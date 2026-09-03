@@ -54,6 +54,20 @@ compression and PDF rasterising — Ghostscript in `vendor/ghostscript/`
 npm install
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r sidecar/requirements.txt
+
+# Refuses direct pushes to main. GitHub's branch protection needs Pro or a
+# public repo, so the rule lives in a hook instead.
+git config core.hooksPath .githooks
+```
+
+## Contributing to yourself
+
+`main` is built through pull requests, and CI has to pass:
+
+```bash
+git switch -c my-change
+git push -u origin my-change
+gh pr create --fill
 ```
 
 ## Running it

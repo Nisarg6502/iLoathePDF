@@ -1,0 +1,31 @@
+#!/bin/sh
+# Refuse a direct push to main.
+#
+# GitHub's branch protection needs Pro or a public repo, and this one is
+# private on the Free plan -- so the rule lives here instead. It is a guard
+# rail, not security: `--no-verify` bypasses it, which is the point when you
+# genuinely need to.
+
+protected="main"
+remote_sha_zero="0000000000000000000000000000000000000000"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    case "$remote_ref" in
+        "refs/heads/$protected")
+            # Allow the very first push, which creates the branch.
+            [ "$remote_sha" = "$remote_sha_zero" ] && continue
+
+            echo "pre-push: refusing to push straight to '$protected'." >&2
+            echo >&2
+            echo "  Open a pull request instead:" >&2
+            echo "    git switch -c my-change" >&2
+            echo "    git push -u origin my-change" >&2
+            echo "    gh pr create --fill" >&2
+            echo >&2
+            echo "  If you really mean it: git push --no-verify" >&2
+            exit 1
+            ;;
+    esac
+done
+
+exit 0
