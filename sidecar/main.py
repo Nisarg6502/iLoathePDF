@@ -125,9 +125,15 @@ def handle_sys(job_id: str, op: str, params: dict) -> bool:
 
 
 def main() -> int:
+    # The frozen build inherits the console code page, so pin both protocol
+    # streams to UTF-8 rather than letting a non-ASCII path decide the encoding.
+    sys.stdin.reconfigure(encoding="utf-8", errors="replace")
+    sys.stdout.reconfigure(encoding="utf-8")
     log(f"iloathepdf sidecar {VERSION} on python {platform.python_version()} ready")
     for raw in sys.stdin:
-        raw = raw.strip()
+        # A UTF-8 BOM can lead the first line when the writer is a Windows
+        # shell rather than our Rust host; it is not part of the JSON.
+        raw = raw.strip().lstrip("\ufeff").strip()
         if not raw:
             continue
         try:
