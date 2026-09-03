@@ -245,7 +245,18 @@ job-parameter assembly to `src/lib/run.ts`, and file picking is reusable through
   Thumbnails therefore show as blank tiles in `design/screenshots/09-components`.
 - **`?theme=light|dark`** forces the theme, for deterministic screenshots and
   manual testing. `scripts/capture-screens.ps1` captures all 18 screens.
-- The repo is a git repository but **nothing has been committed yet**.
+- **`cargo` may not be on PATH in a plain shell** even when Rust is installed
+  (e.g. it sits in `%USERPROFILE%\.cargo\bin` but that folder isn't in the
+  inherited PATH). `npm run build:app` then dies at the `tauri build` step
+  with `program not found`. Prepend the cargo bin dir for that shell and
+  rerun; this only affects building the installer; the resulting
+  `setup.exe` is self-contained and needs no Rust/Python/Node on the
+  installing machine.
+- The frozen engine must decode stdin as UTF-8 regardless of the console code
+  page, and tolerate a leading BOM — `sidecar/main.py`'s read loop reconfigures
+  both protocol streams and strips a leading U+FEFF. This is what broke the very
+  first installer build: PowerShell's pipeline prepends a BOM by default, so
+  the smoke test in `build-sidecar.ps1` got `BAD_PARAMS` from `sys.ping`.
 
 ## Next steps
 
