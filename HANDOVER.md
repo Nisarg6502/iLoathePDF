@@ -21,14 +21,20 @@ and building the installer.
 
 ## Repository
 
-`https://github.com/Nisarg6502/iLoathePDF` — **private**.
+`https://github.com/Nisarg6502/iLoathePDF` — **public**.
 
-- **`main` is built through pull requests.** GitHub's branch protection *and*
-  rulesets both return `403 Upgrade to GitHub Pro or make this repository
-  public`, so the rule is enforced by `.githooks/pre-push` instead. A fresh
-  clone must run `git config core.hooksPath .githooks` to get it, and
-  `--no-verify` bypasses it on purpose. For real server-side enforcement the
-  repo has to go public or the account has to go Pro.
+- **`main` is protected and built through pull requests.** Required checks are
+  Frontend, Document engine and Rust; the branch must be up to date; linear
+  history is required; force pushes and deletions are blocked; and
+  **`enforce_admins` is on**, so the rule applies to the owner too.
+  Approvals are set to 0 — a solo owner cannot approve their own PR.
+- **Turning `enforce_admins` off makes the protection decorative.** It was off
+  initially, and a test push to `main` sailed through with
+  `remote: Bypassed rule violations`. If you need an emergency hotfix, untick
+  *"Do not allow bypassing the above settings"*, push, then tick it back.
+- `.githooks/pre-push` is now belt-and-braces: GitHub enforces the rule
+  server-side, the hook just fails faster. A fresh clone needs
+  `git config core.hooksPath .githooks`; `--no-verify` bypasses it.
 - **CI** (`.github/workflows/ci.yml`) runs three jobs on every push and PR:
   Frontend (oxlint, tsc, vite build), Document engine (pytest on Linux **with
   Ghostscript installed**, so the compression and rasterising tests run rather
@@ -39,7 +45,13 @@ and building the installer.
   the build script fails before clippy runs. This cost one red CI run; do not
   remove that step.
 - **Dependabot** covers npm, cargo, pip and github-actions; patch and minor
-  updates are grouped into one PR per ecosystem.
+  updates are grouped into one PR per ecosystem. Its first five PRs are merged:
+  actions/checkout, setup-node and setup-python are all on v7 (which cleared the
+  Node 20 deprecation warnings), TypeScript is on **7.0.2** and @types/node on
+  26.
+- **TypeScript 7 is the native Go compiler.** A full typecheck now takes well
+  under a second on CI, which looks like a skipped step and is not — it was
+  verified by feeding it a deliberate type error and watching it fail.
 
 ## Milestone checklist
 
