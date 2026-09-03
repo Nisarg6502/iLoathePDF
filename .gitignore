@@ -40,3 +40,5 @@ vendor/
 
 # Design canvas export archive; the extracted files under design/canvas are kept
 *.zip
+
+.worktrees/
