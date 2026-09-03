@@ -10,11 +10,16 @@ export function installRequestCounter(onChange: (count: number) => void): () => 
 
   const OriginalXHR = window.XMLHttpRequest;
   class CountingXHR extends OriginalXHR {
-    open(...args: Parameters<XMLHttpRequest["open"]>) {
+    open(
+      method: string,
+      url: string | URL,
+      async = true,
+      username?: string | null,
+      password?: string | null,
+    ) {
       count += 1;
       onChange(count);
-      // @ts-expect-error -- forwarding the exact arguments XHR.open received
-      return super.open(...args);
+      return super.open(method, url, async, username, password);
     }
   }
   window.XMLHttpRequest = CountingXHR;
