@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f%5B%5D=general-sans@400,500,600,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap">
+<style>
+  body { margin:0; background:oklch(0.128 0.006 68); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hi); }
+  #app[data-theme="light"] {
+    --bg:oklch(0.965 0.005 76); --surface:#ffffff; --surface-2:oklch(0.972 0.006 76);
+    --surface-3:oklch(0.938 0.008 76);
+    --border:oklch(0.905 0.008 76); --border-hi:oklch(0.825 0.010 76);
+    --text:oklch(0.215 0.014 68); --muted:oklch(0.505 0.012 72); --faint:oklch(0.645 0.010 72);
+    --accent:oklch(0.775 0.155 78); --accent-hi:oklch(0.715 0.160 72); --accent-soft:oklch(0.958 0.048 82);
+    --on-accent:oklch(0.235 0.045 68);
+    --ok:oklch(0.545 0.115 162); --ok-soft:oklch(0.958 0.032 162);
+    --danger:oklch(0.545 0.175 26); --danger-soft:oklch(0.958 0.030 26);
+    --paper:#ffffff; --paper-line:oklch(0.902 0.006 76);
+    --shadow:0 1px 2px oklch(0.25 0.02 70 / 0.07), 0 6px 16px -4px oklch(0.25 0.02 70 / 0.10);
+    --tint-a:oklch(0.575 0.145 265); --tint-b:oklch(0.575 0.145 310); --tint-c:oklch(0.575 0.145 200);
+    --tint-d:oklch(0.575 0.145 162); --tint-e:oklch(0.575 0.145 78); --tint-f:oklch(0.575 0.145 28);
+    --tint-g:oklch(0.575 0.145 340);
+  }
+  #app[data-theme="dark"] {
+    --bg:oklch(0.158 0.007 68); --surface:oklch(0.203 0.008 68); --surface-2:oklch(0.245 0.009 70);
+    --surface-3:oklch(0.292 0.010 70);
+    --border:oklch(0.272 0.009 70); --border-hi:oklch(0.395 0.012 72);
+    --text:oklch(0.962 0.005 80); --muted:oklch(0.715 0.010 76); --faint:oklch(0.552 0.010 74);
+    --accent:oklch(0.800 0.152 80); --accent-hi:oklch(0.870 0.140 84); --accent-soft:oklch(0.295 0.055 78);
+    --on-accent:oklch(0.185 0.035 68);
+    --ok:oklch(0.805 0.125 162); --ok-soft:oklch(0.278 0.045 162);
+    --danger:oklch(0.700 0.155 26); --danger-soft:oklch(0.295 0.060 26);
+    --paper:oklch(0.958 0.004 80); --paper-line:oklch(0.858 0.006 78);
+    --shadow:0 0 0 1px oklch(0 0 0 / 0.22), 0 1px 2px oklch(0 0 0 / 0.42), 0 10px 24px -8px oklch(0 0 0 / 0.55);
+    --tint-a:oklch(0.800 0.125 265); --tint-b:oklch(0.800 0.125 310); --tint-c:oklch(0.800 0.125 200);
+    --tint-d:oklch(0.800 0.125 162); --tint-e:oklch(0.800 0.125 78); --tint-f:oklch(0.800 0.125 28);
+    --tint-g:oklch(0.800 0.125 340);
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  #app ::-webkit-scrollbar { width:10px; height:10px; }
+  #app ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius:8px; border:3px solid transparent; background-clip:padding-box; }
+  #app ::-webkit-scrollbar-track { background: transparent; }
+  #app input[type="range"] { accent-color: var(--accent); }
+</style>
+</helmet>
+
+<div id="app" data-theme="{{ theme }}" style="box-sizing:border-box;width:1180px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--text);font-family:'General Sans','Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;border:1px solid var(--border);border-radius:12px;text-wrap:pretty;">
+
+  <!-- ── title bar ────────────────────────────────────────── -->
+  <div style="height:36px;flex:none;display:flex;align-items:center;gap:10px;padding:0 0 0 12px;background:var(--surface);border-bottom:1px solid var(--border);user-select:none;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="width:19px;height:19px;border-radius:6px;background:var(--accent);display:grid;place-items:center;">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="var(--on-accent)" stroke-width="2"><rect x="3.4" y="7.2" width="9.2" height="6" rx="1.3"></rect><path d="M5.5 7.2V5.4a2.5 2.5 0 0 1 5 0v1.8"></path></svg>
+      </span>
+      <span style="font-size:12.5px;font-weight:600;letter-spacing:-0.01em;">IHatePDF</span>
+    </div>
+    <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:10px;letter-spacing:0.12em;color:var(--faint);">LOCAL ONLY</span>
+
+    <div style="flex:1;"></div>
+
+    <div style="display:flex;align-items:center;gap:6px;padding:3px 9px;border-radius:7px;background:var(--ok-soft);">
+      <span style="width:5px;height:5px;border-radius:50%;background:var(--ok);"></span>
+      <span style="font-size:10px;font-weight:700;color:var(--ok);letter-spacing:0.12em;font-family:'Space Mono',ui-monospace,monospace;">OFFLINE</span>
+    </div>
+
+    <button onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:6px;height:24px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:var(--surface-2);color:var(--muted);font-family:inherit;font-size:11px;cursor:pointer;" style-hover="border-color:var(--border-hi);color:var(--text);">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="3.2"></circle><path d="M8 1.4v1.6M8 13v1.6M1.4 8h1.6M13 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M12.6 3.4l-1.1 1.1M4.5 11.5l-1.1 1.1"></path></svg>
+      <span>{{ themeLabel }}</span>
+    </button>
+
+    <div style="display:flex;margin-left:8px;">
+      <div style="width:44px;height:36px;display:grid;place-items:center;color:var(--muted);cursor:default;" style-hover="background:var(--surface-2);"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1"><path d="M0 5h10"></path></svg></div>
+      <div style="width:44px;height:36px;display:grid;place-items:center;color:var(--muted);cursor:default;" style-hover="background:var(--surface-2);"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"></rect></svg></div>
+      <div style="width:44px;height:36px;display:grid;place-items:center;color:var(--muted);cursor:default;border-top-right-radius:7px;" style-hover="background:var(--danger);color:#fff;"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1"><path d="M0 0l10 10M10 0L0 10"></path></svg></div>
+    </div>
+  </div>
+
+  <!-- ── body ─────────────────────────────────────────────── -->
+  <div style="flex:1;min-height:0;display:flex;">
+
+    <!-- rail -->
+    <div style="width:{{ railWidth }};flex:none;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:10px 0 8px;overflow:hidden;transition:width 140ms ease;">
+
+      <sc-if value="{{ railLabels }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:4px 14px 6px;font-size:10px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">PDF</div>
+      </sc-if>
+
+      <div onClick="{{ goMerge }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgMerge }};color:{{ fgMerge }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-a)" stroke-width="1.5" style="flex:none;"><rect x="1.5" y="2" width="5.5" height="4.5" rx="1"></rect><rect x="1.5" y="11.5" width="5.5" height="4.5" rx="1"></rect><rect x="11" y="6.5" width="5.5" height="5" rx="1"></rect><path d="M7 4.3h2.2V9h1.8M7 13.7h2.2V9"></path></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Merge PDF</span>
+      </div>
+
+      <div onClick="{{ goSplit }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgSplit }};color:{{ fgSplit }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-b)" stroke-width="1.5" style="flex:none;"><rect x="2" y="2.5" width="5" height="13" rx="1"></rect><rect x="11" y="2.5" width="5" height="13" rx="1"></rect><path d="M9 1v3.5M9 7v3.5M9 13v3.5" stroke-dasharray="0"></path></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Split PDF</span>
+      </div>
+
+      <div onClick="{{ goOrganize }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgOrganize }};color:{{ fgOrganize }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-c)" stroke-width="1.5" style="flex:none;"><rect x="2" y="2" width="6" height="6" rx="1"></rect><rect x="2" y="10" width="6" height="6" rx="1"></rect><rect x="10" y="10" width="6" height="6" rx="1"></rect><path d="M10 5h6M13 2v6"></path></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Organize pages</span>
+      </div>
+
+      <div onClick="{{ goCompress }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgCompress }};color:{{ fgCompress }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-d)" stroke-width="1.5" style="flex:none;"><rect x="2.5" y="2.5" width="13" height="13" rx="1.2"></rect><path d="M5.5 5.5L8 8M8 8V5.6M8 8H5.6M12.5 12.5L10 10M10 10v2.4M10 10h2.4"></path></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Compress PDF</span>
+      </div>
+
+      <div onClick="{{ goToImages }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgToImages }};color:{{ fgToImages }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-e)" stroke-width="1.5" style="flex:none;"><rect x="2" y="2" width="8.5" height="11" rx="1"></rect><rect x="7.5" y="6.5" width="8.5" height="9.5" rx="1"></rect><circle cx="10.4" cy="9.6" r="1"></circle></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">PDF to images</span>
+      </div>
+
+      <sc-if value="{{ railLabels }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:14px 14px 6px;font-size:10px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">IMAGES</div>
+      </sc-if>
+
+      <div onClick="{{ goToPdf }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgToPdf }};color:{{ fgToPdf }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-f)" stroke-width="1.5" style="flex:none;"><rect x="2" y="3" width="8.5" height="8.5" rx="1"></rect><circle cx="4.8" cy="5.8" r="1"></circle><rect x="7.5" y="7" width="8.5" height="9" rx="1"></rect></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Images to PDF</span>
+      </div>
+
+      <div onClick="{{ goConvert }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgConvert }};color:{{ fgConvert }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-g)" stroke-width="1.5" style="flex:none;"><rect x="2" y="2" width="7.5" height="7.5" rx="1"></rect><rect x="8.5" y="8.5" width="7.5" height="7.5" rx="1"></rect><path d="M11.6 5.6h3.4M14 3.2l1.4 2.4-1.4 2.4M6.4 12.4H3M5 14.8L3.6 12.4 5 10"></path></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Convert images</span>
+      </div>
+
+      <div style="flex:1;"></div>
+
+      <div onClick="{{ goSettings }}" style="display:flex;align-items:center;gap:10px;height:32px;margin:0 6px;padding:0 8px;border-radius:7px;cursor:pointer;justify-content:{{ railJustify }};background:{{ bgSettings }};color:{{ fgSettings }};" style-hover="background:var(--surface-2);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;opacity:0.8;"><circle cx="9" cy="9" r="2.4"></circle><path d="M9 1.8v1.9M9 14.3v1.9M1.8 9h1.9M14.3 9h1.9M3.9 3.9l1.35 1.35M12.75 12.75l1.35 1.35M14.1 3.9l-1.35 1.35M5.25 12.75L3.9 14.1"></path></svg>
+        <span style="font-size:12.5px;white-space:nowrap;display:{{ labelDisplay }};">Settings</span>
+      </div>
+
+      <div onClick="{{ toggleRail }}" style="display:flex;align-items:center;gap:10px;height:28px;margin:4px 6px 0;padding:0 8px;border-radius:7px;cursor:pointer;color:var(--faint);justify-content:{{ railJustify }};" style-hover="background:var(--surface-2);color:var(--text);">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;transform:{{ chevTransform }};"><path d="M11 5.5L7.5 9l3.5 3.5"></path><path d="M3.5 3v12"></path></svg>
+        <span style="font-size:11.5px;white-space:nowrap;display:{{ labelDisplay }};">Collapse</span>
+      </div>
+    </div>
+
+    <!-- workspace -->
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+      <!-- ══ HOME ══ -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Home" style="flex:1;min-height:0;overflow:auto;padding:34px 40px 30px;">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;">
+            <span style="width:6px;height:6px;border-radius:2px;background:var(--accent);"></span>
+            <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;color:var(--muted);">SEVEN TOOLS · ZERO UPLOADS</span>
+          </div>
+          <h1 style="margin:0;font-size:34px;font-weight:600;letter-spacing:-0.032em;line-height:1.08;max-width:16ch;">What are we doing to your files today?</h1>
+          <sc-if value="{{ showHomePrivacy }}" hint-placeholder-val="{{ true }}">
+            <p style="margin:8px 0 0;max-width:640px;font-size:13.5px;color:var(--muted);">Everything runs on this machine. There is no upload step, because there is nowhere to upload to — Aadhaar, PAN, contracts and anything else stay exactly where they are.</p>
+          </sc-if>
+
+          <div onClick="{{ goMerge }}" style="margin-top:22px;display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--accent);background:var(--accent-soft);">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M10 13V4.5M10 4.5L7 7.5M10 4.5l3 3"></path><path d="M3.5 12v3a1.5 1.5 0 0 0 1.5 1.5h10A1.5 1.5 0 0 0 16.5 15v-3"></path></svg>
+            <div style="flex:1;">
+              <div style="font-size:13.5px;font-weight:600;">Drop files anywhere in this window</div>
+              <div style="font-size:12px;color:var(--muted);">PDFs, JPG, PNG, WebP, HEIC — the right tools light up for what you drop.</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span style="font-size:11px;font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--faint);border:1px solid var(--border);border-radius:4px;padding:2px 6px;">Ctrl</span>
+              <span style="font-size:11px;font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--faint);border:1px solid var(--border);border-radius:4px;padding:2px 6px;">O</span>
+            </div>
+          </div>
+
+          <div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:10.5px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">PDF TOOLS</span>
+            <span style="flex:1;height:1px;background:var(--border);"></span>
+          </div>
+          <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <div onClick="{{ goMerge }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-a)" stroke-width="1.5"><rect x="1.5" y="2" width="5.5" height="4.5" rx="1"></rect><rect x="1.5" y="11.5" width="5.5" height="4.5" rx="1"></rect><rect x="11" y="6.5" width="5.5" height="5" rx="1"></rect><path d="M7 4.3h2.2V9h1.8M7 13.7h2.2V9"></path></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">Merge PDF</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">Combine PDFs in the order you choose, with page ranges per file.</div>
+            </div>
+            <div onClick="{{ goSplit }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-b)" stroke-width="1.5"><rect x="2" y="2.5" width="5" height="13" rx="1"></rect><rect x="11" y="2.5" width="5" height="13" rx="1"></rect><path d="M9 1v3.5M9 7v3.5M9 13v3.5"></path></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">Split PDF</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">Cut into ranges, chop every N pages, extract or delete a selection.</div>
+            </div>
+            <div onClick="{{ goOrganize }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-c)" stroke-width="1.5"><rect x="2" y="2" width="6" height="6" rx="1"></rect><rect x="2" y="10" width="6" height="6" rx="1"></rect><rect x="10" y="10" width="6" height="6" rx="1"></rect><path d="M10 5h6M13 2v6"></path></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">Organize pages</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">Reorder, rotate and drop pages on a full-window page canvas.</div>
+            </div>
+            <div onClick="{{ goCompress }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-d)" stroke-width="1.5"><rect x="2.5" y="2.5" width="13" height="13" rx="1.2"></rect><path d="M5.5 5.5L8 8M8 8V5.6M8 8H5.6M12.5 12.5L10 10M10 10v2.4M10 10h2.4"></path></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">Compress PDF</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">Shrink for email, with the quality trade-off shown before you commit.</div>
+            </div>
+            <div onClick="{{ goToImages }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-e)" stroke-width="1.5"><rect x="2" y="2" width="8.5" height="11" rx="1"></rect><rect x="7.5" y="6.5" width="8.5" height="9.5" rx="1"></rect><circle cx="10.4" cy="9.6" r="1"></circle></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">PDF to images</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">Render pages to PNG or JPG at the DPI you pick.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:22px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:10.5px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">IMAGE TOOLS</span>
+            <span style="flex:1;height:1px;background:var(--border);"></span>
+          </div>
+          <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <div onClick="{{ goToPdf }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-f)" stroke-width="1.5"><rect x="2" y="3" width="8.5" height="8.5" rx="1"></rect><circle cx="4.8" cy="5.8" r="1"></circle><rect x="7.5" y="7" width="8.5" height="9" rx="1"></rect></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">Images to PDF</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">Scans and photos into one PDF, one image per page.</div>
+            </div>
+            <div onClick="{{ goConvert }}" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-hi);box-shadow:var(--shadow);">
+              <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--tint-g)" stroke-width="1.5"><rect x="2" y="2" width="7.5" height="7.5" rx="1"></rect><rect x="8.5" y="8.5" width="7.5" height="7.5" rx="1"></rect><path d="M11.6 5.6h3.4M14 3.2l1.4 2.4-1.4 2.4M6.4 12.4H3M5 14.8L3.6 12.4 5 10"></path></svg>
+              <div style="margin-top:9px;font-size:13.5px;font-weight:600;">Convert images</div>
+              <div style="margin-top:2px;font-size:12px;color:var(--muted);">PNG, JPG and WebP any direction — and HEIC off an iPhone.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ══ SETTINGS ══ -->
+      <sc-if value="{{ isSettings }}">
+        <div data-screen-label="Settings" style="flex:1;min-height:0;overflow:auto;padding:28px 40px 30px;">
+          <h1 style="margin:0;font-size:20px;font-weight:650;letter-spacing:-0.01em;">Settings</h1>
+          <p style="margin:6px 0 0;font-size:12.5px;color:var(--muted);">Chosen once, so no tool asks again. Written to <span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--faint);">%APPDATA%\IHatePDF\settings.json</span>.</p>
+
+          <div style="margin-top:22px;max-width:660px;display:flex;flex-direction:column;gap:14px;">
+            <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden;">
+              <div style="padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:650;">Where results go</div>
+              <div style="padding:14px;display:flex;flex-direction:column;gap:12px;">
+                <div>
+                  <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Default destination</div>
+                  <div style="display:flex;gap:8px;">
+                    <div style="flex:1;display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--text);overflow:hidden;white-space:nowrap;">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--tint-e)" stroke-width="1.4" style="flex:none;"><path d="M1.6 4.4a1 1 0 0 1 1-1h3.1l1.2 1.6h5.5a1 1 0 0 1 1 1v6.6a1 1 0 0 1-1 1H2.6a1 1 0 0 1-1-1z"></path></svg>
+                      C:\Users\arun\Documents\IHatePDF
+                    </div>
+                    <button style="height:32px;padding:0 12px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;" style-hover="background:var(--surface-3);">Browse…</button>
+                  </div>
+                </div>
+                <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;">
+                  <span style="margin-top:1px;width:15px;height:15px;flex:none;border-radius:4px;border:1px solid var(--accent);background:var(--accent);display:grid;place-items:center;"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="var(--on-accent)" stroke-width="1.7"><path d="M1.5 5.2l2.3 2.3L8.5 2.8"></path></svg></span>
+                  <span><span style="font-size:12.5px;">Remember the last folder I picked per tool</span><br><span style="font-size:11.5px;color:var(--muted);">Compress output keeps landing in <span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;">\email</span> without asking.</span></span>
+                </label>
+                <div>
+                  <div style="font-size:12px;font-weight:600;margin-bottom:6px;">If a file of that name exists</div>
+                  <div style="display:flex;gap:6px;">
+                    <span style="padding:5px 11px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent-hi);font-size:12px;font-weight:600;">Add a number</span>
+                    <span style="padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:12px;cursor:pointer;">Ask me</span>
+                    <span style="padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:12px;cursor:pointer;">Overwrite</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden;">
+              <div style="padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:650;">Tool defaults</div>
+              <div style="padding:4px 14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12.5px;">Compression level</span>
+                  <span style="padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;">Balanced</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12.5px;">Render resolution</span>
+                  <span style="padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;">150 DPI</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12.5px;">JPG / WebP quality</span>
+                  <span style="padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;">85</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+                  <span style="font-size:12.5px;">Ghostscript</span>
+                  <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ok);"><span style="width:5px;height:5px;border-radius:50%;background:var(--ok);"></span>Found — 10.03.1</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden;">
+              <div style="padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:650;">Privacy</div>
+              <div style="padding:14px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+                  <span><span style="font-size:12.5px;">Strip EXIF from converted images</span><br><span style="font-size:11.5px;color:var(--muted);">Removes GPS location and camera serial. On by default.</span></span>
+                  <span style="flex:none;width:36px;height:20px;border-radius:14px;background:var(--accent);position:relative;cursor:pointer;"><span style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:50%;background:#fff;"></span></span>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:8px;background:var(--ok-soft);">
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ok)" stroke-width="1.5" style="flex:none;margin-top:1px;"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"></rect><path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7"></path></svg>
+                  <div style="font-size:12px;color:var(--text);">This build contains no networking code, no analytics, no auto-updater and no web fonts. Nothing here can be switched on.<br><span style="color:var(--muted);">0 network requests since launch · 0 bytes sent</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ══ TOOL SCREENS ══ -->
+      <sc-if value="{{ isTool }}">
+        <div data-screen-label="{{ toolLabel }}" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+
+          <!-- tool header -->
+          <div style="flex:none;height:54px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface);">
+            <div style="width:28px;height:28px;flex:none;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;">
+              <sc-if value="{{ isMerge }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-a)" stroke-width="1.5"><rect x="1.5" y="2" width="5.5" height="4.5" rx="1"></rect><rect x="1.5" y="11.5" width="5.5" height="4.5" rx="1"></rect><rect x="11" y="6.5" width="5.5" height="5" rx="1"></rect><path d="M7 4.3h2.2V9h1.8M7 13.7h2.2V9"></path></svg></sc-if>
+              <sc-if value="{{ isSplit }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-b)" stroke-width="1.5"><rect x="2" y="2.5" width="5" height="13" rx="1"></rect><rect x="11" y="2.5" width="5" height="13" rx="1"></rect><path d="M9 1v3.5M9 7v3.5M9 13v3.5"></path></svg></sc-if>
+              <sc-if value="{{ isOrganize }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-c)" stroke-width="1.5"><rect x="2" y="2" width="6" height="6" rx="1"></rect><rect x="2" y="10" width="6" height="6" rx="1"></rect><rect x="10" y="10" width="6" height="6" rx="1"></rect><path d="M10 5h6M13 2v6"></path></svg></sc-if>
+              <sc-if value="{{ isCompress }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-d)" stroke-width="1.5"><rect x="2.5" y="2.5" width="13" height="13" rx="1.2"></rect><path d="M5.5 5.5L8 8M8 8V5.6M8 8H5.6M12.5 12.5L10 10M10 10v2.4M10 10h2.4"></path></svg></sc-if>
+              <sc-if value="{{ isToImages }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-e)" stroke-width="1.5"><rect x="2" y="2" width="8.5" height="11" rx="1"></rect><rect x="7.5" y="6.5" width="8.5" height="9.5" rx="1"></rect><circle cx="10.4" cy="9.6" r="1"></circle></svg></sc-if>
+              <sc-if value="{{ isToPdf }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-f)" stroke-width="1.5"><rect x="2" y="3" width="8.5" height="8.5" rx="1"></rect><circle cx="4.8" cy="5.8" r="1"></circle><rect x="7.5" y="7" width="8.5" height="9" rx="1"></rect></svg></sc-if>
+              <sc-if value="{{ isConvert }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--tint-g)" stroke-width="1.5"><rect x="2" y="2" width="7.5" height="7.5" rx="1"></rect><rect x="8.5" y="8.5" width="7.5" height="7.5" rx="1"></rect><path d="M11.6 5.6h3.4M14 3.2l1.4 2.4-1.4 2.4M6.4 12.4H3M5 14.8L3.6 12.4 5 10"></path></svg></sc-if>
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:14px;font-weight:650;letter-spacing:-0.005em;">{{ toolLabel }}</div>
+              <div style="font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toolBlurb }}</div>
+            </div>
+            <div style="flex:1;"></div>
+            <sc-if value="{{ hasFiles }}">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;color:var(--muted);">{{ inputSummary }}</span>
+                <button onClick="{{ addMore }}" style="height:28px;padding:0 11px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;" style-hover="background:var(--surface-3);">Add files</button>
+                <button onClick="{{ clearAll }}" style="height:28px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;" style-hover="color:var(--danger);border-color:var(--danger);">Clear</button>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="flex:1;min-height:0;display:flex;">
+
+            <!-- ── canvas ── -->
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;">
+
+              <!-- empty: drop target fills the whole canvas -->
+              <sc-if value="{{ isEmpty }}">
+                <div onClick="{{ loadFiles }}" style="flex:1;margin:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;" style-hover="border-color:var(--accent);background:var(--accent-soft);">
+                  <span style="width:66px;height:66px;border-radius:20px;background:var(--accent-soft);display:grid;place-items:center;box-shadow:0 0 0 10px color-mix(in oklab, var(--accent-soft) 45%, transparent);">
+                    <svg width="30" height="30" viewBox="0 0 20 20" fill="none" stroke="var(--accent)" stroke-width="1.4"><path d="M10 13.5V4M10 4L6.8 7.2M10 4l3.2 3.2"></path><path d="M3.5 12.5V15a1.5 1.5 0 0 0 1.5 1.5h10A1.5 1.5 0 0 0 16.5 15v-2.5"></path></svg>
+                  </span>
+                  <div style="text-align:center;">
+                    <div style="font-size:16px;font-weight:600;">{{ dropTitle }}</div>
+                    <div style="margin-top:4px;font-size:12.5px;color:var(--muted);">or click anywhere in this box to browse</div>
+                  </div>
+                  <div style="font-size:11px;font-family:'Space Mono',ui-monospace,Consolas,monospace;letter-spacing:0.06em;color:var(--faint);">{{ dropFormats }}</div>
+                </div>
+              </sc-if>
+
+              <!-- loaded: file list (merge / images-to-pdf ordering) -->
+              <sc-if value="{{ showFileList }}">
+                <div style="flex:1;min-height:0;overflow:auto;padding:16px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">ORDER OF OUTPUT</span>
+                    <span style="font-size:11.5px;color:var(--faint);">Drag to reorder · Alt+↑↓ with a keyboard</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <sc-for list="{{ files }}" as="f" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface);">
+                        <span style="color:var(--faint);cursor:grab;flex:none;"><svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor"><circle cx="4" cy="3" r="1.2"></circle><circle cx="8" cy="3" r="1.2"></circle><circle cx="4" cy="7" r="1.2"></circle><circle cx="8" cy="7" r="1.2"></circle><circle cx="4" cy="11" r="1.2"></circle><circle cx="8" cy="11" r="1.2"></circle></svg></span>
+                        <span style="width:20px;flex:none;font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--faint);text-align:right;">{{ f.n }}</span>
+                        <span style="width:34px;height:42px;flex:none;border-radius:3px;background:var(--paper);border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:4px;">
+                          <span style="height:1.5px;background:var(--paper-line);"></span>
+                          <span style="height:1.5px;background:var(--paper-line);"></span>
+                          <span style="height:1.5px;width:60%;background:var(--paper-line);"></span>
+                        </span>
+                        <div style="flex:1;min-width:0;">
+                          <div style="font-size:13px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ f.name }}</div>
+                          <div style="font-size:11.5px;color:var(--muted);">{{ f.meta }}</div>
+                        </div>
+                        <div style="flex:none;display:flex;align-items:center;gap:7px;">
+                          <span style="font-size:11.5px;color:var(--muted);">Pages</span>
+                          <input value="{{ f.range }}" style="width:78px;height:27px;padding:0 8px;border:1px solid var(--border);border-radius:7px;background:var(--surface-2);color:var(--text);font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11.5px;">
+                        </div>
+                        <span style="flex:none;width:26px;height:26px;display:grid;place-items:center;border-radius:7px;color:var(--faint);cursor:pointer;" style-hover="background:var(--danger-soft);color:var(--danger);"><svg width="11" height="11" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.3"><path d="M0.5 0.5l9 9M9.5 0.5l-9 9"></path></svg></span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div onClick="{{ addMore }}" style="margin-top:9px;height:40px;border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:12.5px;cursor:pointer;" style-hover="border-color:var(--accent);color:var(--accent);">
+                    <svg width="13" height="13" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4"><path d="M6 1.5v9M1.5 6h9"></path></svg>
+                    Add more files
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- loaded: page canvas -->
+              <sc-if value="{{ showPageGrid }}">
+                <div style="flex:1;min-height:0;display:flex;flex-direction:column;">
+                  <div style="flex:none;display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);">
+                    <span style="font-size:12px;color:var(--muted);">{{ gridHint }}</span>
+                    <div style="flex:1;"></div>
+                    <sc-if value="{{ isOrganize }}">
+                      <div style="display:flex;gap:6px;">
+                        <button style="height:27px;padding:0 10px;display:flex;align-items:center;gap:6px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:11.5px;cursor:pointer;" style-hover="background:var(--surface-3);"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M11.5 5.5A5 5 0 1 0 12 8"></path><path d="M12 2v3.5H8.5"></path></svg>Rotate</button>
+                        <button style="height:27px;padding:0 10px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:11.5px;cursor:pointer;" style-hover="background:var(--surface-3);">Select all</button>
+                        <button style="height:27px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--danger);font-family:inherit;font-size:11.5px;cursor:pointer;" style-hover="background:var(--danger-soft);">Delete 2</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow:auto;padding:16px;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;">
+                      <sc-for list="{{ pages }}" as="p" hint-placeholder-count="12">
+                        <div style="border:1.5px solid {{ p.ring }};border-radius:12px;padding:5px;background:{{ p.tileBg }};cursor:pointer;">
+                          <div style="aspect-ratio:0.773;border-radius:3px;background:var(--paper);border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;padding:8px 7px;gap:3px;overflow:hidden;">
+                            <div style="height:11px;border-radius:2px;background:var(--paper-line);opacity:0.9;margin-bottom:3px;"></div>
+                            <div style="height:2.5px;border-radius:2px;background:var(--paper-line);"></div>
+                            <div style="height:2.5px;border-radius:2px;background:var(--paper-line);"></div>
+                            <div style="height:2.5px;width:70%;border-radius:2px;background:var(--paper-line);"></div>
+                            <div style="height:2.5px;border-radius:2px;background:var(--paper-line);margin-top:6px;"></div>
+                            <div style="height:2.5px;width:85%;border-radius:2px;background:var(--paper-line);"></div>
+                            <div style="flex:1;"></div>
+                            <div style="font-size:15px;font-weight:650;color:oklch(0.55 0.01 258);text-align:center;">{{ p.n }}</div>
+                          </div>
+                          <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 3px 1px;">
+                            <span style="font-size:10.5px;color:var(--faint);font-family:'Space Mono',ui-monospace,Consolas,monospace;">{{ p.src }}</span>
+                            <span style="font-size:10.5px;color:var(--muted);">{{ p.n }}</span>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- loaded: image grid -->
+              <sc-if value="{{ showImageGrid }}">
+                <div style="flex:1;min-height:0;overflow:auto;padding:16px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">30 IMAGES</span>
+                    <span style="font-size:11.5px;color:var(--faint);">Sorted by file name · drag to reorder</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;">
+                    <sc-for list="{{ images }}" as="im" hint-placeholder-count="12">
+                      <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);">
+                        <div style="aspect-ratio:1.33;background:repeating-linear-gradient(135deg,var(--surface-2) 0 7px,var(--surface-3) 7px 14px);display:grid;place-items:center;">
+                          <span style="font-size:10px;font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--faint);letter-spacing:0.05em;">{{ im.kind }}</span>
+                        </div>
+                        <div style="padding:6px 8px;">
+                          <div style="font-size:11px;font-family:'Space Mono',ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ im.name }}</div>
+                          <div style="font-size:10.5px;color:var(--faint);">{{ im.meta }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- running: per-file progress -->
+              <sc-if value="{{ isRunning }}">
+                <div style="flex:1;min-height:0;display:flex;flex-direction:column;">
+                  <div style="flex:none;padding:16px 18px 14px;border-bottom:1px solid var(--border);">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                      <div style="display:flex;align-items:center;gap:9px;">
+                        <span style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border-hi);border-top-color:var(--accent);animation:spin 0.7s linear infinite;"></span>
+                        <span style="font-size:14px;font-weight:600;">{{ runningTitle }}</span>
+                      </div>
+                      <span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:12px;color:var(--muted);">{{ progressText }}</span>
+                    </div>
+                    <div style="margin-top:11px;height:5px;border-radius:3px;background:var(--surface-3);overflow:hidden;">
+                      <div style="height:100%;width:{{ progressPct }};background:var(--accent);border-radius:3px;transition:width 160ms linear;"></div>
+                    </div>
+                    <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;">
+                      <span style="font-size:11.5px;color:var(--faint);">Writing to C:\Users\arun\Documents\IHatePDF</span>
+                      <button onClick="{{ cancelRun }}" style="height:26px;padding:0 11px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:11.5px;cursor:pointer;" style-hover="border-color:var(--danger);color:var(--danger);">Cancel</button>
+                    </div>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow:auto;padding:6px 18px 16px;">
+                    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+                      <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);">
+                        <span style="width:14px;flex:none;">{{ r.mark }}</span>
+                        <span style="flex:1;min-width:0;font-size:12.5px;font-family:'Space Mono',ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ r.nameColor }};">{{ r.name }}</span>
+                        <span style="flex:none;font-size:11.5px;color:{{ r.statusColor }};">{{ r.status }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- done: result takes the full canvas -->
+              <sc-if value="{{ isDone }}">
+                <div style="flex:1;min-height:0;overflow:auto;padding:22px;">
+                  <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden;">
+                    <div style="padding:16px 20px;display:flex;align-items:center;gap:10px;background:var(--ok-soft);border-bottom:1px solid var(--border);">
+                      <span style="width:20px;height:20px;flex:none;border-radius:50%;background:var(--ok);display:grid;place-items:center;"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="var(--surface)" stroke-width="1.9"><path d="M2 6.3l2.6 2.6L10 3.4"></path></svg></span>
+                      <span style="font-size:14px;font-weight:650;">{{ doneTitle }}</span>
+                      <div style="flex:1;"></div>
+                      <span style="font-size:11.5px;color:var(--muted);">{{ doneTime }}</span>
+                    </div>
+
+                    <sc-if value="{{ isCompress }}">
+                      <div style="padding:26px 20px 22px;">
+                        <div style="display:flex;align-items:flex-end;gap:20px;">
+                          <div>
+                            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;">BEFORE</div>
+                            <div style="font-size:44px;font-weight:400;letter-spacing:-0.04em;line-height:1;font-family:'Space Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;">3.14 MB</div>
+                          </div>
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="1.4" style="margin-bottom:6px;"><path d="M4 12h15M14 7l5 5-5 5"></path></svg>
+                          <div>
+                            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.13em;color:var(--ok);font-family:'Space Mono',ui-monospace,monospace;">AFTER</div>
+                            <div style="font-size:44px;font-weight:400;letter-spacing:-0.04em;line-height:1;font-family:'Space Mono',ui-monospace,monospace;color:var(--ok);font-variant-numeric:tabular-nums;">812 KB</div>
+                          </div>
+                          <div style="margin-bottom:5px;padding:4px 10px;border-radius:8px;background:var(--ok-soft);color:var(--ok);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;">−75%</div>
+                        </div>
+                        <div style="margin-top:18px;display:flex;flex-direction:column;gap:7px;max-width:560px;">
+                          <div style="height:12px;border-radius:3px;background:var(--surface-3);"></div>
+                          <div style="height:12px;width:25.9%;border-radius:3px;background:var(--ok);"></div>
+                        </div>
+                        <div style="margin-top:9px;font-size:12px;color:var(--muted);max-width:560px;">Balanced re-encoded 14 embedded images. Text and vectors are untouched, so nothing on the page got softer to read.</div>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ showResultFiles }}">
+                      <div style="padding:6px 20px 4px;">
+                        <sc-for list="{{ results }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" stroke-width="1.4" style="flex:none;"><path d="M3.2 2h6l3.6 3.6V14H3.2z"></path><path d="M9.2 2v3.8h3.6"></path></svg>
+                            <span style="flex:1;min-width:0;font-size:12.5px;font-family:'Space Mono',ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</span>
+                            <span style="flex:none;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;">{{ r.size }}</span>
+                            <span style="flex:none;font-size:11.5px;color:var(--accent);cursor:pointer;" style-hover="color:var(--accent-hi);text-decoration:underline;">Show</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+
+                    <div style="padding:16px 20px;display:flex;align-items:center;gap:10px;">
+                      <button style="height:34px;padding:0 15px;display:flex;align-items:center;gap:8px;border:1px solid var(--accent);border-radius:8px;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;" style-hover="background:var(--accent-hi);">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.8 4.4a1 1 0 0 1 1-1h3.1l1.2 1.6h5.5a1 1 0 0 1 1 1v6.6a1 1 0 0 1-1 1H2.8a1 1 0 0 1-1-1z"></path></svg>
+                        Open output folder
+                      </button>
+                      <button onClick="{{ runAgain }}" style="height:34px;padding:0 15px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:12.5px;cursor:pointer;" style-hover="background:var(--surface-3);">Back to options</button>
+                      <div style="flex:1;"></div>
+                      <span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--faint);">C:\Users\arun\Documents\IHatePDF</span>
+                    </div>
+                  </div>
+
+                  <sc-if value="{{ hasFailures }}">
+                    <div style="margin-top:14px;border:1px solid var(--danger);border-radius:14px;background:var(--danger-soft);padding:14px 16px;">
+                      <div style="display:flex;align-items:center;gap:9px;">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--danger)" stroke-width="1.6"><circle cx="8" cy="8" r="6.3"></circle><path d="M8 4.8v4M8 11.1v0.1"></path></svg>
+                        <span style="font-size:12.5px;font-weight:650;color:var(--danger);">1 file could not be converted</span>
+                        <div style="flex:1;"></div>
+                        <button style="height:27px;padding:0 11px;border:1px solid var(--danger);border-radius:8px;background:transparent;color:var(--danger);font-family:inherit;font-size:11.5px;cursor:pointer;">Retry that one</button>
+                      </div>
+                      <div style="margin-top:8px;padding-left:24px;font-size:12px;color:var(--text);"><span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;">IMG_2291.HEIC</span> — the HEIC container is truncated. The other 29 were written normally.</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- ── options panel: scrolls, with a pinned action footer ── -->
+            <div style="width:344px;flex:none;border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0;">
+
+              <div style="flex:1;min-height:0;overflow:auto;padding:16px;">
+
+                <sc-if value="{{ isMerge }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">OPTIONS</div>
+                  <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Output file name</div>
+                  <div style="display:flex;align-items:center;height:32px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);overflow:hidden;">
+                    <input value="merged" style="flex:1;min-width:0;height:100%;padding:0 10px;border:none;background:transparent;color:var(--text);font-family:inherit;font-size:12.5px;outline:none;">
+                    <span style="padding:0 10px;font-size:12px;color:var(--faint);font-family:'Space Mono',ui-monospace,Consolas,monospace;border-left:1px solid var(--border);height:100%;display:grid;place-items:center;">.pdf</span>
+                  </div>
+                  <div style="margin-top:16px;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);">
+                    <div style="font-size:12px;font-weight:600;margin-bottom:7px;">Result</div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;"><span>Pages in</span><span style="font-variant-numeric:tabular-nums;color:var(--text);">16</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;"><span>Pages out</span><span style="font-variant-numeric:tabular-nums;color:var(--text);">14</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;"><span>Estimated size</span><span style="font-variant-numeric:tabular-nums;color:var(--text);">4.4 MB</span></div>
+                  </div>
+                  <label style="margin-top:14px;display:flex;gap:9px;align-items:flex-start;cursor:pointer;">
+                    <span style="margin-top:1px;width:15px;height:15px;flex:none;border-radius:4px;border:1px solid var(--border-hi);background:var(--surface-2);"></span>
+                    <span style="font-size:12.5px;">Add a bookmark per source file</span>
+                  </label>
+                </sc-if>
+
+                <sc-if value="{{ isSplit }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">HOW TO SPLIT</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <sc-for list="{{ splitModes }}" as="m" hint-placeholder-count="4">
+                      <div onClick="{{ m.pick }}" style="display:flex;gap:10px;padding:10px 11px;border:1px solid {{ m.border }};border-radius:9px;background:{{ m.bg }};cursor:pointer;">
+                        <span style="margin-top:2px;width:14px;height:14px;flex:none;border-radius:50%;border:1.5px solid {{ m.dot }};display:grid;place-items:center;"><span style="width:6px;height:6px;border-radius:50%;background:{{ m.fill }};"></span></span>
+                        <span><span style="font-size:12.5px;font-weight:600;">{{ m.title }}</span><br><span style="font-size:11.5px;color:var(--muted);">{{ m.blurb }}</span></span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:6px;">Ranges</div>
+                  <input value="1-3, 4-6, 7-14" style="width:100%;box-sizing:border-box;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:12px;outline:none;">
+                  <div style="margin-top:7px;font-size:11.5px;color:var(--muted);">1-based and inclusive. Three ranges → three files: <span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--text);">report_1-3.pdf</span> and so on.</div>
+                </sc-if>
+
+                <sc-if value="{{ isOrganize }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">OPTIONS</div>
+                  <div style="padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);">
+                    <div style="font-size:12px;font-weight:600;margin-bottom:7px;">Pending changes</div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;"><span>Moved</span><span style="color:var(--text);">3 pages</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;"><span>Rotated</span><span style="color:var(--text);">1 page · 90° cw</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;"><span>Deleted</span><span style="color:var(--danger);">2 pages</span></div>
+                    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;"><span style="font-weight:600;">Pages out</span><span style="font-weight:600;font-variant-numeric:tabular-nums;">12</span></div>
+                  </div>
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:6px;">Output file name</div>
+                  <input value="report-organized" style="width:100%;box-sizing:border-box;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:12.5px;outline:none;">
+                  <div style="margin-top:7px;font-size:11.5px;color:var(--muted);">The original is never overwritten.</div>
+                  <div style="margin-top:16px;font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:8px;">KEYBOARD</div>
+                  <div style="display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--muted);">
+                    <div style="display:flex;justify-content:space-between;"><span>Rotate selection</span><span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--text);">R</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span>Delete selection</span><span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--text);">Del</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span>Move page</span><span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--text);">Space then ←→</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span>Undo</span><span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;color:var(--text);">Ctrl+Z</span></div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isCompress }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">COMPRESSION LEVEL</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <sc-for list="{{ levels }}" as="l" hint-placeholder-count="3">
+                      <div onClick="{{ l.pick }}" style="display:flex;gap:10px;padding:10px 11px;border:1px solid {{ l.border }};border-radius:9px;background:{{ l.bg }};cursor:pointer;">
+                        <span style="margin-top:2px;width:14px;height:14px;flex:none;border-radius:50%;border:1.5px solid {{ l.dot }};display:grid;place-items:center;"><span style="width:6px;height:6px;border-radius:50%;background:{{ l.fill }};"></span></span>
+                        <span style="flex:1;"><span style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:12.5px;font-weight:600;">{{ l.title }}</span><span style="font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--ok);">{{ l.est }}</span></span><span style="font-size:11.5px;color:var(--muted);">{{ l.blurb }}</span></span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:14px;font-size:11.5px;color:var(--muted);">Estimates come from a dry run on the first two pages, so they land within a few percent.</div>
+                </sc-if>
+
+                <sc-if value="{{ isToImages }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">OPTIONS</div>
+                  <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Format</div>
+                  <div style="display:flex;gap:6px;">
+                    <span style="flex:1;padding:8px 10px;border:1px solid var(--accent);border-radius:9px;background:var(--accent-soft);cursor:pointer;"><span style="font-size:12.5px;font-weight:600;color:var(--accent-hi);">PNG</span><br><span style="font-size:11px;color:var(--muted);">Crisp text</span></span>
+                    <span style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);cursor:pointer;"><span style="font-size:12.5px;font-weight:600;">JPG</span><br><span style="font-size:11px;color:var(--muted);">Smaller</span></span>
+                  </div>
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:6px;">Resolution</div>
+                  <div style="display:flex;gap:6px;">
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">72</span>
+                    <span style="padding:6px 11px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);font-size:12px;font-weight:600;color:var(--accent-hi);cursor:pointer;">150</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">300</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">600</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">DPI</span>
+                  </div>
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:6px;">Pages</div>
+                  <input placeholder="All pages" style="width:100%;box-sizing:border-box;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:12px;outline:none;">
+                  <div style="margin-top:16px;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);font-size:12px;color:var(--muted);">14 files at roughly <span style="color:var(--text);">1240 × 1754</span> each, about <span style="color:var(--text);">18 MB</span> in total.</div>
+                </sc-if>
+
+                <sc-if value="{{ isToPdf }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">OPTIONS</div>
+                  <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Output file name</div>
+                  <input value="scans" style="width:100%;box-sizing:border-box;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:12.5px;outline:none;">
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:6px;">Page size</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <span style="padding:6px 11px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);font-size:12px;font-weight:600;color:var(--accent-hi);cursor:pointer;">Fit to image</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">A4</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">Letter</span>
+                  </div>
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:8px;">Margin<span style="float:right;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums;">0 mm</span></div>
+                  <input type="range" min="0" max="25" value="0" style="width:100%;">
+                  <div style="margin-top:16px;padding:11px 12px;border-radius:9px;background:var(--ok-soft);font-size:11.5px;color:var(--text);">EXIF is stripped on the way in, so GPS coordinates from your phone do not end up in the PDF.</div>
+                </sc-if>
+
+                <sc-if value="{{ isConvert }}">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:11px;">CONVERT TO</div>
+                  <div style="display:flex;gap:6px;">
+                    <span style="flex:1;padding:8px 10px;border:1px solid var(--accent);border-radius:9px;background:var(--accent-soft);text-align:center;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--accent-hi);">JPG</span>
+                    <span style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);text-align:center;cursor:pointer;font-size:12.5px;color:var(--muted);">PNG</span>
+                    <span style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);text-align:center;cursor:pointer;font-size:12.5px;color:var(--muted);">WebP</span>
+                  </div>
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:8px;">Quality<span style="float:right;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums;">85</span></div>
+                  <input type="range" min="40" max="100" value="85" style="width:100%;">
+                  <div style="margin-top:16px;font-size:12px;font-weight:600;margin-bottom:6px;">Resize</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <span style="padding:6px 11px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);font-size:12px;font-weight:600;color:var(--accent-hi);cursor:pointer;">Keep size</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">Longest edge</span>
+                    <span style="padding:6px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;color:var(--muted);cursor:pointer;">Percentage</span>
+                  </div>
+                  <div style="margin-top:16px;padding:11px 12px;border-radius:9px;background:var(--ok-soft);display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                    <span><span style="font-size:12.5px;font-weight:600;">Strip metadata</span><br><span style="font-size:11.5px;color:var(--muted);">EXIF, GPS, camera serial</span></span>
+                    <span style="flex:none;width:36px;height:20px;border-radius:14px;background:var(--ok);position:relative;cursor:pointer;"><span style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:50%;background:var(--surface);"></span></span>
+                  </div>
+                </sc-if>
+              </div>
+
+              <!-- pinned footer: destination sits directly above Run -->
+              <div style="flex:none;border-top:1px solid var(--border);padding:12px 16px 14px;background:var(--surface-2);">
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:0.13em;color:var(--faint);font-family:'Space Mono',ui-monospace,monospace;margin-bottom:6px;">SAVE TO</div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:30px;padding:0 9px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--accent);">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--tint-e)" stroke-width="1.4" style="flex:none;"><path d="M1.6 4.4a1 1 0 0 1 1-1h3.1l1.2 1.6h5.5a1 1 0 0 1 1 1v6.6a1 1 0 0 1-1 1H2.6a1 1 0 0 1-1-1z"></path></svg>
+                    <span style="flex:1;min-width:0;font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11px;direction:rtl;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">C:\Users\arun\Documents\IHatePDF</span>
+                  </div>
+                  <button style="flex:none;height:30px;padding:0 10px;border:1px solid var(--border-hi);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:11.5px;cursor:pointer;" style-hover="background:var(--surface-3);">Change</button>
+                </div>
+                <div style="margin-top:5px;font-size:11px;color:var(--muted);">{{ writesLine }}</div>
+
+                <button onClick="{{ run }}" style="margin-top:11px;width:100%;height:38px;display:flex;align-items:center;justify-content:center;gap:9px;border:none;border-radius:9px;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:13.5px;font-weight:650;cursor:pointer;box-shadow:var(--shadow);" style-hover="background:var(--accent-hi);" style-active="transform:translateY(1px);">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3.5 2l8 5-8 5z"></path></svg>
+                  <span>{{ runLabel }}</span>
+                  <span style="font-size:11px;font-weight:500;opacity:0.72;font-family:'Space Mono',ui-monospace,Consolas,monospace;">Ctrl+Enter</span>
+                </button>
+
+                <sc-if value="{{ showRunPrivacy }}">
+                  <div style="margin-top:9px;display:flex;align-items:center;gap:7px;justify-content:center;color:var(--ok);">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"></rect><path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7"></path></svg>
+                    <span style="font-size:11px;font-weight:600;">Runs on this machine</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- ── status bar ───────────────────────────────────────── -->
+  <div style="flex:none;height:30px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--surface);border-top:1px solid var(--border);border-bottom-left-radius:7px;border-bottom-right-radius:7px;user-select:none;">
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--ok)" stroke-width="1.6" style="flex:none;"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"></rect><path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7"></path></svg>
+    <span style="font-size:11.5px;color:var(--text);">Files never leave this computer.</span>
+    <span style="font-size:11.5px;color:var(--faint);">No network code in this build · 0 requests since launch</span>
+    <div style="flex:1;"></div>
+    <span style="font-size:11.5px;color:var(--faint);">Output</span>
+    <div style="display:flex;align-items:center;gap:7px;height:22px;padding:0 8px;border-radius:7px;cursor:pointer;color:var(--muted);" style-hover="background:var(--surface-2);color:var(--text);">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--tint-e)" stroke-width="1.4" style="flex:none;"><path d="M1.6 4.4a1 1 0 0 1 1-1h3.1l1.2 1.6h5.5a1 1 0 0 1 1 1v6.6a1 1 0 0 1-1 1H2.6a1 1 0 0 1-1-1z"></path></svg>
+      <span style="font-family:'Space Mono',ui-monospace,Consolas,monospace;font-size:11px;">Documents\IHatePDF</span>
+      <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 3.5L5 7l3.5-3.5"></path></svg>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:800},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark' | 'light'&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;railLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;privacyWeight&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;quiet&quot;,&quot;stated&quot;,&quot;loud&quot;],&quot;default&quot;:&quot;stated&quot;,&quot;tsType&quot;:&quot;'quiet' | 'stated' | 'loud'&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+const TOOLS = {
+  merge:    { label:'Merge PDF',      blurb:'Combine PDFs in the order you choose, with page ranges per file.', run:'Merge 3 PDFs',   drop:'Drop PDF files here',  fmt:'PDF', canvas:'files' },
+  split:    { label:'Split PDF',      blurb:'Cut into ranges, chop every N pages, extract or delete a selection.', run:'Split into 3 files', drop:'Drop a PDF file here', fmt:'PDF', canvas:'pages' },
+  organize: { label:'Organize pages', blurb:'Reorder, rotate and drop pages on a full-window page canvas.', run:'Save 12 pages', drop:'Drop a PDF file here', fmt:'PDF', canvas:'pages' },
+  compress: { label:'Compress PDF',   blurb:'Shrink for email, with the quality trade-off shown before you commit.', run:'Compress PDF', drop:'Drop a PDF file here', fmt:'PDF', canvas:'pages' },
+  toImages: { label:'PDF to images',  blurb:'Render pages to PNG or JPG at the DPI you pick.', run:'Export 14 images', drop:'Drop a PDF file here', fmt:'PDF', canvas:'pages' },
+  toPdf:    { label:'Images to PDF',  blurb:'Scans and photos into one PDF, one image per page.', run:'Create PDF', drop:'Drop images here', fmt:'JPG · PNG · WEBP · HEIC · HEIF · TIF', canvas:'images' },
+  convert:  { label:'Convert images', blurb:'PNG, JPG and WebP any direction — and HEIC off an iPhone.', run:'Convert 30 images', drop:'Drop images here', fmt:'JPG · PNG · WEBP · HEIC · HEIF · TIF', canvas:'images' },
+};
+
+const WRITES = {
+  merge:'Writes merged.pdf · your 3 input files are untouched',
+  split:'Writes 3 files · report.pdf is untouched',
+  organize:'Writes report-organized.pdf · the original is untouched',
+  compress:'Writes report-compressed.pdf · the original is untouched',
+  toImages:'Writes 14 PNG files into a report/ subfolder',
+  toPdf:'Writes scans.pdf · the 30 images are untouched',
+  convert:'Writes 30 JPG files · the HEIC originals are untouched',
+};
+
+const FILES = [
+  { n:1, name:'report.pdf',        meta:'9 pages · 1.2 MB · modified today',      range:'1-9'  },
+  { n:2, name:'invoice-aug.pdf',   meta:'5 pages · 240 KB · modified 3 days ago',  range:'1-3'  },
+  { n:3, name:'aadhaar-scan.pdf',  meta:'2 pages · 3.1 MB · modified last week',   range:'1-2'  },
+];
+
+const IMG_NAMES = ['IMG_2287','IMG_2288','IMG_2289','IMG_2290','IMG_2291','IMG_2292','IMG_2293','IMG_2294','IMG_2295','IMG_2296','IMG_2297','IMG_2298'];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    theme: null,
+    railOpen: true,
+    phase: 'loaded',
+    progress: 0,
+    splitMode: 'ranges',
+    level: 'balanced',
+  };
+
+  componentWillUnmount() { clearInterval(this._t); }
+
+  theme() { return this.state.theme || this.props.theme || 'dark'; }
+
+  go(screen) {
+    clearInterval(this._t);
+    this.setState({ screen, phase: screen === 'convert' ? 'running' : (screen === 'compress' ? 'done' : 'loaded'), progress: screen === 'convert' ? 62 : 0 });
+  }
+
+  run() {
+    clearInterval(this._t);
+    this.setState({ phase:'running', progress: 0 });
+    this._t = setInterval(() => {
+      this.setState(s => {
+        const p = s.progress + 7;
+        if (p >= 100) { clearInterval(this._t); return { progress:100, phase:'done' }; }
+        return { progress: p };
+      });
+    }, 110);
+  }
+
+  radio(on) {
+    return on
+      ? { border:'var(--accent)', bg:'var(--accent-soft)', dot:'var(--accent)', fill:'var(--accent)' }
+      : { border:'var(--border)', bg:'var(--surface-2)', dot:'var(--border-hi)', fill:'transparent' };
+  }
+
+  navStyle(id) {
+    const on = this.state.screen === id;
+    return { bg: on ? 'var(--accent-soft)' : 'transparent', fg: on ? 'var(--accent-hi)' : 'var(--text)' };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const screen = s.screen;
+    const tool = TOOLS[screen];
+    const isTool = !!tool;
+    const phase = s.phase;
+    const pw = this.props.privacyWeight || 'stated';
+
+    // page canvas
+    const pages = [];
+    const total = screen === 'organize' ? 14 : 14;
+    for (let i = 1; i <= total; i++) {
+      const sel = screen === 'organize' && (i === 4 || i === 9);
+      const inRange = screen === 'split' && (i <= 3);
+      const hot = sel || inRange;
+      pages.push({
+        n: i, src: i <= 9 ? 'report' : 'invoice',
+        ring: hot ? 'var(--accent)' : 'var(--border)',
+        tileBg: hot ? 'var(--accent-soft)' : 'var(--surface)',
+      });
+    }
+
+    // batch rows
+    const done = Math.floor(s.progress / 100 * 30);
+    const rows = IMG_NAMES.map((n, i) => {
+      const idx = i + 1;
+      if (n === 'IMG_2291' && idx <= done) return { name:n + '.HEIC', status:'HEIC container truncated', mark:'✕', nameColor:'var(--text)', statusColor:'var(--danger)' };
+      if (idx <= done) return { name:n + '.HEIC → ' + n + '.jpg', status:'done', mark:'✓', nameColor:'var(--muted)', statusColor:'var(--ok)' };
+      if (idx === done + 1) return { name:n + '.HEIC', status:'converting…', mark:'▸', nameColor:'var(--text)', statusColor:'var(--accent)' };
+      return { name:n + '.HEIC', status:'queued', mark:'·', nameColor:'var(--faint)', statusColor:'var(--faint)' };
+    });
+
+    const results = screen === 'compress'
+      ? [{ name:'report-compressed.pdf', size:'812 KB' }]
+      : screen === 'convert'
+        ? [{ name:'IMG_2287.jpg', size:'412 KB' }, { name:'IMG_2288.jpg', size:'389 KB' }, { name:'… 27 more files', size:'10.6 MB' }]
+        : [{ name:'merged.pdf', size:'4.4 MB' }];
+
+    const nav = {};
+    ['merge','split','organize','compress','toImages','toPdf','convert','settings'].forEach(id => {
+      const st = this.navStyle(id);
+      nav['bg' + id[0].toUpperCase() + id.slice(1)] = st.bg;
+      nav['fg' + id[0].toUpperCase() + id.slice(1)] = st.fg;
+    });
+
+    return {
+      theme: this.theme(),
+      themeLabel: this.theme() === 'dark' ? 'Light' : 'Dark',
+      toggleTheme: () => this.setState({ theme: this.theme() === 'dark' ? 'light' : 'dark' }),
+      railLabels: this.props.railLabels !== false && s.railOpen,
+      railWidth: (this.props.railLabels !== false && s.railOpen) ? '200px' : '52px',
+      labelDisplay: (this.props.railLabels !== false && s.railOpen) ? 'inline' : 'none',
+      railJustify: (this.props.railLabels !== false && s.railOpen) ? 'flex-start' : 'center',
+      chevTransform: (this.props.railLabels !== false && s.railOpen) ? 'none' : 'rotate(180deg)',
+      toggleRail: () => this.setState({ railOpen: !s.railOpen }),
+
+      goMerge: () => this.go('merge'), goSplit: () => this.go('split'),
+      goOrganize: () => this.go('organize'), goCompress: () => this.go('compress'),
+      goToImages: () => this.go('toImages'), goToPdf: () => this.go('toPdf'),
+      goConvert: () => this.go('convert'), goSettings: () => this.go('settings'),
+      ...nav,
+      bgHome: screen === 'home' ? 'var(--accent-soft)' : 'transparent',
+
+      isHome: screen === 'home',
+      isSettings: screen === 'settings',
+      isTool,
+      isMerge: screen === 'merge', isSplit: screen === 'split', isOrganize: screen === 'organize',
+      isCompress: screen === 'compress', isToImages: screen === 'toImages',
+      isToPdf: screen === 'toPdf', isConvert: screen === 'convert',
+
+      toolLabel: tool ? tool.label : '',
+      toolBlurb: tool ? tool.blurb : '',
+      runLabel: tool ? tool.run : '',
+      dropTitle: tool ? tool.drop : '',
+      dropFormats: tool ? tool.fmt : '',
+      writesLine: WRITES[screen] || '',
+
+      isEmpty: isTool && phase === 'empty',
+      isRunning: isTool && phase === 'running',
+      isDone: isTool && phase === 'done',
+      hasFiles: isTool && phase !== 'empty',
+      showFileList: isTool && phase === 'loaded' && tool.canvas === 'files',
+      showPageGrid: isTool && phase === 'loaded' && tool.canvas === 'pages',
+      showImageGrid: isTool && phase === 'loaded' && tool.canvas === 'images',
+      showResultFiles: isTool && phase === 'done',
+      hasFailures: screen === 'convert' && phase === 'done',
+
+      inputSummary: screen === 'merge' ? '3 files · 16 pages · 4.5 MB'
+        : (tool && tool.canvas === 'images') ? '30 images · 96 MB'
+        : 'report.pdf · 14 pages · 3.14 MB',
+      gridHint: screen === 'organize'
+        ? 'Click to select, drag to reorder. 2 selected.'
+        : screen === 'split' ? 'Pages 1–3 go to the first output file.'
+        : 'Every page will be rendered.',
+      runningTitle: screen === 'convert' ? 'Converting 30 images to JPG' : 'Working',
+      progressText: screen === 'convert' ? done + ' of 30' : s.progress + '%',
+      progressPct: s.progress + '%',
+      doneTitle: screen === 'compress' ? 'Compressed report.pdf'
+        : screen === 'convert' ? 'Converted 29 of 30 images' : 'Done',
+      doneTime: screen === 'compress' ? 'took 2.4s' : 'took 11.8s',
+
+      files: FILES,
+      pages,
+      images: IMG_NAMES.map((n, i) => ({ name:n + '.HEIC', kind:'HEIC', meta:(3.1 + (i % 5) * 0.2).toFixed(1) + ' MB · 4032×3024' })),
+      rows,
+      results,
+
+      splitModes: [
+        { key:'ranges',  title:'By ranges',     blurb:'One new PDF per range you list.' },
+        { key:'everyn',  title:'Every N pages', blurb:'Chop the document into equal chunks.' },
+        { key:'extract', title:'Extract pages', blurb:'One PDF containing only the pages you name.' },
+        { key:'remove',  title:'Remove pages',  blurb:'One PDF with the pages you name taken out.' },
+      ].map(m => ({ ...m, ...this.radio(s.splitMode === m.key), pick: () => this.setState({ splitMode: m.key }) })),
+
+      levels: [
+        { key:'lossless', title:'Lossless', blurb:'Restructures the file only. Nothing is thrown away.', est:'2.6 MB' },
+        { key:'balanced', title:'Balanced', blurb:'Good for email. Photos soften slightly.', est:'812 KB' },
+        { key:'strong',   title:'Strong',   blurb:'Smallest file. Images visibly soften.', est:'340 KB' },
+      ].map(l => ({ ...l, ...this.radio(s.level === l.key), pick: () => this.setState({ level: l.key }) })),
+
+      showHomePrivacy: pw !== 'quiet',
+      showRunPrivacy: pw === 'loud',
+
+      run: () => this.run(),
+      cancelRun: () => { clearInterval(this._t); this.setState({ phase:'loaded', progress:0 }); },
+      runAgain: () => this.setState({ phase:'loaded', progress:0 }),
+      loadFiles: () => this.setState({ phase:'loaded' }),
+      clearAll: () => this.setState({ phase:'empty', progress:0 }),
+      addMore: () => this.setState({ phase:'loaded' }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

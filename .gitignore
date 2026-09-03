@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# iLoathePDF
+.venv/
+vendor/
+__pycache__/
+.pytest_cache/
+build/
+*.spec
+
+# Rust
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Vendored third-party binaries (see HANDOVER.md to reinstall)
+vendor/
+
+# Design canvas export archive; the extracted files under design/canvas are kept
+*.zip

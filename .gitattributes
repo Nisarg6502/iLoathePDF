@@ -1,0 +1,9 @@
+# Normalise line endings so CI (Linux) and the working copy (Windows) agree.
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+*.woff2 binary
+*.png binary
+*.ico binary
+*.icns binary
+*.pdf binary
