@@ -19,6 +19,28 @@ Both earlier blockers are cleared — MSVC Build Tools 14.44 and Ghostscript
 10.07.1 are installed. What remains is running the real desktop app end to end
 and building the installer.
 
+## Repository
+
+`https://github.com/Nisarg6502/iLoathePDF` — **private**.
+
+- **`main` is built through pull requests.** GitHub's branch protection *and*
+  rulesets both return `403 Upgrade to GitHub Pro or make this repository
+  public`, so the rule is enforced by `.githooks/pre-push` instead. A fresh
+  clone must run `git config core.hooksPath .githooks` to get it, and
+  `--no-verify` bypasses it on purpose. For real server-side enforcement the
+  repo has to go public or the account has to go Pro.
+- **CI** (`.github/workflows/ci.yml`) runs three jobs on every push and PR:
+  Frontend (oxlint, tsc, vite build), Document engine (pytest on Linux **with
+  Ghostscript installed**, so the compression and rasterising tests run rather
+  than skip), and Rust (fmt + clippy with `-D warnings` on Windows).
+- **The Rust job creates `vendor/` and `build/sidecar/iloathepdf-sidecar/`
+  before linting.** `tauri_build` validates every `bundle.resources` path at
+  build-script time, and both are gitignored — a clean checkout has neither, so
+  the build script fails before clippy runs. This cost one red CI run; do not
+  remove that step.
+- **Dependabot** covers npm, cargo, pip and github-actions; patch and minor
+  updates are grouped into one PR per ecosystem.
+
 ## Milestone checklist
 
 | | Milestone | State |
@@ -30,6 +52,7 @@ and building the installer.
 | M4 | Image conversion (Pillow + pillow-heif) | ✅ |
 | M5 | Images ↔ PDF | ✅ |
 | M6 | Polish, PyInstaller build, NSIS installer, network-silence check | 🚧 freeze works; installer never built |
+| M7 | Redesign from the Claude Design canvas, rename to iLoathePDF, repo + CI | ✅ |
 
 ## Third-party binaries
 
@@ -190,6 +213,19 @@ job-parameter assembly to `src/lib/run.ts`, and file picking is reusable through
   regression undo them.
 - **`vendor/` and `build/` are gitignored** but are required to build the
   installer. A fresh clone needs `vendor/ghostscript/` reinstalled.
+- **The app was renamed from IHatePDF to iLoathePDF.** The localStorage keys
+  moved with it (`iloathepdf.theme`, `iloathepdf.outputDir`), so saved
+  preferences reset once. The Rust crate, the frozen sidecar binary name and the
+  installer product name all changed too — a stale `build/sidecar/` from before
+  the rename will not be found.
+- **Never put a control inside `data-tauri-drag-region`.** mousedown hands the
+  window to the OS for dragging and the click never fires. That is why the
+  minimise and maximise buttons silently did nothing; the attribute now sits on
+  an inert spacer only.
+- **The first native file dialog is slow on Windows** — Explorer's shell
+  namespace initialises lazily and can stall for seconds. The plugin chunk is
+  preloaded and the drop target shows a pending state; the OS delay itself is
+  not ours to fix.
 - **`design/canvas/` holds the source design.** Re-read it before changing
   layout or colour; it is the reference, not the screenshots.
 - **pdf.js renders on `requestAnimationFrame`**, which does not fire in a hidden
