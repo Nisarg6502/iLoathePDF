@@ -59,11 +59,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-      # tauri_build validates bundle.resources at build-script time, and the
-      # frozen engine only exists after scripts/build-sidecar.ps1 has run.
-      # Lint does not need its contents, just the path.
-      - name: Placeholder for the bundled engine
-        run: New-Item -ItemType Directory -Force build/sidecar/iloathepdf-sidecar
+      # tauri_build validates every bundle.resources path at build-script time.
+      # Both of ours are gitignored -- vendor/ holds the AGPL Ghostscript build
+      # and build/ holds the frozen engine -- so a clean checkout has neither
+      # and the build script fails before clippy ever runs. Lint does not need
+      # their contents, only the paths.
+      - name: Placeholder resource paths
+        run: |
+          New-Item -ItemType Directory -Force vendor
+          New-Item -ItemType Directory -Force build/sidecar/iloathepdf-sidecar
         shell: pwsh
 
       - name: Format
