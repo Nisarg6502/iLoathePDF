@@ -1,0 +1,14 @@
+{
+  "name": "iloathepdf-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/desktop",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev:desktop": "npm run tauri dev --workspace=apps/desktop",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:web": "npm run build --workspace=apps/web",
+    "test:web": "npm run test --workspace=apps/web"
+  }
+}
