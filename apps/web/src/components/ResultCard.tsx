@@ -1,0 +1,44 @@
+import { PreviewBadge } from "./PreviewBadge";
+import type { EngineResult } from "@/engines/types";
+
+export function ResultCard({
+  result,
+  onReset,
+}: {
+  result: EngineResult;
+  onReset: () => void;
+}) {
+  return (
+    <div className="flex min-h-[400px] flex-col justify-center rounded-2xl border border-border bg-surface p-8">
+      <div className="flex items-center gap-2">
+        <span className="size-1.75 rounded-full bg-ok" />
+        <span className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-ok">DONE · ON THIS MACHINE</span>
+        {result.isPreview && <PreviewBadge />}
+      </div>
+      <div className="mt-5 text-lg font-semibold">{result.summary}</div>
+      <div className="mt-5 flex flex-col gap-2.5">
+        {result.files.map((f) => (
+          <div key={f.name} className="flex items-center gap-3.5 rounded-xl border border-border bg-surface-2 p-3.5">
+            <div className="min-w-0 flex-1">
+              <div className="text-[13.5px] font-medium">{f.name}</div>
+            </div>
+            <a
+              href={URL.createObjectURL(f.blob)}
+              download={f.name}
+              className="rounded-[9px] bg-accent px-3.5 py-2 text-[13px] font-semibold text-on-accent hover:bg-accent-hi"
+            >
+              Download
+            </a>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={onReset}
+        className="mt-5 w-fit rounded-[11px] border border-border px-4 py-2 text-sm text-muted hover:bg-surface-2 hover:text-text"
+      >
+        Start over
+      </button>
+    </div>
+  );
+}
