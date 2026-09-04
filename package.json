@@ -1,48 +1,14 @@
 {
-  "name": "iloathepdf",
+  "name": "iloathepdf-monorepo",
   "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "workspaces": [
+    "apps/desktop",
+    "apps/web"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview",
-    "tauri": "tauri",
-    "test": ".venv\\Scripts\\python.exe -m pytest",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "build:sidecar": "powershell -ExecutionPolicy Bypass -File scripts/build-sidecar.ps1",
-    "build:app": "npm run build:sidecar && tauri build"
-  },
-  "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/modifiers": "^9.0.0",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@tauri-apps/api": "^2.11.1",
-    "@tauri-apps/plugin-dialog": "^2.7.3",
-    "@tauri-apps/plugin-opener": "^2.5.5",
-    "@tauri-apps/plugin-shell": "^2.3.6",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.39.0",
-    "motion": "^13.2.0",
-    "pdfjs-dist": "^6.3.289",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.3",
-    "tailwind-merge": "^3.6.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@tauri-apps/cli": "^2.11.4",
-    "@types/node": "^26.4.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "@vitejs/plugin-react": "^6.1.0",
-    "oxlint": "^1.79.0",
-    "tailwindcss": "^4.3.3",
-    "typescript": "~7.0.2",
-    "vite": "^8.2.2"
-  },
-  "description": "Private, offline PDF and image toolkit"
+    "dev:desktop": "npm run tauri dev --workspace=apps/desktop",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:web": "npm run build --workspace=apps/web",
+    "test:web": "npm run test --workspace=apps/web"
+  }
 }

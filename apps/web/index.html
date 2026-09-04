@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLoathePDF — PDF tools that never upload your files</title>
+    <meta name="description" content="Merge, split, compress, organize and convert PDFs and images, entirely in your browser tab. No upload, no server, no account." />
+    <!--
+      Counterpart to public/404.html's SPA redirect shim: decode the real path
+      back out of the "?/actualpath" query string and restore it with
+      history.replaceState before React Router mounts and reads location.
+    -->
+    <script>
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, "", l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

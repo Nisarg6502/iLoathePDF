@@ -23,25 +23,27 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: package-lock.json
       - run: npm ci
       - name: Lint
-        run: npm run lint
+        run: npm run lint --workspace=apps/desktop
       - name: Typecheck
-        run: npm run typecheck
+        run: npm run typecheck --workspace=apps/desktop
       - name: Build
-        run: npm run build
+        run: npm run build --workspace=apps/desktop
 
   engine:
     name: Document engine
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/desktop
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
-      # Ghostscript is what compression and rasterising actually run on, so the
-      # tests covering them run here rather than skipping.
       - name: Install Ghostscript
         run: sudo apt-get update && sudo apt-get install -y ghostscript
       - run: pip install -r sidecar/requirements.txt
@@ -51,6 +53,9 @@ jobs:
   rust:
     name: Rust
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/desktop
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
@@ -58,12 +63,7 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
-      # tauri_build validates every bundle.resources path at build-script time.
-      # Both of ours are gitignored -- vendor/ holds the AGPL Ghostscript build
-      # and build/ holds the frozen engine -- so a clean checkout has neither
-      # and the build script fails before clippy ever runs. Lint does not need
-      # their contents, only the paths.
+          workspaces: apps/desktop/src-tauri
       - name: Placeholder resource paths
         run: |
           New-Item -ItemType Directory -Force vendor
