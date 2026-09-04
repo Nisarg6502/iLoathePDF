@@ -32,7 +32,7 @@ export function SiteFooter() {
 
         <div className="flex flex-col gap-2">
           <span className="font-mono text-[10px] font-bold tracking-[0.13em] text-faint">STATUS</span>
-          <span className="font-mono text-[11.5px] text-ok">local · wasm · offline ok</span>
+          <span className="font-mono text-[11.5px] text-ok">local · no uploads</span>
           <span className="font-mono text-[11.5px] text-faint">{reqCount} requests this session</span>
         </div>
       </div>

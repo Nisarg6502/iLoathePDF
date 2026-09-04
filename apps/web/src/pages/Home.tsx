@@ -42,7 +42,7 @@ export function Home() {
           <div className="mt-6 flex w-fit items-center gap-3.5 rounded-[10px] border border-border bg-surface px-3.5 py-2.5">
             <span className="flex items-center gap-1.5 text-xs text-ok">
               <span className="size-1.5 rounded-full bg-ok" />
-              Offline capable
+              Runs locally, no uploads
             </span>
             <span className="h-3.5 w-px bg-border" />
             <span className="font-mono text-[11.5px] text-muted">

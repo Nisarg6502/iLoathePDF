@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from "react";
 import { PreviewBadge } from "./PreviewBadge";
 import type { EngineResult } from "@/engines/types";
 
@@ -8,6 +9,14 @@ export function ResultCard({
   result: EngineResult;
   onReset: () => void;
 }) {
+  const urls = useMemo(() => result.files.map((f) => URL.createObjectURL(f.blob)), [result.files]);
+
+  useEffect(() => {
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [urls]);
+
   return (
     <div className="flex min-h-[400px] flex-col justify-center rounded-2xl border border-border bg-surface p-8">
       <div className="flex items-center gap-2">
@@ -17,13 +26,13 @@ export function ResultCard({
       </div>
       <div className="mt-5 text-lg font-semibold">{result.summary}</div>
       <div className="mt-5 flex flex-col gap-2.5">
-        {result.files.map((f) => (
+        {result.files.map((f, i) => (
           <div key={f.name} className="flex items-center gap-3.5 rounded-xl border border-border bg-surface-2 p-3.5">
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] font-medium">{f.name}</div>
             </div>
             <a
-              href={URL.createObjectURL(f.blob)}
+              href={urls[i]}
               download={f.name}
               className="rounded-[9px] bg-accent px-3.5 py-2 text-[13px] font-semibold text-on-accent hover:bg-accent-hi"
             >

@@ -118,6 +118,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
               options={options}
               onChange={setOptions}
               disabled={step === "running" || step === "done"}
+              files={files}
             />
           </div>
           <div className="border-t border-border bg-surface-2 px-4 py-3.5">

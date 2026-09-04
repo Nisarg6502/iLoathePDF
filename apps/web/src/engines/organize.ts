@@ -15,7 +15,18 @@ export const organizeEngine: Engine = async ({ files, options }) => {
 
   const bytes = await file.arrayBuffer();
   const src = await PDFDocument.load(bytes);
+  const srcPageCount = src.getPageCount();
+
+  for (const i of order) {
+    if (i < 0 || i >= srcPageCount) {
+      throw new Error(`Page count doesn't match the PDF (${srcPageCount} pages).`);
+    }
+  }
+
   const keptOriginalIndices = order.filter((i) => !remove.has(i));
+  if (keptOriginalIndices.length === 0) {
+    throw new Error("Nothing to organize — no pages selected.");
+  }
 
   const out = await PDFDocument.create();
   const pages = await out.copyPages(src, keptOriginalIndices);

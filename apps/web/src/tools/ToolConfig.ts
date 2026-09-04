@@ -5,6 +5,8 @@ export interface OptionsPanelProps<TOptions = Record<string, unknown>> {
   options: TOptions;
   onChange: (options: TOptions) => void;
   disabled: boolean;
+  /** The currently selected input file(s), when available. Optional — most panels can ignore it. */
+  files?: File[];
 }
 
 export interface ToolConfig {
