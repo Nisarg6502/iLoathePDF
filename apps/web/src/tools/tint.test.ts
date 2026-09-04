@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tintColor, tintWash } from "./tint";
+import { tintColor, tintWash, tintButtonBg } from "./tint";
 
 describe("tintColor", () => {
   it("returns the CSS variable reference for a tint key", () => {
@@ -15,5 +15,16 @@ describe("tintWash", () => {
 
   it("accepts a custom percentage", () => {
     expect(tintWash("b", 25)).toBe("color-mix(in oklch, var(--tint-b) 25%, var(--surface))");
+  });
+
+  it("accepts a custom mix base", () => {
+    expect(tintWash("c", 8, "var(--bg)")).toBe("color-mix(in oklch, var(--tint-c) 8%, var(--bg))");
+  });
+});
+
+describe("tintButtonBg", () => {
+  it("returns the button-specific CSS variable reference for a tint key", () => {
+    expect(tintButtonBg("a")).toBe("var(--tint-a-btn)");
+    expect(tintButtonBg("g")).toBe("var(--tint-g-btn)");
   });
 });

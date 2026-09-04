@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useRequestCount } from "@/components/layout/RequestStatusContext";
 import { HeroDemo } from "@/components/HeroDemo";
 import { TOOLS } from "@/tools/registry";
@@ -7,6 +7,7 @@ import { tintColor, tintWash } from "@/tools/tint";
 
 export function Home() {
   const reqCount = useRequestCount();
+  const reduce = useReducedMotion();
 
   return (
     <div>
@@ -29,7 +30,7 @@ export function Home() {
           <div className="mt-8 flex gap-2.5">
             <Link
               to="/tools/compress"
-              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97]"
+              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97] active:bg-accent-deep"
             >
               Open the tools
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -71,7 +72,7 @@ export function Home() {
               .map((tool, i) => (
                 <motion.div
                   key={tool.slug}
-                  initial={{ opacity: 0, transform: "translateY(10px)" }}
+                  initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
                   whileInView={{ opacity: 1, transform: "translateY(0px)" }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.4, delay: i * 0.08, ease: [0.23, 1, 0.32, 1] }}
@@ -79,7 +80,7 @@ export function Home() {
                   <Link
                     to={`/tools/${tool.slug}`}
                     className="block rounded-[13px] border border-border p-4.5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
-                    style={{ background: tintWash(tool.tint, 5) }}
+                    style={{ background: tintWash(tool.tint, 5, "var(--bg)") }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = tintColor(tool.tint);
                     }}
@@ -112,7 +113,7 @@ export function Home() {
           ].map((s, i) => (
             <motion.div
               key={s.n}
-              initial={{ opacity: 0, transform: "translateY(10px)" }}
+              initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
               whileInView={{ opacity: 1, transform: "translateY(0px)" }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.4, delay: i * 0.15, ease: [0.23, 1, 0.32, 1] }}
