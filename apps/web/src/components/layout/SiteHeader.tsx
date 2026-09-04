@@ -4,7 +4,6 @@ import { ThemeToggle } from "./ThemeToggle";
 const NAV_LINKS = [
   { to: "/", label: "Home", end: true },
   { to: "/tools", label: "Tools" },
-  { to: "/tools/compress", label: "Compress" },
   { to: "/how-it-works", label: "How it works" },
   { to: "/privacy", label: "Privacy" },
 ];
