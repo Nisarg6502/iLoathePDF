@@ -1,6 +1,7 @@
 {
   "name": "iloathepdf-monorepo",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "apps/desktop",
     "apps/web"

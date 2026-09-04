@@ -144,6 +144,11 @@ Two limits accepted rather than fought:
 
 ## Licensing
 
-Ghostscript is AGPL. Bundling it for personal use is fine. If this is ever
-distributed, the AGPL obligations attach — keep the repo private, or replace the
-compression backend. pikepdf is MPL-2.0, Pillow is MIT-CMU, img2pdf is LGPL-3.
+Ghostscript is AGPL. This app's own code is MIT licensed (see the repo root
+[LICENSE](../LICENSE)), but bundling Ghostscript into a distributed installer
+still carries AGPL's obligations on top of that — chiefly, making the
+corresponding source available to anyone who receives the binary. Since this
+repo is public, that requirement is already satisfied for the app itself;
+Ghostscript's own source is available from its upstream project. The other
+Python dependencies: pikepdf is MPL-2.0, Pillow is MIT-CMU, img2pdf is
+LGPL-3 — none of them impose obligations beyond attribution.
