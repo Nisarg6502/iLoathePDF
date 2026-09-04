@@ -1,0 +1,106 @@
+name: Release desktop
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+concurrency:
+  group: release-desktop-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build installer and publish release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: apps/desktop/sidecar/requirements.txt
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Create venv and install sidecar dependencies
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .venv\Scripts\python.exe -m pip install -r sidecar/requirements.txt
+
+      - name: Download Ghostscript installer
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10071/gs10071w64.exe"
+          $expectedHash = "3A4C28D0AAC47AA7CCCD35A5932C55110376E9DBD966898DDE388B7FABA444A4"
+          Invoke-WebRequest -Uri $url -OutFile gs-installer.exe
+          $actualHash = (Get-FileHash gs-installer.exe -Algorithm SHA256).Hash
+          if ($actualHash -ne $expectedHash) {
+            throw "Ghostscript installer hash mismatch. Expected $expectedHash, got $actualHash"
+          }
+
+      - name: Install Ghostscript into vendor/
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $vendorPath = Join-Path (Get-Location) "vendor\ghostscript"
+          Start-Process -FilePath ".\gs-installer.exe" -ArgumentList "/S", "/D=$vendorPath" -Wait
+          if (-not (Test-Path (Join-Path $vendorPath "bin"))) {
+            throw "Ghostscript did not install to the expected path: $vendorPath"
+          }
+          Remove-Item gs-installer.exe
+
+      - name: Build frontend
+        run: npm run build --workspace=apps/desktop
+
+      - name: Build installer
+        run: npm run build:app --workspace=apps/desktop
+
+      - name: Locate installer
+        id: installer
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path "apps/desktop/src-tauri/target/release/bundle/nsis" -Filter "*.exe" | Select-Object -First 1
+          if (-not $installer) { throw "No NSIS installer found in apps/desktop/src-tauri/target/release/bundle/nsis" }
+          echo "path=$($installer.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Determine release tag
+        id: tag
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            echo "tag=${{ github.ref_name }}" >> $env:GITHUB_OUTPUT
+            echo "prerelease=false" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "tag=dev-${{ github.run_number }}" >> $env:GITHUB_OUTPUT
+            echo "prerelease=true" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: iLoathePDF ${{ steps.tag.outputs.tag }}
+          prerelease: ${{ steps.tag.outputs.prerelease }}
+          generate_release_notes: true
+          files: ${{ steps.installer.outputs.path }}
