@@ -1,5 +1,7 @@
 import type { ToolConfig } from "./ToolConfig";
 import { PlaceholderOptions } from "./options/PlaceholderOptions";
+import { MergeOptions } from "./options/MergeOptions";
+import { mergeEngine } from "@/engines/merge";
 
 const notImplemented: ToolConfig["engine"] = async () => {
   throw new Error("This tool's engine has not been implemented yet.");
@@ -12,7 +14,7 @@ const IconStub = () => (
 );
 
 export const TOOLS: ToolConfig[] = [
-  { slug: "merge", name: "Merge PDF", description: "Combine PDFs in the order you choose, with page ranges per file.", category: "pdf", Icon: IconStub, accept: [".pdf"], multiple: true, defaultOptions: {}, OptionsPanel: PlaceholderOptions, engine: notImplemented, status: "live" },
+  { slug: "merge", name: "Merge PDF", description: "Combine PDFs in the order you choose, with page ranges per file.", category: "pdf", Icon: IconStub, accept: [".pdf"], multiple: true, defaultOptions: {}, OptionsPanel: MergeOptions, engine: mergeEngine, status: "live" },
   { slug: "split", name: "Split PDF", description: "Cut into ranges, chop every N pages, extract or delete a selection.", category: "pdf", Icon: IconStub, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PlaceholderOptions, engine: notImplemented, status: "live" },
   { slug: "organize", name: "Organize pages", description: "Reorder, rotate and drop pages on a page canvas.", category: "pdf", Icon: IconStub, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PlaceholderOptions, engine: notImplemented, status: "live" },
   { slug: "compress", name: "Compress PDF", description: "Shrink for email, with the quality trade-off shown before you commit.", category: "pdf", Icon: IconStub, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PlaceholderOptions, engine: notImplemented, status: "preview" },
