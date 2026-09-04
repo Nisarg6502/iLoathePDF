@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { getTool } from "@/tools/registry";
 import { ToolPage } from "@/components/ToolPage";
 import { PreviewBadge } from "@/components/PreviewBadge";
+import { tintWash } from "@/tools/tint";
 
 export function ToolDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -18,7 +19,10 @@ export function ToolDetail() {
   return (
     <div>
       <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-8 pt-8">
-        <span className="grid size-9.5 flex-none place-items-center rounded-[11px] border border-border bg-surface">
+        <span
+          className="grid size-9.5 flex-none place-items-center rounded-[11px] border border-border"
+          style={{ background: tintWash(tool.tint, 14) }}
+        >
           <tool.Icon className="size-5" />
         </span>
         <div>
