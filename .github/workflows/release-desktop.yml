@@ -16,6 +16,7 @@ jobs:
   build-and-release:
     name: Build installer and publish release
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
 
@@ -62,11 +63,18 @@ jobs:
       - name: Install Ghostscript into vendor/
         working-directory: apps/desktop
         shell: pwsh
+        timeout-minutes: 3
         run: |
+          # The NSIS installer's /S silent flag does not reliably suppress every
+          # prompt on a headless CI runner (a run on 2026-09-04 hung for 2+ hours
+          # with -Wait never returning, no error, no output). 7-Zip can extract
+          # an NSIS installer's payload directly, like any other archive, which
+          # sidesteps installer UI logic entirely rather than trying to silence it.
           $vendorPath = Join-Path (Get-Location) "vendor\ghostscript"
-          Start-Process -FilePath ".\gs-installer.exe" -ArgumentList "/S", "/D=$vendorPath" -Wait
+          & "C:\Program Files\7-Zip\7z.exe" x ".\gs-installer.exe" "-o$vendorPath" -y
+          if ($LASTEXITCODE -ne 0) { throw "7z extraction of the Ghostscript installer failed with exit code $LASTEXITCODE" }
           if (-not (Test-Path (Join-Path $vendorPath "bin"))) {
-            throw "Ghostscript did not install to the expected path: $vendorPath"
+            throw "Ghostscript did not extract to the expected path: $vendorPath"
           }
           Remove-Item gs-installer.exe
 
