@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom";
+import { motion, useReducedMotion } from "motion/react";
 import { useRequestCount } from "@/components/layout/RequestStatusContext";
+import { HeroDemo } from "@/components/HeroDemo";
+import { TOOLS } from "@/tools/registry";
+import { tintColor, tintWash } from "@/tools/tint";
 
 export function Home() {
   const reqCount = useRequestCount();
+  const reduce = useReducedMotion();
 
   return (
     <div>
@@ -25,7 +30,7 @@ export function Home() {
           <div className="mt-8 flex gap-2.5">
             <Link
               to="/tools/compress"
-              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97]"
+              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97] active:bg-accent-deep"
             >
               Open the tools
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -51,47 +56,7 @@ export function Home() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]">
-          <div className="flex h-[38px] items-center gap-2 border-b border-border bg-surface-2 px-3.5">
-            <span className="flex gap-1.5">
-              <span className="size-2.5 rounded-full bg-border-hi" />
-              <span className="size-2.5 rounded-full bg-border-hi" />
-              <span className="size-2.5 rounded-full bg-border-hi" />
-            </span>
-            <span className="flex-1" />
-            <span className="font-mono text-[10.5px] text-faint">iloathepdf.app/compress</span>
-          </div>
-          <div className="p-5">
-            <div className="flex items-center gap-2.5">
-              <span className="grid size-6.5 place-items-center rounded-lg bg-surface-2">
-                <svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="var(--tint-d)" strokeWidth="1.5">
-                  <rect x="2.5" y="2.5" width="13" height="13" rx="1.2" />
-                  <path d="M5.5 5.5L8 8M8 8V5.6M8 8H5.6M12.5 12.5L10 10M10 10v2.4M10 10h2.4" />
-                </svg>
-              </span>
-              <span className="text-[13.5px] font-semibold">Compress PDF</span>
-              <span className="flex-1" />
-              <span className="font-mono text-[10.5px] text-ok">DONE</span>
-            </div>
-            <div className="mt-4.5 rounded-xl border border-border bg-surface-2 p-5">
-              <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">RESULT</div>
-              <div className="mt-3 flex items-baseline gap-3 font-mono">
-                <span className="text-[22px] text-faint line-through">3.14 MB</span>
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="var(--faint)" strokeWidth="1.5">
-                  <path d="M3 8h10M9 4l4 4-4 4" />
-                </svg>
-                <span className="text-[38px] font-bold tracking-[-0.03em]">812 KB</span>
-              </div>
-              <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-surface-3">
-                <span className="w-1/4 bg-ok" />
-              </div>
-              <div className="mt-2 flex justify-between font-mono text-[11px] text-muted">
-                <span>−75% smaller</span>
-                <span>quality: balanced</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HeroDemo />
       </div>
 
       <div className="border-t border-border bg-surface">
@@ -101,21 +66,34 @@ export function Home() {
             <Link to="/tools" className="text-[13.5px] text-accent">See all →</Link>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { to: "/tools/compress", title: "Compress PDF", desc: "Shrink for email, with the quality trade-off shown first." },
-              { to: "/tools/merge", title: "Merge PDF", desc: "Combine in the order you choose, page ranges per file." },
-              { to: "/tools/split", title: "Split PDF", desc: "Ranges, every N pages, extract or delete a selection." },
-              { to: "/tools/organize", title: "Organize pages", desc: "Reorder, rotate and drop pages on a page canvas." },
-            ].map((t) => (
-              <Link
-                key={t.to}
-                to={t.to}
-                className="rounded-[13px] border border-border bg-bg p-4.5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:border-border-hi hover:shadow-[var(--shadow-card)]"
-              >
-                <div className="mt-2.5 text-sm font-semibold">{t.title}</div>
-                <div className="mt-1 text-[12.5px] leading-snug text-muted">{t.desc}</div>
-              </Link>
-            ))}
+            {["compress", "merge", "split", "organize"]
+              .map((slug) => TOOLS.find((t) => t.slug === slug))
+              .filter((t): t is (typeof TOOLS)[number] => Boolean(t))
+              .map((tool, i) => (
+                <motion.div
+                  key={tool.slug}
+                  initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
+                  whileInView={{ opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.4, delay: i * 0.08, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <Link
+                    to={`/tools/${tool.slug}`}
+                    className="block rounded-[13px] border border-border p-4.5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                    style={{ background: tintWash(tool.tint, 5, "var(--bg)") }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = tintColor(tool.tint);
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "";
+                    }}
+                  >
+                    <tool.Icon className="size-5" />
+                    <div className="mt-2.5 text-sm font-semibold">{tool.name}</div>
+                    <div className="mt-1 text-[12.5px] leading-snug text-muted">{tool.description}</div>
+                  </Link>
+                </motion.div>
+              ))}
           </div>
         </div>
       </div>
@@ -132,12 +110,19 @@ export function Home() {
             { n: "01", title: "Nothing loads except the page", body: "The tool code arrives with the page like any other script and runs in this tab. That is the last request the site makes." },
             { n: "02", title: "Your file stays put", body: "Files are read through the File API into memory the tab owns. No fetch, no form post, no signed URL." },
             { n: "03", title: "Result is a local save", body: "Output is a blob your browser writes to disk. Close the tab and every trace is gone." },
-          ].map((s) => (
-            <div key={s.n} className="rounded-[13px] border border-border bg-surface p-5.5">
+          ].map((s, i) => (
+            <motion.div
+              key={s.n}
+              initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
+              whileInView={{ opacity: 1, transform: "translateY(0px)" }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.4, delay: i * 0.15, ease: [0.23, 1, 0.32, 1] }}
+              className="rounded-[13px] border border-border bg-surface p-5.5"
+            >
               <span className="font-mono text-[11px] font-bold text-accent">{s.n}</span>
               <div className="mt-2.5 text-[15px] font-semibold">{s.title}</div>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{s.body}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3.5 md:grid-cols-[1fr_300px]">

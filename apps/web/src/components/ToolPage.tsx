@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ToolConfig } from "@/tools/ToolConfig";
 import type { EngineResult } from "@/engines/types";
+import { tintButtonBg } from "@/tools/tint";
 import { FileDropZone } from "./FileDropZone";
 import { ResultCard } from "./ResultCard";
 
@@ -153,7 +154,8 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
               type="button"
               onClick={run}
               disabled={step === "empty" || step === "running"}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-accent transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
+              style={step === "empty" || step === "running" ? undefined : { background: tintButtonBg(tool.tint) }}
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-tint transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
             >
               {step === "running" && (
                 <svg className="spinner size-3.5" viewBox="0 0 20 20" fill="none">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { TOOLS } from "@/tools/registry";
 import { PreviewBadge } from "@/components/PreviewBadge";
+import { tintColor, tintWash } from "@/tools/tint";
 
 export function ToolsIndex() {
   const pdfTools = TOOLS.filter((t) => t.category === "pdf");
@@ -28,7 +29,14 @@ export function ToolsIndex() {
               <Link
                 key={tool.slug}
                 to={`/tools/${tool.slug}`}
-                className="rounded-[14px] border border-border bg-surface p-5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:border-accent hover:shadow-[var(--shadow-card)]"
+                className="rounded-[14px] border border-border p-5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                style={{ background: tintWash(tool.tint, 5) }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = tintColor(tool.tint);
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "";
+                }}
               >
                 <div className="flex items-start justify-between">
                   <tool.Icon className="size-5.5" />
@@ -36,7 +44,9 @@ export function ToolsIndex() {
                 </div>
                 <div className="mt-3 text-[15px] font-semibold">{tool.name}</div>
                 <div className="mt-1 text-[13px] leading-relaxed text-muted">{tool.description}</div>
-                <div className="mt-3 font-mono text-[11px] text-accent">Open →</div>
+                <div className="mt-3 font-mono text-[11px]" style={{ color: tintColor(tool.tint) }}>
+                  Open →
+                </div>
               </Link>
             ))}
           </div>

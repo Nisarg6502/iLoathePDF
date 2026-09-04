@@ -50,26 +50,27 @@
 }
 
 :root {
-  --bg: oklch(0.965 0.005 76);
+  --bg: oklch(0.955 0.006 76);
   --surface: #ffffff;
-  --surface-2: oklch(0.972 0.006 76);
-  --surface-3: oklch(0.938 0.008 76);
-  --border: oklch(0.905 0.008 76);
-  --border-hi: oklch(0.825 0.010 76);
+  --surface-2: oklch(0.945 0.010 76);
+  --surface-3: oklch(0.905 0.014 76);
+  --border: oklch(0.87 0.012 76);
+  --border-hi: oklch(0.78 0.016 76);
   --text: oklch(0.215 0.014 68);
   --muted: oklch(0.505 0.012 72);
   --faint: oklch(0.645 0.010 72);
-  --accent: oklch(0.775 0.155 78);
-  --accent-hi: oklch(0.715 0.160 72);
-  --accent-soft: oklch(0.958 0.048 82);
-  --on-accent: oklch(0.235 0.045 68);
+  --accent: oklch(0.74 0.175 76);
+  --accent-hi: oklch(0.68 0.178 70);
+  --accent-deep: oklch(0.52 0.15 66);
+  --accent-soft: oklch(0.95 0.06 82);
+  --on-accent: oklch(0.2 0.05 66);
   --ok: oklch(0.545 0.115 162);
   --ok-soft: oklch(0.958 0.032 162);
   --danger: oklch(0.545 0.175 26);
   --danger-soft: oklch(0.958 0.030 26);
   --paper: #ffffff;
   --paper-line: oklch(0.902 0.006 76);
-  --shadow-card: 0 1px 2px oklch(0.25 0.02 70 / 0.07), 0 6px 16px -4px oklch(0.25 0.02 70 / 0.1);
+  --shadow-card: 0 1px 3px oklch(0.25 0.02 70 / 0.10), 0 8px 20px -6px oklch(0.25 0.02 70 / 0.16);
   --tint-a: oklch(0.575 0.145 265);
   --tint-b: oklch(0.575 0.145 310);
   --tint-c: oklch(0.575 0.145 200);
@@ -77,22 +78,33 @@
   --tint-e: oklch(0.575 0.145 78);
   --tint-f: oklch(0.575 0.145 28);
   --tint-g: oklch(0.575 0.145 340);
+  --tint-a-btn: oklch(0.5 0.145 265);
+  --tint-b-btn: oklch(0.5 0.145 310);
+  --tint-c-btn: oklch(0.5 0.145 200);
+  --tint-d-btn: oklch(0.5 0.145 162);
+  --tint-e-btn: oklch(0.5 0.145 78);
+  --tint-f-btn: oklch(0.5 0.145 28);
+  --tint-g-btn: oklch(0.5 0.145 340);
+  --on-tint: #ffffff;
+  --toggle-track-light: linear-gradient(135deg, oklch(0.86 0.06 230), oklch(0.78 0.08 242));
+  --toggle-track-dark: linear-gradient(135deg, oklch(0.30 0.06 264), oklch(0.16 0.05 270));
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 :root[data-theme="dark"] {
-  --bg: oklch(0.158 0.007 68);
-  --surface: oklch(0.203 0.008 68);
-  --surface-2: oklch(0.245 0.009 70);
-  --surface-3: oklch(0.292 0.010 70);
-  --border: oklch(0.272 0.009 70);
-  --border-hi: oklch(0.395 0.012 72);
+  --bg: oklch(0.150 0.007 68);
+  --surface: oklch(0.198 0.009 68);
+  --surface-2: oklch(0.252 0.011 70);
+  --surface-3: oklch(0.310 0.013 70);
+  --border: oklch(0.285 0.011 70);
+  --border-hi: oklch(0.42 0.014 72);
   --text: oklch(0.962 0.005 80);
   --muted: oklch(0.715 0.010 76);
   --faint: oklch(0.552 0.010 74);
   --accent: oklch(0.8 0.152 80);
   --accent-hi: oklch(0.87 0.14 84);
+  --accent-deep: oklch(0.62 0.145 78);
   --accent-soft: oklch(0.295 0.055 78);
   --on-accent: oklch(0.185 0.035 68);
   --ok: oklch(0.805 0.125 162);
@@ -109,6 +121,14 @@
   --tint-e: oklch(0.8 0.125 78);
   --tint-f: oklch(0.8 0.125 28);
   --tint-g: oklch(0.8 0.125 340);
+  --tint-a-btn: var(--tint-a);
+  --tint-b-btn: var(--tint-b);
+  --tint-c-btn: var(--tint-c);
+  --tint-d-btn: var(--tint-d);
+  --tint-e-btn: var(--tint-e);
+  --tint-f-btn: var(--tint-f);
+  --tint-g-btn: var(--tint-g);
+  --on-tint: oklch(0.16 0.007 68);
 }
 
 @theme inline {
@@ -123,6 +143,8 @@
   --color-faint: var(--faint);
   --color-accent: var(--accent);
   --color-accent-hi: var(--accent-hi);
+  --color-accent-deep: var(--accent-deep);
+  --color-on-tint: var(--on-tint);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
   --color-ok: var(--ok);
