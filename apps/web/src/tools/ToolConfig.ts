@@ -1,5 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 import type { Engine } from "@/engines/types";
+import type { TintKey } from "./tint";
 
 export interface OptionsPanelProps<TOptions = Record<string, unknown>> {
   options: TOptions;
@@ -21,4 +22,5 @@ export interface ToolConfig {
   OptionsPanel: ComponentType<OptionsPanelProps>;
   engine: Engine;
   status: "live" | "preview";
+  tint: TintKey;
 }

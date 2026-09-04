@@ -20,6 +20,7 @@ function makeTool(overrides: Partial<ToolConfig> = {}): ToolConfig {
       isPreview: false,
     }),
     status: "live",
+    tint: "a",
     ...overrides,
   };
 }
