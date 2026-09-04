@@ -7,9 +7,23 @@ async function toFile(bytes: Uint8Array) {
   return new File([bytes as BlobPart], "in.pdf", { type: "application/pdf" });
 }
 
+// A fixture whose pages have distinct sizes, so reordering can be proven by
+// checking which size ends up at which output index (page count alone can't
+// distinguish a reorder from a no-op).
+async function makeDistinctSizedPdf(sizes: [number, number][]): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  for (const [w, h] of sizes) doc.addPage([w, h]);
+  return doc.save();
+}
+
 describe("organizeEngine", () => {
   it("reorders pages per the given order", async () => {
-    const file = await toFile(await makeTestPdf(3));
+    const sizes: [number, number][] = [
+      [100, 150],
+      [200, 250],
+      [300, 350],
+    ];
+    const file = await toFile(await makeDistinctSizedPdf(sizes));
     const result = await organizeEngine({
       files: [file],
       options: { order: [2, 0, 1], rotate: {}, remove: [] },
@@ -17,6 +31,9 @@ describe("organizeEngine", () => {
 
     const out = await PDFDocument.load(await result.files[0].blob.arrayBuffer());
     expect(out.getPageCount()).toBe(3);
+    expect(out.getPage(0).getSize()).toEqual({ width: 300, height: 350 });
+    expect(out.getPage(1).getSize()).toEqual({ width: 100, height: 150 });
+    expect(out.getPage(2).getSize()).toEqual({ width: 200, height: 250 });
   });
 
   it("removes pages listed in remove", async () => {
