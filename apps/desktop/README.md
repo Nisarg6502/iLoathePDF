@@ -82,6 +82,8 @@ npm run build:app      # freeze the engine, then build the installer
 
 ## Licence
 
-Personal project, not distributed. Note that the bundled **Ghostscript is
-AGPL**: distributing a build brings AGPL obligations with it. See the licensing
-note in [SPECS.md](SPECS.md) before sharing binaries.
+This app's own code is [MIT licensed](../../LICENSE), same as the rest of the
+repo. Note that the bundled **Ghostscript is AGPL**: distributing a compiled
+installer brings AGPL obligations with it regardless of this app's own
+license. See the licensing note in [SPECS.md](SPECS.md) before sharing
+binaries.
