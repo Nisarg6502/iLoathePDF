@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { PreviewBadge } from "./PreviewBadge";
 import type { EngineResult } from "@/engines/types";
 
@@ -9,13 +9,15 @@ export function ResultCard({
   result: EngineResult;
   onReset: () => void;
 }) {
-  const urls = useMemo(() => result.files.map((f) => URL.createObjectURL(f.blob)), [result.files]);
+  const [urls, setUrls] = useState<string[]>([]);
 
   useEffect(() => {
+    const created = result.files.map((f) => URL.createObjectURL(f.blob));
+    setUrls(created);
     return () => {
-      urls.forEach((url) => URL.revokeObjectURL(url));
+      created.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [urls]);
+  }, [result.files]);
 
   return (
     <div className="flex min-h-[400px] flex-col justify-center rounded-2xl border border-border bg-surface p-8">
