@@ -28,7 +28,7 @@ export function ToolsIndex() {
               <Link
                 key={tool.slug}
                 to={`/tools/${tool.slug}`}
-                className="rounded-[14px] border border-border bg-surface p-5 hover:border-accent hover:shadow-[var(--shadow-card)]"
+                className="rounded-[14px] border border-border bg-surface p-5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:border-accent hover:shadow-[var(--shadow-card)]"
               >
                 <div className="flex items-start justify-between">
                   <tool.Icon className="size-5.5" />

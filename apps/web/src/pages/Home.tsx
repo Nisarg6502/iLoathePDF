@@ -25,7 +25,7 @@ export function Home() {
           <div className="mt-8 flex gap-2.5">
             <Link
               to="/tools/compress"
-              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] hover:bg-accent-hi"
+              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97]"
             >
               Open the tools
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -34,7 +34,7 @@ export function Home() {
             </Link>
             <Link
               to="/download"
-              className="inline-flex h-11 items-center rounded-[11px] border border-border-hi bg-surface px-4.5 text-[14.5px] font-medium text-text hover:bg-surface-2"
+              className="inline-flex h-11 items-center rounded-[11px] border border-border-hi bg-surface px-4.5 text-[14.5px] font-medium text-text transition-transform duration-100 hover:bg-surface-2 active:scale-[0.97]"
             >
               Get the desktop app
             </Link>
@@ -110,7 +110,7 @@ export function Home() {
               <Link
                 key={t.to}
                 to={t.to}
-                className="rounded-[13px] border border-border bg-bg p-4.5 hover:border-border-hi hover:shadow-[var(--shadow-card)]"
+                className="rounded-[13px] border border-border bg-bg p-4.5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:border-border-hi hover:shadow-[var(--shadow-card)]"
               >
                 <div className="mt-2.5 text-sm font-semibold">{t.title}</div>
                 <div className="mt-1 text-[12.5px] leading-snug text-muted">{t.desc}</div>

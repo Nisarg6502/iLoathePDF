@@ -30,7 +30,7 @@ export function SiteHeader() {
               to={link.to}
               end={link.end}
               className={({ isActive }) =>
-                `rounded-lg px-2.5 py-1.5 text-[13.5px] hover:bg-surface-2 ${isActive ? "text-text" : "text-muted"}`
+                `rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors duration-150 hover:bg-surface-2 ${isActive ? "text-text" : "text-muted"}`
               }
             >
               {link.label}
@@ -43,7 +43,7 @@ export function SiteHeader() {
         <ThemeToggle />
         <Link
           to="/download"
-          className="flex h-8 flex-none items-center gap-1.5 rounded-[9px] border border-border-hi bg-surface-2 px-3.5 text-[13px] font-semibold text-text hover:bg-surface-3"
+          className="flex h-8 flex-none items-center gap-1.5 rounded-[9px] border border-border-hi bg-surface-2 px-3.5 text-[13px] font-semibold text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96]"
         >
           Desktop app
         </Link>

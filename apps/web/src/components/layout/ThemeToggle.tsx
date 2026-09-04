@@ -14,9 +14,18 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       title="Toggle theme"
-      className="grid size-[30px] flex-none place-items-center rounded-lg border border-border text-muted hover:border-border-hi hover:text-text"
+      className="grid size-[30px] flex-none place-items-center overflow-hidden rounded-lg border border-border text-muted transition-colors duration-150 hover:border-border-hi hover:text-text active:scale-[0.94]"
     >
-      <svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.4">
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 18 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        className="transition-transform duration-200 ease-[var(--ease-out-strong)]"
+        style={{ transform: theme === "dark" ? "rotate(-90deg)" : "rotate(0deg)" }}
+      >
         <path d="M9 2.2a6.8 6.8 0 0 0 0 13.6 6.8 6.8 0 0 1 0-13.6z" fill="currentColor" stroke="none" opacity="0.75" />
         <circle cx="9" cy="9" r="6.8" />
       </svg>
