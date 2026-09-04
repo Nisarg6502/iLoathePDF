@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useRequestCount } from "@/components/layout/RequestStatusContext";
+import { HeroDemo } from "@/components/HeroDemo";
 
 export function Home() {
   const reqCount = useRequestCount();
@@ -51,47 +52,7 @@ export function Home() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]">
-          <div className="flex h-[38px] items-center gap-2 border-b border-border bg-surface-2 px-3.5">
-            <span className="flex gap-1.5">
-              <span className="size-2.5 rounded-full bg-border-hi" />
-              <span className="size-2.5 rounded-full bg-border-hi" />
-              <span className="size-2.5 rounded-full bg-border-hi" />
-            </span>
-            <span className="flex-1" />
-            <span className="font-mono text-[10.5px] text-faint">iloathepdf.app/compress</span>
-          </div>
-          <div className="p-5">
-            <div className="flex items-center gap-2.5">
-              <span className="grid size-6.5 place-items-center rounded-lg bg-surface-2">
-                <svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="var(--tint-d)" strokeWidth="1.5">
-                  <rect x="2.5" y="2.5" width="13" height="13" rx="1.2" />
-                  <path d="M5.5 5.5L8 8M8 8V5.6M8 8H5.6M12.5 12.5L10 10M10 10v2.4M10 10h2.4" />
-                </svg>
-              </span>
-              <span className="text-[13.5px] font-semibold">Compress PDF</span>
-              <span className="flex-1" />
-              <span className="font-mono text-[10.5px] text-ok">DONE</span>
-            </div>
-            <div className="mt-4.5 rounded-xl border border-border bg-surface-2 p-5">
-              <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">RESULT</div>
-              <div className="mt-3 flex items-baseline gap-3 font-mono">
-                <span className="text-[22px] text-faint line-through">3.14 MB</span>
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="var(--faint)" strokeWidth="1.5">
-                  <path d="M3 8h10M9 4l4 4-4 4" />
-                </svg>
-                <span className="text-[38px] font-bold tracking-[-0.03em]">812 KB</span>
-              </div>
-              <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-surface-3">
-                <span className="w-1/4 bg-ok" />
-              </div>
-              <div className="mt-2 flex justify-between font-mono text-[11px] text-muted">
-                <span>−75% smaller</span>
-                <span>quality: balanced</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HeroDemo />
       </div>
 
       <div className="border-t border-border bg-surface">
