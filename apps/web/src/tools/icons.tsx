@@ -61,6 +61,16 @@ export function ImagesToPdfIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function SignIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-h)" strokeWidth="1.5" {...props}>
+      <rect x="2" y="2" width="14" height="14" rx="1.5" />
+      <path d="M4.2 11.5c1-2.2 1.8-3.2 2.4-3.2s.6 1.4 1.2 1.4 1.4-2 2-2 .5 1.7 1.1 1.7 1-.9 2-1" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4.2 13.6h9.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function ConvertImagesIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-g)" strokeWidth="1.5" {...props}>

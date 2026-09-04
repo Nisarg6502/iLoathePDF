@@ -1,12 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
-import { useRequestCount } from "@/components/layout/RequestStatusContext";
 import { HeroDemo } from "@/components/HeroDemo";
 import { TOOLS } from "@/tools/registry";
 import { tintColor, tintWash } from "@/tools/tint";
 
 export function Home() {
-  const reqCount = useRequestCount();
   const reduce = useReducedMotion();
 
   return (
@@ -48,10 +46,6 @@ export function Home() {
             <span className="flex items-center gap-1.5 text-xs text-ok">
               <span className="size-1.5 rounded-full bg-ok" />
               Runs locally, no uploads
-            </span>
-            <span className="h-3.5 w-px bg-border" />
-            <span className="font-mono text-[11.5px] text-muted">
-              {reqCount} network requests since load · 0 bytes sent
             </span>
           </div>
         </div>
@@ -125,27 +119,16 @@ export function Home() {
             </motion.div>
           ))}
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-3.5 md:grid-cols-[1fr_300px]">
-          <div className="flex items-center gap-3 rounded-[13px] border border-border bg-surface px-5 py-4.5">
-            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" strokeWidth="1.5" className="flex-none">
-              <circle cx="8" cy="8" r="6.3" />
-              <path d="M8 5.2v.2M8 7.4v3.4" />
-            </svg>
-            <span className="text-[13.5px] leading-relaxed text-muted">
-              Verify it yourself: open DevTools → Network, run any tool, and
-              watch the request list stay exactly where it is.{" "}
-              <Link to="/privacy" className="text-accent">More on privacy</Link>
-            </span>
-          </div>
-          <div className="rounded-[13px] border border-border bg-surface px-5 py-4.5 font-mono">
-            <div className="text-[10px] font-bold tracking-[0.13em] text-faint">NETWORK PANEL</div>
-            <div className="mt-3 flex flex-col gap-1.5 text-xs">
-              <div className="flex justify-between"><span className="text-muted">requests</span><span>{reqCount}</span></div>
-              <div className="flex justify-between"><span className="text-muted">bytes sent</span><span>0</span></div>
-              <div className="flex justify-between"><span className="text-muted">cookies</span><span>0</span></div>
-              <div className="flex justify-between border-t border-border pt-1.5"><span className="text-muted">engine</span><span className="text-ok">local</span></div>
-            </div>
-          </div>
+        <div className="mt-4 flex items-center gap-3 rounded-[13px] border border-border bg-surface px-5 py-4.5">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" strokeWidth="1.5" className="flex-none">
+            <circle cx="8" cy="8" r="6.3" />
+            <path d="M8 5.2v.2M8 7.4v3.4" />
+          </svg>
+          <span className="text-[13.5px] leading-relaxed text-muted">
+            Verify it yourself: open DevTools → Network, run any tool, and
+            watch the request list stay exactly where it is.{" "}
+            <Link to="/privacy" className="text-accent">More on privacy</Link>
+          </span>
         </div>
       </div>
     </div>

@@ -23,4 +23,11 @@ export interface ToolConfig {
   engine: Engine;
   status: "live" | "preview";
   tint: TintKey;
+  /**
+   * When set, ToolDetail renders this instead of the generic ToolPage
+   * (drop zone -> options sidebar -> run). Used by tools whose main area is
+   * a bespoke canvas rather than a file list, e.g. Sign & Fill's page
+   * preview with draggable elements.
+   */
+  Workspace?: ComponentType<{ tool: ToolConfig }>;
 }
