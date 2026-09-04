@@ -32,7 +32,7 @@ export const convertImagesEngine: Engine = async ({ files, options }) => {
   if (files.length === 0) throw new Error("Add at least one image.");
 
   const to = (options.to as string) ?? "png";
-  if (!(to in MIME_BY_FORMAT)) throw new Error(`Unsupported target format: ${to}`);
+  if (!Object.hasOwn(MIME_BY_FORMAT, to)) throw new Error(`Unsupported target format: ${to}`);
 
   const heicFiles = files.filter(isHeic);
   const liveFiles = files.filter((f) => !isHeic(f));

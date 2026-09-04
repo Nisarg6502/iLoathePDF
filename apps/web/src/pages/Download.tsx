@@ -24,7 +24,7 @@ export function Download() {
           </p>
           <p className="mt-6 text-[13.5px] leading-relaxed text-muted">
             Builds are published from{" "}
-            <a href="https://github.com/Nisarg6502/IHatePDF/releases" className="text-accent">
+            <a href="https://github.com/Nisarg6502/iLoathePDF/releases" className="text-accent">
               the project's GitHub Releases
             </a>{" "}
             once available.
