@@ -58,6 +58,51 @@ if (typeof URL.revokeObjectURL === "undefined") {
   URL.revokeObjectURL = () => {};
 }
 
+// jsdom does not implement createImageBitmap (used by convertImages.ts to
+// decode uploaded images onto a canvas). The `canvas` package is already a
+// devDependency (jsdom delegates HTMLCanvasElement to it), so reuse its
+// image loader to produce an object node-canvas's context.drawImage can
+// draw directly, matching ImageBitmap's width/height shape closely enough
+// for tests.
+if (typeof globalThis.createImageBitmap !== "function") {
+  const { loadImage } = await import("canvas");
+  (globalThis as unknown as { createImageBitmap: (blob: Blob) => Promise<unknown> }).createImageBitmap = async (
+    blob: Blob,
+  ) => {
+    const buffer = Buffer.from(await blob.arrayBuffer());
+    return loadImage(buffer);
+  };
+}
+
+// The `canvas` package backing jsdom's HTMLCanvasElement in this Node test
+// environment is not built with libwebp, so canvas.toBlob(..., "image/webp")
+// silently falls back to encoding PNG bytes while still needing to report
+// the blob's `type` correctly for engines/tests that branch on it. Force the
+// reported type to match what was requested — real browsers (where this app
+// actually runs) encode webp natively via toBlob, so this only affects tests.
+if (typeof HTMLCanvasElement !== "undefined" && HTMLCanvasElement.prototype.toBlob) {
+  const originalToBlob = HTMLCanvasElement.prototype.toBlob;
+  HTMLCanvasElement.prototype.toBlob = function (
+    this: HTMLCanvasElement,
+    callback: (blob: Blob | null) => void,
+    type?: string,
+    quality?: number,
+  ) {
+    originalToBlob.call(
+      this,
+      (blob) => {
+        if (blob && type && blob.type !== type) {
+          callback(new Blob([blob], { type }));
+        } else {
+          callback(blob);
+        }
+      },
+      type,
+      quality,
+    );
+  };
+}
+
 // jsdom's Blob/File implementation does not implement arrayBuffer() (used
 // by engines to read uploaded files and by tests to read engine output).
 // Polyfill it via FileReader, which jsdom does implement fully.
