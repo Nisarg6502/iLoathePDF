@@ -15,12 +15,13 @@ import {
   Minimize2,
   Replace,
   Scissors,
+  Signature,
 } from "lucide-react";
 import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -113,6 +114,22 @@ export const TOOLS: Tool[] = [
     ordered: false,
     action: "Save PDF",
     defaults: { outputName: "organized" },
+  },
+  {
+    id: "sign",
+    path: "/t/sign",
+    title: "Sign & Fill",
+    description: "Draw or upload a signature, then add text, dates and initials on the page.",
+    icon: Signature,
+    group: "pdf",
+    tint: "h",
+    op: "pdf.sign",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Export signed PDF",
+    defaults: { outputName: "signed" },
   },
   {
     id: "compress",

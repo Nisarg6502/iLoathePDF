@@ -13,6 +13,7 @@ export type OpName =
   | "pdf.split"
   | "pdf.organize"
   | "pdf.compress"
+  | "pdf.sign"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -91,6 +92,28 @@ export interface PdfOrganizeParams {
 }
 export interface PdfOrganizeResult { output: string; bytes: number; pages: number }
 
+export type SignElementKind = "signature" | "initials" | "text" | "date";
+export interface SignElementParams {
+  page: number;
+  kind: SignElementKind;
+  x_pct: number;
+  y_pct: number;
+  w_pct: number;
+  h_pct: number;
+  /** base64 PNG, no "data:" prefix -- required for signature/initials. */
+  image_b64?: string;
+  /** required for text/date. */
+  text?: string;
+  font_size?: number;
+  color?: string;
+}
+export interface PdfSignParams {
+  input: string;
+  output: string;
+  elements: SignElementParams[];
+}
+export interface PdfSignResult { output: string; bytes: number; pages: number; elements: number }
+
 export type CompressLevel = "lossless" | "balanced" | "strong";
 export interface PdfCompressParams { input: string; output: string; level: CompressLevel }
 export interface PdfCompressResult {
@@ -143,6 +166,7 @@ export interface OpMap {
   "pdf.split": [PdfSplitParams, PdfSplitResult];
   "pdf.organize": [PdfOrganizeParams, PdfOrganizeResult];
   "pdf.compress": [PdfCompressParams, PdfCompressResult];
+  "pdf.sign": [PdfSignParams, PdfSignResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];
@@ -253,6 +277,10 @@ async function mockJob(
       return { pages: 6, encrypted: false, bytes: 234567, page_sizes: Array(6).fill([595, 842]) };
     case "pdf.compress":
       return { output: out, bytes: 61234, original_bytes: 234567, ratio: 0.739, engine: "ghostscript" };
+    case "pdf.sign": {
+      const elements = (p.elements as unknown[] | undefined)?.length ?? 0;
+      return { output: out, bytes: 128432, pages: 6, elements };
+    }
     case "pdf.split":
     case "img.convert":
     case "pdf.to_img": {
