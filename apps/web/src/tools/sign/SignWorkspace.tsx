@@ -205,7 +205,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
               }}
               onPointerDown={() => setActivePage(page.index)}
               onFocus={() => setActivePage(page.index)}
-              className={`relative mx-auto w-full max-w-[640px] overflow-hidden rounded-lg border bg-white shadow-sm ${
+              className={`relative mx-auto w-full max-w-[640px] shrink-0 overflow-hidden rounded-lg border bg-white shadow-sm ${
                 activePage === page.index ? "border-accent" : "border-border"
               }`}
               onClick={(e) => {

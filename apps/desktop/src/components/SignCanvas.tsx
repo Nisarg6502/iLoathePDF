@@ -130,7 +130,7 @@ export function SignCanvas({
               pageRefs.current[pageIndex] = node;
             }}
             onPointerDown={() => onActivePageChange(pageIndex)}
-            className={`relative overflow-hidden rounded-card border bg-white shadow-sm ${
+            className={`relative shrink-0 overflow-hidden rounded-card border bg-white shadow-sm ${
               activePageIndex === pageIndex ? "border-accent" : "border-border"
             }`}
             onClick={(e) => {
