@@ -21,6 +21,8 @@ import { JobOutcome } from "@/components/ResultCard";
 import { useFilePicker, type PickedFile } from "@/components/FileDropZone";
 import type { PdfPageItem } from "@/components/PageThumbnailGrid";
 import { Button } from "@/components/ui/button";
+import { SignOptionsPanel } from "@/components/SignOptionsPanel";
+import { SignatureCapture } from "@/components/SignatureCapture";
 import { JobError, isTauri, type Progress } from "@/lib/jobs";
 import { execute, type JobResult } from "@/lib/run";
 import { takePendingFiles } from "@/lib/handoff";
@@ -28,10 +30,23 @@ import { useOutputDir } from "@/lib/settings";
 import { panelVariants } from "@/lib/motion";
 import type { OptionValues, Tool } from "@/lib/tools";
 import { cn, formatBytes } from "@/lib/utils";
+import type { SavedSignKind } from "@/lib/signatureStore";
+import type { SignElement } from "@/lib/signTypes";
 
 const OrganizeCanvas = lazy(() =>
   import("@/components/OrganizeCanvas").then((m) => ({ default: m.OrganizeCanvas })),
 );
+const SignCanvas = lazy(() =>
+  import("@/components/SignCanvas").then((m) => ({ default: m.SignCanvas })),
+);
+
+function newSignId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function todayFormatted(): string {
+  return new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
 
 type RunState =
   | { phase: "idle" }
@@ -46,6 +61,11 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
   const [state, setState] = useState<RunState>({ phase: "idle" });
   const [startedAt, setStartedAt] = useState(0);
   const abort = useRef<AbortController | null>(null);
+
+  const [signElements, setSignElements] = useState<SignElement[]>([]);
+  const [signSelectedId, setSignSelectedId] = useState<string | null>(null);
+  const [signActivePage, setSignActivePage] = useState(0);
+  const [signCaptureKind, setSignCaptureKind] = useState<SavedSignKind | null>(null);
 
   const { browse, dragging, rejected, picking } = useFilePicker({
     accept: tool.accepts,
@@ -66,14 +86,21 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     setFiles(tool.multiple ? handed : handed.slice(0, 1));
     setValues(tool.defaults);
     setPages([]);
+    setSignElements([]);
+    setSignSelectedId(null);
+    setSignActivePage(0);
+    setSignCaptureKind(null);
     setState({ phase: "idle" });
   }, [tool]);
 
   const blocker = useMemo(() => {
     if (files.length === 0) return `Add ${tool.acceptsLabel} to continue.`;
     if (tool.id === "merge" && files.length < 2) return "Merging needs at least two PDFs.";
+    if (tool.id === "sign" && signElements.length === 0) {
+      return "Add a signature, text, date or initials to continue.";
+    }
     return null;
-  }, [files.length, tool]);
+  }, [files.length, tool, signElements.length]);
 
   const running = state.phase === "running";
 
@@ -87,7 +114,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     const onProgress = (p: Progress) => setState({ phase: "running", pct: p.pct, note: p.note });
 
     try {
-      const result = await execute(tool, files, values, pages, onProgress, controller.signal);
+      const result = await execute(tool, files, values, pages, onProgress, controller.signal, signElements);
       setState({ phase: "done", result });
     } catch (err) {
       setState({
@@ -97,7 +124,55 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     } finally {
       abort.current = null;
     }
-  }, [blocker, running, tool, files, values, pages]);
+  }, [blocker, running, tool, files, values, pages, signElements]);
+
+  function addImageSignElement(kind: SavedSignKind, imageDataUrl: string) {
+    const img = new Image();
+    img.onload = () => {
+      const aspect = img.naturalWidth / img.naturalHeight || 2.4;
+      const wPct = kind === "signature" ? 0.28 : 0.12;
+      const hPct = wPct / aspect;
+      const el: SignElement = {
+        id: newSignId(),
+        kind,
+        pageIndex: signActivePage,
+        xPct: 0.35,
+        yPct: 0.45,
+        wPct,
+        hPct,
+        imageDataUrl,
+      };
+      setSignElements((prev) => [...prev, el]);
+      setSignSelectedId(el.id);
+    };
+    img.src = imageDataUrl;
+  }
+
+  function addTextSignElement(kind: "text" | "date") {
+    const el: SignElement = {
+      id: newSignId(),
+      kind,
+      pageIndex: signActivePage,
+      xPct: 0.35,
+      yPct: 0.45,
+      wPct: 0.25,
+      hPct: 0.045,
+      text: kind === "date" ? todayFormatted() : "Text",
+      fontSize: 16,
+      color: "#000000",
+    };
+    setSignElements((prev) => [...prev, el]);
+    setSignSelectedId(el.id);
+  }
+
+  function updateSignElement(id: string, patch: Partial<SignElement>) {
+    setSignElements((prev) => prev.map((e) => (e.id === id ? ({ ...e, ...patch } as SignElement) : e)));
+  }
+
+  function deleteSignElement(id: string) {
+    setSignElements((prev) => prev.filter((e) => e.id !== id));
+    setSignSelectedId((cur) => (cur === id ? null : cur));
+  }
 
   // Ctrl+Enter runs, matching the hint on the button.
   useEffect(() => {
@@ -282,6 +357,34 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                   <OrganizeCanvas file={files[0]} pages={pages} onChange={setPages} />
                 </Suspense>
               </motion.div>
+            ) : tool.id === "sign" ? (
+              <motion.div
+                key="sign-canvas"
+                variants={panelVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="min-h-0 flex-1 overflow-auto p-4"
+              >
+                <Suspense
+                  fallback={
+                    <div className="grid h-full place-items-center text-[14px] text-muted">
+                      Loading the page canvas…
+                    </div>
+                  }
+                >
+                  <SignCanvas
+                    file={files[0]}
+                    elements={signElements}
+                    activePageIndex={signActivePage}
+                    onActivePageChange={setSignActivePage}
+                    selectedId={signSelectedId}
+                    onSelect={setSignSelectedId}
+                    onUpdate={updateSignElement}
+                    onDelete={deleteSignElement}
+                  />
+                </Suspense>
+              </motion.div>
             ) : (
               <motion.div
                 key="list"
@@ -303,7 +406,20 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
             <div className="mb-2.5 font-mono text-[12px] font-bold tracking-[0.13em] text-faint">
               OPTIONS
             </div>
-            <ToolOptions tool={tool} values={values} onChange={setValues} />
+            {tool.id === "sign" ? (
+              <SignOptionsPanel
+                elements={signElements}
+                selectedId={signSelectedId}
+                activePageIndex={signActivePage}
+                onAddCapture={setSignCaptureKind}
+                onAddText={addTextSignElement}
+                onSelect={setSignSelectedId}
+                onUpdate={updateSignElement}
+                onDelete={deleteSignElement}
+              />
+            ) : (
+              <ToolOptions tool={tool} values={values} onChange={setValues} />
+            )}
           </div>
 
           <RunFooter
@@ -315,6 +431,17 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
           />
         </aside>
       </div>
+
+      {signCaptureKind && (
+        <SignatureCapture
+          kind={signCaptureKind}
+          onClose={() => setSignCaptureKind(null)}
+          onPick={(dataUrl) => {
+            addImageSignElement(signCaptureKind, dataUrl);
+            setSignCaptureKind(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -14,9 +14,12 @@ import {
 import { resolveOutputDir } from "./settings";
 import { stripExt } from "./utils";
 import type { OptionValues, Tool } from "./tools";
+import type { SignElementParams } from "./jobs";
 import type { PickedFile } from "@/components/FileDropZone";
 import type { PdfPageItem } from "@/components/PageThumbnailGrid";
 import type { CompressionSummary } from "@/components/ResultCard";
+import type { SignElement } from "./signTypes";
+import { isImageSignElement } from "./signTypes";
 
 export interface JobResult {
   outputs: { path: string; bytes: number }[];
@@ -59,6 +62,7 @@ export async function execute(
   pages: PdfPageItem[],
   onProgress: (p: Progress) => void,
   signal: AbortSignal,
+  signElements: SignElement[] = [],
 ): Promise<JobResult> {
   const first = files[0];
   const dir = outputDirFor(first.path);
@@ -153,6 +157,32 @@ export async function execute(
       };
     }
 
+    case "pdf.sign": {
+      if (signElements.length === 0) {
+        throw new JobError("BAD_PARAMS", "Add at least one signature, text, date or initials before exporting.");
+      }
+      const elements: SignElementParams[] = signElements.map((el) => ({
+        page: el.pageIndex,
+        kind: el.kind,
+        x_pct: el.xPct,
+        y_pct: el.yPct,
+        w_pct: el.wPct,
+        h_pct: el.hPct,
+        ...(isImageSignElement(el)
+          ? { image_b64: dataUrlToBase64(el.imageDataUrl) }
+          : { text: el.text, font_size: el.fontSize, color: el.color }),
+      }));
+      const r = await runJob(
+        "pdf.sign",
+        { input: first.path, output: join(`${base}-signed.pdf`), elements },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.elements} element${r.elements === 1 ? "" : "s"} added across ${r.pages} page${r.pages === 1 ? "" : "s"}.`,
+      };
+    }
+
     case "pdf.to_img": {
       const pages = str("pages").trim();
       const r = await runJob(
@@ -213,4 +243,8 @@ export async function execute(
     default:
       throw new JobError("BAD_PARAMS", `No runner wired for ${op}`);
   }
+}
+
+function dataUrlToBase64(dataUrl: string): string {
+  return dataUrl.slice(dataUrl.indexOf(",") + 1);
 }

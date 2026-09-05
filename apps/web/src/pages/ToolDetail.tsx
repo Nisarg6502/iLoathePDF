@@ -33,7 +33,7 @@ export function ToolDetail() {
           <p className="mt-1 text-sm text-muted">{tool.description}</p>
         </div>
       </div>
-      <ToolPage tool={tool} />
+      {tool.Workspace ? <tool.Workspace tool={tool} /> : <ToolPage tool={tool} />}
     </div>
   );
 }

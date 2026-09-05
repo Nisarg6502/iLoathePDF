@@ -126,6 +126,29 @@ params:
 ```
 result: `{"outputs": [{"path": "...", "bytes": 1024}], "count": 3}`
 
+### `pdf.sign`
+params:
+```json
+{"input": "a.pdf", "output": "out.pdf",
+ "elements": [
+   {"page": 0, "kind": "signature", "x_pct": 0.1, "y_pct": 0.8, "w_pct": 0.25, "h_pct": 0.08,
+    "image_b64": "iVBORw0KG..."},
+   {"page": 0, "kind": "date", "x_pct": 0.5, "y_pct": 0.05, "w_pct": 0.2, "h_pct": 0.04,
+    "text": "Sep 5, 2026", "font_size": 14, "color": "#1d4ed8"}
+ ]}
+```
+`kind` is one of `signature`, `initials`, `text`, `date`. `page` is a 0-based
+page index. Placement (`x_pct`/`y_pct`/`w_pct`/`h_pct`) is a fraction (0..1)
+of that page's own box, top-left origin: `x_pct`/`y_pct` locate the box's
+top-left corner, `w_pct`/`h_pct` its size. `signature`/`initials` elements
+carry `image_b64` (a base64-encoded PNG, no `data:` prefix) drawn to fill the
+box; `text`/`date` elements carry `text`, an absolute `font_size` in points
+(defaults to 16, does not scale with page size) and a `color` hex string
+(defaults to `#000000`), drawn left-aligned and vertically centered in the
+box. Elements are grouped per page and merged on top of that page's existing
+content — nothing about the source page is otherwise touched.
+result: `{"output": "...", "bytes": 4096, "pages": 2, "elements": 3}`
+
 ## Page range spec
 
 Used by `pages` and `ranges`. 1-based, inclusive. Grammar: comma-separated items,

@@ -60,7 +60,7 @@ export function Download() {
         <div>
           <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-accent">WINDOWS</span>
           <h1 className="mt-4 text-[40px] font-semibold leading-[1.05] tracking-[-0.035em]">
-            The same seven tools, with no browser in the way.
+            The same eight tools, with no browser in the way.
           </h1>
           <p className="mt-4 max-w-[48ch] text-base leading-relaxed text-muted">
             Bigger files, whole folders at once, output saved where you want

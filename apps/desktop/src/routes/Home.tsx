@@ -41,7 +41,7 @@ export default function Home() {
         <div className="mb-3.5 flex items-center gap-2.5">
           <span className="size-1.5 rounded-[2px] bg-accent" />
           <span className="font-mono text-[11px] font-bold tracking-[0.16em] text-muted">
-            SEVEN TOOLS · ZERO UPLOADS
+            EIGHT TOOLS · ZERO UPLOADS
           </span>
         </div>
 
