@@ -14,7 +14,7 @@ export function Home() {
           <div className="mb-4 flex items-center gap-2">
             <span className="size-1.5 rounded-sm bg-accent" />
             <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-muted">
-              SEVEN TOOLS · ZERO UPLOADS
+              EIGHT TOOLS · ZERO UPLOADS
             </span>
           </div>
           <h1 className="m-0 text-[clamp(38px,4.2vw,58px)] font-semibold leading-[1.02] tracking-[-0.035em] text-balance">
@@ -56,11 +56,11 @@ export function Home() {
       <div className="border-t border-border bg-surface">
         <div className="mx-auto max-w-6xl px-8 py-14">
           <div className="mb-6 flex items-baseline justify-between">
-            <h2 className="m-0 text-[26px] font-semibold tracking-[-0.025em]">Seven tools, one page each</h2>
+            <h2 className="m-0 text-[26px] font-semibold tracking-[-0.025em]">Eight tools, one page each</h2>
             <Link to="/tools" className="text-[13.5px] text-accent">See all →</Link>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {["compress", "merge", "split", "organize"]
+            {["merge", "split", "organize", "sign"]
               .map((slug) => TOOLS.find((t) => t.slug === slug))
               .filter((t): t is (typeof TOOLS)[number] => Boolean(t))
               .map((tool, i) => (

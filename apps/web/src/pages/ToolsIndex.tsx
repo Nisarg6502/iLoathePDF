@@ -12,7 +12,7 @@ export function ToolsIndex() {
       <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">All tools</h1>
       <p className="mt-2.5 max-w-[58ch] text-[15.5px] text-muted">
         Each one runs locally. Pick a tool, drop a file, get a file — the
-        same seven that ship in the desktop app.
+        same eight that ship in the desktop app.
       </p>
 
       {[
