@@ -1,9 +1,6 @@
 import { Link } from "react-router-dom";
-import { useRequestCount } from "./RequestStatusContext";
 
 export function SiteFooter() {
-  const reqCount = useRequestCount();
-
   return (
     <div className="border-t border-border bg-surface">
       <div className="mx-auto flex max-w-6xl flex-wrap items-start gap-14 px-8 py-9">
@@ -28,12 +25,6 @@ export function SiteFooter() {
           <span className="font-mono text-[10px] font-bold tracking-[0.13em] text-faint">ABOUT</span>
           <Link to="/how-it-works" className="text-[12.5px] text-muted hover:text-text">How it works</Link>
           <Link to="/privacy" className="text-[12.5px] text-muted hover:text-text">Privacy</Link>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className="font-mono text-[10px] font-bold tracking-[0.13em] text-faint">STATUS</span>
-          <span className="font-mono text-[11.5px] text-ok">local · no uploads</span>
-          <span className="font-mono text-[11.5px] text-faint">{reqCount} requests this session</span>
         </div>
       </div>
     </div>
