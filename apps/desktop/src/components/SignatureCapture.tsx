@@ -82,7 +82,7 @@ export function SignatureCapture({
     reader.readAsDataURL(file);
   }
 
-  function useSaved(mark: SavedSignMark) {
+  function pickSaved(mark: SavedSignMark) {
     onPick(mark.imageDataUrl);
   }
 
@@ -126,7 +126,7 @@ export function SignatureCapture({
             <div className="mt-2 flex flex-wrap gap-2">
               {saved.map((m) => (
                 <div key={m.id} className="group relative rounded-lg border border-border bg-white p-1.5">
-                  <button type="button" onClick={() => useSaved(m)} className="block">
+                  <button type="button" onClick={() => pickSaved(m)} className="block">
                     <img src={m.imageDataUrl} alt="Saved mark" className="h-10 w-auto object-contain" />
                   </button>
                   <button
