@@ -70,7 +70,11 @@ if (typeof globalThis.createImageBitmap !== "function") {
     blob: Blob,
   ) => {
     const buffer = Buffer.from(await blob.arrayBuffer());
-    return loadImage(buffer);
+    const image = await loadImage(buffer);
+    // Real ImageBitmap has a close() method to release decoded pixel data;
+    // node-canvas's loadImage() result doesn't, so stub it for code under
+    // test that calls .close() to avoid leaking decoded bitmaps.
+    return Object.assign(image, { close: () => {} });
   };
 }
 

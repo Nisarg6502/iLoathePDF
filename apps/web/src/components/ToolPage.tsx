@@ -5,6 +5,8 @@ import type { EngineResult } from "@/engines/types";
 import { tintButtonBg } from "@/tools/tint";
 import { FileDropZone } from "./FileDropZone";
 import { ResultCard } from "./ResultCard";
+import { ImageInputList } from "./ImageInputList";
+import { CameraCapture } from "./CameraCapture";
 
 type Step = "empty" | "ready" | "running" | "done" | "error";
 
@@ -24,6 +26,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
   const [result, setResult] = useState<EngineResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dismissedSizeWarning, setDismissedSizeWarning] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
 
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
   const showSizeWarning = totalBytes > LARGE_FILE_WARNING_BYTES && !dismissedSizeWarning;
@@ -63,6 +66,26 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             {step === "empty" && (
               <motion.div key="empty" {...stepFade}>
                 <FileDropZone accept={tool.accept} multiple={tool.multiple} onFiles={handleFiles} />
+                {tool.category === "image" && (
+                  <>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="h-px flex-1 bg-border" />
+                      <span className="text-[12px] text-faint">or</span>
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowCamera(true)}
+                      className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-[11px] border border-border bg-surface text-sm font-medium text-text transition-transform duration-100 hover:bg-surface-2 active:scale-[0.97]"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h1l.8-1.2A1 1 0 0 1 6.6 2.4h2.8a1 1 0 0 1 .8.4L11 4h1a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5v-6z" />
+                        <circle cx="8" cy="8.2" r="2.4" />
+                      </svg>
+                      Scan with camera
+                    </button>
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -79,24 +102,28 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
                     Remove
                   </button>
                 </div>
-                <ul className="flex flex-col gap-2">
-                  {files.map((f) => (
-                    <li key={f.name} className="flex items-center gap-3.5 rounded-xl border border-border bg-surface-2 p-3.5">
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium">{f.name}</div>
-                        <div className="mt-0.5 font-mono text-[11.5px] text-muted">
-                          {(f.size / 1024).toFixed(0)} KB
+                {tool.category === "image" ? (
+                  <ImageInputList files={files} options={options} onChange={setOptions} disabled={step === "running"} />
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {files.map((f) => (
+                      <li key={f.name} className="flex items-center gap-3.5 rounded-xl border border-border bg-surface-2 p-3.5">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium">{f.name}</div>
+                          <div className="mt-0.5 font-mono text-[11.5px] text-muted">
+                            {(f.size / 1024).toFixed(0)} KB
+                          </div>
                         </div>
-                      </div>
-                      {step === "running" && (
-                        <svg className="spinner size-4 flex-none text-accent" viewBox="0 0 20 20" fill="none">
-                          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
-                          <path d="M18 10a8 8 0 0 0-8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                        {step === "running" && (
+                          <svg className="spinner size-4 flex-none text-accent" viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
+                            <path d="M18 10a8 8 0 0 0-8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </motion.div>
             )}
 
@@ -168,6 +195,16 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
           </div>
         </div>
       </div>
+
+      {showCamera && (
+        <CameraCapture
+          onDone={(capturedFiles) => {
+            setShowCamera(false);
+            if (capturedFiles.length > 0) handleFiles(capturedFiles);
+          }}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
     </div>
   );
 }

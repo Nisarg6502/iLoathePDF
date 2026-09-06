@@ -58,4 +58,22 @@ describe("ToolPage", () => {
 
     expect(await screen.findByText(/boom/i)).toBeInTheDocument();
   });
+
+  it("offers camera scan and an image edit list for image-category tools", async () => {
+    const tool = makeTool({ category: "image", accept: [".png"], multiple: true });
+    render(<ToolPage tool={tool} />);
+
+    expect(screen.getByRole("button", { name: /scan with camera/i })).toBeInTheDocument();
+
+    const file = new File(["content"], "photo.png", { type: "image/png" });
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [file] } });
+
+    expect(await screen.findByRole("button", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("does not offer camera scan for pdf-category tools", () => {
+    const tool = makeTool({ category: "pdf" });
+    render(<ToolPage tool={tool} />);
+    expect(screen.queryByRole("button", { name: /scan with camera/i })).not.toBeInTheDocument();
+  });
 });
