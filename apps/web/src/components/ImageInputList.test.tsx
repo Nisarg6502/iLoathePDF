@@ -46,4 +46,22 @@ describe("ImageInputList", () => {
     render(<ImageInputList files={[makeFile("a.png")]} options={{}} onChange={vi.fn()} disabled={true} />);
     expect(screen.getByRole("button", { name: "Edit" })).toBeDisabled();
   });
+
+  it("preserves sibling option keys when applying an edit", async () => {
+    const onChange = vi.fn();
+    render(
+      <ImageInputList
+        files={[makeFile("a.png")]}
+        options={{ margin: 10 }}
+        onChange={onChange}
+        disabled={false}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(await screen.findByText("Rotate right"));
+    fireEvent.click(screen.getByText("Apply"));
+
+    expect(onChange).toHaveBeenCalledWith({ margin: 10, edits: { 0: { rotate: 90, crop: null } } });
+  });
 });
