@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { DesktopAppArt } from "@/components/DesktopAppArt";
 
 const RELEASES_URL = "https://github.com/Nisarg6502/iLoathePDF/releases";
 const LATEST_RELEASE_API = "https://api.github.com/repos/Nisarg6502/iLoathePDF/releases/latest";
@@ -115,22 +116,26 @@ export function Download() {
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]">
-          <div className="border-b border-border px-4.5 py-3.5 text-[12.5px] font-semibold">
-            What the desktop app adds
-          </div>
-          <div className="px-4.5 pb-3.5 pt-1.5">
-            {perks.map(([title, body]) => (
-              <div key={title} className="flex items-start gap-2.5 border-b border-border py-3.5 last:border-b-0">
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ok)" strokeWidth="1.8" className="mt-0.5 flex-none">
-                  <path d="M2.5 8.4l3.2 3.2L13.5 4" />
-                </svg>
-                <div>
-                  <div className="text-[13.5px] font-medium">{title}</div>
-                  <div className="text-[12.5px] text-muted">{body}</div>
+        <div className="flex flex-col gap-5">
+          <DesktopAppArt />
+
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]">
+            <div className="border-b border-border px-4.5 py-3.5 text-[12.5px] font-semibold">
+              What the desktop app adds
+            </div>
+            <div className="px-4.5 pb-3.5 pt-1.5">
+              {perks.map(([title, body]) => (
+                <div key={title} className="flex items-start gap-2.5 border-b border-border py-3.5 last:border-b-0">
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ok)" strokeWidth="1.8" className="mt-0.5 flex-none">
+                    <path d="M2.5 8.4l3.2 3.2L13.5 4" />
+                  </svg>
+                  <div>
+                    <div className="text-[13.5px] font-medium">{title}</div>
+                    <div className="text-[12.5px] text-muted">{body}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
