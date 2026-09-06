@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { renderRotatedCropped, type ImageEdit, type Rect } from "@/tools/imageEdit";
+import { isFullFrameCrop, renderRotatedCropped, type ImageEdit, type Rect } from "@/tools/imageEdit";
 
 const MIN_SIZE = 0.06;
 const FULL_RECT: Rect = { x: 0, y: 0, w: 1, h: 1 };
@@ -35,18 +35,27 @@ export function ImageEditModal({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<Drag | null>(null);
+  const bitmapRef = useRef<ImageBitmap | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     createImageBitmap(file)
       .then((b) => {
-        if (!cancelled) setBitmap(b);
+        if (cancelled) {
+          b.close();
+          return;
+        }
+        bitmapRef.current = b;
+        setBitmap(b);
       })
       .catch(() => {
         if (!cancelled) setError("Couldn't open this image. It may be corrupted or in an unsupported format.");
       });
     return () => {
       cancelled = true;
+      bitmapRef.current?.close();
+      bitmapRef.current = null;
+      setBitmap(null);
     };
   }, [file]);
 
@@ -61,9 +70,13 @@ export function ImageEditModal({
   useEffect(() => {
     if (!bitmap || !canvasRef.current) return;
     const rotatedOnly = renderRotatedCropped(bitmap, { rotate, crop: null });
-    canvasRef.current.width = rotatedOnly.width;
-    canvasRef.current.height = rotatedOnly.height;
-    canvasRef.current.getContext("2d")?.drawImage(rotatedOnly, 0, 0);
+    const MAX_PREVIEW_DIM = 1200;
+    const scale = Math.min(1, MAX_PREVIEW_DIM / Math.max(rotatedOnly.width, rotatedOnly.height));
+    const displayW = Math.max(1, Math.round(rotatedOnly.width * scale));
+    const displayH = Math.max(1, Math.round(rotatedOnly.height * scale));
+    canvasRef.current.width = displayW;
+    canvasRef.current.height = displayH;
+    canvasRef.current.getContext("2d")?.drawImage(rotatedOnly, 0, 0, displayW, displayH);
   }, [bitmap, rotate]);
 
   const displayRect = crop ?? FULL_RECT;
@@ -136,8 +149,8 @@ export function ImageEditModal({
         ) : (
           <div
             ref={frameRef}
-            className="relative mx-auto w-full touch-none overflow-hidden rounded-xl border border-border bg-surface-2"
-            style={{ aspectRatio: rotatedAspect || 1, maxHeight: "50vh" }}
+            className="relative mx-auto touch-none overflow-hidden rounded-xl border border-border bg-surface-2"
+            style={{ aspectRatio: rotatedAspect || 1, maxHeight: "50vh", maxWidth: "100%", width: "auto", height: "auto" }}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
           >
@@ -198,7 +211,7 @@ export function ImageEditModal({
           {!error && (
             <button
               type="button"
-              onClick={() => onApply({ rotate, crop })}
+              onClick={() => onApply({ rotate, crop: crop && !isFullFrameCrop(crop) ? crop : null })}
               className="rounded-lg bg-accent px-3.5 py-1.5 text-[12.5px] font-semibold text-on-accent"
             >
               Apply

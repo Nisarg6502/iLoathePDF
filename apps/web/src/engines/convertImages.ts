@@ -14,6 +14,7 @@ function isHeic(file: File): boolean {
 async function convertOne(file: File, to: string, edit: ImageEdit): Promise<EngineOutputFile> {
   const bitmap = await createImageBitmap(file);
   const canvas = renderRotatedCropped(bitmap, edit);
+  bitmap.close();
 
   const mimeType = MIME_BY_FORMAT[to];
   const blob: Blob = await new Promise((resolve, reject) => {

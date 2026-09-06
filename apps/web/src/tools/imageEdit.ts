@@ -14,8 +14,19 @@ export type ImageEdits = Record<number, ImageEdit>;
 
 export const DEFAULT_IMAGE_EDIT: ImageEdit = { rotate: 0, crop: null };
 
+const FULL_FRAME_EPSILON = 0.001;
+
+export function isFullFrameCrop(crop: Rect): boolean {
+  return (
+    crop.x <= FULL_FRAME_EPSILON &&
+    crop.y <= FULL_FRAME_EPSILON &&
+    crop.w >= 1 - FULL_FRAME_EPSILON &&
+    crop.h >= 1 - FULL_FRAME_EPSILON
+  );
+}
+
 export function isNoopEdit(edit: ImageEdit | undefined): boolean {
-  return !edit || (edit.rotate === 0 && edit.crop === null);
+  return !edit || (edit.rotate === 0 && (edit.crop === null || isFullFrameCrop(edit.crop)));
 }
 
 type DrawableImage = CanvasImageSource & { width: number; height: number };

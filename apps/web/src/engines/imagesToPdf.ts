@@ -13,11 +13,18 @@ async function embedImage(doc: PDFDocument, file: File, edit: ImageEdit | undefi
 
   const bitmap = await createImageBitmap(file);
   const canvas = renderRotatedCropped(bitmap, edit!);
+  bitmap.close();
+
+  const isPng = file.type === "image/png" || /\.png$/i.test(file.name);
   const blob: Blob = await new Promise((resolve, reject) => {
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas export failed."))), "image/png");
+    if (isPng) {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas export failed."))), "image/png");
+    } else {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas export failed."))), "image/jpeg", 0.92);
+    }
   });
   const bytes = await blob.arrayBuffer();
-  return doc.embedPng(bytes);
+  return isPng ? doc.embedPng(bytes) : doc.embedJpg(bytes);
 }
 
 export const imagesToPdfEngine: Engine = async ({ files, options }) => {
