@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { HeroDemo } from "@/components/HeroDemo";
+import { PipelineArt } from "@/components/PipelineArt";
+import { Faq } from "@/components/Faq";
 import { TOOLS } from "@/tools/registry";
 import { tintColor, tintWash } from "@/tools/tint";
 
@@ -99,6 +101,15 @@ export function Home() {
           structures the desktop app understands. Your browser runs them
           locally.
         </p>
+        <motion.div
+          initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
+          whileInView={{ opacity: 1, transform: "translateY(0px)" }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+          className="mt-8 rounded-[13px] border border-border bg-surface px-4 py-6"
+        >
+          <PipelineArt />
+        </motion.div>
         <div className="mt-7 grid grid-cols-1 gap-3.5 md:grid-cols-3">
           {[
             { n: "01", title: "Nothing loads except the page", body: "The tool code arrives with the page like any other script and runs in this tab. That is the last request the site makes." },
@@ -131,6 +142,8 @@ export function Home() {
           </span>
         </div>
       </div>
+
+      <Faq />
     </div>
   );
 }
