@@ -23,3 +23,19 @@ export function makeTestPng(): Uint8Array {
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
 }
+
+// A synthetic image with real, distinguishable width/height — for tests
+// that need to assert on rotate/crop output dimensions (a 1x1 PNG can't).
+export async function makeTestImageFile(width: number, height: number, name = "test.png"): Promise<File> {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context unavailable in test environment.");
+  ctx.fillStyle = "#3366ff";
+  ctx.fillRect(0, 0, width, height);
+  const blob: Blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("canvas.toBlob failed"))), "image/png");
+  });
+  return new File([blob], name, { type: "image/png" });
+}
