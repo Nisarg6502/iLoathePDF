@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { isFullFrameCrop, renderRotatedCropped, type ImageEdit, type Rect } from "@/tools/imageEdit";
 
 const MIN_SIZE = 0.06;
@@ -58,14 +58,6 @@ export function ImageEditModal({
       setBitmap(null);
     };
   }, [file]);
-
-  const rotatedAspect = useMemo(() => {
-    if (!bitmap) return 1;
-    const swapped = rotate === 90 || rotate === 270;
-    const w = swapped ? bitmap.height : bitmap.width;
-    const h = swapped ? bitmap.width : bitmap.height;
-    return w / h;
-  }, [bitmap, rotate]);
 
   useEffect(() => {
     if (!bitmap || !canvasRef.current) return;
@@ -149,12 +141,14 @@ export function ImageEditModal({
         ) : (
           <div
             ref={frameRef}
-            className="relative mx-auto touch-none overflow-hidden rounded-xl border border-border bg-surface-2"
-            style={{ aspectRatio: rotatedAspect || 1, maxHeight: "50vh", maxWidth: "100%", width: "auto", height: "auto" }}
+            className="relative mx-auto w-fit touch-none overflow-hidden"
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
           >
-            <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+            <canvas
+              ref={canvasRef}
+              className="block max-h-[50vh] max-w-full rounded-xl border border-border bg-surface-2"
+            />
             <div
               className="absolute cursor-move border-2 border-accent bg-accent/10"
               style={{

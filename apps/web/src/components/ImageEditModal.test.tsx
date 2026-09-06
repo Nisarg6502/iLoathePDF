@@ -51,6 +51,22 @@ describe("ImageEditModal", () => {
     expect(onApply).toHaveBeenCalledWith({ rotate: 0, crop: null });
   });
 
+  it("normalizes a full-frame crop to null on Apply", async () => {
+    const onApply = vi.fn();
+    render(
+      <ImageEditModal
+        file={makeFile()}
+        edit={{ rotate: 0, crop: { x: 0, y: 0, w: 1, h: 1 } }}
+        onApply={onApply}
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(await screen.findByText("Apply"));
+
+    expect(onApply).toHaveBeenCalledWith({ rotate: 0, crop: null });
+  });
+
   it("shows an error and allows Cancel when createImageBitmap fails to decode the image", async () => {
     const original = globalThis.createImageBitmap;
     globalThis.createImageBitmap = vi.fn().mockRejectedValue(new Error("decode failed"));

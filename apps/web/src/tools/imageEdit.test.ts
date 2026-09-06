@@ -72,4 +72,8 @@ describe("isNoopEdit", () => {
   it("is false when crop is set", () => {
     expect(isNoopEdit({ rotate: 0, crop: { x: 0, y: 0, w: 0.5, h: 0.5 } })).toBe(false);
   });
+
+  it("is true for a crop that covers the entire frame", () => {
+    expect(isNoopEdit({ rotate: 0, crop: { x: 0, y: 0, w: 1, h: 1 } })).toBe(true);
+  });
 });
