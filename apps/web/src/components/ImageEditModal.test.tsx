@@ -50,4 +50,25 @@ describe("ImageEditModal", () => {
 
     expect(onApply).toHaveBeenCalledWith({ rotate: 0, crop: null });
   });
+
+  it("shows an error and allows Cancel when createImageBitmap fails to decode the image", async () => {
+    const original = globalThis.createImageBitmap;
+    globalThis.createImageBitmap = vi.fn().mockRejectedValue(new Error("decode failed"));
+    const onClose = vi.fn();
+
+    try {
+      render(<ImageEditModal file={makeFile()} edit={DEFAULT_IMAGE_EDIT} onApply={vi.fn()} onClose={onClose} />);
+
+      expect(
+        await screen.findByText("Couldn't open this image. It may be corrupted or in an unsupported format."),
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Rotate right")).not.toBeInTheDocument();
+      expect(screen.queryByText("Apply")).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("Cancel"));
+      expect(onClose).toHaveBeenCalled();
+    } finally {
+      globalThis.createImageBitmap = original;
+    }
+  });
 });

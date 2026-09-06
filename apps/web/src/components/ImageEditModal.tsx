@@ -31,15 +31,20 @@ export function ImageEditModal({
   const [rotate, setRotate] = useState(edit.rotate);
   const [crop, setCrop] = useState<Rect | null>(edit.crop);
   const [bitmap, setBitmap] = useState<ImageBitmap | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<Drag | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    createImageBitmap(file).then((b) => {
-      if (!cancelled) setBitmap(b);
-    });
+    createImageBitmap(file)
+      .then((b) => {
+        if (!cancelled) setBitmap(b);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Couldn't open this image. It may be corrupted or in an unsupported format.");
+      });
     return () => {
       cancelled = true;
     };
@@ -126,69 +131,79 @@ export function ImageEditModal({
           </button>
         </div>
 
-        <div
-          ref={frameRef}
-          className="relative mx-auto w-full touch-none overflow-hidden rounded-xl border border-border bg-surface-2"
-          style={{ aspectRatio: rotatedAspect || 1, maxHeight: "50vh" }}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-        >
-          <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        {error ? (
+          <div className="rounded-xl border border-border bg-surface-2 p-4 text-[13px] text-muted">{error}</div>
+        ) : (
           <div
-            className="absolute cursor-move border-2 border-accent bg-accent/10"
-            style={{
-              left: `${displayRect.x * 100}%`,
-              top: `${displayRect.y * 100}%`,
-              width: `${displayRect.w * 100}%`,
-              height: `${displayRect.h * 100}%`,
-            }}
-            onPointerDown={(e) => onHandlePointerDown("move", e)}
+            ref={frameRef}
+            className="relative mx-auto w-full touch-none overflow-hidden rounded-xl border border-border bg-surface-2"
+            style={{ aspectRatio: rotatedAspect || 1, maxHeight: "50vh" }}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
           >
-            {CORNERS.map((corner) => (
-              <span
-                key={corner}
-                onPointerDown={(e) => onHandlePointerDown(corner, e)}
-                className="absolute size-3 rounded-full border border-accent bg-surface"
-                style={{
-                  left: corner.includes("w") ? -6 : undefined,
-                  right: corner.includes("e") ? -6 : undefined,
-                  top: corner.includes("n") ? -6 : undefined,
-                  bottom: corner.includes("s") ? -6 : undefined,
-                  cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
-                }}
-              />
-            ))}
+            <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+            <div
+              className="absolute cursor-move border-2 border-accent bg-accent/10"
+              style={{
+                left: `${displayRect.x * 100}%`,
+                top: `${displayRect.y * 100}%`,
+                width: `${displayRect.w * 100}%`,
+                height: `${displayRect.h * 100}%`,
+              }}
+              onPointerDown={(e) => onHandlePointerDown("move", e)}
+            >
+              {CORNERS.map((corner) => (
+                <span
+                  key={corner}
+                  onPointerDown={(e) => onHandlePointerDown(corner, e)}
+                  className="absolute size-3 rounded-full border border-accent bg-surface"
+                  style={{
+                    left: corner.includes("w") ? -6 : undefined,
+                    right: corner.includes("e") ? -6 : undefined,
+                    top: corner.includes("n") ? -6 : undefined,
+                    bottom: corner.includes("s") ? -6 : undefined,
+                    cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => rotateBy(-90)} className="rounded-lg border border-border px-3 py-1.5 text-[12.5px]">
-            Rotate left
-          </button>
-          <button type="button" onClick={() => rotateBy(90)} className="rounded-lg border border-border px-3 py-1.5 text-[12.5px]">
-            Rotate right
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setRotate(0);
-              setCrop(null);
-            }}
-            className="rounded-lg border border-border px-3 py-1.5 text-[12.5px] text-muted"
-          >
-            Reset
-          </button>
+          {!error && (
+            <>
+              <button type="button" onClick={() => rotateBy(-90)} className="rounded-lg border border-border px-3 py-1.5 text-[12.5px]">
+                Rotate left
+              </button>
+              <button type="button" onClick={() => rotateBy(90)} className="rounded-lg border border-border px-3 py-1.5 text-[12.5px]">
+                Rotate right
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRotate(0);
+                  setCrop(null);
+                }}
+                className="rounded-lg border border-border px-3 py-1.5 text-[12.5px] text-muted"
+              >
+                Reset
+              </button>
+            </>
+          )}
           <span className="flex-1" />
           <button type="button" onClick={onClose} className="rounded-lg border border-border px-3.5 py-1.5 text-[12.5px]">
             Cancel
           </button>
-          <button
-            type="button"
-            onClick={() => onApply({ rotate, crop })}
-            className="rounded-lg bg-accent px-3.5 py-1.5 text-[12.5px] font-semibold text-on-accent"
-          >
-            Apply
-          </button>
+          {!error && (
+            <button
+              type="button"
+              onClick={() => onApply({ rotate, crop })}
+              className="rounded-lg bg-accent px-3.5 py-1.5 text-[12.5px] font-semibold text-on-accent"
+            >
+              Apply
+            </button>
+          )}
         </div>
       </div>
     </div>
