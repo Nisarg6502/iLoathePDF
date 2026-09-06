@@ -17,6 +17,11 @@ export function CameraCapture({
   const shotCount = useRef(0);
   const [shots, setShots] = useState<Shot[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const shotsRef = useRef<Shot[]>([]);
+
+  useEffect(() => {
+    shotsRef.current = shots;
+  }, [shots]);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,8 +51,7 @@ export function CameraCapture({
     start();
     return () => {
       cancelled = true;
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
+      teardown();
     };
   }, []);
 
@@ -56,9 +60,13 @@ export function CameraCapture({
     streamRef.current = null;
   }
 
-  function stopAndClose() {
+  function teardown() {
     stopStream();
-    shots.forEach((s) => URL.revokeObjectURL(s.url));
+    shotsRef.current.forEach((s) => URL.revokeObjectURL(s.url));
+  }
+
+  function stopAndClose() {
+    teardown();
     onClose();
   }
 
@@ -91,8 +99,9 @@ export function CameraCapture({
   }
 
   function finish() {
-    stopStream();
-    onDone(shots.map((s) => s.file));
+    const files = shots.map((s) => s.file);
+    teardown();
+    onDone(files);
   }
 
   return (
