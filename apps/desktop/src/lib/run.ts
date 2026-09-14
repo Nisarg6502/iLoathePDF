@@ -240,6 +240,52 @@ export async function execute(
       return { outputs: r.outputs, summary: `${r.count} images converted.` };
     }
 
+    case "pdf.watermark": {
+      const mode = str("mode", "watermark") as "watermark" | "page_numbers" | "stamp";
+      const pages = str("pages") === "custom" ? str("customPages", "1") : str("pages", "all");
+      const params: import("./jobs").PdfWatermarkParams = {
+        input: first.path,
+        output: join(`${base}-${mode}.pdf`),
+        mode,
+        pages,
+      };
+      if (mode === "watermark") {
+        params.watermark = {
+          content: str("watermarkContent", "text") as "text" | "image",
+          text: str("watermarkText") || undefined,
+          image_b64: str("watermarkImageDataUrl") ? dataUrlToBase64(str("watermarkImageDataUrl")) : undefined,
+          font_size: num("watermarkFontSize", 48),
+          color: str("watermarkColor", "#888888"),
+          opacity: num("watermarkOpacity", 0.35),
+          rotation: num("watermarkRotation", 45),
+          placement: str("watermarkPlacement", "single") as "single" | "tiled",
+        };
+      } else if (mode === "page_numbers") {
+        params.page_numbers = {
+          position: str("pageNumberPosition", "bottom-center"),
+          format: str("pageNumberFormat", "n") as "n" | "page-n" | "n-of-total",
+          start: num("pageNumberStart", 1),
+          font_size: num("pageNumberFontSize", 11),
+          color: str("pageNumberColor", "#000000"),
+        };
+      } else {
+        params.stamp = {
+          content: str("stampContent", "text") as "text" | "image",
+          text: str("stampText") || undefined,
+          image_b64: str("stampImageDataUrl") ? dataUrlToBase64(str("stampImageDataUrl")) : undefined,
+          position: str("stampPosition", "bottom-right"),
+          font_size: num("stampFontSize", 24),
+          color: str("stampColor", "#000000"),
+          max_width_pct: num("stampMaxWidthPct", 0.2),
+        };
+      }
+      const r = await runJob("pdf.watermark", params, opts);
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.pages_affected} of ${r.pages} page${r.pages === 1 ? "" : "s"} updated.`,
+      };
+    }
+
     default:
       throw new JobError("BAD_PARAMS", `No runner wired for ${op}`);
   }
