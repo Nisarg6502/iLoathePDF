@@ -80,3 +80,13 @@ export function ConvertImagesIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function WatermarkIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-j)" strokeWidth="1.5" {...props}>
+      <rect x="2.5" y="2.5" width="13" height="13" rx="1.2" />
+      <path d="M6 12.5L12 5.5" strokeOpacity="0.5" />
+      <path d="M9 9.5v-4M9 5.5l-1.3 1.3M9 5.5l1.3 1.3" strokeOpacity="0.5" />
+    </svg>
+  );
+}
