@@ -218,7 +218,7 @@ export const TOOLS: Tool[] = [
     ordered: false,
     action: "Save PDF",
     defaults: {
-      mode: "watermark", pages: "all",
+      mode: "watermark", pages: "all", customPages: "",
       watermarkContent: "text", watermarkText: "", watermarkImageDataUrl: "",
       watermarkFontSize: 48, watermarkColor: "#888888",
       watermarkOpacity: 0.35, watermarkRotation: 45, watermarkPlacement: "single",

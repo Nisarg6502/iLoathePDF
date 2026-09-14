@@ -242,7 +242,7 @@ export async function execute(
 
     case "pdf.watermark": {
       const mode = str("mode", "watermark") as "watermark" | "page_numbers" | "stamp";
-      const pages = str("pages", "all");
+      const pages = str("pages") === "custom" ? str("customPages", "1") : str("pages", "all");
       const params: import("./jobs").PdfWatermarkParams = {
         input: first.path,
         output: join(`${base}-${mode}.pdf`),
