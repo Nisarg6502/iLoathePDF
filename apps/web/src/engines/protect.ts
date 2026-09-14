@@ -40,11 +40,14 @@ export const protectEngine: Engine = async ({ files, options }) => {
       decrypted = await decryptPDF(bytes, password);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        message.toLowerCase().includes("not encrypted")
-          ? "This PDF isn't password protected."
-          : "Incorrect password.",
-      );
+      const lower = message.toLowerCase();
+      if (lower.includes("not encrypted")) {
+        throw new Error("This PDF isn't password protected.");
+      }
+      if (lower.includes("unsupported encryption")) {
+        throw new Error("This PDF uses an encryption type the browser version can't open — try the desktop app.");
+      }
+      throw new Error("Incorrect password.");
     }
     return {
       files: [

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { PDFDocument } from "pdf-lib";
 import { isEncrypted } from "@pdfsmaller/pdf-decrypt";
@@ -44,6 +46,22 @@ describe("protectEngine", () => {
     const outBytes = new Uint8Array(await unlocked.files[0].blob.arrayBuffer());
     const doc = await PDFDocument.load(outBytes);
     expect(doc.getPageCount()).toBe(3);
+  });
+
+  it("unlocks a PDF that was protected by the desktop app's pikepdf engine (cross-engine compatibility)", async () => {
+    const fixtureBytes = readFileSync(
+      join(__dirname, "__fixtures__", "pikepdf-aes256.pdf"),
+    );
+    const fixtureFile = await toFile(new Uint8Array(fixtureBytes), "pikepdf-protected.pdf");
+
+    const result = await protectEngine({
+      files: [fixtureFile],
+      options: { mode: "unlock", password: "fixture-password" },
+    });
+
+    const outBytes = new Uint8Array(await result.files[0].blob.arrayBuffer());
+    const doc = await PDFDocument.load(outBytes);
+    expect(doc.getPageCount()).toBeGreaterThan(0);
   });
 
   it("unlock mode rejects the wrong password", async () => {
