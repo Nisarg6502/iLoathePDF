@@ -120,8 +120,6 @@ def _build_watermark_overlay(spec: dict, width_pt: float, height_pt: float) -> b
     from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas as pdfcanvas
 
-    from ._common import size_of  # noqa: F401 (keeps import group simple; unused here, harmless)
-
     buf = io.BytesIO()
     c = pdfcanvas.Canvas(buf, pagesize=(width_pt, height_pt))
     opacity = _opacity(spec.get("opacity", 1.0))
