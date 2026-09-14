@@ -146,11 +146,12 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
       const text =
         spec.format === "n" ? String(n) : spec.format === "page-n" ? `Page ${n}` : `${n} of ${targetIndices.length}`;
       const textWidth = font.widthOfTextAtSize(text, size);
-      // 0.7 factor (vs. 1.0 for geometric centering) matches desktop's optical
-      // centering for text: alignedXY divides contentH by 2, so this yields
-      // the same 0.35*fontSize offset as pdf_watermark.py's _draw_aligned_text.
-      const { x, y } = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size * 0.7);
-      page.drawText(text, { x, y, size, font, color: hexToRgb(spec.color ?? "#000000") });
+      const aligned = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size);
+      // alignedXY centers "middle" geometrically (contentH/2 = 0.5*size). Nudge
+      // by +0.15*size so text lands at desktop's 0.35*size optical center
+      // instead -- top/bottom alignment is untouched by this adjustment.
+      const y = vAlign === "middle" ? aligned.y + size * 0.15 : aligned.y;
+      page.drawText(text, { x: aligned.x, y, size, font, color: hexToRgb(spec.color ?? "#000000") });
     });
   } else {
     const spec = options.stamp as StampSpec;
@@ -176,8 +177,11 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
       } else {
         const size = Math.max(4, spec.fontSize ?? 24);
         const textWidth = font.widthOfTextAtSize(spec.text!, size);
-        const { x, y } = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size * 0.7);
-        page.drawText(spec.text!, { x, y, size, font, color: hexToRgb(spec.color ?? "#000000") });
+        const aligned = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size);
+        // See the page-numbers branch above: only "middle" gets the optical-
+        // centering nudge, top/bottom stay geometrically exact.
+        const y = vAlign === "middle" ? aligned.y + size * 0.15 : aligned.y;
+        page.drawText(spec.text!, { x: aligned.x, y, size, font, color: hexToRgb(spec.color ?? "#000000") });
       }
     }
   }
