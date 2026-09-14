@@ -16,6 +16,8 @@ import { convertImagesEngine } from "@/engines/convertImages";
 import { SignOptions } from "./options/SignOptions";
 import { signEngine } from "@/engines/sign";
 import { SignWorkspace } from "./sign/SignWorkspace";
+import { WatermarkOptions } from "./options/WatermarkOptions";
+import { watermarkEngine } from "@/engines/watermark";
 import {
   CompressIcon,
   MergeIcon,
@@ -25,6 +27,7 @@ import {
   ImagesToPdfIcon,
   ConvertImagesIcon,
   SignIcon,
+  WatermarkIcon,
 } from "./icons";
 
 export const TOOLS: ToolConfig[] = [
@@ -36,6 +39,7 @@ export const TOOLS: ToolConfig[] = [
   { slug: "images-to-pdf", name: "Images to PDF", description: "Scans and photos into one PDF, one image per page.", category: "image", Icon: ImagesToPdfIcon, accept: [".png", ".jpg", ".jpeg"], multiple: true, defaultOptions: { margin: 24 }, OptionsPanel: ImagesToPdfOptions, engine: imagesToPdfEngine, status: "live", tint: "f" },
   { slug: "convert-images", name: "Convert images", description: "PNG, JPG and WebP any direction — and HEIC off an iPhone.", category: "image", Icon: ConvertImagesIcon, accept: [".png", ".jpg", ".jpeg", ".webp", ".heic"], multiple: true, defaultOptions: { to: "png" }, OptionsPanel: ConvertImagesOptions, engine: convertImagesEngine, status: "preview", tint: "g" },
   { slug: "sign", name: "Sign & Fill", description: "Draw or upload a signature, then add text, dates and initials on the page.", category: "pdf", Icon: SignIcon, accept: [".pdf"], multiple: false, defaultOptions: { elements: [] }, OptionsPanel: SignOptions, engine: signEngine, status: "live", tint: "h", Workspace: SignWorkspace },
+  { slug: "watermark", name: "Watermark, Page Numbers & Stamp", description: "Add a repeating watermark, sequential page numbers, or a fixed stamp to every page.", category: "pdf", Icon: WatermarkIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "watermark", pages: "all", watermark: { content: "text", text: "", opacity: 0.35, rotation: 45, placement: "single" }, page_numbers: { position: "bottom-center", format: "n", start: 1 }, stamp: { content: "text", text: "", position: "bottom-right", maxWidthPct: 0.2 } }, OptionsPanel: WatermarkOptions, engine: watermarkEngine, status: "live", tint: "j" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {
