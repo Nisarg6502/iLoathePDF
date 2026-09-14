@@ -10,7 +10,7 @@ export function SiteFooter() {
             <span className="text-sm font-semibold tracking-tight">iLoathePDF</span>
           </div>
           <p className="mt-2.5 max-w-[34ch] text-[12.5px] leading-snug text-muted">
-            Eight PDF and image tools that run on your machine. Browser or desktop, your choice.
+            Nine PDF and image tools that run on your machine. Browser or desktop, your choice.
           </p>
         </div>
 
