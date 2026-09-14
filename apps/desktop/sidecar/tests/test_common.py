@@ -69,3 +69,40 @@ def test_relative_paths_are_refused(tmp_path):
 
     # Absolute paths still work.
     assert ensure_dir(str(tmp_path / "made")).is_dir()
+
+
+def test_open_pdf_with_password_round_trips(tmp_path):
+    import pikepdf
+
+    from ops._common import open_pdf_with_password
+
+    plain = tmp_path / "plain.pdf"
+    with pikepdf.Pdf.new() as pdf:
+        pdf.add_blank_page()
+        pdf.save(str(plain))
+
+    protected = tmp_path / "protected.pdf"
+    with pikepdf.open(str(plain)) as pdf:
+        pdf.save(str(protected), encryption=pikepdf.Encryption(owner="o", user="o", R=6))
+
+    with open_pdf_with_password(protected, "o") as pdf:
+        assert len(pdf.pages) == 1
+
+
+def test_open_pdf_with_password_rejects_wrong_password(tmp_path):
+    import pikepdf
+
+    from ops._common import open_pdf_with_password
+
+    plain = tmp_path / "plain.pdf"
+    with pikepdf.Pdf.new() as pdf:
+        pdf.add_blank_page()
+        pdf.save(str(plain))
+
+    protected = tmp_path / "protected.pdf"
+    with pikepdf.open(str(plain)) as pdf:
+        pdf.save(str(protected), encryption=pikepdf.Encryption(owner="o", user="o", R=6))
+
+    with pytest.raises(OpError) as exc:
+        open_pdf_with_password(protected, "wrong")
+    assert exc.value.code == "WRONG_PASSWORD"

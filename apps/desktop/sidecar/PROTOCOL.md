@@ -32,6 +32,7 @@ in the same commit. Downstream agents code against it and must not edit it.
 | `FILE_NOT_FOUND` | An input path does not exist |
 | `ENCRYPTED_PDF` | PDF is password protected |
 | `CORRUPT_PDF` | PDF could not be parsed |
+| `WRONG_PASSWORD` | Incorrect password given to `pdf.protect` unlock |
 | `UNSUPPORTED_FORMAT` | Image/file format not supported |
 | `GHOSTSCRIPT_MISSING` | Ghostscript binary not found (compress/rasterise) |
 | `OUTPUT_WRITE_FAILED` | Could not write the output file |
@@ -148,6 +149,19 @@ box; `text`/`date` elements carry `text`, an absolute `font_size` in points
 box. Elements are grouped per page and merged on top of that page's existing
 content — nothing about the source page is otherwise touched.
 result: `{"output": "...", "bytes": 4096, "pages": 2, "elements": 3}`
+
+### `pdf.protect`
+params:
+```json
+{"input": "a.pdf", "output": "out.pdf", "mode": "protect|unlock", "password": "secret"}
+```
+`protect` sets an AES-256 (R=6) password required to open the PDF, with the
+owner password equal to the user password. Rejects an already-encrypted
+input with `ENCRYPTED_PDF` -- unlock it first. `unlock` removes password
+protection given the correct password; a wrong password fails with
+`WRONG_PASSWORD`. `password` must be at least 4 characters (`BAD_PARAMS`
+otherwise).
+result: `{"output": "...", "bytes": 4096}`
 
 ### `pdf.watermark`
 params:

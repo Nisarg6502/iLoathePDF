@@ -31,6 +31,16 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
   const showSizeWarning = totalBytes > LARGE_FILE_WARNING_BYTES && !dismissedSizeWarning;
 
+  const protectInvalid =
+    tool.slug === "protect" &&
+    (() => {
+      const mode = String(options.mode ?? "protect");
+      const password = String(options.password ?? "");
+      if (password.length < 4) return true;
+      if (mode === "protect" && password !== String(options.confirmPassword ?? "")) return true;
+      return false;
+    })();
+
   function handleFiles(newFiles: File[]) {
     setFiles(newFiles);
     setDismissedSizeWarning(false);
@@ -180,8 +190,8 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             <button
               type="button"
               onClick={run}
-              disabled={step === "empty" || step === "running"}
-              style={step === "empty" || step === "running" ? undefined : { background: tintButtonBg(tool.tint) }}
+              disabled={step === "empty" || step === "running" || protectInvalid}
+              style={step === "empty" || step === "running" || protectInvalid ? undefined : { background: tintButtonBg(tool.tint) }}
               className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-tint transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
             >
               {step === "running" && (

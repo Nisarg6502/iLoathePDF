@@ -101,6 +101,7 @@
   --tint-f: oklch(0.575 0.145 28);
   --tint-g: oklch(0.575 0.145 340);
   --tint-h: oklch(0.575 0.145 120);
+  --tint-i: oklch(0.575 0.145 230);
   --tint-j: oklch(0.575 0.145 53);
 
   /* Motion. The browser's built-in easings are too weak to read as intended. */
@@ -145,6 +146,7 @@
   --tint-f: oklch(0.8 0.125 28);
   --tint-g: oklch(0.8 0.125 340);
   --tint-h: oklch(0.8 0.125 120);
+  --tint-i: oklch(0.8 0.125 230);
   --tint-j: oklch(0.8 0.125 53);
 }
 

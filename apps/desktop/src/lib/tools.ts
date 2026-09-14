@@ -12,6 +12,7 @@ import {
   FileImage,
   FileOutput,
   Images,
+  Lock,
   Minimize2,
   Replace,
   Scissors,
@@ -22,7 +23,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "j";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -131,6 +132,22 @@ export const TOOLS: Tool[] = [
     ordered: false,
     action: "Export signed PDF",
     defaults: { outputName: "signed" },
+  },
+  {
+    id: "protect",
+    path: "/t/protect",
+    title: "Protect & Unlock PDF",
+    description: "Add or remove a password that's required to open the file.",
+    icon: Lock,
+    group: "pdf",
+    tint: "i",
+    op: "pdf.protect",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Save PDF",
+    defaults: { mode: "protect", password: "", confirmPassword: "" },
   },
   {
     id: "compress",

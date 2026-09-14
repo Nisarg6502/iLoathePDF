@@ -38,8 +38,17 @@ pub async fn run_job(
     // blocking pool; `State` itself cannot cross that boundary.
     let engine = state.engine()?;
     // Logged because "where did my output go?" is otherwise unanswerable after
-    // the fact; these are local paths in a local log file.
-    log::info!("job {id} {op} {params}");
+    // the fact; these are local paths in a local log file, except `password`
+    // (pdf.protect), which is redacted before logging even in dev builds.
+    let log_params = match &params {
+        Value::Object(map) if map.contains_key("password") => {
+            let mut redacted = map.clone();
+            redacted.insert("password".to_string(), Value::String("***".to_string()));
+            Value::Object(redacted).to_string()
+        }
+        other => other.to_string(),
+    };
+    log::info!("job {id} {op} {log_params}");
     tauri::async_runtime::spawn_blocking(move || engine.call(&id, &op, params))
         .await
         .unwrap_or_else(|e| Err(JobError::internal(format!("job thread panicked: {e}"))))

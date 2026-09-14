@@ -79,6 +79,7 @@
   --tint-f: oklch(0.575 0.145 28);
   --tint-g: oklch(0.575 0.145 340);
   --tint-h: oklch(0.575 0.145 120);
+  --tint-i: oklch(0.575 0.145 230);
   --tint-j: oklch(0.575 0.145 53);
   --tint-a-btn: oklch(0.5 0.145 265);
   --tint-b-btn: oklch(0.5 0.145 310);
@@ -88,6 +89,7 @@
   --tint-f-btn: oklch(0.5 0.145 28);
   --tint-g-btn: oklch(0.5 0.145 340);
   --tint-h-btn: oklch(0.5 0.145 120);
+  --tint-i-btn: oklch(0.5 0.145 230);
   --tint-j-btn: oklch(0.5 0.145 53);
   --on-tint: #ffffff;
   --toggle-track-light: linear-gradient(135deg, oklch(0.86 0.06 230), oklch(0.78 0.08 242));
@@ -126,6 +128,7 @@
   --tint-f: oklch(0.8 0.125 28);
   --tint-g: oklch(0.8 0.125 340);
   --tint-h: oklch(0.8 0.125 120);
+  --tint-i: oklch(0.8 0.125 230);
   --tint-j: oklch(0.8 0.125 53);
   --tint-a-btn: var(--tint-a);
   --tint-b-btn: var(--tint-b);
@@ -135,6 +138,7 @@
   --tint-f-btn: var(--tint-f);
   --tint-g-btn: var(--tint-g);
   --tint-h-btn: var(--tint-h);
+  --tint-i-btn: var(--tint-i);
   --tint-j-btn: var(--tint-j);
   --on-tint: oklch(0.16 0.007 68);
 }

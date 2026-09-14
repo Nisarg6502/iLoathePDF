@@ -183,6 +183,25 @@ export async function execute(
       };
     }
 
+    case "pdf.protect": {
+      const mode = str("mode", "protect") as "protect" | "unlock";
+      const suffix = mode === "protect" ? "protected" : "unlocked";
+      const r = await runJob(
+        "pdf.protect",
+        {
+          input: first.path,
+          output: join(`${base}-${suffix}.pdf`),
+          mode,
+          password: str("password"),
+        },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: mode === "protect" ? "Password protection added." : "Password protection removed.",
+      };
+    }
+
     case "pdf.to_img": {
       const pages = str("pages").trim();
       const r = await runJob(
