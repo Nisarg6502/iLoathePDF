@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Info } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { OptionValues, Tool } from "../lib/tools";
@@ -279,6 +279,49 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "protect": {
+      const mode = str("mode") as "protect" | "unlock";
+      const password = str("password");
+      const confirmPassword = str("confirmPassword");
+      const mismatch = mode === "protect" && confirmPassword.length > 0 && password !== confirmPassword;
+      return (
+        <OptionsPanel
+          className={className}
+          description={
+            mode === "protect"
+              ? "Anyone opening this PDF will need the password you set here."
+              : "Enter the PDF's current password to remove it."
+          }
+        >
+          <Field label="Mode">
+            {() => (
+              <RadioGroup
+                value={mode}
+                onValueChange={(v) => set({ mode: v, password: "", confirmPassword: "" })}
+                aria-label="Protect or unlock"
+              >
+                <RadioGroupItem value="protect" label="Protect" hint="Set a password to open the PDF." />
+                <RadioGroupItem value="unlock" label="Unlock" hint="Remove an existing password." />
+              </RadioGroup>
+            )}
+          </Field>
+          <ProtectPasswordField
+            label={mode === "protect" ? "Set password" : "Enter password"}
+            value={password}
+            onChange={(v) => set({ password: v })}
+          />
+          {mode === "protect" ? (
+            <ProtectPasswordField
+              label="Confirm password"
+              value={confirmPassword}
+              onChange={(v) => set({ confirmPassword: v })}
+              hint={mismatch ? "Passwords do not match." : undefined}
+            />
+          ) : null}
+        </OptionsPanel>
+      );
+    }
+
     case "pdf-to-image":
       return (
         <OptionsPanel className={className} description="Each page is rendered into its own image file.">
@@ -469,4 +512,41 @@ export function ToolOptions({
     default:
       return null;
   }
+}
+
+function ProtectPasswordField({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  hint?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <Field label={label} hint={hint}>
+      {(id) => (
+        <div className="relative">
+          <Input
+            id={id}
+            type={show ? "text" : "password"}
+            value={value}
+            onChange={(e) => onChange(e.currentTarget.value)}
+            placeholder="At least 4 characters"
+            className="pr-14"
+          />
+          <button
+            type="button"
+            onClick={() => setShow((v) => !v)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-text"
+          >
+            {show ? "Hide" : "Show"}
+          </button>
+        </div>
+      )}
+    </Field>
+  );
 }
