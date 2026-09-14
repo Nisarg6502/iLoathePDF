@@ -17,12 +17,13 @@ import {
   Replace,
   Scissors,
   Signature,
+  Stamp,
 } from "lucide-react";
 import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -217,6 +218,31 @@ export const TOOLS: Tool[] = [
       max_px: 2000,
       percent: 50,
       strip_metadata: true,
+    },
+  },
+  {
+    id: "watermark",
+    path: "/t/watermark",
+    title: "Watermark, Page Numbers & Stamp",
+    description: "Add a repeating watermark, sequential page numbers, or a fixed stamp to every page.",
+    icon: Stamp,
+    group: "pdf",
+    tint: "j",
+    op: "pdf.watermark",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Save PDF",
+    defaults: {
+      mode: "watermark", pages: "all", customPages: "",
+      watermarkContent: "text", watermarkText: "", watermarkImageDataUrl: "",
+      watermarkFontSize: 48, watermarkColor: "#888888",
+      watermarkOpacity: 0.35, watermarkRotation: 45, watermarkPlacement: "single",
+      pageNumberPosition: "bottom-center", pageNumberFormat: "n", pageNumberStart: 1,
+      pageNumberFontSize: 11, pageNumberColor: "#000000",
+      stampContent: "text", stampText: "", stampImageDataUrl: "", stampPosition: "bottom-right",
+      stampFontSize: 24, stampColor: "#000000",
     },
   },
 ];

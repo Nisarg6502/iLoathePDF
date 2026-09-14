@@ -15,6 +15,7 @@ export type OpName =
   | "pdf.compress"
   | "pdf.sign"
   | "pdf.protect"
+  | "pdf.watermark"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -162,6 +163,24 @@ export interface PdfToImgParams {
 }
 export interface PdfToImgResult { outputs: OutputFile[]; count: number }
 
+export type WatermarkMode = "watermark" | "page_numbers" | "stamp";
+export interface WatermarkSpecParams {
+  content?: "text" | "image"; text?: string; image_b64?: string;
+  font_size?: number; color?: string; opacity?: number; rotation?: number; placement?: "single" | "tiled";
+}
+export interface PageNumbersSpecParams {
+  position: string; format: "n" | "page-n" | "n-of-total"; start: number; font_size?: number; color?: string;
+}
+export interface StampSpecParams {
+  content: "text" | "image"; text?: string; image_b64?: string; position: string;
+  font_size?: number; color?: string; max_width_pct?: number;
+}
+export interface PdfWatermarkParams {
+  input: string; output: string; mode: WatermarkMode; pages: string;
+  watermark?: WatermarkSpecParams; page_numbers?: PageNumbersSpecParams; stamp?: StampSpecParams;
+}
+export interface PdfWatermarkResult { output: string; bytes: number; pages: number; pages_affected: number }
+
 export interface PingResult { pong: boolean; version: string; python: string }
 
 /** Maps each op to its params and result types, so runJob() is fully typed. */
@@ -174,6 +193,7 @@ export interface OpMap {
   "pdf.compress": [PdfCompressParams, PdfCompressResult];
   "pdf.sign": [PdfSignParams, PdfSignResult];
   "pdf.protect": [PdfProtectParams, PdfProtectResult];
+  "pdf.watermark": [PdfWatermarkParams, PdfWatermarkResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];

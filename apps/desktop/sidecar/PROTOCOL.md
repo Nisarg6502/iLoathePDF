@@ -163,6 +163,34 @@ protection given the correct password; a wrong password fails with
 otherwise).
 result: `{"output": "...", "bytes": 4096}`
 
+### `pdf.watermark`
+params:
+```json
+{"input": "a.pdf", "output": "out.pdf",
+ "mode": "watermark|page_numbers|stamp", "pages": "all|first|1-3,5",
+ "watermark": {"content": "text|image", "text": "CONFIDENTIAL", "image_b64": "...",
+   "font_size": 48, "color": "#888888", "opacity": 0.35, "rotation": 45, "placement": "single|tiled"},
+ "page_numbers": {"position": "bottom-center", "format": "n|page-n|n-of-total",
+   "start": 1, "font_size": 11, "color": "#000000"},
+ "stamp": {"content": "text|image", "text": "APPROVED", "image_b64": "...",
+   "position": "bottom-right", "font_size": 24, "max_width_pct": 0.2}}
+```
+Only the sub-object matching `mode` is required. `pages` selects which pages
+are affected: `all`, `first` (page 1 only), or a page-range spec (see "Page
+range spec" below). `watermark` draws either centered once (`placement:
+"single"`) or in a fixed 3x4 repeating grid (`"tiled"`), rotated by
+`rotation` degrees and faded by `opacity` (0..1). `page_numbers` positions
+are one of `top-left, top-center, top-right, bottom-left, bottom-center,
+bottom-right`; `format` is `n` ("1"), `page-n` ("Page 1") or `n-of-total`
+("1 of 12", where the total is the count of *selected* pages, not the whole
+document); numbering starts at `start` on the first selected page and
+increments by 1 per selected page. `stamp` positions add three more
+(`left`, `center`, `right` -- the middle row) to page numbers' six, and
+places identical content on every selected page. `max_width_pct` (stamp
+images only) is the image's max width as a fraction of page width, aspect
+ratio preserved.
+result: `{"output": "...", "bytes": 4096, "pages": 12, "pages_affected": 10}`
+
 ## Page range spec
 
 Used by `pages` and `ranges`. 1-based, inclusive. Grammar: comma-separated items,

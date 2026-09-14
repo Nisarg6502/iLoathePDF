@@ -509,9 +509,348 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "watermark":
+      return (
+        <OptionsPanel className={className} description="Add watermarks, page numbers, or stamps to PDF pages.">
+          <Field label="What to add">
+            {() => (
+              <RadioGroup
+                value={str("mode")}
+                onValueChange={(v) => set({ mode: v })}
+                aria-label="Watermark mode"
+              >
+                <RadioGroupItem
+                  value="watermark"
+                  label="Watermark"
+                  hint="Repeating text or image on every page."
+                />
+                <RadioGroupItem
+                  value="page_numbers"
+                  label="Page numbers"
+                  hint="Sequential numbering on every page."
+                />
+                <RadioGroupItem
+                  value="stamp"
+                  label="Stamp"
+                  hint="Fixed text or image at a specific position."
+                />
+              </RadioGroup>
+            )}
+          </Field>
+
+          <Field label="Apply to">
+            {() => (
+              <RadioGroup
+                value={str("pages")}
+                onValueChange={(v) => set({ pages: v })}
+                aria-label="Page range"
+              >
+                <RadioGroupItem value="all" label="Every page" />
+                <RadioGroupItem value="first" label="First page only" />
+                <RadioGroupItem value="custom" label="Custom range" />
+              </RadioGroup>
+            )}
+          </Field>
+
+          {str("pages") === "custom" ? (
+            <Field label="Pages" hint="Example: 1-3, 5, 7-10">
+              {(id) => (
+                <Input
+                  id={id}
+                  value={str("customPages") || ""}
+                  onChange={(e) => set({ customPages: e.currentTarget.value })}
+                  placeholder="1-3, 5, 7"
+                />
+              )}
+            </Field>
+          ) : null}
+
+          {str("mode") === "watermark" ? (
+            <>
+              <Field label="Content">
+                {() => (
+                  <RadioGroup
+                    value={str("watermarkContent")}
+                    onValueChange={(v) => set({ watermarkContent: v })}
+                    aria-label="Watermark content type"
+                  >
+                    <RadioGroupItem value="text" label="Text" />
+                    <RadioGroupItem value="image" label="Image" />
+                  </RadioGroup>
+                )}
+              </Field>
+
+              {str("watermarkContent") === "text" ? (
+                <Field label="Text">
+                  {(id) => (
+                    <Input
+                      id={id}
+                      value={str("watermarkText")}
+                      onChange={(e) => set({ watermarkText: e.currentTarget.value })}
+                      placeholder="CONFIDENTIAL"
+                    />
+                  )}
+                </Field>
+              ) : (
+                <ImageFileField
+                  label="Watermark image"
+                  value={str("watermarkImageDataUrl")}
+                  onChange={(v) => set({ watermarkImageDataUrl: v })}
+                />
+              )}
+
+              <Field label="Font size" value={`${num("watermarkFontSize")} pt`}>
+                {(id) => (
+                  <Slider
+                    id={id}
+                    value={num("watermarkFontSize")}
+                    min={12}
+                    max={144}
+                    step={1}
+                    onValueChange={(v) => set({ watermarkFontSize: v })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Color">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="color"
+                    value={str("watermarkColor")}
+                    onChange={(e) => set({ watermarkColor: e.currentTarget.value })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Opacity" value={`${Math.round(num("watermarkOpacity") * 100)}%`}>
+                {(id) => (
+                  <Slider
+                    id={id}
+                    value={num("watermarkOpacity")}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onValueChange={(v) => set({ watermarkOpacity: v })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Rotation" value={`${num("watermarkRotation")}°`}>
+                {(id) => (
+                  <Slider
+                    id={id}
+                    value={num("watermarkRotation")}
+                    min={0}
+                    max={360}
+                    step={1}
+                    onValueChange={(v) => set({ watermarkRotation: v })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Placement">
+                {() => (
+                  <RadioGroup
+                    value={str("watermarkPlacement")}
+                    onValueChange={(v) => set({ watermarkPlacement: v })}
+                    aria-label="Watermark placement"
+                  >
+                    <RadioGroupItem
+                      value="single"
+                      label="Single"
+                      hint="One instance in the center."
+                    />
+                    <RadioGroupItem
+                      value="tiled"
+                      label="Tiled"
+                      hint="Repeating across the page."
+                    />
+                  </RadioGroup>
+                )}
+              </Field>
+            </>
+          ) : null}
+
+          {str("mode") === "page_numbers" ? (
+            <>
+              <Field label="Position">
+                {(id) => (
+                  <Select
+                    id={id}
+                    value={str("pageNumberPosition")}
+                    onChange={(e) => set({ pageNumberPosition: e.currentTarget.value })}
+                    options={[
+                      { value: "top-left", label: "Top left" },
+                      { value: "top-center", label: "Top center" },
+                      { value: "top-right", label: "Top right" },
+                      { value: "bottom-left", label: "Bottom left" },
+                      { value: "bottom-center", label: "Bottom center" },
+                      { value: "bottom-right", label: "Bottom right" },
+                    ]}
+                  />
+                )}
+              </Field>
+
+              <Field label="Format">
+                {() => (
+                  <RadioGroup
+                    value={str("pageNumberFormat")}
+                    onValueChange={(v) => set({ pageNumberFormat: v })}
+                    aria-label="Page number format"
+                  >
+                    <RadioGroupItem value="n" label="1, 2, 3..." />
+                    <RadioGroupItem value="page-n" label="Page 1, Page 2..." />
+                    <RadioGroupItem value="n-of-total" label="1 of 10, 2 of 10..." />
+                  </RadioGroup>
+                )}
+              </Field>
+
+              <Field label="Start at" value={`${num("pageNumberStart")}`}>
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="number"
+                    value={String(num("pageNumberStart"))}
+                    onChange={(e) => set({ pageNumberStart: parseInt(e.currentTarget.value) || 1 })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Font size" value={`${num("pageNumberFontSize")} pt`}>
+                {(id) => (
+                  <Slider
+                    id={id}
+                    value={num("pageNumberFontSize")}
+                    min={8}
+                    max={72}
+                    step={1}
+                    onValueChange={(v) => set({ pageNumberFontSize: v })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Color">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="color"
+                    value={str("pageNumberColor")}
+                    onChange={(e) => set({ pageNumberColor: e.currentTarget.value })}
+                  />
+                )}
+              </Field>
+            </>
+          ) : null}
+
+          {str("mode") === "stamp" ? (
+            <>
+              <Field label="Content">
+                {() => (
+                  <RadioGroup
+                    value={str("stampContent")}
+                    onValueChange={(v) => set({ stampContent: v })}
+                    aria-label="Stamp content type"
+                  >
+                    <RadioGroupItem value="text" label="Text" />
+                    <RadioGroupItem value="image" label="Image" />
+                  </RadioGroup>
+                )}
+              </Field>
+
+              {str("stampContent") === "text" ? (
+                <Field label="Text">
+                  {(id) => (
+                    <Input
+                      id={id}
+                      value={str("stampText")}
+                      onChange={(e) => set({ stampText: e.currentTarget.value })}
+                      placeholder="APPROVED"
+                    />
+                  )}
+                </Field>
+              ) : (
+                <ImageFileField
+                  label="Stamp image"
+                  value={str("stampImageDataUrl")}
+                  onChange={(v) => set({ stampImageDataUrl: v })}
+                />
+              )}
+
+              <Field label="Position">
+                {(id) => (
+                  <Select
+                    id={id}
+                    value={str("stampPosition")}
+                    onChange={(e) => set({ stampPosition: e.currentTarget.value })}
+                    options={[
+                      { value: "top-left", label: "Top left" },
+                      { value: "top-center", label: "Top center" },
+                      { value: "top-right", label: "Top right" },
+                      { value: "left", label: "Left" },
+                      { value: "center", label: "Center" },
+                      { value: "right", label: "Right" },
+                      { value: "bottom-left", label: "Bottom left" },
+                      { value: "bottom-center", label: "Bottom center" },
+                      { value: "bottom-right", label: "Bottom right" },
+                    ]}
+                  />
+                )}
+              </Field>
+
+              <Field label="Font size" value={`${num("stampFontSize")} pt`}>
+                {(id) => (
+                  <Slider
+                    id={id}
+                    value={num("stampFontSize")}
+                    min={8}
+                    max={72}
+                    step={1}
+                    onValueChange={(v) => set({ stampFontSize: v })}
+                  />
+                )}
+              </Field>
+
+              <Field label="Color">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="color"
+                    value={str("stampColor")}
+                    onChange={(e) => set({ stampColor: e.currentTarget.value })}
+                  />
+                )}
+              </Field>
+            </>
+          ) : null}
+        </OptionsPanel>
+      );
+
     default:
       return null;
   }
+}
+
+function ImageFileField({ label, value, onChange }: { label: string; value: string; onChange: (dataUrl: string) => void }) {
+  return (
+    <Field label={label} hint={value ? "Image selected." : undefined}>
+      {(id) => (
+        <input
+          id={id}
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.currentTarget.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => onChange(reader.result as string);
+            reader.readAsDataURL(file);
+          }}
+          className="text-xs text-muted file:mr-2 file:rounded-md file:border-0 file:bg-surface-2 file:px-2 file:py-1 file:text-xs"
+        />
+      )}
+    </Field>
+  );
 }
 
 function ProtectPasswordField({
