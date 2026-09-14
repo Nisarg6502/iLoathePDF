@@ -14,6 +14,7 @@ export type OpName =
   | "pdf.organize"
   | "pdf.compress"
   | "pdf.sign"
+  | "pdf.protect"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -27,6 +28,7 @@ export type ErrorCode =
   | "GHOSTSCRIPT_MISSING"
   | "OUTPUT_WRITE_FAILED"
   | "CANCELLED"
+  | "WRONG_PASSWORD"
   | "INTERNAL";
 
 export class JobError extends Error {
@@ -114,6 +116,10 @@ export interface PdfSignParams {
 }
 export interface PdfSignResult { output: string; bytes: number; pages: number; elements: number }
 
+export type ProtectMode = "protect" | "unlock";
+export interface PdfProtectParams { input: string; output: string; mode: ProtectMode; password: string }
+export interface PdfProtectResult { output: string; bytes: number }
+
 export type CompressLevel = "lossless" | "balanced" | "strong";
 export interface PdfCompressParams { input: string; output: string; level: CompressLevel }
 export interface PdfCompressResult {
@@ -167,6 +173,7 @@ export interface OpMap {
   "pdf.organize": [PdfOrganizeParams, PdfOrganizeResult];
   "pdf.compress": [PdfCompressParams, PdfCompressResult];
   "pdf.sign": [PdfSignParams, PdfSignResult];
+  "pdf.protect": [PdfProtectParams, PdfProtectResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];
