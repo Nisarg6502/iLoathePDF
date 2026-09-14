@@ -60,7 +60,7 @@ _TILE_COLS, _TILE_ROWS = 3, 4  # 12 repeats, per the design spec
 def _resolve_pages(spec: str, total: int) -> list[int]:
     if spec == "all":
         return list(range(total))
-    if spec == "first":
+    if spec == "first" or not spec.strip():
         return [0]
     return parse_pages(spec, total)
 
@@ -134,17 +134,21 @@ def _build_watermark_overlay(spec: dict, width_pt: float, height_pt: float) -> b
     else:
         pivots = [(width_pt / 2, height_pt / 2)]
 
+    is_image = spec.get("content") == "image"
+    if is_image:
+        data = _decode_image(spec.get("image_b64"))
+        iw, ih = _image_size(data)
+        w_pt = width_pt * 0.3
+        h_pt = w_pt * ih / iw
+        reader = ImageReader(io.BytesIO(data))
+
     for cx, cy in pivots:
         c.saveState()
         c.translate(cx, cy)
         c.rotate(rotation)
         c.setFillAlpha(opacity)
-        if spec.get("content") == "image":
-            data = _decode_image(spec.get("image_b64"))
-            iw, ih = _image_size(data)
-            w_pt = width_pt * 0.3
-            h_pt = w_pt * ih / iw
-            c.drawImage(ImageReader(io.BytesIO(data)), 0, 0, width=w_pt, height=h_pt, mask="auto")
+        if is_image:
+            c.drawImage(reader, 0, 0, width=w_pt, height=h_pt, mask="auto")
         else:
             text = spec.get("text")
             if not isinstance(text, str) or not text:

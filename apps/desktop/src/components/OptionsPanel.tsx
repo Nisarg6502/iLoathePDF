@@ -744,10 +744,12 @@ export function ToolOptions({
                       { value: "top-left", label: "Top left" },
                       { value: "top-center", label: "Top center" },
                       { value: "top-right", label: "Top right" },
+                      { value: "left", label: "Left" },
+                      { value: "center", label: "Center" },
+                      { value: "right", label: "Right" },
                       { value: "bottom-left", label: "Bottom left" },
                       { value: "bottom-center", label: "Bottom center" },
                       { value: "bottom-right", label: "Bottom right" },
-                      { value: "center", label: "Center" },
                     ]}
                   />
                 )}

@@ -102,6 +102,20 @@ def test_watermark_first_page_only(make_pdf, out_dir):
     assert result["pages_affected"] == 1
 
 
+def test_watermark_empty_custom_range_defaults_to_first_page(make_pdf, out_dir):
+    src = make_pdf("a", pages=4)
+    dest = out_dir / "out.pdf"
+    result = pdf_watermark.run(
+        {
+            "input": str(src), "output": str(dest), "mode": "watermark", "pages": "",
+            "watermark": {"content": "text", "text": "DRAFT", "font_size": 24, "color": "#888888",
+                          "opacity": 0.35, "rotation": 45, "placement": "single"},
+        },
+        noop_progress,
+    )
+    assert result["pages_affected"] == 1
+
+
 def test_watermark_missing_text_when_content_is_text(make_pdf, out_dir):
     src = make_pdf("a", pages=1)
     with pytest.raises(OpError) as exc:

@@ -72,6 +72,19 @@ describe("watermarkEngine", () => {
     expect(result.summary).toMatch(/2/);
   });
 
+  it("watermark: empty custom page range defaults to page 1, not every page", async () => {
+    const file = await toFile(await makeTestPdf(4));
+    const result = await watermarkEngine({
+      files: [file],
+      options: {
+        mode: "watermark", pages: "",
+        watermark: { content: "text", text: "DRAFT", fontSize: 24, color: "#888888",
+                    opacity: 0.35, rotation: 45, placement: "single" },
+      },
+    });
+    expect(result.summary).toMatch(/^1 page/);
+  });
+
   it("watermark: rejects a missing text when content is text", async () => {
     const file = await toFile(await makeTestPdf(1));
     await expect(

@@ -51,8 +51,14 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
 
 function resolvePages(spec: string, pageCount: number): number[] {
   if (spec === "all") return Array.from({ length: pageCount }, (_, i) => i);
-  if (spec === "first") return [0];
+  if (spec === "first" || !spec.trim()) return [0];
   return parseRanges(spec, pageCount);
+}
+
+async function embedImageFromDataUrl(doc: PDFDocument, dataUrl: string) {
+  const bytes = dataUrlToBytes(dataUrl);
+  const isJpeg = dataUrl.startsWith("data:image/jpeg") || dataUrl.startsWith("data:image/jpg");
+  return isJpeg ? doc.embedJpg(bytes) : doc.embedPng(bytes);
 }
 
 /** x/y of the content's own drawing anchor (bottom-left before rotation), aligned per h/vAlign. */
@@ -91,7 +97,7 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
     let image: Awaited<ReturnType<typeof doc.embedPng>> | undefined;
     if (spec.content === "image") {
       if (!spec.imageDataUrl) throw new Error("Add an image for the watermark.");
-      image = await doc.embedPng(dataUrlToBytes(spec.imageDataUrl));
+      image = await embedImageFromDataUrl(doc, spec.imageDataUrl);
     } else if (!spec.text) {
       throw new Error("Add watermark text.");
     }
@@ -140,7 +146,10 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
       const text =
         spec.format === "n" ? String(n) : spec.format === "page-n" ? `Page ${n}` : `${n} of ${targetIndices.length}`;
       const textWidth = font.widthOfTextAtSize(text, size);
-      const { x, y } = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size);
+      // 0.7 factor (vs. 1.0 for geometric centering) matches desktop's optical
+      // centering for text: alignedXY divides contentH by 2, so this yields
+      // the same 0.35*fontSize offset as pdf_watermark.py's _draw_aligned_text.
+      const { x, y } = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size * 0.7);
       page.drawText(text, { x, y, size, font, color: hexToRgb(spec.color ?? "#000000") });
     });
   } else {
@@ -152,7 +161,7 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
     let image: Awaited<ReturnType<typeof doc.embedPng>> | undefined;
     if (spec.content === "image") {
       if (!spec.imageDataUrl) throw new Error("Add a stamp image.");
-      image = await doc.embedPng(dataUrlToBytes(spec.imageDataUrl));
+      image = await embedImageFromDataUrl(doc, spec.imageDataUrl);
     } else if (!spec.text) {
       throw new Error("Add stamp text.");
     }
@@ -167,7 +176,7 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
       } else {
         const size = Math.max(4, spec.fontSize ?? 24);
         const textWidth = font.widthOfTextAtSize(spec.text!, size);
-        const { x, y } = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size);
+        const { x, y } = alignedXY(xPct, yPct, width, height, hAlign, vAlign, textWidth, size * 0.7);
         page.drawText(spec.text!, { x, y, size, font, color: hexToRgb(spec.color ?? "#000000") });
       }
     }
