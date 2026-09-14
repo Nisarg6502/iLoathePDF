@@ -16,6 +16,8 @@ import { convertImagesEngine } from "@/engines/convertImages";
 import { SignOptions } from "./options/SignOptions";
 import { signEngine } from "@/engines/sign";
 import { SignWorkspace } from "./sign/SignWorkspace";
+import { ProtectOptions } from "./options/ProtectOptions";
+import { protectEngine } from "@/engines/protect";
 import {
   CompressIcon,
   MergeIcon,
@@ -25,6 +27,7 @@ import {
   ImagesToPdfIcon,
   ConvertImagesIcon,
   SignIcon,
+  ProtectIcon,
 } from "./icons";
 
 export const TOOLS: ToolConfig[] = [
@@ -36,6 +39,7 @@ export const TOOLS: ToolConfig[] = [
   { slug: "images-to-pdf", name: "Images to PDF", description: "Scans and photos into one PDF, one image per page.", category: "image", Icon: ImagesToPdfIcon, accept: [".png", ".jpg", ".jpeg"], multiple: true, defaultOptions: { margin: 24 }, OptionsPanel: ImagesToPdfOptions, engine: imagesToPdfEngine, status: "live", tint: "f" },
   { slug: "convert-images", name: "Convert images", description: "PNG, JPG and WebP any direction — and HEIC off an iPhone.", category: "image", Icon: ConvertImagesIcon, accept: [".png", ".jpg", ".jpeg", ".webp", ".heic"], multiple: true, defaultOptions: { to: "png" }, OptionsPanel: ConvertImagesOptions, engine: convertImagesEngine, status: "preview", tint: "g" },
   { slug: "sign", name: "Sign & Fill", description: "Draw or upload a signature, then add text, dates and initials on the page.", category: "pdf", Icon: SignIcon, accept: [".pdf"], multiple: false, defaultOptions: { elements: [] }, OptionsPanel: SignOptions, engine: signEngine, status: "live", tint: "h", Workspace: SignWorkspace },
+  { slug: "protect", name: "Protect & Unlock PDF", description: "Add or remove a password that's required to open the file.", category: "pdf", Icon: ProtectIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "protect", password: "", confirmPassword: "" }, OptionsPanel: ProtectOptions, engine: protectEngine, status: "live", tint: "i" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {

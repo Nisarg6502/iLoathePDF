@@ -80,3 +80,14 @@ export function ConvertImagesIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ProtectIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-i)" strokeWidth="1.5" {...props}>
+      <rect x="3.5" y="8" width="11" height="7.5" rx="1.2" />
+      <path d="M5.5 8V5.5a3.5 3.5 0 0 1 7 0V8" />
+      <circle cx="9" cy="11.5" r="1" fill="var(--tint-i)" stroke="none" />
+      <path d="M9 12.5v1.5" />
+    </svg>
+  );
+}
