@@ -193,6 +193,22 @@ def open_pdf(path: Path):
         raise OpError("CORRUPT_PDF", f"{path.name} could not be read: {exc}") from exc
 
 
+def open_pdf_with_password(path: Path, password: str):
+    """pikepdf.open with a password, protocol-shaped errors.
+
+    Only pdf.protect's unlock mode calls this -- every other op treats a
+    password-protected input as unsupported (ENCRYPTED_PDF via open_pdf).
+    """
+    import pikepdf
+
+    try:
+        return pikepdf.open(str(path), password=password)
+    except pikepdf.PasswordError as exc:
+        raise OpError("WRONG_PASSWORD", "Incorrect password") from exc
+    except pikepdf.PdfError as exc:
+        raise OpError("CORRUPT_PDF", f"{path.name} could not be read: {exc}") from exc
+
+
 # --------------------------------------------------------------------------
 # ghostscript discovery (shared by pdf_compress and pdf_to_img)
 # --------------------------------------------------------------------------

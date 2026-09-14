@@ -99,8 +99,16 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     if (tool.id === "sign" && signElements.length === 0) {
       return "Add a signature, text, date or initials to continue.";
     }
+    if (tool.id === "protect") {
+      const password = String(values.password ?? "");
+      const mode = String(values.mode ?? "protect");
+      if (password.length < 4) return "Enter a password of at least 4 characters.";
+      if (mode === "protect" && password !== String(values.confirmPassword ?? "")) {
+        return "Passwords do not match.";
+      }
+    }
     return null;
-  }, [files.length, tool, signElements.length]);
+  }, [files.length, tool, signElements.length, values]);
 
   const running = state.phase === "running";
 
