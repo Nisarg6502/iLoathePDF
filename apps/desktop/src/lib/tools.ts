@@ -9,6 +9,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Combine,
+  EyeOff,
   FileImage,
   FileOutput,
   Images,
@@ -23,7 +24,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -244,6 +245,22 @@ export const TOOLS: Tool[] = [
       stampContent: "text", stampText: "", stampImageDataUrl: "", stampPosition: "bottom-right",
       stampFontSize: 24, stampColor: "#000000",
     },
+  },
+  {
+    id: "redact",
+    path: "/t/redact",
+    title: "Redact PDF",
+    description: "Black out sensitive text, photos or signatures — visually or for good.",
+    icon: EyeOff,
+    group: "pdf",
+    tint: "k",
+    op: "pdf.redact",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Save PDF",
+    defaults: { mode: "visual" },
   },
 ];
 
