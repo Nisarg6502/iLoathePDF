@@ -1,4 +1,4 @@
-import { PDFDocument, PDFDict, PDFName, rgb, type PDFPage } from "pdf-lib";
+import { PDFDocument, PDFName, rgb, type PDFPage } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { Engine } from "./types";
@@ -64,36 +64,47 @@ function assertNoRotationOrCropMismatch(page: PDFPage) {
   }
 }
 
-// outDoc is a brand-new PDFDocument, so it never ends up with an AcroForm --
-// nothing in this file constructs or carries one over (see
-// copyDocumentMetadata below for why). copyPages() still copies each
-// untouched page's own /Annots array intact, since annotations belong to
-// the page, not the catalog -- so a text-field/checkbox widget on an
-// untouched page would otherwise survive as a dangling reference: the
-// widget dict itself is copied fine, but the AcroForm dictionary that
-// gives it a value, type, and place in the form hierarchy doesn't exist in
-// outDoc. Some viewers render that as broken or refuse to interact with
-// it. A correct AcroForm carry-over is possible in principle (pdf-lib
-// exposes the low-level PDFObjectCopier used internally by copyPages), but
-// a field's widget can reference its host page via /P -- and if that
-// field's widget lives on a *boxed* page, naively copying the AcroForm's
-// /Fields array would pull that original, un-redacted page back into
-// outDoc through the /P reference. That's the same class of content-leak
-// bug this file exists to prevent (see the big comment below), so rather
-// than take on that risk, True Redact deliberately drops Widget
-// annotations from copied pages instead. Interactive form fields are not
-// preserved by True Redact mode -- this is a deliberate, bounded
-// limitation, not an oversight. Visual Cover-up (which mutates the
-// original document in place) is unaffected and keeps forms intact.
-function stripWidgetAnnotations(page: PDFPage) {
-  const annots = page.node.Annots();
-  if (!annots) return;
-  for (let i = annots.size() - 1; i >= 0; i--) {
-    const dict = page.node.context.lookupMaybe(annots.get(i), PDFDict);
-    if (dict?.get(PDFName.of("Subtype")) === PDFName.of("Widget")) {
-      annots.remove(i);
-    }
-  }
+// True Redact strips EVERY annotation (links, form-field widgets,
+// comments, etc.) from EVERY source page -- not just Widget annotations,
+// and not just boxed pages -- before copyPages() ever runs. This is a
+// deliberate, bounded product decision, not an oversight, and it's the
+// only implementation of this feature we can be confident is actually
+// safe. Here's why:
+//
+// copyPages() (pdf-lib's PDFObjectCopier) doesn't just copy a page's own
+// content -- it recursively follows every object reference reachable from
+// that page, including through its /Annots array. An annotation on an
+// UNTOUCHED page can reference a BOXED page: a Link annotation with an
+// internal /Dest pointing at a boxed page, or any annotation whose /P
+// (page back-reference) points at a boxed page (this happens with
+// linked/shared form-field widgets whose /Kids span multiple pages, among
+// other cases). When the object copier walks an untouched page's
+// annotations and hits a reference into a boxed page, it copies that
+// boxed page's ENTIRE original content -- including whatever was supposed
+// to be redacted -- into outDoc as a reachable object, which then gets
+// serialized by outDoc.save(). The boxed page itself is never added to
+// outDoc's page tree, but its original content leaks out anyway, reachable
+// through another page's annotation. pdf-lib has no object garbage
+// collection, so nothing later prunes it back out -- the exact same fact
+// that made the original removePage/insertPage content leak possible (see
+// the big comment below), just reached through a different path.
+//
+// Stripping only Widget annotations (the previous approach, to avoid
+// leaving a dangling AcroForm reference -- outDoc never has an AcroForm,
+// since nothing in this file constructs or carries one over) does NOT
+// close this hole: a plain Link annotation is enough to reach a boxed
+// page. And there's no safe way to filter "only annotations that don't
+// transitively reach a boxed page" without re-implementing the same
+// reachability analysis the object copier itself performs. So the only
+// implementation we can be confident is actually safe is to strip
+// /Annots from every source page before copyPages() runs at all --
+// nothing in copyPages()'s input has an annotation graph left to
+// traverse. This means True Redact drops all annotations from the output,
+// including on pages that were never boxed: no links, no form fields, no
+// comments, anywhere in the document. Visual Cover-up (which mutates the
+// original document in place) is unaffected and keeps annotations intact.
+function stripAnnotations(page: PDFPage) {
+  page.node.delete(PDFName.of("Annots"));
 }
 
 // Because True Redact rebuilds the output as a brand-new PDFDocument (see
@@ -103,23 +114,39 @@ function stripWidgetAnnotations(page: PDFPage) {
 // explicitly; each getter can legitimately return undefined (the source
 // simply never set that field), so only call the matching setter when a
 // value is actually present.
+//
+// pdf-lib's getters don't just return undefined for a missing field --
+// they can also THROW on a field that's present but malformed, e.g. a
+// non-string /Title (type-assertion error) or a /CreationDate string that
+// isn't in strict `D:...` PDF date format (date-parse error). That's a
+// purely cosmetic field failing to abort an entire redaction job -- one
+// that's already paid for all the expensive rasterization work above --
+// so the whole copy is wrapped in one try/catch: if ANY field can't be
+// read or written, metadata copying is abandoned for the rest of the
+// fields too and the job proceeds without it, rather than throwing and
+// losing the redacted output entirely.
 function copyDocumentMetadata(source: PDFDocument, target: PDFDocument) {
-  const title = source.getTitle();
-  if (title !== undefined) target.setTitle(title);
-  const author = source.getAuthor();
-  if (author !== undefined) target.setAuthor(author);
-  const subject = source.getSubject();
-  if (subject !== undefined) target.setSubject(subject);
-  const keywords = source.getKeywords();
-  if (keywords !== undefined) target.setKeywords([keywords]);
-  const creator = source.getCreator();
-  if (creator !== undefined) target.setCreator(creator);
-  const producer = source.getProducer();
-  if (producer !== undefined) target.setProducer(producer);
-  const creationDate = source.getCreationDate();
-  if (creationDate !== undefined) target.setCreationDate(creationDate);
-  const modificationDate = source.getModificationDate();
-  if (modificationDate !== undefined) target.setModificationDate(modificationDate);
+  try {
+    const title = source.getTitle();
+    if (title !== undefined) target.setTitle(title);
+    const author = source.getAuthor();
+    if (author !== undefined) target.setAuthor(author);
+    const subject = source.getSubject();
+    if (subject !== undefined) target.setSubject(subject);
+    const keywords = source.getKeywords();
+    if (keywords !== undefined) target.setKeywords([keywords]);
+    const creator = source.getCreator();
+    if (creator !== undefined) target.setCreator(creator);
+    const producer = source.getProducer();
+    if (producer !== undefined) target.setProducer(producer);
+    const creationDate = source.getCreationDate();
+    if (creationDate !== undefined) target.setCreationDate(creationDate);
+    const modificationDate = source.getModificationDate();
+    if (modificationDate !== undefined) target.setModificationDate(modificationDate);
+  } catch {
+    // Malformed-but-valid metadata field (see comment above) -- skip
+    // metadata entirely for this document rather than fail the job.
+  }
 }
 
 export const redactEngine: Engine = async ({ files, options }) => {
@@ -192,6 +219,17 @@ export const redactEngine: Engine = async ({ files, options }) => {
     const loadingTask = pdfjsLib.getDocument({ data: bytes.slice(0) });
     const pdfjsDoc = await loadingTask.promise;
     try {
+      // Strip /Annots from every untouched SOURCE page before copyPages()
+      // runs at all -- see the big comment on stripAnnotations above for
+      // why this has to happen pre-copy (doing it after, on the copied
+      // pages, is too late: the object copier has already pulled in
+      // whatever the annotations referenced). Mutating `doc` here is safe
+      // because `doc` is never saved in this branch -- only read from
+      // (via copyPages and, for boxed pages, pdf.js rendering below).
+      for (const sourceIndex of unboxedIndices) {
+        stripAnnotations(doc.getPage(sourceIndex));
+      }
+
       // Copy every untouched page in a single batched call. pdf-lib builds
       // a fresh internal object copier per `copyPages()` call, and that
       // copier is what dedupes objects shared between the pages copied in
@@ -205,9 +243,7 @@ export const redactEngine: Engine = async ({ files, options }) => {
         unboxedIndices.length > 0 ? await outDoc.copyPages(doc, unboxedIndices) : [];
       const copiedPageByIndex = new Map<number, PDFPage>();
       unboxedIndices.forEach((sourceIndex, i) => {
-        const copiedPage = copiedPages[i];
-        stripWidgetAnnotations(copiedPage);
-        copiedPageByIndex.set(sourceIndex, copiedPage);
+        copiedPageByIndex.set(sourceIndex, copiedPages[i]);
       });
 
       // Walk the source page order once, interleaving the pre-copied

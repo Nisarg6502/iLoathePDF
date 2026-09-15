@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PDFDocument, PDFName, degrees } from "pdf-lib";
+import { PDFDocument, PDFDict, PDFName, PDFNumber, PDFString, degrees } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import { inflateSync } from "node:zlib";
 import { redactEngine, boxRectPt } from "./redact";
@@ -282,6 +282,105 @@ describe("redactEngine", () => {
 
     const outPage2Annots = out.getPage(1).node.Annots();
     expect(outPage2Annots === undefined || outPage2Annots.size() === 0).toBe(true);
+  });
+
+  // --- Critical Finding: annotation-graph content leak ---
+  //
+  // copyPages() (pdf-lib's PDFObjectCopier) recursively follows every
+  // object reference reachable from a copied page, including through its
+  // /Annots array. A Link annotation on an UNTOUCHED page with an internal
+  // /Dest pointing at a BOXED page is enough to pull that boxed page's
+  // entire original, un-redacted content into outDoc as a reachable
+  // object -- even though the boxed page is never added to outDoc's page
+  // tree, its content still gets serialized by outDoc.save(). Stripping
+  // only Widget annotations (the previous fix) does not close this: a
+  // plain Link annotation reaches it too. This reproduces that exact
+  // scenario and uses the same stream-level byte scanner as the
+  // removePage/insertPage regression test above to confirm the boxed
+  // page's marker text is genuinely gone from the saved bytes -- not just
+  // absent from the live page tree.
+  it("true: an untouched page's Link annotation pointing at a boxed page must not leak the boxed page's content", async () => {
+    const doc = await PDFDocument.create();
+    const boxedPage = doc.addPage([200, 300]);
+    boxedPage.drawText("Page 1", { x: 20, y: 260, size: 18 });
+    const untouchedPage = doc.addPage([200, 300]);
+    untouchedPage.drawText("Page 2", { x: 20, y: 260, size: 18 });
+
+    // A Link annotation on the untouched page, with an internal /Dest
+    // referencing the boxed page directly by its object reference -- the
+    // same shape a "jump to page 1" internal link would have.
+    const linkAnnot = doc.context.obj({
+      Type: "Annot",
+      Subtype: "Link",
+      Rect: [0, 0, 0, 0],
+      Border: [0, 0, 0],
+      Dest: [boxedPage.ref, "XYZ", null, null, null],
+    });
+    const linkAnnotRef = doc.context.register(linkAnnot);
+    untouchedPage.node.addAnnot(linkAnnotRef);
+
+    // Sanity check on the fixture itself.
+    expect(untouchedPage.node.Annots()?.size()).toBe(1);
+
+    const bytes = await doc.save();
+    const file = await toFile(bytes);
+    // Box page 1 (the Link's destination) only; page 2 (with the Link) is
+    // untouched and copied forward via copyPages.
+    const result = await redactEngine({ files: [file], options: { mode: "true", boxes: [box(0)] } });
+    const outBytes = await result.files[0].blob.arrayBuffer();
+
+    const out = await PDFDocument.load(outBytes.slice(0));
+    expect(out.getPageCount()).toBe(2);
+    // The untouched page's Link annotation itself must be gone too (True
+    // Redact drops all annotations), not just harmless.
+    expect(out.getPage(1).node.Annots()).toBeUndefined();
+
+    // The actual bug: even with the annotation gone from the live page
+    // tree, the boxed page's original content could still be a reachable-
+    // but-orphaned object that save() writes out anyway. Scan the raw
+    // saved bytes directly to confirm "Page 1" (the boxed page's original
+    // text) is genuinely absent, while "Page 2" (the untouched page) is
+    // still genuinely present.
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 1")).toBe(false);
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 2")).toBe(true);
+  });
+
+  // --- Unguarded metadata getters can crash the whole redaction ---
+  //
+  // pdf-lib's metadata getters don't just return undefined for a missing
+  // field -- they can THROW on a field that's present but malformed, e.g.
+  // a /CreationDate string that isn't in strict `D:...` PDF date format
+  // (InvalidPDFDateStringError from decodeDate()). Before the fix, that
+  // exception propagated out of copyDocumentMetadata and failed the whole
+  // redaction job -- after all the expensive rasterization work was
+  // already done -- for a purely cosmetic field. This confirms the job
+  // still succeeds (does not throw) against such a fixture.
+  it("true: a malformed metadata field does not abort the whole redaction", async () => {
+    const doc = await PDFDocument.create();
+    doc.addPage([200, 300]);
+    doc.setTitle("Will be overwritten");
+
+    // Force-create the Info dict via setTitle above, then reach in at the
+    // low level and corrupt /CreationDate to a string that isn't valid
+    // PDF date syntax -- decodeDate() throws InvalidPDFDateStringError on
+    // this, rather than returning undefined.
+    const infoRef = doc.context.trailerInfo.Info;
+    const infoDict = doc.context.lookup(infoRef, PDFDict);
+    infoDict.set(PDFName.of("CreationDate"), PDFString.of("not-a-valid-pdf-date"));
+    // Also corrupt /Title to a non-string type, which fails pdf-lib's
+    // literal-or-hex-string assertion in getTitle() with a different kind
+    // of throw (type-assertion error rather than a parse error).
+    infoDict.set(PDFName.of("Title"), PDFNumber.of(42));
+
+    const bytes = await doc.save();
+    const file = await toFile(bytes);
+
+    // Must not throw, and must still produce a redacted file.
+    const result = await redactEngine({ files: [file], options: { mode: "true", boxes: [box(0)] } });
+    expect(result.files).toHaveLength(1);
+    const outBytes = await result.files[0].blob.arrayBuffer();
+    const out = await PDFDocument.load(outBytes);
+    expect(out.getPageCount()).toBe(1);
   });
 });
 
