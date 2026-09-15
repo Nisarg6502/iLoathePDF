@@ -168,3 +168,119 @@ def test_redact_propagates_encrypted_and_corrupt(encrypted_pdf, corrupt_pdf, out
             )
         assert exc.value.code == code
     assert not (out_dir / "r.pdf").exists()
+
+
+# --------------------------------------------------------------------------
+# _rect_points: percentage -> point coordinate math
+# --------------------------------------------------------------------------
+
+
+def test_rect_points_converts_top_left_percent_to_bottom_left_points():
+    # 595x842pt page (A4 @ 72dpi). Box at x_pct=0.1, y_pct=0.2, w_pct=0.3,
+    # h_pct=0.1: x_pct/w_pct are a straight scale of width; y_pct is measured
+    # from the TOP of the page but PDF points are measured from the BOTTOM,
+    # so the box's y_pt (its bottom edge) is:
+    #   top_of_box_pt = height - y_pct * height = 842 - 0.2*842 = 673.6
+    #   y_pt (bottom edge) = top_of_box_pt - h_pt = 673.6 - 84.2 = 589.4
+    width_pt, height_pt = 595.0, 842.0
+    box = {"x_pct": 0.1, "y_pct": 0.2, "w_pct": 0.3, "h_pct": 0.1}
+
+    x_pt, y_pt, w_pt, h_pt = pdf_redact._rect_points(box, width_pt, height_pt)
+
+    assert x_pt == pytest.approx(59.5)
+    assert w_pt == pytest.approx(178.5)
+    assert h_pt == pytest.approx(84.2)
+    assert y_pt == pytest.approx(589.4)
+
+
+def test_rect_points_box_flush_with_page_top_touches_the_top_edge():
+    # A box pinned to the very top of the page (y_pct=0) should have its top
+    # edge (y_pt + h_pt) equal to the page height.
+    width_pt, height_pt = 200.0, 300.0
+    box = {"x_pct": 0.0, "y_pct": 0.0, "w_pct": 1.0, "h_pct": 0.25}
+
+    x_pt, y_pt, w_pt, h_pt = pdf_redact._rect_points(box, width_pt, height_pt)
+
+    assert x_pt == 0.0
+    assert w_pt == 200.0
+    assert h_pt == 75.0
+    assert y_pt + h_pt == pytest.approx(height_pt)
+
+
+# --------------------------------------------------------------------------
+# rotation / crop guard (True Redact only)
+# --------------------------------------------------------------------------
+
+
+def _rotate_page(path, page_index: int, degrees: int) -> None:
+    with pikepdf.open(str(path), allow_overwriting_input=True) as pdf:
+        pdf.pages[page_index].Rotate = degrees
+        pdf.save(str(path))
+
+
+def _crop_page(path, page_index: int) -> None:
+    with pikepdf.open(str(path), allow_overwriting_input=True) as pdf:
+        page = pdf.pages[page_index]
+        mbox = [float(v) for v in page.mediabox]
+        page.cropbox = pikepdf.Array([mbox[0] + 10, mbox[1] + 10, mbox[2] - 10, mbox[3] - 10])
+        pdf.save(str(path))
+
+
+@needs_gs
+def test_redact_true_rejects_a_rotated_page(make_pdf, out_dir):
+    src = make_pdf("a", pages=1)
+    _rotate_page(src, 0, 90)
+    dest = out_dir / "redacted.pdf"
+
+    with pytest.raises(OpError) as exc:
+        pdf_redact.run(
+            {"input": str(src), "output": str(dest), "mode": "true", "boxes": one_box(0)},
+            noop_progress,
+        )
+    assert exc.value.code == "BAD_PARAMS"
+    assert "rotated" in exc.value.message.lower()
+    assert not dest.exists()
+
+
+def test_redact_visual_still_works_on_a_rotated_page(make_pdf, out_dir):
+    src = make_pdf("a", pages=1)
+    _rotate_page(src, 0, 90)
+    dest = out_dir / "redacted.pdf"
+
+    result = pdf_redact.run(
+        {"input": str(src), "output": str(dest), "mode": "visual", "boxes": one_box(0)},
+        noop_progress,
+    )
+    assert result["mode"] == "visual"
+    assert dest.exists()
+
+
+@needs_gs
+def test_redact_true_rejects_a_cropped_page(make_pdf, out_dir):
+    src = make_pdf("a", pages=1)
+    _crop_page(src, 0)
+    dest = out_dir / "redacted.pdf"
+
+    with pytest.raises(OpError) as exc:
+        pdf_redact.run(
+            {"input": str(src), "output": str(dest), "mode": "true", "boxes": one_box(0)},
+            noop_progress,
+        )
+    assert exc.value.code == "BAD_PARAMS"
+    assert not dest.exists()
+
+
+@needs_gs
+def test_redact_true_rejects_only_the_rotated_page_it_targets(make_pdf, out_dir):
+    # A rotated page elsewhere in the document that ISN'T targeted by a box
+    # must not block redaction of an untouched, unrotated page.
+    src = make_pdf("a", pages=2)
+    _rotate_page(src, 1, 90)
+    dest = out_dir / "redacted.pdf"
+
+    result = pdf_redact.run(
+        {"input": str(src), "output": str(dest), "mode": "true", "boxes": one_box(0)},
+        noop_progress,
+    )
+    assert result["mode"] == "true"
+    assert dest.exists()

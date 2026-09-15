@@ -30,6 +30,11 @@ from ._common import (
 
 _REDACT_DPI = 200
 
+_ROTATED_OR_CROPPED_MESSAGE = (
+    "This page is rotated/cropped -- True Redact isn't supported for it yet. "
+    "Try Visual Cover-up, or rotate the PDF to its default orientation first."
+)
+
 
 def _pct(box: dict, key: str) -> float:
     value = box.get(key)
@@ -60,6 +65,26 @@ def _validate(boxes: object, page_count: int) -> list[dict]:
             }
         )
     return out
+
+
+def _assert_no_rotation_or_crop_mismatch(page) -> None:
+    """Refuse pages the bake logic can't yet handle correctly.
+
+    The box-drawing UI previews pages via pdf.js, which honors `/Rotate` and
+    `CropBox`. This op's bake logic reads the raw, unrotated `mediabox` and
+    Ghostscript-rasterizes at that implied orientation -- on a page with a
+    non-default `/Rotate` (or a `CropBox` that differs from `MediaBox`) the
+    box would land in the wrong place and/or the flattened image would be
+    stretched into the wrong aspect ratio. Rather than a full rotation/crop-
+    aware coordinate rewrite, True Redact refuses to touch such a page.
+    """
+    rotation = int(page.get("/Rotate", 0))
+    if rotation % 360 != 0:
+        raise OpError("BAD_PARAMS", _ROTATED_OR_CROPPED_MESSAGE)
+    mediabox = [float(v) for v in page.mediabox]
+    cropbox = [float(v) for v in page.cropbox]
+    if any(abs(a - b) > 0.01 for a, b in zip(mediabox, cropbox)):
+        raise OpError("BAD_PARAMS", _ROTATED_OR_CROPPED_MESSAGE)
 
 
 def _rect_points(box: dict, width_pt: float, height_pt: float) -> tuple[float, float, float, float]:
@@ -178,6 +203,11 @@ def run(params: dict, progress: ProgressFn) -> dict:
                 pages_done += 1
                 progress(5 + int(85 * pages_done / len(pages_in_order)), f"page {page_index + 1}")
         else:
+            # Fail fast, like the Ghostscript check above, before any
+            # rasterization work: reject rotated/cropped pages up front.
+            for page_index in pages_in_order:
+                _assert_no_rotation_or_crop_mismatch(src.pages[page_index])
+
             with temp_dir() as tmp:
                 for page_index in pages_in_order:
                     page = src.pages[page_index]
