@@ -20,6 +20,8 @@ import type { PdfPageItem } from "@/components/PageThumbnailGrid";
 import type { CompressionSummary } from "@/components/ResultCard";
 import type { SignElement } from "./signTypes";
 import { isImageSignElement } from "./signTypes";
+import type { RedactBoxParams } from "./jobs";
+import type { RedactBox } from "./redactTypes";
 
 export interface JobResult {
   outputs: { path: string; bytes: number }[];
@@ -63,6 +65,7 @@ export async function execute(
   onProgress: (p: Progress) => void,
   signal: AbortSignal,
   signElements: SignElement[] = [],
+  redactBoxes: RedactBox[] = [],
 ): Promise<JobResult> {
   const first = files[0];
   const dir = outputDirFor(first.path);
@@ -180,6 +183,28 @@ export async function execute(
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
         summary: `${r.elements} element${r.elements === 1 ? "" : "s"} added across ${r.pages} page${r.pages === 1 ? "" : "s"}.`,
+      };
+    }
+
+    case "pdf.redact": {
+      if (redactBoxes.length === 0) {
+        throw new JobError("BAD_PARAMS", "Add at least one box before exporting.");
+      }
+      const boxes: RedactBoxParams[] = redactBoxes.map((b) => ({
+        page: b.pageIndex,
+        x_pct: b.xPct,
+        y_pct: b.yPct,
+        w_pct: b.wPct,
+        h_pct: b.hPct,
+      }));
+      const r = await runJob(
+        "pdf.redact",
+        { input: first.path, output: join(`${base}-redacted.pdf`), mode: str("mode", "visual") as "visual" | "true", boxes },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.boxes} box${r.boxes === 1 ? "" : "es"} redacted (${r.mode === "true" ? "true redact" : "visual cover-up"}).`,
       };
     }
 

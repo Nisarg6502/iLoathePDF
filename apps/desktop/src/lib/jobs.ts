@@ -16,6 +16,7 @@ export type OpName =
   | "pdf.sign"
   | "pdf.protect"
   | "pdf.watermark"
+  | "pdf.redact"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -117,6 +118,22 @@ export interface PdfSignParams {
 }
 export interface PdfSignResult { output: string; bytes: number; pages: number; elements: number }
 
+export type RedactMode = "visual" | "true";
+export interface RedactBoxParams {
+  page: number;
+  x_pct: number;
+  y_pct: number;
+  w_pct: number;
+  h_pct: number;
+}
+export interface PdfRedactParams {
+  input: string;
+  output: string;
+  mode: RedactMode;
+  boxes: RedactBoxParams[];
+}
+export interface PdfRedactResult { output: string; bytes: number; pages: number; boxes: number; mode: RedactMode }
+
 export type ProtectMode = "protect" | "unlock";
 export interface PdfProtectParams { input: string; output: string; mode: ProtectMode; password: string }
 export interface PdfProtectResult { output: string; bytes: number }
@@ -194,6 +211,7 @@ export interface OpMap {
   "pdf.sign": [PdfSignParams, PdfSignResult];
   "pdf.protect": [PdfProtectParams, PdfProtectResult];
   "pdf.watermark": [PdfWatermarkParams, PdfWatermarkResult];
+  "pdf.redact": [PdfRedactParams, PdfRedactResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];
