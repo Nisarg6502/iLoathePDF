@@ -191,6 +191,25 @@ images only) is the image's max width as a fraction of page width, aspect
 ratio preserved.
 result: `{"output": "...", "bytes": 4096, "pages": 12, "pages_affected": 10}`
 
+### `pdf.redact`
+params:
+```json
+{"input": "a.pdf", "output": "out.pdf", "mode": "visual|true",
+ "boxes": [{"page": 0, "x_pct": 0.1, "y_pct": 0.2, "w_pct": 0.3, "h_pct": 0.1}]}
+```
+`page` is a 0-based page index. Placement (`x_pct`/`y_pct`/`w_pct`/`h_pct`) is
+a fraction (0..1) of that page's own box, top-left origin: `x_pct`/`y_pct`
+locate the box's top-left corner, `w_pct`/`h_pct` its size. `mode: "visual"`
+(the default) draws a black rectangle on top of each box -- the original
+page content is untouched underneath. `mode: "true"` rasterizes every page
+that received at least one box with Ghostscript and replaces it wholesale,
+so nothing under a box -- or anywhere else on that page -- survives in
+extractable form; pages with no boxes are never touched. `true` mode rejects
+a targeted page whose `/Rotate` is non-default or whose CropBox differs from
+its MediaBox with `BAD_PARAMS` (not yet supported -- use `visual` mode, or
+rotate the PDF to its default orientation first).
+result: `{"output": "...", "bytes": 4096, "pages": 12, "boxes": 3, "mode": "true"}`
+
 ## Page range spec
 
 Used by `pages` and `ranges`. 1-based, inclusive. Grammar: comma-separated items,
