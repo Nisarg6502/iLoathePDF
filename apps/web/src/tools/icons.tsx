@@ -101,3 +101,12 @@ export function WatermarkIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function RedactIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-k)" strokeWidth="1.5" {...props}>
+      <rect x="2.5" y="3.5" width="13" height="11" rx="1.2" />
+      <rect x="4.5" y="8" width="9" height="3" fill="var(--tint-k)" stroke="none" />
+    </svg>
+  );
+}
