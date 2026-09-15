@@ -1,4 +1,4 @@
-import { PDFDocument, PDFName, rgb, type PDFPage } from "pdf-lib";
+import { PDFDocument, rgb, type PDFName, type PDFPage } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { Engine } from "./types";
@@ -64,47 +64,105 @@ function assertNoRotationOrCropMismatch(page: PDFPage) {
   }
 }
 
-// True Redact strips EVERY annotation (links, form-field widgets,
-// comments, etc.) from EVERY source page -- not just Widget annotations,
-// and not just boxed pages -- before copyPages() ever runs. This is a
-// deliberate, bounded product decision, not an oversight, and it's the
-// only implementation of this feature we can be confident is actually
-// safe. Here's why:
+// True Redact strips every dictionary entry it doesn't explicitly know is
+// safe from EVERY source page -- not just boxed pages -- before
+// copyPages() ever runs. This is a deliberate, bounded product decision,
+// not an oversight, and it's the only implementation of this feature we
+// can be confident is actually safe. Here's why:
 //
 // copyPages() (pdf-lib's PDFObjectCopier) doesn't just copy a page's own
 // content -- it recursively follows every object reference reachable from
-// that page, including through its /Annots array. An annotation on an
-// UNTOUCHED page can reference a BOXED page: a Link annotation with an
-// internal /Dest pointing at a boxed page, or any annotation whose /P
-// (page back-reference) points at a boxed page (this happens with
-// linked/shared form-field widgets whose /Kids span multiple pages, among
-// other cases). When the object copier walks an untouched page's
-// annotations and hits a reference into a boxed page, it copies that
-// boxed page's ENTIRE original content -- including whatever was supposed
-// to be redacted -- into outDoc as a reachable object, which then gets
+// that page's dictionary, through ANY key, not just the obvious ones. An
+// UNTOUCHED page's dictionary can reference a BOXED page through more
+// spots than just /Annots: a Link annotation's /Dest or a widget's /P
+// (round 3's fix), but ALSO /AA (page open/close actions, whose action
+// dict can carry a /D destination into another page), /B (article thread
+// beads, which carry /P back-references to their page), /PresSteps
+// (presentation navigation steps), /SeparationInfo (page group separation
+// info, which can reference the pages it applies to), or any other
+// spec-legal or non-standard key nobody has thought of yet. When the
+// object copier walks an untouched page's dictionary and hits a reference
+// into a boxed page through ANY of these, it copies that boxed page's
+// ENTIRE original content -- including whatever was supposed to be
+// redacted -- into outDoc as a reachable object, which then gets
 // serialized by outDoc.save(). The boxed page itself is never added to
 // outDoc's page tree, but its original content leaks out anyway, reachable
-// through another page's annotation. pdf-lib has no object garbage
+// through another page's dictionary. pdf-lib has no object garbage
 // collection, so nothing later prunes it back out -- the exact same fact
 // that made the original removePage/insertPage content leak possible (see
 // the big comment below), just reached through a different path.
 //
-// Stripping only Widget annotations (the previous approach, to avoid
-// leaving a dangling AcroForm reference -- outDoc never has an AcroForm,
-// since nothing in this file constructs or carries one over) does NOT
-// close this hole: a plain Link annotation is enough to reach a boxed
-// page. And there's no safe way to filter "only annotations that don't
-// transitively reach a boxed page" without re-implementing the same
-// reachability analysis the object copier itself performs. So the only
-// implementation we can be confident is actually safe is to strip
-// /Annots from every source page before copyPages() runs at all --
-// nothing in copyPages()'s input has an annotation graph left to
-// traverse. This means True Redact drops all annotations from the output,
-// including on pages that were never boxed: no links, no form fields, no
-// comments, anywhere in the document. Visual Cover-up (which mutates the
-// original document in place) is unaffected and keeps annotations intact.
-function stripAnnotations(page: PDFPage) {
-  page.node.delete(PDFName.of("Annots"));
+// A denylist (deleting /Annots, or /Annots plus a handful of other named
+// keys) can never fully close this: every round so far has found another
+// spec-legal key carrying a reference to another page, and there's no way
+// to be sure the list is exhaustive without re-implementing the object
+// copier's own reachability analysis. So instead this is an ALLOWLIST:
+// delete every entry that ISN'T one of a small set of keys known to be
+// both necessary for a page to render/behave correctly and incapable of
+// referencing another page. Nothing in copyPages()'s input has anything
+// left on it except that safe set, so no future or overlooked key can
+// reopen this bug class. This means True Redact drops all annotations
+// (and page actions, article beads, etc.) from the output, including on
+// pages that were never boxed: no links, no form fields, no comments,
+// anywhere in the document. Visual Cover-up (which mutates the original
+// document in place) is unaffected and keeps everything intact.
+//
+// The allowlist:
+//   - Type, Parent: page-tree bookkeeping. `Parent` looks dangerous (it
+//     points at the Pages tree node, whose /Kids reaches every sibling
+//     page, boxed ones included) but pdf-lib's own copyPDFPage() needs it
+//     present on the SOURCE page to resolve inherited attributes
+//     (Resources/MediaBox/CropBox/Rotate that live on an ancestor Pages
+//     node rather than directly on the page) -- it reads that chain with
+//     plain local dict lookups (Dict.get), never through the object
+//     copier's copy(), and deletes /Parent from its own clone before the
+//     copier ever walks the clone's entries. So the Kids array is never
+//     reachable through this path; dropping /Parent here would only break
+//     inheritance for real documents that rely on it.
+//   - Contents, Resources: the page's actual drawable content and the
+//     fonts/images/graphics state it draws with.
+//   - MediaBox, CropBox, BleedBox, TrimBox, ArtBox: page geometry.
+//   - Rotate, Group, UserUnit, LastModified, StructParents, Tabs:
+//     orientation, transparency-group info, unit scale, a timestamp, a
+//     plain integer index into the structure tree, and click-order --
+//     none of these are references, so none can carry a reference to
+//     another page.
+const SAFE_PAGE_KEYS = new Set([
+  "Type",
+  "Parent",
+  "Contents",
+  "Resources",
+  "MediaBox",
+  "CropBox",
+  "BleedBox",
+  "TrimBox",
+  "ArtBox",
+  "Rotate",
+  "Group",
+  "UserUnit",
+  "LastModified",
+  "StructParents",
+  "Tabs",
+]);
+
+function stripUnsafePageEntries(page: PDFPage) {
+  // PDFDict#entries() (pdf-lib/cjs/core/objects/PDFDict.js) returns
+  // `Array.from(this.dict.keys()/.entries())` -- a snapshot array, not a
+  // live view over the underlying Map -- so deleting while iterating this
+  // array is safe. Collect first anyway to keep that independent of
+  // pdf-lib's internals.
+  const keysToDelete: PDFName[] = [];
+  for (const [key] of page.node.entries()) {
+    // PDFName#asString() (pdf-lib/cjs/core/objects/PDFName.js) returns the
+    // encoded name WITH its leading slash (e.g. "/Annots"), hence the
+    // slice(1) to compare against the bare names in SAFE_PAGE_KEYS.
+    if (!SAFE_PAGE_KEYS.has(key.asString().slice(1))) {
+      keysToDelete.push(key);
+    }
+  }
+  for (const key of keysToDelete) {
+    page.node.delete(key);
+  }
 }
 
 // Because True Redact rebuilds the output as a brand-new PDFDocument (see
@@ -219,15 +277,16 @@ export const redactEngine: Engine = async ({ files, options }) => {
     const loadingTask = pdfjsLib.getDocument({ data: bytes.slice(0) });
     const pdfjsDoc = await loadingTask.promise;
     try {
-      // Strip /Annots from every untouched SOURCE page before copyPages()
-      // runs at all -- see the big comment on stripAnnotations above for
-      // why this has to happen pre-copy (doing it after, on the copied
-      // pages, is too late: the object copier has already pulled in
-      // whatever the annotations referenced). Mutating `doc` here is safe
-      // because `doc` is never saved in this branch -- only read from
-      // (via copyPages and, for boxed pages, pdf.js rendering below).
+      // Strip every unsafe dictionary entry from every untouched SOURCE
+      // page before copyPages() runs at all -- see the big comment on
+      // stripUnsafePageEntries above for why this has to happen pre-copy
+      // (doing it after, on the copied pages, is too late: the object
+      // copier has already pulled in whatever those entries referenced).
+      // Mutating `doc` here is safe because `doc` is never saved in this
+      // branch -- only read from (via copyPages and, for boxed pages,
+      // pdf.js rendering below).
       for (const sourceIndex of unboxedIndices) {
-        stripAnnotations(doc.getPage(sourceIndex));
+        stripUnsafePageEntries(doc.getPage(sourceIndex));
       }
 
       // Copy every untouched page in a single batched call. pdf-lib builds

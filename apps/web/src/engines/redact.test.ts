@@ -345,6 +345,61 @@ describe("redactEngine", () => {
     expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 2")).toBe(true);
   });
 
+  // --- Allowlist regression: /AA (page action) content leak ---
+  //
+  // /Annots is not the only page-dictionary key that can carry a
+  // reference reaching another page: /AA (additional actions -- e.g. a
+  // page-open action) can too, via its action dictionary's /D
+  // destination. The old fix (denylisting /Annots only) left this wide
+  // open; stripUnsafePageEntries's allowlist closes it because /AA simply
+  // isn't in SAFE_PAGE_KEYS. This reproduces the same leak shape as the
+  // /Annots regression test above, but through /AA instead, and uses the
+  // same stream-level byte scanner to confirm the boxed page's original
+  // content is genuinely absent from the saved bytes.
+  it("true: an untouched page's /AA page-open action pointing at a boxed page must not leak the boxed page's content", async () => {
+    const doc = await PDFDocument.create();
+    const boxedPage = doc.addPage([200, 300]);
+    boxedPage.drawText("Page 1", { x: 20, y: 260, size: 18 });
+    const untouchedPage = doc.addPage([200, 300]);
+    untouchedPage.drawText("Page 2", { x: 20, y: 260, size: 18 });
+
+    // A page-open action on the untouched page: a GoTo action whose /D
+    // destination references the boxed page directly by its object
+    // reference -- the same shape a "jump to page 1 on open" action would
+    // have. /AA's /O entry is the open action.
+    const openAction = doc.context.obj({
+      Type: "Action",
+      S: "GoTo",
+      D: [boxedPage.ref, "XYZ", null, null, null],
+    });
+    const aaDict = doc.context.obj({ O: openAction });
+    untouchedPage.node.set(PDFName.of("AA"), aaDict);
+
+    // Sanity check on the fixture itself.
+    expect(untouchedPage.node.get(PDFName.of("AA"))).toBeDefined();
+
+    const bytes = await doc.save();
+    const file = await toFile(bytes);
+    // Box page 1 (the action's destination) only; page 2 (with /AA) is
+    // untouched and copied forward via copyPages.
+    const result = await redactEngine({ files: [file], options: { mode: "true", boxes: [box(0)] } });
+    const outBytes = await result.files[0].blob.arrayBuffer();
+
+    const out = await PDFDocument.load(outBytes.slice(0));
+    expect(out.getPageCount()).toBe(2);
+    // /AA itself must be gone too (it's not in SAFE_PAGE_KEYS).
+    expect(out.getPage(1).node.get(PDFName.of("AA"))).toBeUndefined();
+
+    // The actual bug: even with /AA gone from the live page tree, the
+    // boxed page's original content could still be a reachable-but-
+    // orphaned object that save() writes out anyway. Scan the raw saved
+    // bytes directly to confirm "Page 1" (the boxed page's original text)
+    // is genuinely absent, while "Page 2" (the untouched page) is still
+    // genuinely present.
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 1")).toBe(false);
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 2")).toBe(true);
+  });
+
   // --- Unguarded metadata getters can crash the whole redaction ---
   //
   // pdf-lib's metadata getters don't just return undefined for a missing
