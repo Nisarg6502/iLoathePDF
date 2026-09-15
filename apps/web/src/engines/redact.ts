@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, type PDFPage } from "pdf-lib";
+import { PDFDocument, PDFDict, PDFName, rgb, type PDFPage } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { Engine } from "./types";
@@ -64,6 +64,64 @@ function assertNoRotationOrCropMismatch(page: PDFPage) {
   }
 }
 
+// outDoc is a brand-new PDFDocument, so it never ends up with an AcroForm --
+// nothing in this file constructs or carries one over (see
+// copyDocumentMetadata below for why). copyPages() still copies each
+// untouched page's own /Annots array intact, since annotations belong to
+// the page, not the catalog -- so a text-field/checkbox widget on an
+// untouched page would otherwise survive as a dangling reference: the
+// widget dict itself is copied fine, but the AcroForm dictionary that
+// gives it a value, type, and place in the form hierarchy doesn't exist in
+// outDoc. Some viewers render that as broken or refuse to interact with
+// it. A correct AcroForm carry-over is possible in principle (pdf-lib
+// exposes the low-level PDFObjectCopier used internally by copyPages), but
+// a field's widget can reference its host page via /P -- and if that
+// field's widget lives on a *boxed* page, naively copying the AcroForm's
+// /Fields array would pull that original, un-redacted page back into
+// outDoc through the /P reference. That's the same class of content-leak
+// bug this file exists to prevent (see the big comment below), so rather
+// than take on that risk, True Redact deliberately drops Widget
+// annotations from copied pages instead. Interactive form fields are not
+// preserved by True Redact mode -- this is a deliberate, bounded
+// limitation, not an oversight. Visual Cover-up (which mutates the
+// original document in place) is unaffected and keeps forms intact.
+function stripWidgetAnnotations(page: PDFPage) {
+  const annots = page.node.Annots();
+  if (!annots) return;
+  for (let i = annots.size() - 1; i >= 0; i--) {
+    const dict = page.node.context.lookupMaybe(annots.get(i), PDFDict);
+    if (dict?.get(PDFName.of("Subtype")) === PDFName.of("Widget")) {
+      annots.remove(i);
+    }
+  }
+}
+
+// Because True Redact rebuilds the output as a brand-new PDFDocument (see
+// the big comment below), none of the source catalog's Info dictionary
+// survives automatically -- title, author, dates, etc. would all silently
+// come back as undefined. Carry the standard metadata fields forward
+// explicitly; each getter can legitimately return undefined (the source
+// simply never set that field), so only call the matching setter when a
+// value is actually present.
+function copyDocumentMetadata(source: PDFDocument, target: PDFDocument) {
+  const title = source.getTitle();
+  if (title !== undefined) target.setTitle(title);
+  const author = source.getAuthor();
+  if (author !== undefined) target.setAuthor(author);
+  const subject = source.getSubject();
+  if (subject !== undefined) target.setSubject(subject);
+  const keywords = source.getKeywords();
+  if (keywords !== undefined) target.setKeywords([keywords]);
+  const creator = source.getCreator();
+  if (creator !== undefined) target.setCreator(creator);
+  const producer = source.getProducer();
+  if (producer !== undefined) target.setProducer(producer);
+  const creationDate = source.getCreationDate();
+  if (creationDate !== undefined) target.setCreationDate(creationDate);
+  const modificationDate = source.getModificationDate();
+  if (modificationDate !== undefined) target.setModificationDate(modificationDate);
+}
+
 export const redactEngine: Engine = async ({ files, options }) => {
   const file = files[0];
   if (!file) throw new Error("Add a PDF to redact.");
@@ -125,14 +183,43 @@ export const redactEngine: Engine = async ({ files, options }) => {
       assertNoRotationOrCropMismatch(doc.getPage(pageIndex));
     }
 
+    const unboxedIndices: number[] = [];
+    for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+      if (!byPage.has(pageIndex)) unboxedIndices.push(pageIndex);
+    }
+
     const outDoc = await PDFDocument.create();
     const loadingTask = pdfjsLib.getDocument({ data: bytes.slice(0) });
     const pdfjsDoc = await loadingTask.promise;
     try {
+      // Copy every untouched page in a single batched call. pdf-lib builds
+      // a fresh internal object copier per `copyPages()` call, and that
+      // copier is what dedupes objects shared between the pages copied in
+      // that one call (an embedded font subset, a repeated logo/background
+      // image, an ICC profile). Calling `copyPages(doc, [pageIndex])` once
+      // per page -- the previous approach -- gave each page its own
+      // copier, so a resource shared across N untouched pages got copied
+      // into outDoc N times instead of once (measured ~9x file bloat on a
+      // document sharing one image across pages).
+      const copiedPages =
+        unboxedIndices.length > 0 ? await outDoc.copyPages(doc, unboxedIndices) : [];
+      const copiedPageByIndex = new Map<number, PDFPage>();
+      unboxedIndices.forEach((sourceIndex, i) => {
+        const copiedPage = copiedPages[i];
+        stripWidgetAnnotations(copiedPage);
+        copiedPageByIndex.set(sourceIndex, copiedPage);
+      });
+
+      // Walk the source page order once, interleaving the pre-copied
+      // untouched pages with freshly rasterized boxed pages. `addPage`
+      // always appends to the end of outDoc, so processing indices in
+      // ascending source order reproduces the exact source page order --
+      // this is NOT "all untouched pages first, then all boxed pages".
       for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
         const pageBoxes = byPage.get(pageIndex);
         if (!pageBoxes) {
-          const [copiedPage] = await outDoc.copyPages(doc, [pageIndex]);
+          const copiedPage = copiedPageByIndex.get(pageIndex);
+          if (!copiedPage) throw new Error(`Internal error: no copied page for index ${pageIndex}.`);
           outDoc.addPage(copiedPage);
           continue;
         }
@@ -171,6 +258,7 @@ export const redactEngine: Engine = async ({ files, options }) => {
     } finally {
       await loadingTask.destroy();
     }
+    copyDocumentMetadata(doc, outDoc);
     outBytes = await outDoc.save();
   }
 

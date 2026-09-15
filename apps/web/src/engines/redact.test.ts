@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PDFDocument, degrees } from "pdf-lib";
+import { PDFDocument, PDFName, degrees } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import { inflateSync } from "node:zlib";
 import { redactEngine, boxRectPt } from "./redact";
@@ -168,6 +168,120 @@ describe("redactEngine", () => {
     // Page 2 received no box, so it must be copied forward untouched --
     // proves the scanner isn't just failing to find anything at all.
     expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 2")).toBe(true);
+  });
+
+  // --- Re-review Issue 1 regression: batched copyPages must preserve order ---
+  //
+  // The rebuilt true-redact loop copies every untouched page in a single
+  // batched `copyPages(doc, unboxedIndices)` call (instead of one call per
+  // page) and then interleaves those copied pages with freshly rasterized
+  // boxed pages while walking the source page order. The existing tests
+  // above only ever box page 0 (or every page) of a small doc, so they
+  // would not catch a bug where the interleaving logic put boxed pages in
+  // the wrong slot, or reordered pages relative to the source. This test
+  // boxes the *middle* page of a 5-page doc and checks every page lands in
+  // its correct final position.
+  it("true: preserves page order and content when the box is on a middle page, not the first", async () => {
+    const file = await toFile(await makeTestPdf(5));
+    // Page 3 (0-indexed 2) gets boxed; pages 1, 2, 4, 5 must be untouched.
+    const result = await redactEngine({ files: [file], options: { mode: "true", boxes: [box(2)] } });
+    const outBytes = await result.files[0].blob.arrayBuffer();
+    const out = await PDFDocument.load(outBytes);
+
+    expect(out.getPageCount()).toBe(5);
+    // pdfjsLib.getDocument({ data }) transfers/detaches its input ArrayBuffer,
+    // so each pageText() call needs its own untouched copy of outBytes.
+    expect(await pageText(outBytes.slice(0), 1)).toContain("Page 1");
+    expect(await pageText(outBytes.slice(0), 2)).toContain("Page 2");
+    expect(await pageText(outBytes.slice(0), 3)).not.toContain("Page 3");
+    expect(await pageText(outBytes.slice(0), 4)).toContain("Page 4");
+    expect(await pageText(outBytes.slice(0), 5)).toContain("Page 5");
+
+    // Confirm page 3's original content is fully gone at the byte/stream
+    // level too, not just from the live page tree (same class of check as
+    // the content-leak regression test above), and that the untouched
+    // pages surrounding it are still genuinely present.
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 3")).toBe(false);
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 1")).toBe(true);
+    expect(bytesContainMarkerAtStreamLevel(outBytes, "Page 5")).toBe(true);
+  });
+
+  // --- Re-review Issue 2 (item 1): metadata copy-forward ---
+  it("true: carries standard document metadata forward to the rebuilt output", async () => {
+    const doc = await PDFDocument.create();
+    doc.addPage([200, 300]);
+    doc.setTitle("Redacted Report");
+    doc.setAuthor("Jane Doe");
+    doc.setSubject("Quarterly Numbers");
+    doc.setKeywords(["finance", "q3", "confidential"]);
+    doc.setCreator("IHatePDF Test Suite");
+    doc.setProducer("pdf-lib test fixture");
+    const bytes = await doc.save();
+
+    const file = await toFile(bytes);
+    const result = await redactEngine({ files: [file], options: { mode: "true", boxes: [box(0)] } });
+    const outBytes = await result.files[0].blob.arrayBuffer();
+    const out = await PDFDocument.load(outBytes);
+
+    expect(out.getTitle()).toBe("Redacted Report");
+    expect(out.getAuthor()).toBe("Jane Doe");
+    expect(out.getSubject()).toBe("Quarterly Numbers");
+    expect(out.getKeywords()).toBe("finance q3 confidential");
+    expect(out.getCreator()).toBe("IHatePDF Test Suite");
+    // Producer and ModificationDate are NOT asserted against the fixture's
+    // custom values: pdf-lib's own `PDFDocument.load()` (default
+    // `updateMetadata: true`, unrelated to this fix) unconditionally
+    // re-stamps Producer and ModificationDate the moment the source bytes
+    // are loaded inside redactEngine, before copyDocumentMetadata ever
+    // runs -- so this is what redactEngine's own input doc reports for
+    // those two fields regardless. What matters here is that they are
+    // still present on the output (not silently dropped, which was the
+    // reviewer's actual complaint -- "producer... became undefined").
+    expect(out.getProducer()).toBeTypeOf("string");
+    expect(out.getModificationDate()).toBeInstanceOf(Date);
+  });
+
+  // --- Re-review Issue 2 (item 2): orphaned widget annotation ---
+  //
+  // A source doc with an AcroForm and a text-field widget on an untouched
+  // page used to come out of true-redact with the widget annotation intact
+  // on the copied page's /Annots array but NO AcroForm in the output
+  // catalog -- a dangling reference some viewers render broken or refuse
+  // to interact with. This asserts the actual fix, not just "no error is
+  // thrown": the output catalog has no AcroForm, and critically, the
+  // untouched page's copied /Annots array no longer references the widget
+  // either -- so nothing dangling is left behind.
+  it("true: drops the orphaned widget annotation from an untouched page instead of leaving it dangling", async () => {
+    const doc = await PDFDocument.create();
+    const page1 = doc.addPage([200, 300]);
+    page1.drawText("Page 1", { x: 20, y: 260, size: 18 });
+    const page2 = doc.addPage([200, 300]);
+    page2.drawText("Page 2", { x: 20, y: 260, size: 18 });
+
+    const form = doc.getForm();
+    const field = form.createTextField("redact.test.field");
+    field.addToPage(page2, { x: 20, y: 100, width: 100, height: 20 });
+    field.setText("hello");
+
+    // Sanity check on the fixture itself: it really has an AcroForm and a
+    // widget on page 2 before it goes anywhere near redactEngine.
+    expect(doc.catalog.has(PDFName.of("AcroForm"))).toBe(true);
+    const sourcePage2Annots = doc.getPage(1).node.Annots();
+    expect(sourcePage2Annots?.size()).toBe(1);
+
+    const bytes = await doc.save();
+    const file = await toFile(bytes);
+    // Box page 1 only -- page 2 (with the widget) is untouched and copied
+    // forward via copyPages.
+    const result = await redactEngine({ files: [file], options: { mode: "true", boxes: [box(0)] } });
+    const outBytes = await result.files[0].blob.arrayBuffer();
+    const out = await PDFDocument.load(outBytes);
+
+    expect(out.getPageCount()).toBe(2);
+    expect(out.catalog.has(PDFName.of("AcroForm"))).toBe(false);
+
+    const outPage2Annots = out.getPage(1).node.Annots();
+    expect(outPage2Annots === undefined || outPage2Annots.size() === 0).toBe(true);
   });
 });
 
