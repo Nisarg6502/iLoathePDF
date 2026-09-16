@@ -35,7 +35,7 @@ jobs:
           set -e
           mkdir -p apps/web/public/tesseract/core apps/web/public/tesseract/lang
           cp node_modules/tesseract.js/dist/worker.min.js apps/web/public/tesseract/
-          cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
+          cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
           eng_traineddata=$(find /usr/share/tesseract-ocr -name eng.traineddata | head -1)
           gzip -k -c "$eng_traineddata" > apps/web/public/tesseract/lang/eng.traineddata.gz
       - name: Typecheck
