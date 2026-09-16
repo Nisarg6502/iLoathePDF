@@ -1,0 +1,7 @@
+public/tesseract/
+
+# tesseract.js's own Node-side cache of the loaded language file, written to
+# the process CWD on first use regardless of where langPath pointed it at
+# (see apps/web/src/engines/ocr.ts and ocr.test.ts) -- a runtime cache, not
+# a project file.
+/eng.traineddata

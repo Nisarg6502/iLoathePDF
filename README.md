@@ -102,7 +102,34 @@ Then see each app's own README for how to run and build it:
 - [`apps/desktop/README.md`](apps/desktop/README.md) — requires Node 22,
   Python 3.11, Rust with the MSVC toolchain, and Ghostscript.
 - [`apps/web`](apps/web) — `npm run dev --workspace=apps/web` and open the
-  printed local URL.
+  printed local URL. The OCR tool needs its `tesseract.js` worker, core (WASM)
+  and English language files vendored locally under `apps/web/public/tesseract/`
+  (gitignored, not committed — the app never fetches them from a CDN at
+  runtime, matching its no-network guarantee). After `npm install`, copy them
+  in:
+
+  ```bash
+  mkdir -p apps/web/public/tesseract/core apps/web/public/tesseract/lang
+  cp node_modules/tesseract.js/dist/worker.min.js apps/web/public/tesseract/
+  cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
+  gzip -k -c vendor/tesseract/tessdata/eng.traineddata > apps/web/public/tesseract/lang/eng.traineddata.gz
+  ```
+
+  Both the plain-SIMD and relaxed-SIMD LSTM builds are needed: `corePath` is
+  a directory, and `tesseract.js` feature-detects which one to load at
+  runtime (only the `-lstm` variants, since this tool always uses OEM
+  `LSTM_ONLY`) — a browser that supports relaxed SIMD (current Chrome) will
+  404 without that file present, even though a plain-SIMD browser works
+  fine. Keep `tesseract.js-core`'s explicit version in `apps/web/package.json`
+  in sync with whatever `tesseract.js` itself depends on (check
+  `node_modules/tesseract.js/package.json`'s own `tesseract.js-core` range)
+  so this isn't vendoring a different, possibly incomplete build than the
+  one npm actually resolves.
+
+  (The last line reuses the same `eng.traineddata` the desktop app vendors —
+  see `apps/desktop/HANDOVER.md`. If that file isn't present yet, source
+  `eng.traineddata` from the Tesseract project's own `tessdata` release
+  instead and gzip it the same way.)
 
 ## Contributing
 

@@ -110,3 +110,14 @@ export function RedactIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function OcrIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-l)" strokeWidth="1.5" {...props}>
+      <rect x="2.5" y="2.5" width="13" height="13" rx="1.2" />
+      <path d="M5.5 6h4M5.5 9h7" strokeOpacity="0.5" />
+      <circle cx="10.5" cy="12.5" r="2" />
+      <path d="M12.2 14.2l1.6 1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
