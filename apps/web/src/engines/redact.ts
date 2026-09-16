@@ -116,17 +116,31 @@ function assertNoRotationOrCropMismatch(page: PDFPage) {
 //     node rather than directly on the page) -- it reads that chain with
 //     plain local dict lookups (Dict.get), never through the object
 //     copier's copy(), and deletes /Parent from its own clone before the
-//     copier ever walks the clone's entries. So the Kids array is never
-//     reachable through this path; dropping /Parent here would only break
-//     inheritance for real documents that rely on it.
+//     copier ever walks the clone's entries. So the /Kids array itself is
+//     never reachable through this path; dropping /Parent here would only
+//     break inheritance for real documents that rely on it. (The value an
+//     inherited attribute resolves to IS still passed through copy() --
+//     see the Resources/Contents caveat below; a legitimate Pages node
+//     never puts a page reference there, so this is theoretical, not a
+//     live gap in practice.)
 //   - Contents, Resources: the page's actual drawable content and the
-//     fonts/images/graphics state it draws with.
+//     fonts/images/graphics state it draws with. These can legitimately
+//     contain indirect references (embedded fonts, images, nested forms),
+//     so in principle a hand-crafted PDF could smuggle a boxed-page
+//     reference in here. No allowlist can rule that out without
+//     reimplementing the object copier's own reachability analysis --
+//     this is a known, accepted residual limitation, not something this
+//     list closes.
 //   - MediaBox, CropBox, BleedBox, TrimBox, ArtBox: page geometry.
-//   - Rotate, Group, UserUnit, LastModified, StructParents, Tabs:
-//     orientation, transparency-group info, unit scale, a timestamp, a
-//     plain integer index into the structure tree, and click-order --
-//     none of these are references, so none can carry a reference to
-//     another page.
+//   - Rotate, UserUnit, LastModified, StructParents, Tabs: orientation,
+//     unit scale, a timestamp, a plain integer index into the structure
+//     tree, and click-order -- plain values, not references.
+//   - Group: transparency-group info. This IS commonly an indirect
+//     reference (and its own /CS entry can be indirect too), but a
+//     transparency group dictionary can never legally resolve to a page
+//     object, so it cannot itself become a path to another page's
+//     content -- unlike Contents/Resources, which routinely point at
+//     the kind of embedded objects a page's own content stream needs.
 const SAFE_PAGE_KEYS = new Set([
   "Type",
   "Parent",
