@@ -1,6 +1,7 @@
 """Tests for `pdf.ocr` -- OCR a scanned PDF into a searchable one."""
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pikepdf
@@ -112,6 +113,56 @@ def test_ocr_page_produces_a_searchable_single_page_pdf(make_pdf, tmp_path):
         assert pdf_ocr._page_has_text(ocred.pages[0])
 
 
+def _make_sharp_scan_pdf(tmp_path: Path, text: str = "HELLO WORLD") -> Path:
+    """A one-page, image-only PDF rendered directly at OCR resolution (300
+    DPI) with a large, clean font -- unlike the shared `make_pdf` fixture
+    (a 72 DPI PIL render whose embedded image then gets upscaled to 300 DPI
+    for OCR, which is fairly blurry), this embeds the bitmap at its true
+    pixel size tagged with the real 300 DPI it was drawn at, so Ghostscript's
+    re-rasterisation at `_OCR_DPI` is a 1:1 copy rather than an upsample.
+    Built here rather than in the shared `conftest.py` fixture because the
+    strict text-content assertion below needs an OCR-friendly input, while
+    every other test in this suite (and the rest of the app) only needs
+    *a* page image and shouldn't have its fixture behaviour changed.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    dpi = pdf_ocr._OCR_DPI
+    width, height = 6 * dpi, 2 * dpi
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.load_default(size=200)
+    draw.text((100, 100), text, fill="black", font=font)
+
+    out = tmp_path / "sharp_scan.pdf"
+    img.save(out, "PDF", resolution=float(dpi))
+    return out
+
+
+def _ocr_txt_mode(image_path: Path, tmp_path: Path) -> str:
+    """Run Tesseract's plain `txt` output mode on `image_path`, independent
+    of `pdf_ocr._ocr_page`'s `pdf` mode.
+
+    Tesseract's PDF output embeds recognized text in a "GlyphLessFont" whose
+    Tj operand strings aren't directly readable ASCII, and pikepdf has no
+    text-extraction API in the version this project pins (no
+    `Page.extract_text()`) -- so there's no straightforward way to pull
+    recognized text back out of the PDF `pdf_ocr.run` produces. Running
+    Tesseract's own `txt` mode on the same rasterized page image instead
+    proves the OCR engine actually recognized the fixture's text correctly,
+    decoupled from how that text ends up encoded inside the PDF.
+    """
+    exe = pdf_ocr.find_tesseract()
+    output_base = tmp_path / "direct-ocr-check"
+    argv = [exe, str(image_path), str(output_base)]
+    tessdata_dir = pdf_ocr._tessdata_dir_for(exe)
+    if tessdata_dir is not None:
+        argv += ["--tessdata-dir", str(tessdata_dir)]
+    argv += ["-l", "eng", "txt"]
+    subprocess.run(argv, check=True, capture_output=True, creationflags=pdf_ocr._no_window_flags())
+    return output_base.with_suffix(".txt").read_text(encoding="utf-8")
+
+
 @needs_gs
 @needs_tesseract
 def test_ocr_round_trip_produces_selectable_text(make_pdf, out_dir):
@@ -126,6 +177,58 @@ def test_ocr_round_trip_produces_selectable_text(make_pdf, out_dir):
     with pikepdf.open(str(dest)) as after:
         assert len(after.pages) == 1
         assert pdf_ocr._page_has_text(after.pages[0])
+
+
+@needs_gs
+@needs_tesseract
+def test_ocr_round_trip_recognizes_the_actual_text(tmp_path, out_dir):
+    """The round trip must recover the *actual* recognized text, not merely
+    attach *some* text layer -- mirrors the web engine's equivalent test
+    (apps/web/src/engines/ocr.test.ts: "adds selectable text that pdf.js can
+    extract back out"), which extracts text via pdf.js and asserts it
+    contains the known fixture string.
+
+    See `_ocr_txt_mode` for why this checks Tesseract's independent `txt`
+    output rather than trying to extract text back out of the produced PDF.
+    """
+    text = "HELLO WORLD"
+    src = _make_sharp_scan_pdf(tmp_path, text)
+    dest = out_dir / "searchable.pdf"
+
+    result = pdf_ocr.run({"input": str(src), "output": str(dest)}, noop_progress)
+    assert result["pages"] == 1
+    with pikepdf.open(str(dest)) as after:
+        assert len(after.pages) == 1
+        assert pdf_ocr._page_has_text(after.pages[0])
+
+    # Independent check: OCR the same source image directly in txt mode and
+    # confirm Tesseract actually read the fixture's text correctly.
+    png = tmp_path / "direct-check.png"
+    pdf_ocr._rasterize_page(src, 1, png, noop_progress, 0, "check")
+    recognized = _ocr_txt_mode(png, tmp_path)
+    assert text in recognized.upper()
+
+
+@needs_gs
+@needs_tesseract
+def test_ocr_round_trip_preserves_page_dimensions(make_pdf, out_dir):
+    """Desktop's OCR page geometry depends on Ghostscript writing a DPI
+    marker into the rasterized PNG that Tesseract/Leptonica reads back
+    correctly as 300 DPI -- if that silently breaks (a Ghostscript flag
+    change, a Tesseract/Leptonica DPI-inference change), every OCR'd page
+    could come out the wrong physical size while every other test here
+    (which only checks page *count* and presence of a text layer) keeps
+    passing. Assert the output page's MediaBox matches the input's.
+    """
+    src = make_pdf("scan", pages=1)
+    dest = out_dir / "searchable.pdf"
+
+    pdf_ocr.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    with pikepdf.open(str(src)) as before, pikepdf.open(str(dest)) as after:
+        before_box = [float(v) for v in before.pages[0].MediaBox]
+        after_box = [float(v) for v in after.pages[0].MediaBox]
+    assert after_box == pytest.approx(before_box, abs=1.0)
 
 
 @needs_gs
