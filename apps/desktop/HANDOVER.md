@@ -80,6 +80,29 @@ and `lib/` directories beside the executable, not just the two binaries.
 `vendor/` is gitignored, so a fresh clone must reinstall it. See the AGPL note in
 SPECS.md before distributing anything.
 
+**Tesseract 5.5.3.20260724 (Apache-2.0)** is installed at `vendor/tesseract/`,
+from the UB Mannheim Windows build
+([tesseract-ocr-w64-setup-5.5.3.20260724.exe](https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.3)
+— the same UB Mannheim installer project linked from
+[digi.bib.uni-mannheim.de/tesseract/](https://github.com/UB-Mannheim/tesseract/wiki),
+now also published on GitHub Releases), sha256
+`bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4`.
+`find_tesseract()` looks there first; only `tesseract.exe`, its DLLs, and
+`tessdata/eng.traineddata` + `tessdata/configs/` are copied in (v1 is
+English-only, so the installer's other bundled languages are not vendored).
+`ILOATHEPDF_TESSERACT` overrides the path for ad-hoc testing.
+
+Two things differed from the plan once run against the real binary: the
+installer's `/S` silent flag still triggers a UAC elevation prompt (its
+manifest requests `highestAvailable`), which a non-interactive session can't
+grant — the payload was extracted instead with 7-Zip's NSIS support, without
+ever running the installer as a process. And the installer's exe payload
+does not bundle `eng.traineddata` at all (it normally downloads it on the fly
+via an NSIS `INetC` plugin during an interactive install) nor the
+`tessdata/configs/` directory that `tesseract ... pdf` needs to resolve the
+`pdf` configfile — both were fetched/copied in separately; see
+`.superpowers/sdd/task-1-report.md` for the full trail.
+
 **MSVC Build Tools 14.44** (`Microsoft.VisualStudio.Workload.VCTools`) is
 installed at `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`.
 Note that `C:\msys64\ucrt64\bin` is on PATH and contains a GNU `link` that
@@ -95,6 +118,7 @@ from a shell that puts msys2 first can fail confusingly.
 | Python | 3.11.3 (`.venv/Scripts/python.exe`) |
 | Rust | 1.98.0, MSVC host (Build Tools 14.44) |
 | Ghostscript | 10.07.1 in `vendor/ghostscript/` |
+| Tesseract | 5.5.3.20260724 in `vendor/tesseract/` |
 | WebView2 runtime | 152.0.4191.53 (present) |
 | Python packages | pikepdf 10.12.0, Pillow 12.3.0, pillow-heif 1.6.0, img2pdf 0.6.3, pytest 9.1.1, pyinstaller 6.22.2 |
 
