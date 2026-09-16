@@ -112,17 +112,20 @@ Then see each app's own README for how to run and build it:
   ```bash
   mkdir -p apps/web/public/tesseract/core apps/web/public/tesseract/lang
   cp node_modules/tesseract.js/dist/worker.min.js apps/web/public/tesseract/
-  cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
+  cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
   gzip -k -c vendor/tesseract/tessdata/eng.traineddata > apps/web/public/tesseract/lang/eng.traineddata.gz
   ```
 
-  Both the plain-SIMD and relaxed-SIMD LSTM builds are needed: `corePath` is
-  a directory, and `tesseract.js` feature-detects which one to load at
-  runtime (only the `-lstm` variants, since this tool always uses OEM
-  `LSTM_ONLY`) — a browser that supports relaxed SIMD (current Chrome) will
-  404 without that file present, even though a plain-SIMD browser works
-  fine. Keep `tesseract.js-core`'s explicit version in `apps/web/package.json`
-  in sync with whatever `tesseract.js` itself depends on (check
+  All three LSTM builds are needed: `corePath` is a directory, and
+  `tesseract.js` feature-detects which one to load at runtime (only the
+  `-lstm` variants, since this tool always uses OEM `LSTM_ONLY`) — relaxed-SIMD
+  for a browser that supports it (current Chrome), plain SIMD for one that
+  doesn't, and the plain `tesseract-core-lstm.*` build (no SIMD at all) for a
+  browser with no WASM SIMD support whatsoever (older Safari/Firefox, or SIMD
+  disabled by policy). Missing any one of the three 404s for exactly the
+  browsers that would have picked it. Keep `tesseract.js-core`'s explicit
+  version in `apps/web/package.json` in sync with whatever `tesseract.js`
+  itself depends on (check
   `node_modules/tesseract.js/package.json`'s own `tesseract.js-core` range)
   so this isn't vendoring a different, possibly incomplete build than the
   one npm actually resolves.
