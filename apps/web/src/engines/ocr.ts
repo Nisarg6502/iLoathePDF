@@ -47,7 +47,16 @@ function ocrWorkerOptions() {
   }
   return {
     workerPath: assetUrl("worker.min.js"),
-    corePath: assetUrl("core"),
+    // A *directory* corePath makes tesseract.js feature-detect the best
+    // available WASM core at runtime (SIMD / relaxed-SIMD / plain) and load
+    // "<corePath>/tesseract-core-<variant>-lstm.wasm.js" -- but relaxed-SIMD
+    // detection returns true in current Chrome, and tesseract.js-core 6.x
+    // doesn't actually ship a relaxedsimd build to point it at (confirmed:
+    // no such file exists in node_modules/tesseract.js-core), so that
+    // capability-detected path 404s. Pointing corePath at the exact SIMD
+    // build's filename (the one Step 3 vendors) skips that detection
+    // entirely -- tesseract.js loads a corePath ending in ".js" as-is.
+    corePath: assetUrl("core/tesseract-core-simd-lstm.wasm.js"),
     langPath: assetUrl("lang"),
   };
 }
