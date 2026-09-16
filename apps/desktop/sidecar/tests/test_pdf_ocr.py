@@ -89,3 +89,45 @@ def test_ocr_progress_reaches_100(make_pdf, out_dir):
 
     pdf_ocr.run({"input": str(src), "output": str(dest)}, lambda pct, note="": calls.append(pct))
     assert calls[-1] == 100
+
+
+def test_ocr_without_ghostscript_fails_fast(make_pdf, out_dir, monkeypatch):
+    def _raise():
+        raise OpError("GHOSTSCRIPT_MISSING", "Ghostscript was not found.")
+
+    monkeypatch.setattr("ops.pdf_ocr.find_ghostscript", _raise)
+    src = make_pdf("a", pages=1)
+    dest = out_dir / "o.pdf"
+
+    with pytest.raises(OpError) as exc:
+        pdf_ocr.run({"input": str(src), "output": str(dest)}, noop_progress)
+    assert exc.value.code == "GHOSTSCRIPT_MISSING"
+    assert not dest.exists()
+
+
+def test_ocr_without_tesseract_fails_fast(make_pdf, out_dir, monkeypatch):
+    def _raise():
+        raise OpError("TESSERACT_MISSING", "Tesseract was not found.")
+
+    monkeypatch.setattr("ops.pdf_ocr.find_tesseract", _raise)
+    src = make_pdf("a", pages=1)
+    dest = out_dir / "o.pdf"
+
+    with pytest.raises(OpError) as exc:
+        pdf_ocr.run({"input": str(src), "output": str(dest)}, noop_progress)
+    assert exc.value.code == "TESSERACT_MISSING"
+    assert not dest.exists()
+
+
+def test_ocr_propagates_encrypted_and_corrupt(encrypted_pdf, corrupt_pdf, out_dir):
+    for src, code in ((encrypted_pdf, "ENCRYPTED_PDF"), (corrupt_pdf, "CORRUPT_PDF")):
+        with pytest.raises(OpError) as exc:
+            pdf_ocr.run({"input": str(src), "output": str(out_dir / "o.pdf")}, noop_progress)
+        assert exc.value.code == code
+    assert not (out_dir / "o.pdf").exists()
+
+
+def test_ocr_missing_input_file(out_dir, tmp_path):
+    with pytest.raises(OpError) as exc:
+        pdf_ocr.run({"input": str(tmp_path / "ghost.pdf"), "output": str(out_dir / "o.pdf")}, noop_progress)
+    assert exc.value.code == "FILE_NOT_FOUND"
