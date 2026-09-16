@@ -49,3 +49,20 @@ def test_ocr_accepts_an_image_only_pdf_past_the_text_guard(make_pdf, out_dir, mo
         pdf_ocr.run({"input": str(src), "output": str(out_dir / "o.pdf")}, noop_progress)
     except OpError as exc:
         assert exc.code != "ALREADY_HAS_TEXT"
+
+
+@needs_gs
+@needs_tesseract
+def test_ocr_page_produces_a_searchable_single_page_pdf(make_pdf, tmp_path):
+    src = make_pdf("a", pages=1)
+    png = tmp_path / "page-1.png"
+    pdf_ocr._rasterize_page(src, 1, png, noop_progress, 0, "page 1")
+    assert png.exists() and png.stat().st_size > 0
+
+    output_base = tmp_path / "page-1"
+    pdf_ocr._ocr_page(png, output_base, noop_progress, 0, "page 1")
+    out_pdf = output_base.with_suffix(".pdf")
+    assert out_pdf.exists()
+    with pikepdf.open(str(out_pdf)) as ocred:
+        assert len(ocred.pages) == 1
+        assert pdf_ocr._page_has_text(ocred.pages[0])

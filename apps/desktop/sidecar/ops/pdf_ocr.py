@@ -42,6 +42,83 @@ def _page_has_text(page) -> bool:
     return any(str(instr.operator) in _TEXT_OPS for instr in instructions)
 
 
+def _no_window_flags() -> int:
+    return getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+
+def _rasterize_page(src: Path, page_no: int, dest: Path, progress: ProgressFn, pct: int, note: str) -> None:
+    """Render one 1-based page of `src` to a PNG at `dest` with Ghostscript."""
+    gs = find_ghostscript()
+    proc = subprocess.Popen(
+        [
+            gs, "-q", "-dSAFER", "-dBATCH", "-dNOPAUSE",
+            "-sDEVICE=png16m", f"-r{_OCR_DPI}",
+            "-dTextAlphaBits=4", "-dGraphicsAlphaBits=4",
+            f"-dFirstPage={page_no}", f"-dLastPage={page_no}",
+            f"-sOutputFile={dest}", str(src),
+        ],
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        creationflags=_no_window_flags(),
+    )
+    try:
+        while True:
+            try:
+                _, stderr = proc.communicate(timeout=0.2)
+                break
+            except subprocess.TimeoutExpired:
+                progress(pct, note)
+    except BaseException:
+        proc.kill()
+        proc.wait()
+        raise
+    if proc.returncode != 0:
+        tail = (stderr or b"").decode("utf-8", "replace").strip().splitlines()[-3:]
+        raise OpError("INTERNAL", "Ghostscript failed: " + " ".join(tail))
+
+
+def _tessdata_dir_for(tesseract_exe: str) -> Path | None:
+    """The tessdata/ folder shipped beside a vendored Tesseract, if any.
+
+    When Tesseract was found via PATH (a real system install) rather than
+    our vendor/ folder, there is no co-located tessdata to point at -- leave
+    Tesseract to find its own via its compiled-in default / TESSDATA_PREFIX,
+    rather than guessing at a system layout we don't control.
+    """
+    candidate = Path(tesseract_exe).resolve().parent / "tessdata"
+    return candidate if candidate.is_dir() else None
+
+
+def _ocr_page(image_path: Path, output_base: Path, progress: ProgressFn, pct: int, note: str) -> None:
+    """Run Tesseract on `image_path`, producing `<output_base>.pdf` -- a
+    single-page PDF with the source image plus an invisible text layer."""
+    exe = find_tesseract()
+    argv = [exe, str(image_path), str(output_base)]
+    tessdata_dir = _tessdata_dir_for(exe)
+    if tessdata_dir is not None:
+        argv += ["--tessdata-dir", str(tessdata_dir)]
+    argv += ["-l", "eng", "pdf"]
+
+    proc = subprocess.Popen(
+        argv,
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        creationflags=_no_window_flags(),
+    )
+    try:
+        while True:
+            try:
+                _, stderr = proc.communicate(timeout=0.2)
+                break
+            except subprocess.TimeoutExpired:
+                progress(pct, note)
+    except BaseException:
+        proc.kill()
+        proc.wait()
+        raise
+    if proc.returncode != 0:
+        tail = (stderr or b"").decode("utf-8", "replace").strip().splitlines()[-3:]
+        raise OpError("INTERNAL", "Tesseract failed: " + " ".join(tail))
+
+
 def run(params: dict, progress: ProgressFn) -> dict:
     import pikepdf
 
