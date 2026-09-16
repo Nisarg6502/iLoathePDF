@@ -32,6 +32,31 @@ def test_ocr_rejects_a_pdf_that_already_has_text(tmp_path, out_dir):
     assert not (out_dir / "o.pdf").exists()
 
 
+def _make_form_xobject_text_pdf(tmp_path: Path) -> Path:
+    """A one-page PDF whose text is drawn inside a Form XObject (via
+    beginForm/doForm), not directly in the page's own content stream --
+    `pikepdf.parse_content_stream(page)` alone would miss this."""
+    from reportlab.pdfgen import canvas as pdfcanvas
+
+    out = tmp_path / "has_text_in_xobject.pdf"
+    c = pdfcanvas.Canvas(str(out), pagesize=(595, 842))
+    c.beginForm("textform", 0, 0, 595, 842)
+    c.setFont("Helvetica", 12)
+    c.drawString(72, 700, "Text hidden inside a Form XObject.")
+    c.endForm()
+    c.doForm("textform")
+    c.save()
+    return out
+
+
+def test_ocr_rejects_a_pdf_with_text_only_inside_a_form_xobject(tmp_path, out_dir):
+    src = _make_form_xobject_text_pdf(tmp_path)
+    with pytest.raises(OpError) as exc:
+        pdf_ocr.run({"input": str(src), "output": str(out_dir / "o.pdf")}, noop_progress)
+    assert exc.value.code == "ALREADY_HAS_TEXT"
+    assert not (out_dir / "o.pdf").exists()
+
+
 @needs_gs
 @needs_tesseract
 def test_ocr_page_produces_a_searchable_single_page_pdf(make_pdf, tmp_path):

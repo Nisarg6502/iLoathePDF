@@ -35,11 +35,31 @@ _TEXT_OPS = {"Tj", "TJ", "'", '"'}
 
 
 def _page_has_text(page) -> bool:
-    """True if the page's content stream draws any text."""
+    """True if the page's content stream draws any text.
+
+    `pikepdf.parse_content_stream` only sees the page's own operators, not
+    text drawn inside a Form XObject invoked via `Do` -- so this recurses
+    into every Form XObject reachable from `/Resources/XObject` (a Form
+    XObject can itself reference nested Form XObjects), rather than trusting
+    the page-level stream alone. Missing this would let a page whose visible
+    text lives entirely inside an XObject slip past the guard undetected.
+    """
     import pikepdf
 
     instructions = pikepdf.parse_content_stream(page)
-    return any(str(instr.operator) in _TEXT_OPS for instr in instructions)
+    if any(str(instr.operator) in _TEXT_OPS for instr in instructions):
+        return True
+
+    resources = page.get("/Resources")
+    if resources is None:
+        return False
+    xobjects = resources.get("/XObject")
+    if xobjects is None:
+        return False
+    for xobj in xobjects.values():
+        if xobj.get("/Subtype") == pikepdf.Name.Form and _page_has_text(xobj):
+            return True
+    return False
 
 
 def _no_window_flags() -> int:
@@ -117,6 +137,17 @@ def _ocr_page(image_path: Path, output_base: Path, progress: ProgressFn, pct: in
     if proc.returncode != 0:
         tail = (stderr or b"").decode("utf-8", "replace").strip().splitlines()[-3:]
         raise OpError("INTERNAL", "Tesseract failed: " + " ".join(tail))
+
+    out_pdf = output_base.with_suffix(".pdf")
+    if not out_pdf.is_file():
+        # Tesseract can exit 0 while silently writing nothing -- e.g. when
+        # the `pdf` configfile can't be resolved because tessdata/configs/
+        # is missing beside the language data. Surface this as a clean
+        # protocol error instead of letting the caller's later
+        # pikepdf.open() crash on a nonexistent path.
+        tail = (stderr or b"").decode("utf-8", "replace").strip().splitlines()[-3:]
+        detail = " ".join(tail) if tail else "no output written and no error reported"
+        raise OpError("INTERNAL", f"Tesseract produced no output for {image_path.name}: {detail}")
 
 
 def run(params: dict, progress: ProgressFn) -> dict:
