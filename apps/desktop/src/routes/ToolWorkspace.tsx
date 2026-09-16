@@ -23,6 +23,7 @@ import type { PdfPageItem } from "@/components/PageThumbnailGrid";
 import { Button } from "@/components/ui/button";
 import { SignOptionsPanel } from "@/components/SignOptionsPanel";
 import { SignatureCapture } from "@/components/SignatureCapture";
+import { RedactOptionsPanel } from "@/components/RedactOptionsPanel";
 import { JobError, isTauri, type Progress } from "@/lib/jobs";
 import { execute, type JobResult } from "@/lib/run";
 import { takePendingFiles } from "@/lib/handoff";
@@ -32,6 +33,7 @@ import type { OptionValues, Tool } from "@/lib/tools";
 import { cn, formatBytes } from "@/lib/utils";
 import type { SavedSignKind } from "@/lib/signatureStore";
 import type { SignElement } from "@/lib/signTypes";
+import type { RedactBox, RedactMode } from "@/lib/redactTypes";
 
 const OrganizeCanvas = lazy(() =>
   import("@/components/OrganizeCanvas").then((m) => ({ default: m.OrganizeCanvas })),
@@ -39,8 +41,15 @@ const OrganizeCanvas = lazy(() =>
 const SignCanvas = lazy(() =>
   import("@/components/SignCanvas").then((m) => ({ default: m.SignCanvas })),
 );
+const RedactCanvas = lazy(() =>
+  import("@/components/RedactCanvas").then((m) => ({ default: m.RedactCanvas })),
+);
 
 function newSignId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function newRedactId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
@@ -67,6 +76,10 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
   const [signActivePage, setSignActivePage] = useState(0);
   const [signCaptureKind, setSignCaptureKind] = useState<SavedSignKind | null>(null);
 
+  const [redactBoxes, setRedactBoxes] = useState<RedactBox[]>([]);
+  const [redactSelectedId, setRedactSelectedId] = useState<string | null>(null);
+  const [redactActivePage, setRedactActivePage] = useState(0);
+
   const { browse, dragging, rejected, picking } = useFilePicker({
     accept: tool.accepts,
     multiple: tool.multiple,
@@ -90,6 +103,9 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     setSignSelectedId(null);
     setSignActivePage(0);
     setSignCaptureKind(null);
+    setRedactBoxes([]);
+    setRedactSelectedId(null);
+    setRedactActivePage(0);
     setState({ phase: "idle" });
   }, [tool]);
 
@@ -98,6 +114,9 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     if (tool.id === "merge" && files.length < 2) return "Merging needs at least two PDFs.";
     if (tool.id === "sign" && signElements.length === 0) {
       return "Add a signature, text, date or initials to continue.";
+    }
+    if (tool.id === "redact" && redactBoxes.length === 0) {
+      return "Add at least one box to continue.";
     }
     if (tool.id === "protect") {
       const password = String(values.password ?? "");
@@ -108,7 +127,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
       }
     }
     return null;
-  }, [files.length, tool, signElements.length, values]);
+  }, [files.length, tool, signElements.length, redactBoxes.length, values]);
 
   const running = state.phase === "running";
 
@@ -122,7 +141,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     const onProgress = (p: Progress) => setState({ phase: "running", pct: p.pct, note: p.note });
 
     try {
-      const result = await execute(tool, files, values, pages, onProgress, controller.signal, signElements);
+      const result = await execute(tool, files, values, pages, onProgress, controller.signal, signElements, redactBoxes);
       setState({ phase: "done", result });
     } catch (err) {
       setState({
@@ -132,7 +151,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     } finally {
       abort.current = null;
     }
-  }, [blocker, running, tool, files, values, pages, signElements]);
+  }, [blocker, running, tool, files, values, pages, signElements, redactBoxes]);
 
   function addImageSignElement(kind: SavedSignKind, imageDataUrl: string) {
     const img = new Image();
@@ -180,6 +199,21 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
   function deleteSignElement(id: string) {
     setSignElements((prev) => prev.filter((e) => e.id !== id));
     setSignSelectedId((cur) => (cur === id ? null : cur));
+  }
+
+  function addRedactBox() {
+    const b: RedactBox = { id: newRedactId(), pageIndex: redactActivePage, xPct: 0.3, yPct: 0.4, wPct: 0.3, hPct: 0.1 };
+    setRedactBoxes((prev) => [...prev, b]);
+    setRedactSelectedId(b.id);
+  }
+
+  function updateRedactBox(id: string, patch: Partial<Pick<RedactBox, "xPct" | "yPct" | "wPct" | "hPct">>) {
+    setRedactBoxes((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+  }
+
+  function deleteRedactBox(id: string) {
+    setRedactBoxes((prev) => prev.filter((b) => b.id !== id));
+    setRedactSelectedId((cur) => (cur === id ? null : cur));
   }
 
   // Ctrl+Enter runs, matching the hint on the button.
@@ -393,6 +427,34 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                   />
                 </Suspense>
               </motion.div>
+            ) : tool.id === "redact" ? (
+              <motion.div
+                key="redact-canvas"
+                variants={panelVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="min-h-0 flex-1 overflow-auto p-4"
+              >
+                <Suspense
+                  fallback={
+                    <div className="grid h-full place-items-center text-[14px] text-muted">
+                      Loading the page canvas…
+                    </div>
+                  }
+                >
+                  <RedactCanvas
+                    file={files[0]}
+                    boxes={redactBoxes}
+                    activePageIndex={redactActivePage}
+                    onActivePageChange={setRedactActivePage}
+                    selectedId={redactSelectedId}
+                    onSelect={setRedactSelectedId}
+                    onUpdate={updateRedactBox}
+                    onDelete={deleteRedactBox}
+                  />
+                </Suspense>
+              </motion.div>
             ) : (
               <motion.div
                 key="list"
@@ -424,6 +486,17 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 onSelect={setSignSelectedId}
                 onUpdate={updateSignElement}
                 onDelete={deleteSignElement}
+              />
+            ) : tool.id === "redact" ? (
+              <RedactOptionsPanel
+                mode={(values.mode as RedactMode) ?? "visual"}
+                onModeChange={(mode) => setValues((v) => ({ ...v, mode }))}
+                boxes={redactBoxes}
+                selectedId={redactSelectedId}
+                activePageIndex={redactActivePage}
+                onAddBox={addRedactBox}
+                onSelect={setRedactSelectedId}
+                onDelete={deleteRedactBox}
               />
             ) : (
               <ToolOptions tool={tool} values={values} onChange={setValues} />

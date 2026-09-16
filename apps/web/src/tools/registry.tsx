@@ -20,6 +20,9 @@ import { ProtectOptions } from "./options/ProtectOptions";
 import { protectEngine } from "@/engines/protect";
 import { WatermarkOptions } from "./options/WatermarkOptions";
 import { watermarkEngine } from "@/engines/watermark";
+import { RedactOptions } from "./options/RedactOptions";
+import { redactEngine } from "@/engines/redact";
+import { RedactWorkspace } from "./redact/RedactWorkspace";
 import {
   CompressIcon,
   MergeIcon,
@@ -31,6 +34,7 @@ import {
   SignIcon,
   ProtectIcon,
   WatermarkIcon,
+  RedactIcon,
 } from "./icons";
 
 export const TOOLS: ToolConfig[] = [
@@ -44,6 +48,7 @@ export const TOOLS: ToolConfig[] = [
   { slug: "sign", name: "Sign & Fill", description: "Draw or upload a signature, then add text, dates and initials on the page.", category: "pdf", Icon: SignIcon, accept: [".pdf"], multiple: false, defaultOptions: { elements: [] }, OptionsPanel: SignOptions, engine: signEngine, status: "live", tint: "h", Workspace: SignWorkspace },
   { slug: "protect", name: "Protect & Unlock PDF", description: "Add or remove a password that's required to open the file.", category: "pdf", Icon: ProtectIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "protect", password: "", confirmPassword: "" }, OptionsPanel: ProtectOptions, engine: protectEngine, status: "live", tint: "i" },
   { slug: "watermark", name: "Watermark, Page Numbers & Stamp", description: "Add a repeating watermark, sequential page numbers, or a fixed stamp to every page.", category: "pdf", Icon: WatermarkIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "watermark", pages: "all", watermark: { content: "text", text: "", opacity: 0.35, rotation: 45, placement: "single" }, page_numbers: { position: "bottom-center", format: "n", start: 1 }, stamp: { content: "text", text: "", position: "bottom-right", maxWidthPct: 0.2 } }, OptionsPanel: WatermarkOptions, engine: watermarkEngine, status: "live", tint: "j" },
+  { slug: "redact", name: "Redact PDF", description: "Black out sensitive text, photos or signatures — visually or for good.", category: "pdf", Icon: RedactIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "visual", boxes: [] }, OptionsPanel: RedactOptions, engine: redactEngine, status: "live", tint: "k", Workspace: RedactWorkspace },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {

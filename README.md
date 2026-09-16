@@ -34,7 +34,7 @@ as a website that processes files client-side and never sends them anywhere.
 Both share the same rule: your files never leave the machine they're opened
 on. Pick whichever fits — there's no reason to pick only one.
 
-## The ten tools
+## The eleven tools
 
 | Tool | What it does |
 | --- | --- |
@@ -44,6 +44,7 @@ on. Pick whichever fits — there's no reason to pick only one.
 | Sign & Fill | Draw or upload a signature, then add text, dates and initials on the page |
 | Protect & Unlock PDF | Add or remove a password that's required to open the file |
 | Watermark, Page Numbers & Stamp | Add a repeating watermark, sequential page numbers, or a fixed stamp to every page |
+| Redact PDF | Black out sensitive text, photos or signatures — visually or for good |
 | Compress PDF | Lossless, Balanced or Strong, with the size trade-off shown |
 | PDF to images | Render pages to PNG or JPG at a chosen DPI |
 | Images to PDF | Scans and photos into one PDF, one image per page |
