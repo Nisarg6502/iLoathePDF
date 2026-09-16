@@ -134,4 +134,39 @@ def run(params: dict, progress: ProgressFn) -> dict:
                     "This PDF already has selectable text -- OCR is for scanned/image-only PDFs.",
                 )
 
-    raise NotImplementedError("rasterize + OCR + reassemble: Steps 4-6")
+    # Resolved before any processing so a missing binary fails fast and
+    # loudly, the same discipline pdf.redact's True Redact mode uses.
+    find_ghostscript()
+    find_tesseract()
+
+    pages_total = total
+    progress(5, f"OCR-ing {pages_total} page(s)")
+
+    with temp_dir() as tmp:
+        page_pdfs: list[Path] = []
+        for page_no in range(1, pages_total + 1):
+            note = f"page {page_no} of {pages_total}"
+            pct = 5 + int(70 * (page_no - 1) / pages_total)
+            png_path = tmp / f"page-{page_no}.png"
+            _rasterize_page(path, page_no, png_path, progress, pct, note)
+
+            output_base = tmp / f"page-{page_no}"
+            _ocr_page(png_path, output_base, progress, pct, note)
+            page_pdfs.append(output_base.with_suffix(".pdf"))
+            progress(5 + int(70 * page_no / pages_total), note)
+
+        progress(80, "Assembling pages")
+        with pikepdf.Pdf.new() as dst:
+            for page_pdf_path in page_pdfs:
+                with pikepdf.open(page_pdf_path) as page_pdf:
+                    dst.pages.append(page_pdf.pages[0])
+
+            progress(92, "Writing output")
+            with atomic_output(dest) as tmp_out:
+                try:
+                    dst.save(str(tmp_out))
+                except OSError as exc:
+                    raise OpError("OUTPUT_WRITE_FAILED", f"Cannot write {dest}: {exc}") from exc
+
+    progress(100, "Done")
+    return {"output": str(dest), "bytes": size_of(dest), "pages": pages_total}

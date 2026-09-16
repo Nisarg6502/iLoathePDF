@@ -32,25 +32,6 @@ def test_ocr_rejects_a_pdf_that_already_has_text(tmp_path, out_dir):
     assert not (out_dir / "o.pdf").exists()
 
 
-def test_ocr_accepts_an_image_only_pdf_past_the_text_guard(make_pdf, out_dir, monkeypatch):
-    # make_pdf's pages are PIL-rasterised images with no PDF text operators
-    # (see conftest.py) -- this only proves the guard doesn't false-positive
-    # on them; it doesn't require Ghostscript/Tesseract to actually run, so
-    # the rest of the pipeline is stubbed out.
-    monkeypatch.setattr("ops.pdf_ocr._ocr_page", lambda *a, **k: None)
-    monkeypatch.setattr(
-        "ops.pdf_ocr.pikepdf.Pdf.new",
-        lambda: pikepdf.open(str(make_pdf("stub", pages=1))),
-    )
-    src = make_pdf("a", pages=1)
-    # This will still fail past the guard (no real OCR happened), which is
-    # fine -- this test only asserts ALREADY_HAS_TEXT was NOT raised.
-    try:
-        pdf_ocr.run({"input": str(src), "output": str(out_dir / "o.pdf")}, noop_progress)
-    except OpError as exc:
-        assert exc.code != "ALREADY_HAS_TEXT"
-
-
 @needs_gs
 @needs_tesseract
 def test_ocr_page_produces_a_searchable_single_page_pdf(make_pdf, tmp_path):
@@ -66,3 +47,45 @@ def test_ocr_page_produces_a_searchable_single_page_pdf(make_pdf, tmp_path):
     with pikepdf.open(str(out_pdf)) as ocred:
         assert len(ocred.pages) == 1
         assert pdf_ocr._page_has_text(ocred.pages[0])
+
+
+@needs_gs
+@needs_tesseract
+def test_ocr_round_trip_produces_selectable_text(make_pdf, out_dir):
+    src = make_pdf("scan", pages=1)  # image-only page, no text guard trip
+    dest = out_dir / "searchable.pdf"
+
+    result = pdf_ocr.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    assert result["pages"] == 1
+    assert result["output"] == str(dest)
+    assert result["bytes"] > 0
+    with pikepdf.open(str(dest)) as after:
+        assert len(after.pages) == 1
+        assert pdf_ocr._page_has_text(after.pages[0])
+
+
+@needs_gs
+@needs_tesseract
+def test_ocr_preserves_page_count_on_multi_page_input(make_pdf, out_dir):
+    src = make_pdf("scan", pages=3)
+    dest = out_dir / "searchable.pdf"
+
+    result = pdf_ocr.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    assert result["pages"] == 3
+    with pikepdf.open(str(dest)) as after:
+        assert len(after.pages) == 3
+        for page in after.pages:
+            assert pdf_ocr._page_has_text(page)
+
+
+@needs_gs
+@needs_tesseract
+def test_ocr_progress_reaches_100(make_pdf, out_dir):
+    src = make_pdf("scan", pages=1)
+    dest = out_dir / "searchable.pdf"
+    calls: list[int] = []
+
+    pdf_ocr.run({"input": str(src), "output": str(dest)}, lambda pct, note="": calls.append(pct))
+    assert calls[-1] == 100
