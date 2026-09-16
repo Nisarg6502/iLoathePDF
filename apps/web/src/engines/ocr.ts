@@ -8,7 +8,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const OCR_SCALE = 300 / 72; // pdf.js viewport scale equivalent to 300 DPI
 
-function assetUrl(path: string): string {
+export function assetUrl(path: string): string {
   // import.meta.env.BASE_URL respects Vite's configured base path (this app
   // is served from a /iLoathePDF/ subpath on GitHub Pages, not the origin
   // root) -- a hardcoded "/tesseract/..." would 404 there.
@@ -24,10 +24,42 @@ function assetUrl(path: string): string {
 // `new URL('...', import.meta.url)` and rewrites it into a dev-server asset
 // URL, same as an `?url` import -- exactly the http(s) path this exists to
 // avoid. One extra indirection keeps this a plain runtime URL resolution.)
-function localTesseractAssetPath(path: string): string {
+export function localTesseractAssetPath(path: string): string {
   const moduleUrl = import.meta.url;
   const fileUrl = new URL(`../../public/tesseract/${path}`, moduleUrl);
   return fileUrl.pathname.replace(/^\/([A-Za-z]:)/, "$1");
+}
+
+// The real, production path-building logic -- pulled out as its own plain
+// function (rather than inlined in ocrWorkerOptions()'s non-test branch) so
+// it can be unit-tested directly without needing a MODE flag or a running
+// tesseract.js worker. This is what a real browser build always uses.
+export function productionOcrWorkerOptions() {
+  return {
+    workerPath: assetUrl("worker.min.js"),
+    // MUST be a directory: tesseract.js feature-detects the best available
+    // WASM core at runtime (relaxed-SIMD / SIMD / plain) and loads
+    // "<corePath>/tesseract-core-<variant>-lstm.wasm.js" itself. This used
+    // to be pinned to one exact file (tesseract-core-simd-lstm.wasm.js)
+    // because tesseract.js-core@6.1.2 -- what this project's package.json
+    // explicitly pinned, even though tesseract.js@7.0.0 itself depends on
+    // tesseract.js-core@^7.0.0 -- doesn't ship a relaxedsimd build at all,
+    // and the Chromium build this was tested against supports relaxed SIMD,
+    // so a directory corePath 404'd on the capability-detected filename.
+    // Verified directly: node_modules/tesseract.js-core@6.1.2 has no
+    // "relaxedsimd" files; the nested tesseract.js-core@7.0.0 npm actually
+    // resolved for tesseract.js's own internal use (before this fix) does.
+    // Bumping this project's explicit tesseract.js-core dependency to
+    // ^7.0.0 (matching what tesseract.js@7.0.0 itself requires) and
+    // re-vendoring public/tesseract/core/ from that version -- both
+    // tesseract-core-simd-lstm.* and tesseract-core-relaxedsimd-lstm.* are
+    // now vendored (OEM is always LSTM_ONLY here, so only the *-lstm
+    // variants are ever requested) -- makes the directory-based detection
+    // this option is designed around actually work, instead of working
+    // around a stale, mismatched core version.
+    corePath: assetUrl("core"),
+    langPath: assetUrl("lang"),
+  };
 }
 
 function ocrWorkerOptions() {
@@ -45,20 +77,7 @@ function ocrWorkerOptions() {
     // exercises Step 3's actual bundled tessdata without a network call.
     return { langPath: localTesseractAssetPath("lang") };
   }
-  return {
-    workerPath: assetUrl("worker.min.js"),
-    // A *directory* corePath makes tesseract.js feature-detect the best
-    // available WASM core at runtime (SIMD / relaxed-SIMD / plain) and load
-    // "<corePath>/tesseract-core-<variant>-lstm.wasm.js" -- but relaxed-SIMD
-    // detection returns true in current Chrome, and tesseract.js-core 6.x
-    // doesn't actually ship a relaxedsimd build to point it at (confirmed:
-    // no such file exists in node_modules/tesseract.js-core), so that
-    // capability-detected path 404s. Pointing corePath at the exact SIMD
-    // build's filename (the one Step 3 vendors) skips that detection
-    // entirely -- tesseract.js loads a corePath ending in ".js" as-is.
-    corePath: assetUrl("core/tesseract-core-simd-lstm.wasm.js"),
-    langPath: assetUrl("lang"),
-  };
+  return productionOcrWorkerOptions();
 }
 
 async function pageHasText(page: pdfjsLib.PDFPageProxy): Promise<boolean> {
