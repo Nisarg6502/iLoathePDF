@@ -92,6 +92,20 @@ now also published on GitHub Releases), sha256
 English-only, so the installer's other bundled languages are not vendored).
 `ILOATHEPDF_TESSERACT` overrides the path for ad-hoc testing.
 
+Like Ghostscript, `vendor/tesseract/` is gitignored local state, not
+committed — every checkout re-vendors it independently, and there is no
+guarantee it's present in any given one. As of this note, it genuinely is
+present in the worktree this vendoring was done in, but is NOT present in
+the shared main checkout: `pdf.ocr`'s `@needs_tesseract`-marked tests skip
+there until someone re-vendors it locally by repeating the steps below (a
+GUI installer needs interactive UAC elevation a non-interactive session
+can't grant — the 7-Zip extraction path below is the one that actually
+works headlessly). This also means the Windows-only failure path the fix
+round below found (Tesseract exiting 0 with no output when
+`tessdata/configs/` is absent) and the plan's cross-engine visual
+verification step have each been exercised for real exactly once, in that
+one vendored session — not independently reproduced in every checkout.
+
 Two things differed from the plan once run against the real binary: the
 installer's `/S` silent flag still triggers a UAC elevation prompt (its
 manifest requests `highestAvailable`), which a non-interactive session can't
