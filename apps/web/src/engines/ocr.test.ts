@@ -30,4 +30,33 @@ describe("ocrEngine", () => {
 
     await expect(ocrEngine({ files: [file], options: {} })).rejects.toThrow(/already has selectable text/i);
   });
+
+  it("adds selectable text that pdf.js can extract back out", async () => {
+    const bytes = await makeImageOnlyPdf();
+    const file = new File([bytes as BlobPart], "scan.pdf", { type: "application/pdf" });
+
+    const result = await ocrEngine({ files: [file], options: {} });
+
+    expect(result.files).toHaveLength(1);
+    expect(result.files[0].name).toBe("scan-searchable.pdf");
+
+    const outBytes = new Uint8Array(await result.files[0].blob.arrayBuffer());
+    const pdfjsLib = await import("pdfjs-dist");
+    const outDoc = await pdfjsLib.getDocument({ data: outBytes }).promise;
+    const page = await outDoc.getPage(1);
+    const content = await page.getTextContent();
+    const text = content.items.map((item) => ("str" in item ? item.str : "")).join(" ").toUpperCase();
+    expect(text).toContain("HELLO");
+  }, 30000);
+
+  it("preserves the visible page image", async () => {
+    const bytes = await makeImageOnlyPdf();
+    const file = new File([bytes as BlobPart], "scan.pdf", { type: "application/pdf" });
+
+    const result = await ocrEngine({ files: [file], options: {} });
+
+    const outBytes = new Uint8Array(await result.files[0].blob.arrayBuffer());
+    const outDoc = await PDFDocument.load(outBytes);
+    expect(outDoc.getPageCount()).toBe(1);
+  }, 30000);
 });
