@@ -44,20 +44,43 @@ def _page_has_text(page) -> bool:
     the page-level stream alone. Missing this would let a page whose visible
     text lives entirely inside an XObject slip past the guard undetected.
     """
+    return _content_has_text(page, set())
+
+
+def _content_has_text(obj, seen: set) -> bool:
+    """`_page_has_text`'s recursive worker.
+
+    `seen` tracks the indirect-object id of every Form XObject already
+    visited in this call tree. PDF's indirect-object model lets a Form
+    XObject's own `/Resources/XObject` legally reference an ancestor (or
+    itself) through a shared indirect reference -- a real, constructible
+    (if malformed/adversarial) circular XObject graph, not just a
+    hypothetical. Without this guard such an input would blow the recursion
+    limit; skipping an already-visited XObject instead lets this function
+    finish and return whatever it found before the cycle closed, which is
+    all the guard needs -- a cyclic reference can't hide any text that a
+    single visit wouldn't have already seen.
+    """
     import pikepdf
 
-    instructions = pikepdf.parse_content_stream(page)
+    instructions = pikepdf.parse_content_stream(obj)
     if any(str(instr.operator) in _TEXT_OPS for instr in instructions):
         return True
 
-    resources = page.get("/Resources")
+    resources = obj.get("/Resources")
     if resources is None:
         return False
     xobjects = resources.get("/XObject")
     if xobjects is None:
         return False
     for xobj in xobjects.values():
-        if xobj.get("/Subtype") == pikepdf.Name.Form and _page_has_text(xobj):
+        if xobj.get("/Subtype") != pikepdf.Name.Form:
+            continue
+        key = xobj.objgen if xobj.is_indirect else id(xobj)
+        if key in seen:
+            continue
+        seen.add(key)
+        if _content_has_text(xobj, seen):
             return True
     return False
 

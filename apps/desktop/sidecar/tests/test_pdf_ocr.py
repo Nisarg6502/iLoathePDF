@@ -57,6 +57,44 @@ def test_ocr_rejects_a_pdf_with_text_only_inside_a_form_xobject(tmp_path, out_di
     assert not (out_dir / "o.pdf").exists()
 
 
+def _make_cyclic_xobject_pdf(tmp_path: Path) -> Path:
+    """A one-page PDF with two Form XObjects whose /Resources/XObject
+    entries reference each other, forming a cycle -- built directly with
+    pikepdf since reportlab has no way to produce this. Legal per PDF's
+    indirect-object model, not something `_page_has_text`'s recursion
+    should be able to loop forever on."""
+    pdf = pikepdf.Pdf.new()
+    page = pdf.add_blank_page(page_size=(200, 200))
+
+    xobj1 = pdf.make_indirect(pikepdf.Stream(pdf, b"q Q"))
+    xobj1.Type = pikepdf.Name.XObject
+    xobj1.Subtype = pikepdf.Name.Form
+    xobj1.BBox = pikepdf.Array([0, 0, 200, 200])
+
+    xobj2 = pdf.make_indirect(pikepdf.Stream(pdf, b"q Q"))
+    xobj2.Type = pikepdf.Name.XObject
+    xobj2.Subtype = pikepdf.Name.Form
+    xobj2.BBox = pikepdf.Array([0, 0, 200, 200])
+
+    xobj1.Resources = pikepdf.Dictionary(XObject=pikepdf.Dictionary(Fx2=xobj2))
+    xobj2.Resources = pikepdf.Dictionary(XObject=pikepdf.Dictionary(Fx1=xobj1))  # cycle back to xobj1
+
+    page.Resources = pikepdf.Dictionary(XObject=pikepdf.Dictionary(Fx1=xobj1))
+    page.Contents = pdf.make_indirect(pikepdf.Stream(pdf, b"q /Fx1 Do Q"))
+
+    out = tmp_path / "cyclic_xobjects.pdf"
+    pdf.save(str(out))
+    return out
+
+
+def test_page_has_text_survives_a_cyclic_xobject_graph(tmp_path):
+    src = _make_cyclic_xobject_pdf(tmp_path)
+    with pikepdf.open(str(src)) as pdf:
+        # Must return (no text anywhere in the cycle) rather than raise
+        # RecursionError -- that's the whole point of this test.
+        assert pdf_ocr._page_has_text(pdf.pages[0]) is False
+
+
 @needs_gs
 @needs_tesseract
 def test_ocr_page_produces_a_searchable_single_page_pdf(make_pdf, tmp_path):
