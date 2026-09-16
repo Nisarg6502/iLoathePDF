@@ -193,21 +193,20 @@ def run(params: dict, progress: ProgressFn) -> dict:
     find_ghostscript()
     find_tesseract()
 
-    pages_total = total
-    progress(5, f"OCR-ing {pages_total} page(s)")
+    progress(5, f"OCR-ing {total} page(s)")
 
     with temp_dir() as tmp:
         page_pdfs: list[Path] = []
-        for page_no in range(1, pages_total + 1):
-            note = f"page {page_no} of {pages_total}"
-            pct = 5 + int(70 * (page_no - 1) / pages_total)
+        for page_no in range(1, total + 1):
+            note = f"page {page_no} of {total}"
+            pct = 5 + int(70 * (page_no - 1) / total)
             png_path = tmp / f"page-{page_no}.png"
             _rasterize_page(path, page_no, png_path, progress, pct, note)
 
             output_base = tmp / f"page-{page_no}"
             _ocr_page(png_path, output_base, progress, pct, note)
             page_pdfs.append(output_base.with_suffix(".pdf"))
-            progress(5 + int(70 * page_no / pages_total), note)
+            progress(5 + int(70 * page_no / total), note)
 
         progress(80, "Assembling pages")
         with pikepdf.Pdf.new() as dst:
@@ -223,4 +222,4 @@ def run(params: dict, progress: ProgressFn) -> dict:
                     raise OpError("OUTPUT_WRITE_FAILED", f"Cannot write {dest}: {exc}") from exc
 
     progress(100, "Done")
-    return {"output": str(dest), "bytes": size_of(dest), "pages": pages_total}
+    return {"output": str(dest), "bytes": size_of(dest), "pages": total}

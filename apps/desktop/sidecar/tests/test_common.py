@@ -109,7 +109,7 @@ def test_open_pdf_with_password_rejects_wrong_password(tmp_path):
 
 
 def test_find_tesseract_honors_env_override(tmp_path, monkeypatch):
-    from ops._common import OpError, find_tesseract
+    from ops._common import find_tesseract
 
     fake = tmp_path / "tesseract.exe"
     fake.write_bytes(b"not a real binary, just needs to exist")
