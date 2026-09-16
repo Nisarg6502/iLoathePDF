@@ -97,6 +97,56 @@ function textRenderModesAtShowOps(content: string): number[] {
   return modes;
 }
 
+// tesseract.js's real `createWorker()` spawns a Node worker_thread whose
+// path goes through the library's own internal getEnvironment()/resolvePaths()
+// browser-vs-Node detection. That detection checks `typeof document ===
+// 'object'` -- jsdom always defines `document`, so it unconditionally
+// resolves to "browser", and `isBrowser` gets baked into a closure the very
+// first time tesseract.js's internals are `require()`'d (at this test
+// file's own import time, well before any test body runs) -- there is no
+// way to toggle it per-test. On a POSIX host that misdetection rewrites
+// the worker's own script path into an http(s) URL that Node's real
+// worker_threads.Worker constructor then rejects outright (confirmed: this
+// passes on Windows purely by accident, because a Windows drive-letter
+// path happens to parse as its own URL scheme and survive the rewrite
+// unchanged, and fails identically every time on Linux -- verified against
+// this exact repo's own CI). So every test that needs a working `recognize()`
+// result mocks tesseract.js's `createWorker` entirely (the same technique
+// the ligature test below already established) rather than depending on a
+// real worker_thread spawning successfully in this test environment --
+// this exercises 100% of ocrEngine's own logic (rendering, guard,
+// sanitization, invisible-text drawing, dimension/image preservation) and
+// is what remains genuinely platform-independent; only "does tesseract.js's
+// own Node worker machinery function under jsdom" is left unexercised here,
+// which is a jsdom/tesseract.js interaction bug, not anything in ocr.ts,
+// and is separately proven working by real end-to-end manual browser testing.
+async function withMockedTesseract<T>(
+  words: { text: string; bbox: { x0: number; y0: number; x1: number; y1: number } }[],
+  run: (mockedOcrEngine: typeof ocrEngine) => Promise<T>,
+): Promise<T> {
+  vi.resetModules();
+  vi.doMock("tesseract.js", () => ({
+    createWorker: vi.fn(async () => ({
+      recognize: vi.fn(async () => ({
+        data: { blocks: [{ paragraphs: [{ lines: [{ words }] }] }] },
+      })),
+      terminate: vi.fn(async () => {}),
+    })),
+  }));
+  try {
+    const { ocrEngine: mockedOcrEngine } = await import("./ocr");
+    return await run(mockedOcrEngine);
+  } finally {
+    vi.doUnmock("tesseract.js");
+    vi.resetModules();
+  }
+}
+
+// Approximate bbox for "HELLO" as drawn by makeImageOnlyPdf() (48px font,
+// fillText baseline at x=20,y=60 on a 300x100 canvas) -- close enough for
+// these tests, none of which assert on exact word position.
+const HELLO_WORD = { text: "HELLO", bbox: { x0: 20, y0: 15, x1: 180, y1: 65 } };
+
 describe("ocrEngine", () => {
   it("rejects a PDF that already has selectable text", async () => {
     const bytes = await makeTestPdf(1); // makeTestPdf uses drawText -> real text
@@ -109,12 +159,13 @@ describe("ocrEngine", () => {
     const bytes = await makeImageOnlyPdf();
     const file = new File([bytes as BlobPart], "scan.pdf", { type: "application/pdf" });
 
-    const result = await ocrEngine({ files: [file], options: {} });
+    const outBytes = await withMockedTesseract([HELLO_WORD], async (mockedOcrEngine) => {
+      const result = await mockedOcrEngine({ files: [file], options: {} });
+      expect(result.files).toHaveLength(1);
+      expect(result.files[0].name).toBe("scan-searchable.pdf");
+      return new Uint8Array(await result.files[0].blob.arrayBuffer());
+    });
 
-    expect(result.files).toHaveLength(1);
-    expect(result.files[0].name).toBe("scan-searchable.pdf");
-
-    const outBytes = new Uint8Array(await result.files[0].blob.arrayBuffer());
     const loadingTask = pdfjsLib.getDocument({ data: outBytes });
     const outDoc = await loadingTask.promise;
     try {
@@ -131,9 +182,10 @@ describe("ocrEngine", () => {
     const bytes = await makeImageOnlyPdf();
     const file = new File([bytes as BlobPart], "scan.pdf", { type: "application/pdf" });
 
-    const result = await ocrEngine({ files: [file], options: {} });
-
-    const outBytes = new Uint8Array(await result.files[0].blob.arrayBuffer());
+    const outBytes = await withMockedTesseract([HELLO_WORD], async (mockedOcrEngine) => {
+      const result = await mockedOcrEngine({ files: [file], options: {} });
+      return new Uint8Array(await result.files[0].blob.arrayBuffer());
+    });
     const outDoc = await PDFDocument.load(outBytes);
     expect(outDoc.getPageCount()).toBe(1);
 
@@ -196,8 +248,10 @@ describe("ocrEngine", () => {
     const bytes = await makeImageOnlyPdf();
     const file = new File([bytes as BlobPart], "scan.pdf", { type: "application/pdf" });
 
-    const result = await ocrEngine({ files: [file], options: {} });
-    const outBytes = new Uint8Array(await result.files[0].blob.arrayBuffer());
+    const outBytes = await withMockedTesseract([HELLO_WORD], async (mockedOcrEngine) => {
+      const result = await mockedOcrEngine({ files: [file], options: {} });
+      return new Uint8Array(await result.files[0].blob.arrayBuffer());
+    });
 
     const streams = decodedContentStreams(outBytes);
     expect(streams.length).toBeGreaterThan(0);
