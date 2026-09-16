@@ -254,3 +254,50 @@ def has_ghostscript() -> bool:
         return True
     except OpError:
         return False
+
+
+# --------------------------------------------------------------------------
+# tesseract discovery (used by pdf_ocr)
+# --------------------------------------------------------------------------
+
+def find_tesseract() -> str:
+    """Locate the Tesseract executable, or raise TESSERACT_MISSING.
+
+    Search order mirrors find_ghostscript():
+      1. $ILOATHEPDF_TESSERACT                (explicit override, used by tests)
+      2. <repo or bundle>/vendor/tesseract/tesseract.exe   (shipped copy)
+      3. PATH
+    """
+    override = os.environ.get("ILOATHEPDF_TESSERACT")
+    if override and Path(override).is_file():
+        return override
+
+    names = ["tesseract.exe"] if os.name == "nt" else ["tesseract"]
+
+    # Dev: sidecar/ops/_common.py -> sidecar/ops -> sidecar -> project root.
+    # Bundle: the exe sits in <resources>/sidecar/, vendor/ in <resources>/.
+    exe_dir = Path(sys.executable).resolve().parent
+    roots = (Path(__file__).resolve().parents[2], exe_dir, exe_dir.parent)
+    for root in roots:
+        for name in names:
+            candidate = root / "vendor" / "tesseract" / name
+            if candidate.is_file():
+                return str(candidate)
+
+    for name in names:
+        found = shutil.which(name)
+        if found:
+            return found
+
+    raise OpError(
+        "TESSERACT_MISSING",
+        "Tesseract was not found. OCR needs it to recognise text.",
+    )
+
+
+def has_tesseract() -> bool:
+    try:
+        find_tesseract()
+        return True
+    except OpError:
+        return False
