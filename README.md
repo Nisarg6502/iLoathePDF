@@ -102,7 +102,23 @@ Then see each app's own README for how to run and build it:
 - [`apps/desktop/README.md`](apps/desktop/README.md) — requires Node 22,
   Python 3.11, Rust with the MSVC toolchain, and Ghostscript.
 - [`apps/web`](apps/web) — `npm run dev --workspace=apps/web` and open the
-  printed local URL.
+  printed local URL. The OCR tool needs its `tesseract.js` worker, core (WASM)
+  and English language files vendored locally under `apps/web/public/tesseract/`
+  (gitignored, not committed — the app never fetches them from a CDN at
+  runtime, matching its no-network guarantee). After `npm install`, copy them
+  in:
+
+  ```bash
+  mkdir -p apps/web/public/tesseract/core apps/web/public/tesseract/lang
+  cp node_modules/tesseract.js/dist/worker.min.js apps/web/public/tesseract/
+  cp node_modules/tesseract.js-core/tesseract-core-simd*.{js,wasm} apps/web/public/tesseract/core/
+  gzip -k -c vendor/tesseract/tessdata/eng.traineddata > apps/web/public/tesseract/lang/eng.traineddata.gz
+  ```
+
+  (The last line reuses the same `eng.traineddata` the desktop app vendors —
+  see `apps/desktop/HANDOVER.md`. If that file isn't present yet, source
+  `eng.traineddata` from the Tesseract project's own `tessdata` release
+  instead and gzip it the same way.)
 
 ## Contributing
 
