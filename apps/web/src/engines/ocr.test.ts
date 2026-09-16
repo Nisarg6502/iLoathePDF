@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import { ocrEngine } from "./ocr";
 import { makeTestPdf } from "./testHelpers";
 
