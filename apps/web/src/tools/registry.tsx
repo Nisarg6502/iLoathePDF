@@ -1,4 +1,5 @@
 import type { ToolConfig } from "./ToolConfig";
+import type { Engine } from "@/engines/types";
 import { MergeOptions } from "./options/MergeOptions";
 import { mergeEngine } from "@/engines/merge";
 import { SplitOptions } from "./options/SplitOptions";
@@ -25,6 +26,7 @@ import { redactEngine } from "@/engines/redact";
 import { RedactWorkspace } from "./redact/RedactWorkspace";
 import { OcrOptions } from "./options/OcrOptions";
 import { ocrEngine } from "@/engines/ocr";
+import { PdfToExcelOptions } from "./options/PdfToExcelOptions";
 import {
   CompressIcon,
   MergeIcon,
@@ -38,7 +40,12 @@ import {
   WatermarkIcon,
   RedactIcon,
   OcrIcon,
+  PdfToExcelIcon,
 } from "./icons";
+
+const desktopOnlyEngine: Engine = async () => {
+  throw new Error("This tool is only available in the desktop app.");
+};
 
 export const TOOLS: ToolConfig[] = [
   { slug: "merge", name: "Merge PDF", description: "Combine PDFs in the order you choose, with page ranges per file.", category: "pdf", Icon: MergeIcon, accept: [".pdf"], multiple: true, defaultOptions: {}, OptionsPanel: MergeOptions, engine: mergeEngine, status: "live", tint: "a" },
@@ -53,6 +60,7 @@ export const TOOLS: ToolConfig[] = [
   { slug: "watermark", name: "Watermark, Page Numbers & Stamp", description: "Add a repeating watermark, sequential page numbers, or a fixed stamp to every page.", category: "pdf", Icon: WatermarkIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "watermark", pages: "all", watermark: { content: "text", text: "", opacity: 0.35, rotation: 45, placement: "single" }, page_numbers: { position: "bottom-center", format: "n", start: 1 }, stamp: { content: "text", text: "", position: "bottom-right", maxWidthPct: 0.2 } }, OptionsPanel: WatermarkOptions, engine: watermarkEngine, status: "live", tint: "j" },
   { slug: "redact", name: "Redact PDF", description: "Black out sensitive text, photos or signatures — visually or for good.", category: "pdf", Icon: RedactIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "visual", boxes: [] }, OptionsPanel: RedactOptions, engine: redactEngine, status: "live", tint: "k", Workspace: RedactWorkspace },
   { slug: "ocr", name: "OCR → Searchable PDF", description: "Add an invisible text layer to a scanned PDF so it's searchable and selectable.", category: "pdf", Icon: OcrIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: OcrOptions, engine: ocrEngine, status: "live", tint: "l" },
+  { slug: "pdf-to-excel", name: "PDF to Excel", description: "Extract tables from a PDF into a real, editable spreadsheet.", category: "pdf", Icon: PdfToExcelIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfToExcelOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "m" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {
