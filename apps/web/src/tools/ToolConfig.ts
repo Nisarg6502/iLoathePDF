@@ -21,7 +21,7 @@ export interface ToolConfig {
   defaultOptions: Record<string, unknown>;
   OptionsPanel: ComponentType<OptionsPanelProps>;
   engine: Engine;
-  status: "live" | "preview";
+  status: "live" | "preview" | "desktop-only";
   tint: TintKey;
   /**
    * When set, ToolDetail renders this instead of the generic ToolPage

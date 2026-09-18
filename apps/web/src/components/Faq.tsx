@@ -28,7 +28,7 @@ const FAQS: [string, React.ReactNode][] = [
   [
     "What about macOS or Linux?",
     <>
-      There's no installer for those yet — the web app runs the same tools in any modern browser on any OS. See{" "}
+      There's no installer for those yet — the web app runs all but one of the same tools in any modern browser on any OS (PDF to Excel needs the desktop build). See{" "}
       <Link to="/how-it-works" className="text-accent">
         browser support
       </Link>{" "}

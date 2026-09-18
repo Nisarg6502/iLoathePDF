@@ -242,6 +242,21 @@ export async function execute(
       };
     }
 
+    case "pdf.to_excel": {
+      const r = await runJob(
+        "pdf.to_excel",
+        {
+          input: first.path,
+          output: join(`${base}-tables.xlsx`),
+        },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.sheets} sheet(s) extracted.`,
+      };
+    }
+
     case "pdf.to_img": {
       const pages = str("pages").trim();
       const r = await runJob(

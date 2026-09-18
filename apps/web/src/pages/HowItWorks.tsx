@@ -11,6 +11,7 @@ export function HowItWorks() {
     ["Batch / whole folders", "No", "Yes"],
     ["Saves to a folder you pick", "Downloads only", "Yes"],
     ["Ghostscript-grade compression", "Preview only", "Full"],
+    ["Table extraction to Excel", "No", "Yes"],
     ["Install required", "None", "14 MB installer"],
   ];
 

@@ -30,11 +30,12 @@ as a website that processes files client-side and never sends them anywhere.
 | **Networking code** | None at all — cannot phone home | None — verify in DevTools → Network |
 | **Compress quality** | Full (Ghostscript) | Preview (rasterizes pages, no selectable text yet) |
 | **HEIC → JPG** | Yes | Preview badge (decoder not wired up yet) |
+| **PDF to Excel** | Yes | No — no client-side library extracts tables well enough |
 
 Both share the same rule: your files never leave the machine they're opened
 on. Pick whichever fits — there's no reason to pick only one.
 
-## The twelve tools
+## The thirteen tools
 
 | Tool | What it does |
 | --- | --- |
@@ -46,6 +47,7 @@ on. Pick whichever fits — there's no reason to pick only one.
 | Watermark, Page Numbers & Stamp | Add a repeating watermark, sequential page numbers, or a fixed stamp to every page |
 | Redact PDF | Black out sensitive text, photos or signatures — visually or for good |
 | OCR → Searchable PDF | Add an invisible, searchable text layer to a scanned PDF |
+| PDF to Excel | Extract tables into a real, editable spreadsheet — desktop only |
 | Compress PDF | Lossless, Balanced or Strong, with the size trade-off shown |
 | PDF to images | Render pages to PNG or JPG at a chosen DPI |
 | Images to PDF | Scans and photos into one PDF, one image per page |
@@ -53,8 +55,10 @@ on. Pick whichever fits — there's no reason to pick only one.
 
 On the web app, Compress and the HEIC direction of Convert Images carry a
 visible **Preview** badge: real files go in and real processing happens, but
-the output isn't yet full quality — see the table above. Every other tool is
-fully live in both the desktop app and the browser.
+the output isn't yet full quality — see the table above. PDF to Excel is
+desktop only — no client-side library extracts tables well enough to ship on
+the web, so it shows there as a disabled card pointing to the download.
+Every other tool is fully live in both the desktop app and the browser.
 
 ## How it's built
 

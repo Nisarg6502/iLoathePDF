@@ -37,6 +37,7 @@ in the same commit. Downstream agents code against it and must not edit it.
 | `GHOSTSCRIPT_MISSING` | Ghostscript binary not found (compress/rasterise) |
 | `TESSERACT_MISSING` | Tesseract binary not found (`pdf.ocr`) |
 | `ALREADY_HAS_TEXT` | Input already has selectable text; `pdf.ocr` only accepts scanned/image-only PDFs |
+| `NO_TABLES_FOUND` | `pdf.to_excel` found no table on any page; nothing is written |
 | `OUTPUT_WRITE_FAILED` | Could not write the output file |
 | `CANCELLED` | Job cancelled by the user |
 | `INTERNAL` | Unexpected error; `detail` holds the traceback |
@@ -226,6 +227,19 @@ with `ALREADY_HAS_TEXT` -- OCR is for scans, not native-text PDFs. Fails fast
 with `GHOSTSCRIPT_MISSING` / `TESSERACT_MISSING` if either binary can't be
 found.
 result: `{"output": "...", "bytes": 4096, "pages": 12}`
+
+### `pdf.to_excel`
+params:
+```json
+{"input": "a.pdf", "output": "out.xlsx"}
+```
+Extracts every table pdfplumber detects into a real, editable .xlsx workbook
+-- one worksheet per page that has at least one table, named "Page N"; a
+page with no table contributes no worksheet at all. Multiple tables on one
+page share that page's single worksheet, separated by one blank row. Fails
+with `NO_TABLES_FOUND` if the whole document has no table anywhere -- nothing
+is written in that case.
+result: `{"output": "...", "bytes": 4096, "sheets": 2}`
 
 ## Page range spec
 

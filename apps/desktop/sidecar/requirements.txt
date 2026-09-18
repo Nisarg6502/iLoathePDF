@@ -3,5 +3,7 @@ pikepdf==10.12.0
 pillow-heif==1.6.0
 pillow==12.3.0
 reportlab==5.0.1
+pdfplumber==0.11.10
+openpyxl==3.1.5
 pyinstaller==6.22.2
 pytest==9.1.1

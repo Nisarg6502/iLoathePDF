@@ -836,6 +836,16 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "pdf-to-excel":
+      return (
+        <OptionsPanel
+          className={className}
+          description="Extracts every table it finds into a spreadsheet — one sheet per page. No options to configure."
+        >
+          {null}
+        </OptionsPanel>
+      );
+
     default:
       return null;
   }
