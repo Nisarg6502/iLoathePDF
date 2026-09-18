@@ -18,6 +18,7 @@ export type OpName =
   | "pdf.watermark"
   | "pdf.redact"
   | "pdf.ocr"
+  | "pdf.to_excel"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -140,6 +141,9 @@ export interface PdfRedactResult { output: string; bytes: number; pages: number;
 export interface PdfOcrParams { input: string; output: string }
 export interface PdfOcrResult { output: string; bytes: number; pages: number }
 
+export interface PdfToExcelParams { input: string; output: string }
+export interface PdfToExcelResult { output: string; bytes: number; sheets: number }
+
 export type ProtectMode = "protect" | "unlock";
 export interface PdfProtectParams { input: string; output: string; mode: ProtectMode; password: string }
 export interface PdfProtectResult { output: string; bytes: number }
@@ -219,6 +223,7 @@ export interface OpMap {
   "pdf.watermark": [PdfWatermarkParams, PdfWatermarkResult];
   "pdf.redact": [PdfRedactParams, PdfRedactResult];
   "pdf.ocr": [PdfOcrParams, PdfOcrResult];
+  "pdf.to_excel": [PdfToExcelParams, PdfToExcelResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];
