@@ -54,19 +54,36 @@ def run(params: dict, progress: ProgressFn) -> dict:
     with pdfplumber.open(str(path)) as pdf:
         for index, page in enumerate(pdf.pages):
             page_no = index + 1
-            tables = page.extract_tables()
-            pct = 5 + int(85 * page_no / total_pages) if total_pages else 90
-            if not tables:
-                progress(pct, f"page {page_no}: no table")
-                continue
-            ws = wb.create_sheet(f"Page {page_no}")
-            for table_index, table in enumerate(tables):
-                if table_index > 0:
-                    ws.append([])
-                for row in table:
-                    ws.append([_normalize_cell(cell) for cell in row])
-            sheets_written += 1
-            progress(pct, f"page {page_no}: {len(tables)} table(s)")
+            try:
+                tables = page.extract_tables()
+                pct = 5 + int(85 * page_no / total_pages) if total_pages else 90
+                if not tables:
+                    progress(pct, f"page {page_no}: no table")
+                    continue
+                ws = wb.create_sheet(f"Page {page_no}")
+                for table_index, table in enumerate(tables):
+                    if table_index > 0:
+                        ws.append([])
+                    for row in table:
+                        ws.append([_normalize_cell(cell) for cell in row])
+                        # openpyxl's Cell.value setter auto-infers
+                        # data_type='f' (a live formula) for any string
+                        # starting with "=" -- e.g. a ledger cell that reads
+                        # "=1+1". Table cells are untrusted PDF content, not
+                        # spreadsheet input, so force every cell just
+                        # written back to literal string type. Without this,
+                        # a cell like that either silently recalculates or
+                        # shows #NAME? instead of holding the literal text
+                        # pdfplumber extracted.
+                        for written in ws[ws.max_row]:
+                            written.data_type = "s"
+                sheets_written += 1
+                progress(pct, f"page {page_no}: {len(tables)} table(s)")
+            finally:
+                # pdfplumber caches each page's parsed objects for the life
+                # of the `pdf` handle -- unbounded growth on a large PDF.
+                # Release it as soon as this page's tables are written.
+                page.close()
 
     if sheets_written == 0:
         raise OpError("NO_TABLES_FOUND", "No tables were found in this PDF.")

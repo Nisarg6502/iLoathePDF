@@ -147,3 +147,31 @@ def test_to_excel_missing_input_file(out_dir, tmp_path):
     with pytest.raises(OpError) as exc:
         pdf_to_excel.run({"input": str(tmp_path / "ghost.pdf"), "output": str(out_dir / "o.xlsx")}, noop_progress)
     assert exc.value.code == "FILE_NOT_FOUND"
+
+
+def test_to_excel_never_writes_a_live_formula_for_a_cell_that_looks_like_one(tmp_path, out_dir):
+    """A table cell whose text happens to start with "=" (not unheard of in
+    real-world scanned/extracted documents -- an accounting ledger cell, a
+    stray formula-looking label) must survive as literal text.
+
+    openpyxl's `Cell.value` setter auto-infers `data_type='f'` (formula) for
+    any string starting with "=". Handing pdfplumber's extracted strings
+    straight to `ws.append()` -- as the spec promises ("written as
+    pdfplumber extracts them (strings)") -- silently turns that cell into a
+    live formula (or a #NAME? error) instead of the literal text it actually
+    is: classic spreadsheet-formula-injection, but from an untrusted PDF
+    rather than an untrusted CSV. Every written cell must come back as a
+    literal string after a save/reload round-trip.
+    """
+    src = tmp_path / "formula_like.pdf"
+    table = [["Label", "Value"], ["=1+1", "plain"]]
+    _make_table_pdf(src, [[table]])
+    dest = out_dir / "o.xlsx"
+
+    pdf_to_excel.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    wb = openpyxl.load_workbook(str(dest))
+    ws = wb["Page 1"]
+    cell = ws.cell(row=2, column=1)
+    assert cell.data_type == "s", f"cell was stored as a formula (data_type={cell.data_type!r})"
+    assert cell.value == "=1+1"

@@ -293,7 +293,7 @@ export const TOOLS: Tool[] = [
     acceptsLabel: "a PDF file",
     multiple: false,
     ordered: false,
-    action: "Save Excel file",
+    action: "Save Excel",
     defaults: {},
   },
 ];

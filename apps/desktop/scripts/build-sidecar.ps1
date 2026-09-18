@@ -40,6 +40,9 @@ $env:PYTHONPATH = Join-Path $root "sidecar"
     --collect-all pillow_heif `
     --collect-all img2pdf `
     --collect-all reportlab `
+    --collect-all pdfplumber `
+    --collect-all pdfminer `
+    --collect-all openpyxl `
     --hidden-import PIL.Image `
     --hidden-import PIL.ImageOps `
     (Join-Path $root "sidecar\main.py")

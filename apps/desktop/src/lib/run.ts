@@ -247,7 +247,7 @@ export async function execute(
         "pdf.to_excel",
         {
           input: first.path,
-          output: join(`${base}.xlsx`),
+          output: join(`${base}-tables.xlsx`),
         },
         opts,
       );
