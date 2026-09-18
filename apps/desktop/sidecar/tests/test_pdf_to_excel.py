@@ -47,3 +47,33 @@ def test_to_excel_rejects_a_pdf_with_no_tables_anywhere(tmp_path, out_dir):
         pdf_to_excel.run({"input": str(src), "output": str(dest)}, noop_progress)
     assert exc.value.code == "NO_TABLES_FOUND"
     assert not dest.exists()
+
+
+def test_to_excel_writes_one_sheet_per_table_bearing_page(tmp_path, out_dir):
+    src = tmp_path / "mixed.pdf"
+    table_a = [["Name", "Age"], ["Alice", "30"]]
+    table_c = [["City", "Pop"], ["Tokyo", "37M"]]
+    _make_table_pdf(src, [[table_a], [], [table_c]])  # page 2 has no table
+    dest = out_dir / "o.xlsx"
+
+    result = pdf_to_excel.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    assert result["sheets"] == 2
+    assert result["output"] == str(dest)
+    assert result["bytes"] > 0
+    wb = openpyxl.load_workbook(str(dest))
+    assert wb.sheetnames == ["Page 1", "Page 3"]  # page 2 contributes nothing
+    rows_1 = list(wb["Page 1"].iter_rows(values_only=True))
+    assert rows_1 == [("Name", "Age"), ("Alice", "30")]
+    rows_3 = list(wb["Page 3"].iter_rows(values_only=True))
+    assert rows_3 == [("City", "Pop"), ("Tokyo", "37M")]
+
+
+def test_to_excel_progress_reaches_100(tmp_path, out_dir):
+    src = tmp_path / "one.pdf"
+    _make_table_pdf(src, [[[["A"], ["1"]]]])
+    dest = out_dir / "o.xlsx"
+    calls: list[int] = []
+
+    pdf_to_excel.run({"input": str(src), "output": str(dest)}, lambda pct, note="": calls.append(pct))
+    assert calls[-1] == 100
