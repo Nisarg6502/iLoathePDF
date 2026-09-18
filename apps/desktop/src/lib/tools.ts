@@ -12,6 +12,7 @@ import {
   EyeOff,
   FileImage,
   FileOutput,
+  FileSpreadsheet,
   Images,
   Lock,
   Minimize2,
@@ -25,7 +26,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -277,6 +278,22 @@ export const TOOLS: Tool[] = [
     multiple: false,
     ordered: false,
     action: "Save PDF",
+    defaults: {},
+  },
+  {
+    id: "pdf-to-excel",
+    path: "/t/pdf-to-excel",
+    title: "PDF to Excel",
+    description: "Extract tables from a PDF into a real, editable spreadsheet.",
+    icon: FileSpreadsheet,
+    group: "pdf",
+    tint: "m",
+    op: "pdf.to_excel",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Save Excel file",
     defaults: {},
   },
 ];

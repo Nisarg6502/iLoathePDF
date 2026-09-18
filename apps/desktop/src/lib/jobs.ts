@@ -18,6 +18,7 @@ export type OpName =
   | "pdf.watermark"
   | "pdf.redact"
   | "pdf.ocr"
+  | "pdf.to_excel"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
