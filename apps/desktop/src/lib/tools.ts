@@ -16,6 +16,7 @@ import {
   Lock,
   Minimize2,
   Replace,
+  ScanText,
   Scissors,
   Signature,
   Stamp,
@@ -24,7 +25,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -261,6 +262,22 @@ export const TOOLS: Tool[] = [
     ordered: false,
     action: "Save PDF",
     defaults: { mode: "visual" },
+  },
+  {
+    id: "ocr",
+    path: "/t/ocr",
+    title: "OCR → Searchable PDF",
+    description: "Add an invisible text layer to a scanned PDF so it's searchable and selectable.",
+    icon: ScanText,
+    group: "pdf",
+    tint: "l",
+    op: "pdf.ocr",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Save PDF",
+    defaults: {},
   },
 ];
 

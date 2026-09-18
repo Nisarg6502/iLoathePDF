@@ -28,6 +28,16 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
+      - name: Install Tesseract (source of eng.traineddata)
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr-eng
+      - name: Vendor tesseract.js local assets
+        run: |
+          set -e
+          mkdir -p apps/web/public/tesseract/core apps/web/public/tesseract/lang
+          cp node_modules/tesseract.js/dist/worker.min.js apps/web/public/tesseract/
+          cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
+          eng_traineddata=$(find /usr/share/tesseract-ocr -name eng.traineddata | head -1)
+          gzip -k -c "$eng_traineddata" > apps/web/public/tesseract/lang/eng.traineddata.gz
       - name: Typecheck
         run: npm run typecheck --workspace=apps/web
       - name: Test

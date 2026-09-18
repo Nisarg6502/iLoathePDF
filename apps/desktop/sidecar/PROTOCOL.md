@@ -35,6 +35,8 @@ in the same commit. Downstream agents code against it and must not edit it.
 | `WRONG_PASSWORD` | Incorrect password given to `pdf.protect` unlock |
 | `UNSUPPORTED_FORMAT` | Image/file format not supported |
 | `GHOSTSCRIPT_MISSING` | Ghostscript binary not found (compress/rasterise) |
+| `TESSERACT_MISSING` | Tesseract binary not found (`pdf.ocr`) |
+| `ALREADY_HAS_TEXT` | Input already has selectable text; `pdf.ocr` only accepts scanned/image-only PDFs |
 | `OUTPUT_WRITE_FAILED` | Could not write the output file |
 | `CANCELLED` | Job cancelled by the user |
 | `INTERNAL` | Unexpected error; `detail` holds the traceback |
@@ -209,6 +211,21 @@ a targeted page whose `/Rotate` is non-default or whose CropBox differs from
 its MediaBox with `BAD_PARAMS` (not yet supported -- use `visual` mode, or
 rotate the PDF to its default orientation first).
 result: `{"output": "...", "bytes": 4096, "pages": 12, "boxes": 3, "mode": "true"}`
+
+### `pdf.ocr`
+params:
+```json
+{"input": "a.pdf", "output": "out.pdf"}
+```
+Adds an invisible, searchable text layer to a scanned/image-only PDF. Every
+page is rasterized with Ghostscript at 300 DPI and OCR'd with Tesseract
+(English only for v1); the recognized text is embedded invisibly behind the
+original page image, so the page looks unchanged but becomes selectable and
+searchable. Rejects an input that already has extractable text on any page
+with `ALREADY_HAS_TEXT` -- OCR is for scans, not native-text PDFs. Fails fast
+with `GHOSTSCRIPT_MISSING` / `TESSERACT_MISSING` if either binary can't be
+found.
+result: `{"output": "...", "bytes": 4096, "pages": 12}`
 
 ## Page range spec
 

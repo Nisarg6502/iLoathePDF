@@ -106,3 +106,24 @@ def test_open_pdf_with_password_rejects_wrong_password(tmp_path):
     with pytest.raises(OpError) as exc:
         open_pdf_with_password(protected, "wrong")
     assert exc.value.code == "WRONG_PASSWORD"
+
+
+def test_find_tesseract_honors_env_override(tmp_path, monkeypatch):
+    from ops._common import find_tesseract
+
+    fake = tmp_path / "tesseract.exe"
+    fake.write_bytes(b"not a real binary, just needs to exist")
+    monkeypatch.setenv("ILOATHEPDF_TESSERACT", str(fake))
+    assert find_tesseract() == str(fake)
+
+
+def test_find_tesseract_raises_tesseract_missing_when_nothing_found(monkeypatch):
+    from ops._common import OpError, find_tesseract
+
+    monkeypatch.delenv("ILOATHEPDF_TESSERACT", raising=False)
+    monkeypatch.setattr("ops._common.shutil.which", lambda name: None)
+    monkeypatch.setattr("ops._common.Path.is_file", lambda self: False)
+
+    with pytest.raises(OpError) as exc:
+        find_tesseract()
+    assert exc.value.code == "TESSERACT_MISSING"

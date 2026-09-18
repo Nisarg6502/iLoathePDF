@@ -43,3 +43,4 @@ vendor/
 *.zip
 
 .worktrees/
+.superpowers/

@@ -33,6 +33,7 @@ DISPATCH: dict[str, str] = {
     "pdf.protect": "ops.pdf_protect:run",
     "pdf.watermark": "ops.pdf_watermark:run",
     "pdf.redact": "ops.pdf_redact:run",
+    "pdf.ocr": "ops.pdf_ocr:run",
     "img.convert": "ops.img_convert:run",
     "img.to_pdf": "ops.img_to_pdf:run",
     "pdf.to_img": "ops.pdf_to_img:run",

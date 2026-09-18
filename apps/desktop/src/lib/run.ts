@@ -227,6 +227,21 @@ export async function execute(
       };
     }
 
+    case "pdf.ocr": {
+      const r = await runJob(
+        "pdf.ocr",
+        {
+          input: first.path,
+          output: join(`${base}-searchable.pdf`),
+        },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.pages} page(s) made searchable.`,
+      };
+    }
+
     case "pdf.to_img": {
       const pages = str("pages").trim();
       const r = await runJob(

@@ -17,6 +17,7 @@ export type OpName =
   | "pdf.protect"
   | "pdf.watermark"
   | "pdf.redact"
+  | "pdf.ocr"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -28,6 +29,8 @@ export type ErrorCode =
   | "CORRUPT_PDF"
   | "UNSUPPORTED_FORMAT"
   | "GHOSTSCRIPT_MISSING"
+  | "TESSERACT_MISSING"
+  | "ALREADY_HAS_TEXT"
   | "OUTPUT_WRITE_FAILED"
   | "CANCELLED"
   | "WRONG_PASSWORD"
@@ -134,6 +137,9 @@ export interface PdfRedactParams {
 }
 export interface PdfRedactResult { output: string; bytes: number; pages: number; boxes: number; mode: RedactMode }
 
+export interface PdfOcrParams { input: string; output: string }
+export interface PdfOcrResult { output: string; bytes: number; pages: number }
+
 export type ProtectMode = "protect" | "unlock";
 export interface PdfProtectParams { input: string; output: string; mode: ProtectMode; password: string }
 export interface PdfProtectResult { output: string; bytes: number }
@@ -212,6 +218,7 @@ export interface OpMap {
   "pdf.protect": [PdfProtectParams, PdfProtectResult];
   "pdf.watermark": [PdfWatermarkParams, PdfWatermarkResult];
   "pdf.redact": [PdfRedactParams, PdfRedactResult];
+  "pdf.ocr": [PdfOcrParams, PdfOcrResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];

@@ -826,6 +826,16 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "ocr":
+      return (
+        <OptionsPanel
+          className={className}
+          description="Scans your PDF and adds an invisible, searchable text layer over the original pages. English only for now — no options to configure."
+        >
+          {null}
+        </OptionsPanel>
+      );
+
     default:
       return null;
   }

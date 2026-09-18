@@ -34,7 +34,7 @@ as a website that processes files client-side and never sends them anywhere.
 Both share the same rule: your files never leave the machine they're opened
 on. Pick whichever fits — there's no reason to pick only one.
 
-## The eleven tools
+## The twelve tools
 
 | Tool | What it does |
 | --- | --- |
@@ -45,6 +45,7 @@ on. Pick whichever fits — there's no reason to pick only one.
 | Protect & Unlock PDF | Add or remove a password that's required to open the file |
 | Watermark, Page Numbers & Stamp | Add a repeating watermark, sequential page numbers, or a fixed stamp to every page |
 | Redact PDF | Black out sensitive text, photos or signatures — visually or for good |
+| OCR → Searchable PDF | Add an invisible, searchable text layer to a scanned PDF |
 | Compress PDF | Lossless, Balanced or Strong, with the size trade-off shown |
 | PDF to images | Render pages to PNG or JPG at a chosen DPI |
 | Images to PDF | Scans and photos into one PDF, one image per page |
@@ -102,7 +103,37 @@ Then see each app's own README for how to run and build it:
 - [`apps/desktop/README.md`](apps/desktop/README.md) — requires Node 22,
   Python 3.11, Rust with the MSVC toolchain, and Ghostscript.
 - [`apps/web`](apps/web) — `npm run dev --workspace=apps/web` and open the
-  printed local URL.
+  printed local URL. The OCR tool needs its `tesseract.js` worker, core (WASM)
+  and English language files vendored locally under `apps/web/public/tesseract/`
+  (gitignored, not committed — the app never fetches them from a CDN at
+  runtime, matching its no-network guarantee). After `npm install`, copy them
+  in:
+
+  ```bash
+  mkdir -p apps/web/public/tesseract/core apps/web/public/tesseract/lang
+  cp node_modules/tesseract.js/dist/worker.min.js apps/web/public/tesseract/
+  cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js} node_modules/tesseract.js-core/tesseract-core-lstm.{js,wasm,wasm.js} apps/web/public/tesseract/core/
+  gzip -k -c vendor/tesseract/tessdata/eng.traineddata > apps/web/public/tesseract/lang/eng.traineddata.gz
+  ```
+
+  All three LSTM builds are needed: `corePath` is a directory, and
+  `tesseract.js` feature-detects which one to load at runtime (only the
+  `-lstm` variants, since this tool always uses OEM `LSTM_ONLY`) — relaxed-SIMD
+  for a browser that supports it (current Chrome), plain SIMD for one that
+  doesn't, and the plain `tesseract-core-lstm.*` build (no SIMD at all) for a
+  browser with no WASM SIMD support whatsoever (older Safari/Firefox, or SIMD
+  disabled by policy). Missing any one of the three 404s for exactly the
+  browsers that would have picked it. Keep `tesseract.js-core`'s explicit
+  version in `apps/web/package.json` in sync with whatever `tesseract.js`
+  itself depends on (check
+  `node_modules/tesseract.js/package.json`'s own `tesseract.js-core` range)
+  so this isn't vendoring a different, possibly incomplete build than the
+  one npm actually resolves.
+
+  (The last line reuses the same `eng.traineddata` the desktop app vendors —
+  see `apps/desktop/HANDOVER.md`. If that file isn't present yet, source
+  `eng.traineddata` from the Tesseract project's own `tessdata` release
+  instead and gzip it the same way.)
 
 ## Contributing
 
