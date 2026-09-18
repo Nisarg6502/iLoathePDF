@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { TOOLS } from "@/tools/registry";
 import { PreviewBadge } from "@/components/PreviewBadge";
+import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
 import { tintColor, tintWash } from "@/tools/tint";
 
 export function ToolsIndex() {
@@ -28,7 +29,7 @@ export function ToolsIndex() {
             {group.tools.map((tool) => (
               <Link
                 key={tool.slug}
-                to={`/tools/${tool.slug}`}
+                to={tool.status === "desktop-only" ? "/download" : `/tools/${tool.slug}`}
                 className="rounded-[14px] border border-border p-5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
                 style={{ background: tintWash(tool.tint, 5) }}
                 onMouseEnter={(e) => {
@@ -41,11 +42,12 @@ export function ToolsIndex() {
                 <div className="flex items-start justify-between">
                   <tool.Icon className="size-5.5" />
                   {tool.status === "preview" && <PreviewBadge />}
+                  {tool.status === "desktop-only" && <DesktopOnlyBadge />}
                 </div>
                 <div className="mt-3 text-[15px] font-semibold">{tool.name}</div>
                 <div className="mt-1 text-[13px] leading-relaxed text-muted">{tool.description}</div>
                 <div className="mt-3 font-mono text-[11px]" style={{ color: tintColor(tool.tint) }}>
-                  Open →
+                  {tool.status === "desktop-only" ? "Desktop only →" : "Open →"}
                 </div>
               </Link>
             ))}
