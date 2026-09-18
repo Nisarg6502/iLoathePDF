@@ -30,6 +30,7 @@ as a website that processes files client-side and never sends them anywhere.
 | **Networking code** | None at all — cannot phone home | None — verify in DevTools → Network |
 | **Compress quality** | Full (Ghostscript) | Preview (rasterizes pages, no selectable text yet) |
 | **HEIC → JPG** | Yes | Preview badge (decoder not wired up yet) |
+| **PDF to Excel** | Yes | No — no client-side library extracts tables well enough |
 
 Both share the same rule: your files never leave the machine they're opened
 on. Pick whichever fits — there's no reason to pick only one.

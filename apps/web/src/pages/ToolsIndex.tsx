@@ -12,9 +12,9 @@ export function ToolsIndex() {
     <div className="mx-auto max-w-6xl px-8 py-13">
       <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">All tools</h1>
       <p className="mt-2.5 max-w-[58ch] text-[15.5px] text-muted">
-        Each one runs locally. Pick a tool, drop a file, get a file — the
-        same thirteen tools as the desktop app, except PDF to Excel, which is
-        desktop only for now.
+        Each one runs right here — pick a tool, drop a file, get a file.
+        Twelve of the desktop app's thirteen tools work in the browser; PDF
+        to Excel needs the desktop build.
       </p>
 
       {[
