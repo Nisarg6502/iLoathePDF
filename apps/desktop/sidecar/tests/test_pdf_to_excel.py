@@ -123,3 +123,17 @@ def test_to_excel_writes_none_cells_as_empty_string(tmp_path, out_dir):
     # itself may legitimately come back as either "" or None; both render as
     # an indistinguishable blank cell in any real spreadsheet app.
     assert rows[1][1] in (None, "")
+
+
+def test_to_excel_propagates_encrypted_and_corrupt(encrypted_pdf, corrupt_pdf, out_dir):
+    for src, code in ((encrypted_pdf, "ENCRYPTED_PDF"), (corrupt_pdf, "CORRUPT_PDF")):
+        with pytest.raises(OpError) as exc:
+            pdf_to_excel.run({"input": str(src), "output": str(out_dir / "o.xlsx")}, noop_progress)
+        assert exc.value.code == code
+    assert not (out_dir / "o.xlsx").exists()
+
+
+def test_to_excel_missing_input_file(out_dir, tmp_path):
+    with pytest.raises(OpError) as exc:
+        pdf_to_excel.run({"input": str(tmp_path / "ghost.pdf"), "output": str(out_dir / "o.xlsx")}, noop_progress)
+    assert exc.value.code == "FILE_NOT_FOUND"
