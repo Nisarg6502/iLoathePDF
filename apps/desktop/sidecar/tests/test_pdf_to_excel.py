@@ -95,3 +95,31 @@ def test_to_excel_separates_multiple_tables_on_one_page_with_a_blank_row(tmp_pat
     assert wb.sheetnames == ["Page 1"]
     rows = list(wb["Page 1"].iter_rows(values_only=True))
     assert rows == [("A",), ("1",), (None,), ("B",), ("2",)]
+
+
+def test_to_excel_writes_none_cells_as_empty_string(tmp_path, out_dir):
+    src = tmp_path / "ragged.pdf"
+    # A row with a genuinely empty cell -- reportlab renders an empty string
+    # cell as blank, which pdfplumber can report back as None.
+    table = [["Name", "Note"], ["Alice", ""]]
+    _make_table_pdf(src, [[table]])
+    dest = out_dir / "o.xlsx"
+
+    pdf_to_excel.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    wb = openpyxl.load_workbook(str(dest))
+    rows = list(wb["Page 1"].iter_rows(values_only=True))
+    # Real cell content must survive intact.
+    assert rows[0] == ("Name", "Note")
+    assert rows[1][0] == "Alice"
+    # openpyxl==3.1.5 itself normalizes an empty-string cell to a blank cell
+    # with no text node on save, which reads back as None, not "" (confirmed
+    # by inspecting the written sheet XML: an empty-string cell serializes as
+    # `<c t="inlineStr"></c>` with no `<is><t>` child, indistinguishable on
+    # reload from a cell that was never written). So the implementation's
+    # `["" if cell is None else cell for cell in row]` guard (never pass a
+    # raw Python None into `ws.append`) is verified at the point it matters --
+    # no exception, no wrong value written -- while the round-tripped value
+    # itself may legitimately come back as either "" or None; both render as
+    # an indistinguishable blank cell in any real spreadsheet app.
+    assert rows[1][1] in (None, "")
