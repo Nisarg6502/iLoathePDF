@@ -19,7 +19,7 @@ def _make_table_pdf(path: Path, tables_per_page: list[list[list[list[str]]]]) ->
     that page. A page with an empty list gets a page of plain text instead --
     reportlab's SimpleDocTemplate can't easily emit a truly blank page, and a
     page pdfplumber can find zero tables on is exactly what these tests need."""
-    from reportlab.platypus import PageBreak, Paragraph
+    from reportlab.platypus import PageBreak, Paragraph, Spacer
     from reportlab.lib.styles import getSampleStyleSheet
 
     doc = SimpleDocTemplate(str(path), pagesize=letter)
@@ -31,7 +31,9 @@ def _make_table_pdf(path: Path, tables_per_page: list[list[list[list[str]]]]) ->
         if not tables:
             story.append(Paragraph("No table on this page, just text.", styles["Normal"]))
             continue
-        for table_data in tables:
+        for table_index, table_data in enumerate(tables):
+            if table_index > 0:
+                story.append(Spacer(1, 24))
             t = Table(table_data)
             t.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 1, colors.black)]))
             story.append(t)
@@ -77,3 +79,19 @@ def test_to_excel_progress_reaches_100(tmp_path, out_dir):
 
     pdf_to_excel.run({"input": str(src), "output": str(dest)}, lambda pct, note="": calls.append(pct))
     assert calls[-1] == 100
+
+
+def test_to_excel_separates_multiple_tables_on_one_page_with_a_blank_row(tmp_path, out_dir):
+    src = tmp_path / "two_tables.pdf"
+    table_a = [["A"], ["1"]]
+    table_b = [["B"], ["2"]]
+    _make_table_pdf(src, [[table_a, table_b]])  # one page, two tables
+    dest = out_dir / "o.xlsx"
+
+    result = pdf_to_excel.run({"input": str(src), "output": str(dest)}, noop_progress)
+
+    assert result["sheets"] == 1
+    wb = openpyxl.load_workbook(str(dest))
+    assert wb.sheetnames == ["Page 1"]
+    rows = list(wb["Page 1"].iter_rows(values_only=True))
+    assert rows == [("A",), ("1",), (None,), ("B",), ("2",)]
