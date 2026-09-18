@@ -97,6 +97,25 @@ def test_to_excel_separates_multiple_tables_on_one_page_with_a_blank_row(tmp_pat
     assert rows == [("A",), ("1",), (None,), ("B",), ("2",)]
 
 
+def test_to_excel_normalize_cell_never_returns_none():
+    """The write-time guard itself, tested directly and pre-save.
+
+    openpyxl==3.1.5 cannot tell a cell written as "" apart from a cell that
+    was never written at all -- both come back None after a save()/
+    load_workbook() round-trip (confirmed by inspecting the raw sheet XML:
+    an empty-string cell serializes as `<c t="inlineStr"></c>` with no
+    `<is><t>` child, identical to an omitted cell on reload). That means a
+    round-tripped assertion can't distinguish "the guard ran" from "the
+    guard was deleted" -- it would pass either way. Testing
+    `_normalize_cell` directly, before any openpyxl involvement, is the
+    only way this test can actually fail if the None -> "" normalization
+    is ever removed from pdf_to_excel.py.
+    """
+    assert pdf_to_excel._normalize_cell(None) == ""
+    assert pdf_to_excel._normalize_cell("") == ""
+    assert pdf_to_excel._normalize_cell("Alice") == "Alice"
+
+
 def test_to_excel_writes_none_cells_as_empty_string(tmp_path, out_dir):
     src = tmp_path / "ragged.pdf"
     # A row with a genuinely empty cell -- reportlab renders an empty string
@@ -107,22 +126,13 @@ def test_to_excel_writes_none_cells_as_empty_string(tmp_path, out_dir):
 
     pdf_to_excel.run({"input": str(src), "output": str(dest)}, noop_progress)
 
+    # Real cell content must survive the full run, end to end. The blank
+    # cell's own round-tripped value isn't asserted here -- see
+    # test_to_excel_normalize_cell_never_returns_none for the guard itself.
     wb = openpyxl.load_workbook(str(dest))
     rows = list(wb["Page 1"].iter_rows(values_only=True))
-    # Real cell content must survive intact.
     assert rows[0] == ("Name", "Note")
     assert rows[1][0] == "Alice"
-    # openpyxl==3.1.5 itself normalizes an empty-string cell to a blank cell
-    # with no text node on save, which reads back as None, not "" (confirmed
-    # by inspecting the written sheet XML: an empty-string cell serializes as
-    # `<c t="inlineStr"></c>` with no `<is><t>` child, indistinguishable on
-    # reload from a cell that was never written). So the implementation's
-    # `["" if cell is None else cell for cell in row]` guard (never pass a
-    # raw Python None into `ws.append`) is verified at the point it matters --
-    # no exception, no wrong value written -- while the round-tripped value
-    # itself may legitimately come back as either "" or None; both render as
-    # an indistinguishable blank cell in any real spreadsheet app.
-    assert rows[1][1] in (None, "")
 
 
 def test_to_excel_propagates_encrypted_and_corrupt(encrypted_pdf, corrupt_pdf, out_dir):

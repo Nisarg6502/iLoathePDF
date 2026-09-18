@@ -23,6 +23,16 @@ from ._common import (
 )
 
 
+def _normalize_cell(cell: str | None) -> str:
+    """pdfplumber reports an unreadable/blank cell as None; never let a raw
+    None reach `ws.append()` -- openpyxl itself can't tell a written ""
+    apart from a never-written cell after a save/reload round-trip (both
+    come back None), so this guard is only checkable pre-save. See
+    test_to_excel_normalize_cell_never_returns_none in
+    test_pdf_to_excel.py."""
+    return "" if cell is None else cell
+
+
 def run(params: dict, progress: ProgressFn) -> dict:
     import openpyxl
     import pdfplumber
@@ -54,7 +64,7 @@ def run(params: dict, progress: ProgressFn) -> dict:
                 if table_index > 0:
                     ws.append([])
                 for row in table:
-                    ws.append(["" if cell is None else cell for cell in row])
+                    ws.append([_normalize_cell(cell) for cell in row])
             sheets_written += 1
             progress(pct, f"page {page_no}: {len(tables)} table(s)")
 
