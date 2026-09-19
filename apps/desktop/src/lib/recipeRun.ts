@@ -35,6 +35,12 @@ export async function runRecipe(
   files: PickedFile[],
   onProgress: (p: Progress) => void,
   signal: AbortSignal,
+  /** Called right before each step starts, 1-based. Lets a caller (e.g.
+   * RecipeWorkspace) know which step was in flight if the recipe is later
+   * cancelled or fails mid-chain -- there's no other way to tell that from
+   * the outside, since `onProgress` alone doesn't identify which step it's
+   * reporting for. */
+  onStepStart?: (step: number, totalSteps: number) => void,
 ): Promise<JobResult> {
   let currentFiles = files;
   let lastResult: JobResult | null = null;
@@ -46,6 +52,7 @@ export async function runRecipe(
       throw new JobError("INTERNAL", `Recipe "${recipe.id}" references an unknown tool id "${toolId}".`);
     }
 
+    onStepStart?.(i + 1, recipe.steps.length);
     try {
       const result = await execute(tool, currentFiles, tool.defaults, [], onProgress, signal);
       lastResult = result;

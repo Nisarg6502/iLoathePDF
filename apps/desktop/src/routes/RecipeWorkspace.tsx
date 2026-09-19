@@ -11,7 +11,7 @@
  * the fixed step list instead.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, FolderOpen, Loader2, Play, Plus, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, FolderOpen, Loader2, Play, Plus, RotateCcw, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { JobProgress } from "@/components/JobProgress";
@@ -40,7 +40,12 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [state, setState] = useState<RunState>({ phase: "idle" });
   const [startedAt, setStartedAt] = useState(0);
+  // Which step was in flight when the run ended -- the only way to tell,
+  // from outside runRecipe(), which step a CANCELLED (or any other) error
+  // interrupted. 0 means no step had started yet.
+  const [currentStep, setCurrentStep] = useState(0);
   const abort = useRef<AbortController | null>(null);
+  const { outputDir } = useOutputDir();
 
   const { browse, dragging, rejected, picking } = useFilePicker({
     accept: firstTool?.accepts ?? [],
@@ -79,6 +84,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     const controller = new AbortController();
     abort.current = controller;
     setStartedAt(Date.now());
+    setCurrentStep(0);
     setState({ phase: "running", pct: 0, note: "Starting…" });
 
     const onProgress = (p: Progress) =>
@@ -87,7 +93,9 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
       );
 
     try {
-      const result = await runRecipe(recipe, files, onProgress, controller.signal);
+      const result = await runRecipe(recipe, files, onProgress, controller.signal, (step) =>
+        setCurrentStep(step),
+      );
       setState({ phase: "done", result });
     } catch (err) {
       setState({
@@ -214,11 +222,21 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                 className="min-h-0 flex-1 overflow-auto p-6"
               >
                 <div className="mx-auto max-w-[720px]">
-                  <JobOutcome
-                    error={state.error}
-                    onRetry={() => void run()}
-                    onAgain={() => setState({ phase: "idle" })}
-                  />
+                  {state.error.code === "CANCELLED" ? (
+                    <RecipeCancelledCard
+                      recipe={recipe}
+                      completedSteps={Math.max(0, currentStep - 1)}
+                      outputDir={outputDir}
+                      onRetry={() => void run()}
+                      onAgain={() => setState({ phase: "idle" })}
+                    />
+                  ) : (
+                    <JobOutcome
+                      error={state.error}
+                      onRetry={() => void run()}
+                      onAgain={() => setState({ phase: "idle" })}
+                    />
+                  )}
                 </div>
               </motion.div>
             ) : files.length === 0 ? (
@@ -304,6 +322,71 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         </aside>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * ResultCard's generic CANCELLED copy ("Nothing was written. Your original
+ * files are untouched.") is correct for a standalone tool but false for a
+ * cancelled recipe: earlier steps' outputs are already on disk by the time
+ * a later step is cancelled, and this app has no file-deletion capability
+ * to remove them even if it wanted to. This renders recipe-aware copy in
+ * the same visual shape as ResultCard's ErrorCard, instead of changing
+ * ErrorCard's generic (and, for a standalone tool, accurate) behavior.
+ */
+function RecipeCancelledCard({
+  recipe,
+  completedSteps,
+  outputDir,
+  onRetry,
+  onAgain,
+}: {
+  recipe: Recipe;
+  completedSteps: number;
+  outputDir: string | null;
+  onRetry: () => void;
+  onAgain: () => void;
+}) {
+  const total = recipe.steps.length;
+  const dirLabel = outputDir ?? "the same folder as each input file";
+  const body =
+    completedSteps > 0
+      ? `Stopped after step ${completedSteps} of ${total}. Files written by the completed step${
+          completedSteps === 1 ? "" : "s"
+        } are still in ${dirLabel} — nothing was deleted.`
+      : `Stopped before any step finished. No recipe output was written.`;
+
+  return (
+    <section className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-[var(--shadow-card)]">
+      <div className="flex items-start gap-3 px-4 py-4">
+        <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-2">
+          <AlertTriangle className="h-4 w-4 text-muted" strokeWidth={2.25} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-text">Cancelled</h3>
+          <p className="mt-1 text-sm leading-relaxed text-muted">{body}</p>
+        </div>
+      </div>
+      <footer className="flex items-center gap-2 border-t border-border bg-surface-2/60 px-4 py-3">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Try again
+        </button>
+        <button
+          type="button"
+          onClick={onAgain}
+          className="ml-auto rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          Start over
+        </button>
+      </footer>
+    </section>
   );
 }
 
