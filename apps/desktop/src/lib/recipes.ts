@@ -16,8 +16,6 @@ export interface Recipe {
    * read from the first step's tool (see recipes.tsx's registry.tsx
    * equivalent notes on the web side) -- never duplicated here. */
   steps: string[];
-  /** Set when this recipe has no web equivalent (a step is desktop-only). */
-  desktopOnly?: boolean;
 }
 
 export const RECIPES: Recipe[] = [
@@ -50,7 +48,3 @@ export const RECIPES: Recipe[] = [
     steps: ["merge", "pdf-to-excel"],
   },
 ];
-
-export function recipeById(id: string | undefined): Recipe | undefined {
-  return RECIPES.find((r) => r.id === id);
-}
