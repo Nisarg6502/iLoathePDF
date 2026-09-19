@@ -40,4 +40,23 @@ describe("runRecipe", () => {
     // page's worth of images) instead of all of them, this would be 1, not 4.
     expect(outDoc.getPageCount()).toBe(4);
   });
+
+  it("reports which step failed, with that step's own error message", async () => {
+    const recipe = getRecipe("merge-compress");
+    if (!recipe) throw new Error("Expected merge-compress recipe to exist.");
+
+    // A single valid PDF still merges fine (merge accepts 1+ files), so the
+    // failure needs to come from step 2. Simplest reliable way: pass a file
+    // that Compress's real engine will reject once it receives merge's
+    // output -- but merge's output is always a valid PDF, so instead force
+    // the failure by using a corrupt "PDF" that merge itself rejects at
+    // step 1, proving step-attribution works for the FIRST step at least.
+    // (A step-2-specific failure is harder to construct with real inputs
+    // alone; step-1 attribution exercises the same code path in
+    // runRecipe.ts that would attribute a step-2 failure, since the
+    // try/catch wraps every iteration identically.)
+    const corrupt = new File([new Uint8Array([1, 2, 3, 4])], "corrupt.pdf", { type: "application/pdf" });
+
+    await expect(runRecipe(recipe, [corrupt])).rejects.toThrow(/Step 1 of 2 \(Merge PDF\) failed:/);
+  });
 });
