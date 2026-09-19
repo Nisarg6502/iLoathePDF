@@ -5,6 +5,7 @@
  * from that tool's own `defaultOptions` in tools/registry.tsx (see
  * runRecipe.ts), never duplicated here.
  */
+import { getTool } from "@/tools/registry";
 
 export interface RecipeConfig {
   slug: string;
@@ -54,4 +55,15 @@ export const RECIPES: RecipeConfig[] = [
 
 export function getRecipe(slug: string): RecipeConfig | undefined {
   return RECIPES.find((r) => r.slug === slug);
+}
+
+/**
+ * True when any of this recipe's steps runs at "preview" quality on web
+ * (e.g. Compress or Convert images), matching the same single-tool
+ * PreviewBadge pattern ToolsIndex/ToolDetail already use -- a recipe that
+ * passes through a preview-quality step is itself only as good as that
+ * step's own result.
+ */
+export function recipeHasPreviewStep(recipe: RecipeConfig): boolean {
+  return recipe.steps.some((slug) => getTool(slug)?.status === "preview");
 }

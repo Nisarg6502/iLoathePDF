@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { RECIPES } from "@/recipes/registry";
+import { RECIPES, recipeHasPreviewStep } from "@/recipes/registry";
 import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
+import { PreviewBadge } from "@/components/PreviewBadge";
 
 export function RecipesIndex() {
   return (
@@ -20,6 +21,7 @@ export function RecipesIndex() {
           >
             <div className="flex items-start justify-between">
               <span className="font-mono text-[11px] text-faint">{recipe.steps.length} steps</span>
+              {recipe.status === "live" && recipeHasPreviewStep(recipe) && <PreviewBadge />}
               {recipe.status === "desktop-only" && <DesktopOnlyBadge />}
             </div>
             <div className="mt-3 text-[15px] font-semibold">{recipe.title}</div>

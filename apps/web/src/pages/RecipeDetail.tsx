@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { getRecipe } from "@/recipes/registry";
+import { getRecipe, recipeHasPreviewStep } from "@/recipes/registry";
 import { getTool } from "@/tools/registry";
 import { runRecipe } from "@/recipes/runRecipe";
 import { FileDropZone } from "@/components/FileDropZone";
 import { ResultCard } from "@/components/ResultCard";
 import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
+import { PreviewBadge } from "@/components/PreviewBadge";
 import { LargeFileWarning, LARGE_FILE_WARNING_BYTES } from "@/components/LargeFileWarning";
 import type { EngineResult } from "@/engines/types";
 
@@ -98,7 +99,10 @@ export function RecipeDetail() {
     <div>
       <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-8 pt-8">
         <div>
-          <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{recipe.title}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{recipe.title}</h1>
+            {recipeHasPreviewStep(recipe) && <PreviewBadge />}
+          </div>
           <p className="mt-1 text-sm text-muted">{recipe.description}</p>
         </div>
       </div>
