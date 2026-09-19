@@ -2,6 +2,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { PDFDocument } from "pdf-lib";
 import type { Engine } from "./types";
+import { DomCanvasFactory } from "./ocr";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -13,7 +14,15 @@ export const compressEngine: Engine = async ({ files, options }) => {
   if (dpi < 72 || dpi > 300) throw new Error("DPI must be between 72 and 300.");
 
   const originalBytes = await file.arrayBuffer();
-  const loadingTask = pdfjsLib.getDocument({ data: originalBytes });
+  // Same DomCanvasFactory workaround ocr.ts already established: pdf.js
+  // picks its own Node-specific canvas factory whenever it detects a real
+  // Node process, which is true under Vitest even though jsdom provides a
+  // perfectly good `document`. That factory's canvases fail jsdom's own
+  // drawImage() type checks for a page with an embedded raster image (e.g.
+  // a page built by the Images to PDF tool). Passing this factory opts
+  // back into the DOM path pdf.js already takes by default in a real
+  // browser, so it's a no-op there -- this only matters under jsdom.
+  const loadingTask = pdfjsLib.getDocument({ data: originalBytes, CanvasFactory: DomCanvasFactory });
   const srcDoc = await loadingTask.promise;
   const out = await PDFDocument.create();
 
