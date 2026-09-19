@@ -7,10 +7,9 @@ import { FileDropZone } from "./FileDropZone";
 import { ResultCard } from "./ResultCard";
 import { ImageInputList } from "./ImageInputList";
 import { CameraCapture } from "./CameraCapture";
+import { LargeFileWarning, LARGE_FILE_WARNING_BYTES } from "./LargeFileWarning";
 
 type Step = "empty" | "ready" | "running" | "done" | "error";
-
-const LARGE_FILE_WARNING_BYTES = 150 * 1024 * 1024; // ~150 MB, per spec's browser-memory ceiling
 
 const stepFade = {
   initial: { opacity: 0, transform: "translateY(6px)" },
@@ -159,20 +158,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
           </AnimatePresence>
 
           {showSizeWarning && (
-            <div className="page-in mt-3 flex items-start gap-3 rounded-xl border border-border bg-surface-2 p-3.5">
-              <span className="mt-0.5 flex-none text-[13px]">⚠</span>
-              <div className="flex-1 text-[12.5px] leading-relaxed text-muted">
-                {(totalBytes / (1024 * 1024)).toFixed(0)} MB is a lot for one browser tab — this may
-                run slowly or the tab may run out of memory. The desktop app has no such limit.
-              </div>
-              <button
-                type="button"
-                onClick={() => setDismissedSizeWarning(true)}
-                className="flex-none text-[12.5px] text-muted hover:text-text"
-              >
-                Dismiss
-              </button>
-            </div>
+            <LargeFileWarning totalBytes={totalBytes} onDismiss={() => setDismissedSizeWarning(true)} />
           )}
         </div>
 

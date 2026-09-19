@@ -7,6 +7,7 @@ import { runRecipe } from "@/recipes/runRecipe";
 import { FileDropZone } from "@/components/FileDropZone";
 import { ResultCard } from "@/components/ResultCard";
 import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
+import { LargeFileWarning, LARGE_FILE_WARNING_BYTES } from "@/components/LargeFileWarning";
 import type { EngineResult } from "@/engines/types";
 
 type Step = "empty" | "ready" | "running" | "done" | "error";
@@ -27,6 +28,10 @@ export function RecipeDetail() {
   const [result, setResult] = useState<EngineResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [dismissedSizeWarning, setDismissedSizeWarning] = useState(false);
+
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  const showSizeWarning = totalBytes > LARGE_FILE_WARNING_BYTES && !dismissedSizeWarning;
 
   if (!recipe) {
     return (
@@ -64,6 +69,7 @@ export function RecipeDetail() {
 
   function handleFiles(newFiles: File[]) {
     setFiles(newFiles);
+    setDismissedSizeWarning(false);
     setStep("ready");
   }
 
@@ -170,6 +176,10 @@ export function RecipeDetail() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {showSizeWarning && (
+              <LargeFileWarning totalBytes={totalBytes} onDismiss={() => setDismissedSizeWarning(true)} />
+            )}
           </div>
 
           <div className="sticky top-[82px] overflow-hidden rounded-2xl border border-border bg-surface">
