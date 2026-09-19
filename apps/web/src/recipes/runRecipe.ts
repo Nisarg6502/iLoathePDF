@@ -32,8 +32,16 @@ export async function runRecipe(
       throw new Error(`Recipe "${recipe.slug}" references an unknown tool slug "${slug}".`);
     }
 
+    // Scale this step's own 0-1 progress into the recipe's overall 0-1
+    // range, instead of forwarding it straight through -- otherwise a
+    // 3-step recipe's progress bar fills three separate times (0->1,
+    // 0->1, 0->1) rather than climbing smoothly once across the whole run.
+    const stepProgress = onProgress
+      ? (fraction: number) => onProgress((i + fraction) / recipe.steps.length)
+      : undefined;
+
     try {
-      const result = await tool.engine({ files: currentFiles, options: tool.defaultOptions, onProgress });
+      const result = await tool.engine({ files: currentFiles, options: tool.defaultOptions, onProgress: stepProgress });
       lastResult = result;
       currentFiles = outputsToFiles(result.files);
     } catch (err) {

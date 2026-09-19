@@ -53,8 +53,15 @@ export async function runRecipe(
     }
 
     onStepStart?.(i + 1, recipe.steps.length);
+    // Scale this step's own 0-100 progress into the recipe's overall
+    // 0-100 range, instead of forwarding it straight through -- otherwise
+    // a 3-step recipe's progress bar fills three separate times (0->100,
+    // 0->100, 0->100) rather than climbing smoothly once across the whole
+    // run.
+    const stepProgress = (p: Progress) =>
+      onProgress({ ...p, pct: (i * 100 + p.pct) / recipe.steps.length });
     try {
-      const result = await execute(tool, currentFiles, tool.defaults, [], onProgress, signal);
+      const result = await execute(tool, currentFiles, tool.defaults, [], stepProgress, signal);
       lastResult = result;
       currentFiles = outputsToPickedFiles(result.outputs);
     } catch (err) {
