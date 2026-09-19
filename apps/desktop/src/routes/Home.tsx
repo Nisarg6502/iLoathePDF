@@ -9,6 +9,7 @@ import {
   type Tool,
   type ToolGroup,
 } from "../lib/tools";
+import { RECIPES, type Recipe } from "../lib/recipes";
 import { AnimatePresence, motion } from "motion/react";
 import { useWindowFileDrop, type PickedFile } from "../components/FileDropZone";
 import { scrimVariants, sheetVariants } from "../lib/motion";
@@ -103,6 +104,21 @@ export default function Home() {
             </div>
           </section>
         ))}
+
+        <section className="mt-6.5">
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
+              RECIPES
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="mt-3 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+            {RECIPES.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} index={cardIndex++} />
+            ))}
+          </div>
+        </section>
       </div>
 
       {dragging && !dropped ? <DragVeil /> : null}
@@ -163,6 +179,49 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
         </span>
         <span className="mt-1 block text-[14px] leading-relaxed text-muted">
           {tool.description}
+        </span>
+      </span>
+
+      <ArrowRight
+        aria-hidden
+        className="absolute right-4 top-4 size-4 -translate-x-1 text-muted opacity-0 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:opacity-100"
+      />
+    </Link>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
+  return (
+    <Link
+      to={`/r/${recipe.id}`}
+      style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+      className={cn(
+        "ihp-rise group relative flex flex-col gap-3 rounded-card border border-border bg-surface p-4",
+        "shadow-[var(--shadow-card)] outline-none",
+        "transition-[transform,border-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        "hover:-translate-y-0.5 hover:border-accent",
+        "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
+        "active:translate-y-0 active:scale-[0.99]",
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "inline-flex w-fit items-center rounded-full bg-accent-soft px-2 py-0.5",
+          "font-mono text-[11px] font-bold tracking-[0.06em] text-accent",
+        )}
+      >
+        {recipe.steps.length} STEPS
+      </span>
+
+      <span className="flex-1">
+        <span className="block text-[16px] font-semibold tracking-[-0.01em] text-text">
+          {recipe.title}
+        </span>
+        <span className="mt-1 block text-[14px] leading-relaxed text-muted">
+          {recipe.description}
         </span>
       </span>
 
