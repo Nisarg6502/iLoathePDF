@@ -83,10 +83,11 @@ export function RecipeDetail() {
   }
 
   async function run() {
+    if (!recipe) return; // unreachable: the run button only renders once `recipe` is defined
     setStep("running");
     setError(null);
     try {
-      const engineResult = await runRecipe(recipe!, files, setProgress);
+      const engineResult = await runRecipe(recipe, files, setProgress);
       setResult(engineResult);
       setStep("done");
     } catch (e) {
