@@ -31,7 +31,11 @@ export const RECIPES: Recipe[] = [
     id: "scan-to-searchable-pdf",
     title: "Scan to Searchable PDF",
     description: "Turn photographed pages into one small, searchable PDF.",
-    steps: ["image-to-pdf", "ocr", "compress"],
+    // Matches web's step order (OCR last) for consistency across platforms.
+    // Desktop's Ghostscript-based compress preserves text either way, so
+    // this reordering isn't required here to fix a bug -- but keeping both
+    // platforms identical avoids future confusion.
+    steps: ["image-to-pdf", "compress", "ocr"],
   },
   {
     id: "flatten-pdf",

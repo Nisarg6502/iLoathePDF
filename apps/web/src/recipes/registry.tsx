@@ -27,7 +27,13 @@ export const RECIPES: RecipeConfig[] = [
     slug: "scan-to-searchable-pdf",
     title: "Scan to Searchable PDF",
     description: "Turn photographed pages into one small, searchable PDF.",
-    steps: ["images-to-pdf", "ocr", "compress"],
+    // OCR must run LAST: web's Compress engine rasterizes every page to a
+    // JPEG and rebuilds a brand-new PDF with no text objects, which would
+    // destroy OCR's invisible text layer if Compress ran after it. OCR
+    // works fine on an already-rasterized PDF (it reads page images either
+    // way), so putting it last is safe and is what actually keeps the
+    // final result searchable, as the recipe's name promises.
+    steps: ["images-to-pdf", "compress", "ocr"],
     status: "live",
   },
   {
