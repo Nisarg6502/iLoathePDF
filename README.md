@@ -60,6 +60,17 @@ desktop only — no client-side library extracts tables well enough to ship on
 the web, so it shows there as a disabled card pointing to the download.
 Every other tool is fully live in both the desktop app and the browser.
 
+## Recipes
+
+Four fixed, curated multi-step chains over the tools above — drop a file,
+pick a recipe, get the final result, with no per-step configuration:
+**Merge → Compress**, **Scan to Searchable PDF** (Images to PDF → OCR →
+Compress), **Flatten PDF** (PDF to Images → Images to PDF), and
+**Merge → Extract Tables** (desktop only, since it ends in PDF to Excel).
+Recipes aren't a general pipeline builder and aren't counted among the
+thirteen tools above — they're compositions of existing tools, reusing each
+one's own default settings.
+
 ## How it's built
 
 ```

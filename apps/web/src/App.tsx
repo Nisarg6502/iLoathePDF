@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Home } from "@/pages/Home";
 import { ToolsIndex } from "@/pages/ToolsIndex";
 import { ToolDetail } from "@/pages/ToolDetail";
+import { RecipesIndex } from "@/pages/RecipesIndex";
+import { RecipeDetail } from "@/pages/RecipeDetail";
 import { HowItWorks } from "@/pages/HowItWorks";
 import { Privacy } from "@/pages/Privacy";
 import { Download } from "@/pages/Download";
@@ -30,6 +32,8 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="tools" element={<ToolsIndex />} />
           <Route path="tools/:slug" element={<ToolDetail />} />
+          <Route path="recipes" element={<RecipesIndex />} />
+          <Route path="recipes/:slug" element={<RecipeDetail />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="download" element={<Download />} />

@@ -12,6 +12,7 @@
     "tauri": "tauri",
     "test": ".venv\\Scripts\\python.exe -m pytest",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "check:recipe-steps": "node --experimental-strip-types scripts/check-recipe-steps.ts",
     "build:sidecar": "powershell -ExecutionPolicy Bypass -File scripts/build-sidecar.ps1",
     "build:app": "npm run build:sidecar && tauri build"
   },
