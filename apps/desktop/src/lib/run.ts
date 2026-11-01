@@ -117,9 +117,9 @@ export async function execute(
       let rotations: Record<string, number> = {};
       if (pages.length > 0) {
         order = pages.map((p) => p.pageNumber - 1);
-        for (const p of pages) {
-          if (p.rotation % 360 !== 0) rotations[String(p.pageNumber - 1)] = p.rotation % 360;
-        }
+        // Every page, not just the turned ones: rotation is an absolute angle and
+        // a page that began at /Rotate 90 and was turned back to 0 must say so.
+        for (const p of pages) rotations[String(p.pageNumber - 1)] = ((p.rotation % 360) + 360) % 360;
       } else {
         const info = await runJob("pdf.info", { input: first.path });
         order = Array.from({ length: info.pages }, (_, i) => i);

@@ -92,6 +92,40 @@ describe("ToolPage", () => {
     expect(await screen.findByText(/drop a file here/i)).toBeInTheDocument();
   });
 
+  it("merge: reorders and removes PDFs, and needs at least two to run", async () => {
+    const tool = makeTool({ slug: "merge", accept: [".pdf"], multiple: true });
+    render(<ToolPage tool={tool} />);
+
+    const pdf = (name: string) => new File(["x"], name, { type: "application/pdf" });
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [pdf("a.pdf"), pdf("b.pdf")] } });
+    await screen.findByText("a.pdf");
+
+    fireEvent.click(screen.getByRole("button", { name: "Move b.pdf up" }));
+    await waitFor(() =>
+      expect(screen.getAllByRole("button", { name: /^Move .* up$/ }).map((b) => b.getAttribute("aria-label"))).toEqual([
+        "Move b.pdf up",
+        "Move a.pdf up",
+      ]),
+    );
+    expect(screen.getByRole("button", { name: "Run" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove a.pdf" }));
+    await waitFor(() => expect(screen.queryByText("a.pdf")).toBeNull());
+    expect(screen.getByRole("button", { name: "Run" })).toBeDisabled();
+    expect(screen.getByText(/at least two PDFs/)).toBeInTheDocument();
+  });
+
+  it("ignores dropped files of the wrong type and says so", async () => {
+    render(<ToolPage tool={makeTool({ accept: [".pdf"] })} />);
+    const zone = screen.getByText(/drop a file here/i).closest("div[class*='cursor-pointer']")!;
+
+    const png = new File(["x"], "pic.png", { type: "image/png" });
+    fireEvent.drop(zone, { dataTransfer: { files: [png] } });
+
+    expect(await screen.findByText(/1 file was skipped/)).toBeInTheDocument();
+    expect(screen.getByText(/drop a file here/i)).toBeInTheDocument(); // still on the empty step
+  });
+
   it("does not offer camera scan for pdf-category tools", () => {
     const tool = makeTool({ category: "pdf" });
     render(<ToolPage tool={tool} />);
