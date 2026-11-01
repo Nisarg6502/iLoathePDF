@@ -77,3 +77,24 @@ describe("isNoopEdit", () => {
     expect(isNoopEdit({ rotate: 0, crop: { x: 0, y: 0, w: 1, h: 1 } })).toBe(true);
   });
 });
+
+describe("reorderEdits / removeEdit", () => {
+  const rot = (rotate: 0 | 90 | 180 | 270) => ({ rotate, crop: null });
+
+  it("moves an edit with its image when the image moves down", async () => {
+    const { reorderEdits } = await import("./imageEdit");
+    // [A(90), B, C(270)] -> move A to the end -> [B, C(270), A(90)]
+    expect(reorderEdits({ 0: rot(90), 2: rot(270) }, 3, 0, 2)).toEqual({ 1: rot(270), 2: rot(90) });
+  });
+
+  it("moves an edit with its image when the image moves up", async () => {
+    const { reorderEdits } = await import("./imageEdit");
+    // [A, B, C(180)] -> move C to the front -> [C(180), A, B]
+    expect(reorderEdits({ 2: rot(180) }, 3, 2, 0)).toEqual({ 0: rot(180) });
+  });
+
+  it("drops the removed image's edit and shifts later ones down", async () => {
+    const { removeEdit } = await import("./imageEdit");
+    expect(removeEdit({ 0: rot(90), 1: rot(180), 2: rot(270) }, 1)).toEqual({ 0: rot(90), 1: rot(270) });
+  });
+});
