@@ -42,4 +42,15 @@ describe("mergeEngine", () => {
   it("rejects an empty file list", async () => {
     await expect(mergeEngine({ files: [], options: {} })).rejects.toThrow();
   });
+
+  it("names the result merged.pdf by default and honours a typed name", async () => {
+    const a = await toFile(await makeTestPdf(1), "a.pdf");
+    const b = await toFile(await makeTestPdf(1), "b.pdf");
+
+    const byDefault = await mergeEngine({ files: [a, b], options: {} });
+    expect(byDefault.files[0].name).toBe("merged.pdf");
+
+    const named = await mergeEngine({ files: [a, b], options: { outputName: "Contract pack.pdf" } });
+    expect(named.files[0].name).toBe("Contract pack.pdf");
+  });
 });

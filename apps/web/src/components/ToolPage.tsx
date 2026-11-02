@@ -46,6 +46,14 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
     setStep("ready");
   }
 
+  // The image list reorders, removes and adds in place. Emptying it is the same
+  // as removing everything, so go back to the drop zone rather than a blank list.
+  function handleListChange(next: File[]) {
+    if (next.length === 0) return reset();
+    setFiles(next);
+    setDismissedSizeWarning(false);
+  }
+
   function reset() {
     setFiles([]);
     setResult(null);
@@ -112,7 +120,14 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
                   </button>
                 </div>
                 {tool.category === "image" ? (
-                  <ImageInputList files={files} options={options} onChange={setOptions} disabled={step === "running"} />
+                  <ImageInputList
+                    files={files}
+                    options={options}
+                    onChange={setOptions}
+                    disabled={step === "running"}
+                    accept={tool.accept}
+                    onFilesChange={tool.multiple ? handleListChange : undefined}
+                  />
                 ) : (
                   <ul className="flex flex-col gap-2">
                     {files.map((f) => (

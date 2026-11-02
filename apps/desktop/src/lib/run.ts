@@ -12,7 +12,7 @@ import {
   type Progress,
 } from "./jobs";
 import { resolveOutputDir } from "./settings";
-import { stripExt } from "./utils";
+import { isAbsoluteWindowsPath, safeFileStem, stripExt } from "./utils";
 import type { OptionValues, Tool } from "./tools";
 import type { SignElementParams } from "./jobs";
 import type { PickedFile } from "@/components/FileDropZone";
@@ -47,8 +47,7 @@ export function outputDirFor(inputPath: string): string {
   // A destination chosen in Settings or the status bar wins; otherwise results
   // land beside the input, which is the sane default for a one-off job.
   const dir = resolveOutputDir(inputPath) ?? "";
-  const absolute = /^[a-zA-Z]:[\/]/.test(dir) || dir.startsWith("\\\\");
-  if (!dir || !absolute) {
+  if (!dir || !isAbsoluteWindowsPath(dir)) {
     throw new JobError(
       "FILE_NOT_FOUND",
       "That file's location on disk is unknown, so there is nowhere to save the result. Add it again by dragging it in or using Select files.",
@@ -70,7 +69,8 @@ export async function execute(
   const first = files[0];
   const dir = outputDirFor(first.path);
   const base = stripExt(first.name);
-  const join = (name: string) => `${dir}\\${name}`;
+  // A drive root already ends in a separator ("G:\"); do not double it.
+  const join = (name: string) => `${dir.endsWith("\\") ? dir : dir + "\\"}${name}`;
   const opts = { onProgress, signal };
   const str = (k: string, fallback = "") => String(v[k] ?? fallback);
   const num = (k: string, fallback = 0) => Number(v[k] ?? fallback);
@@ -79,7 +79,7 @@ export async function execute(
 
   switch (op) {
     case "pdf.merge": {
-      const out = join(`${str("outputName", "merged") || "merged"}.pdf`);
+      const out = join(`${safeFileStem(v.outputName, "merged")}.pdf`);
       const r = await runJob(
         "pdf.merge",
         { inputs: files.map((f) => ({ path: f.path })), output: out },
@@ -128,7 +128,7 @@ export async function execute(
         "pdf.organize",
         {
           input: first.path,
-          output: join(`${str("outputName", `${base}-organized`) || `${base}-organized`}.pdf`),
+          output: join(`${safeFileStem(v.outputName, `${base}-organized`)}.pdf`),
           order,
           rotations,
         },
@@ -275,15 +275,18 @@ export async function execute(
     }
 
     case "img.to_pdf": {
-      const out = join(`${str("outputName", "images") || "images"}.pdf`);
+      const out = join(`${safeFileStem(v.outputName, "images")}.pdf`);
+      const pageSize = str("page_size", "fit") as "fit" | "a4" | "letter";
       const r = await runJob(
         "img.to_pdf",
         {
           inputs: files.map((f) => f.path),
           output: out,
-          page_size: str("page_size", "fit") as "fit" | "a4" | "letter",
+          page_size: pageSize,
           orientation: str("orientation", "auto") as "auto" | "portrait" | "landscape",
-          margin_mm: num("margin_mm", 0),
+          // The margin control is hidden for "fit" pages, so a stale value
+          // from an earlier choice must not silently grow every page.
+          margin_mm: pageSize === "fit" ? 0 : num("margin_mm", 0),
         },
         opts,
       );

@@ -13,8 +13,18 @@ export interface RecipeConfig {
   description: string;
   /** Tool slugs, in order. */
   steps: string[];
+  /**
+   * Per-step option overrides, keyed by tool slug, merged over that tool's
+   * defaultOptions. Needed where a recipe must not inherit a default meant for
+   * standalone use (e.g. Images to PDF defaults to "fit", which would blow a
+   * 4000px photo up to a 3000pt page before Compress/OCR rasterise it again).
+   */
+  stepOptions?: Record<string, Record<string, unknown>>;
   status: "live" | "desktop-only";
 }
+
+// The A4 + ~8 mm margin layout Images to PDF used before its page-size option existed.
+const A4_PAGES = { "images-to-pdf": { page_size: "a4", margin_mm: 8 } };
 
 export const RECIPES: RecipeConfig[] = [
   {
@@ -35,6 +45,7 @@ export const RECIPES: RecipeConfig[] = [
     // way), so putting it last is safe and is what actually keeps the
     // final result searchable, as the recipe's name promises.
     steps: ["images-to-pdf", "compress", "ocr"],
+    stepOptions: A4_PAGES,
     status: "live",
   },
   {
@@ -42,6 +53,7 @@ export const RECIPES: RecipeConfig[] = [
     title: "Flatten PDF",
     description: "Rasterize every page and rebuild the PDF from the images, stripping anything but the visual page content.",
     steps: ["pdf-to-images", "images-to-pdf"],
+    stepOptions: A4_PAGES,
     status: "live",
   },
   {
