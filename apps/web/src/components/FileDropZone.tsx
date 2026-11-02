@@ -11,11 +11,21 @@ export function FileDropZone({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [skipped, setSkipped] = useState(0);
+
+  // `accept` only constrains the picker; a drop delivers whatever was dragged,
+  // which then failed deep inside the engine with an unrelated-looking error.
+  function acceptFiles(incoming: File[]) {
+    const exts = accept.map((a) => a.toLowerCase());
+    const ok = incoming.filter((f) => exts.some((ext) => f.name.toLowerCase().endsWith(ext)));
+    setSkipped(incoming.length - ok.length);
+    if (ok.length > 0) onFiles(multiple ? ok : ok.slice(0, 1));
+  }
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragActive(false);
-    if (e.dataTransfer.files.length) onFiles(Array.from(e.dataTransfer.files));
+    if (e.dataTransfer.files.length) acceptFiles(Array.from(e.dataTransfer.files));
   }
 
   return (
@@ -38,7 +48,7 @@ export function FileDropZone({
         accept={accept.join(",")}
         multiple={multiple}
         className="hidden"
-        onChange={(e) => e.target.files && onFiles(Array.from(e.target.files))}
+        onChange={(e) => e.target.files && acceptFiles(Array.from(e.target.files))}
       />
       <span
         className={`grid size-18 place-items-center rounded-[22px] bg-accent-soft transition-transform duration-150 ease-[var(--ease-out-strong)] ${
@@ -53,6 +63,11 @@ export function FileDropZone({
       <div className="text-center">
         <div className="text-lg font-semibold">{isDragActive ? "Drop it" : "Drop a file here"}</div>
         <div className="mt-1 text-[13.5px] text-muted">or click anywhere in this box to browse</div>
+        {skipped > 0 && (
+          <div role="status" className="mt-3 text-[13px] text-danger">
+            {skipped} file{skipped === 1 ? " was" : "s were"} skipped. Accepted: {accept.join(", ")}
+          </div>
+        )}
       </div>
     </div>
   );
