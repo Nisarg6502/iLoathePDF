@@ -8,6 +8,10 @@
  * (no useful default with nothing supplied).
  */
 
+// Type-only import: erased at runtime, so scripts/check-recipe-steps.ts can
+// still load this file under plain Node without pulling in tools.ts's icons.
+import type { OptionValues } from "./tools";
+
 export interface Recipe {
   id: string;
   title: string;
@@ -23,7 +27,7 @@ export interface Recipe {
    * each page to its photo before Compress/OCR rasterise it again). Mirrors
    * the web registry's `stepOptions`.
    */
-  stepOptions?: Record<string, Record<string, unknown>>;
+  stepOptions?: Record<string, OptionValues>;
 }
 
 // A4 + 8 mm margin pages -- identical to the web registry's A4_PAGES.
