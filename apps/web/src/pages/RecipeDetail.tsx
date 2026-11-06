@@ -68,6 +68,9 @@ export function RecipeDetail() {
 
   const firstTool = getTool(recipe.steps[0]);
 
+  // Same rule standalone Merge and the desktop recipe workspace enforce.
+  const mergeNeedsTwo = recipe.steps[0] === "merge" && files.length < 2;
+
   function handleFiles(newFiles: File[]) {
     setFiles(newFiles);
     setDismissedSizeWarning(false);
@@ -208,7 +211,7 @@ export function RecipeDetail() {
               <button
                 type="button"
                 onClick={run}
-                disabled={step === "empty" || step === "running"}
+                disabled={step === "empty" || step === "running" || mergeNeedsTwo}
                 className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-tint transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
               >
                 {step === "running" && (
@@ -219,6 +222,9 @@ export function RecipeDetail() {
                 )}
                 {step === "running" ? "Working…" : step === "done" ? "Run again" : "Run"}
               </button>
+              {step === "ready" && mergeNeedsTwo && (
+                <p className="mt-2 text-center text-[12.5px] text-muted">Merging needs at least two PDFs.</p>
+              )}
             </div>
           </div>
         </div>
