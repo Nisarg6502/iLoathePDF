@@ -8,6 +8,10 @@
  * (no useful default with nothing supplied).
  */
 
+// Type-only import: erased at runtime, so scripts/check-recipe-steps.ts can
+// still load this file under plain Node without pulling in tools.ts's icons.
+import type { OptionValues } from "./tools";
+
 export interface Recipe {
   id: string;
   title: string;
@@ -16,7 +20,18 @@ export interface Recipe {
    * read from the first step's tool (see recipes.tsx's registry.tsx
    * equivalent notes on the web side) -- never duplicated here. */
   steps: string[];
+  /**
+   * Per-step option overrides, keyed by tool id, merged over that tool's
+   * `defaults`. Needed where a recipe must not inherit a default meant for
+   * standalone use (e.g. Images to PDF defaults to "fit", which would size
+   * each page to its photo before Compress/OCR rasterise it again). Mirrors
+   * the web registry's `stepOptions`.
+   */
+  stepOptions?: Record<string, OptionValues>;
 }
+
+// A4 + 8 mm margin pages -- identical to the web registry's A4_PAGES.
+const A4_PAGES = { "image-to-pdf": { page_size: "a4", margin_mm: 8 } };
 
 export const RECIPES: Recipe[] = [
   {
@@ -34,12 +49,14 @@ export const RECIPES: Recipe[] = [
     // this reordering isn't required here to fix a bug -- but keeping both
     // platforms identical avoids future confusion.
     steps: ["image-to-pdf", "compress", "ocr"],
+    stepOptions: A4_PAGES,
   },
   {
     id: "flatten-pdf",
     title: "Flatten PDF",
     description: "Rasterize every page and rebuild the PDF from the images, stripping anything but the visual page content.",
     steps: ["pdf-to-image", "image-to-pdf"],
+    stepOptions: A4_PAGES,
   },
   {
     id: "merge-extract-tables",
