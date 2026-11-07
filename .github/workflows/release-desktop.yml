@@ -78,6 +78,16 @@ jobs:
           }
           Remove-Item gs-installer.exe
 
+      - name: Check version consistency
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            npm run check:version --workspace=apps/desktop -- "${{ github.ref_name }}"
+          } else {
+            npm run check:version --workspace=apps/desktop
+          }
+          if ($LASTEXITCODE -ne 0) { throw "Version check failed" }
+
       - name: Build frontend
         run: npm run build --workspace=apps/desktop
 
@@ -105,7 +115,7 @@ jobs:
           }
 
       - name: Publish release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: iLoathePDF ${{ steps.tag.outputs.tag }}

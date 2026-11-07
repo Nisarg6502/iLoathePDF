@@ -31,6 +31,22 @@ async function makeTestScanImage(text = "SCAN"): Promise<File> {
 const SCAN_WORD = { text: "SCAN", bbox: { x0: 20, y0: 15, x1: 220, y1: 90 } };
 
 describe("runRecipe", () => {
+  it("runs Images to PDF steps with the recipe's A4 override, not the tool's standalone 'fit' default", async () => {
+    const recipe = getRecipe("scan-to-searchable-pdf");
+    if (!recipe) throw new Error("Expected scan-to-searchable-pdf recipe to exist.");
+    expect(recipe.stepOptions?.["images-to-pdf"]).toMatchObject({ page_size: "a4" });
+
+    const { imagesToPdfEngine } = await import("@/engines/imagesToPdf");
+    const direct = await imagesToPdfEngine({
+      files: [await makeTestScanImage()],
+      options: { ...recipe.stepOptions!["images-to-pdf"] },
+    });
+    const doc = await PDFDocument.load(await direct.files[0].blob.arrayBuffer());
+    const { width, height } = doc.getPage(0).getSize();
+    expect(width).toBeCloseTo(841.89, 0); // landscape A4: the 300x200 image is wider than tall
+    expect(height).toBeCloseTo(595.28, 0);
+  });
+
   it("chains merge then compress into one final result", async () => {
     const recipe = getRecipe("merge-compress");
     if (!recipe) throw new Error("Expected merge-compress recipe to exist.");

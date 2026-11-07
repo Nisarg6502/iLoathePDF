@@ -42,6 +42,22 @@ for (const recipe of RECIPES) {
   }
 }
 
+// Parity with web's registry: any recipe containing Images to PDF must
+// override its standalone "fit" default with A4 pages, and every stepOptions
+// key must name a step the recipe actually has.
+for (const recipe of RECIPES) {
+  for (const key of Object.keys(recipe.stepOptions ?? {})) {
+    if (!recipe.steps.includes(key)) {
+      failed = true;
+      console.error(`FAIL: recipe "${recipe.id}" has stepOptions for "${key}", which is not one of its steps.`);
+    }
+  }
+  if (recipe.steps.includes("image-to-pdf") && recipe.stepOptions?.["image-to-pdf"]?.page_size !== "a4") {
+    failed = true;
+    console.error(`FAIL: recipe "${recipe.id}" must override image-to-pdf with page_size "a4" (matches web).`);
+  }
+}
+
 if (failed) {
   console.error("FAIL: one or more recipes reference a tool that can never be a recipe step.");
   process.exit(1);
