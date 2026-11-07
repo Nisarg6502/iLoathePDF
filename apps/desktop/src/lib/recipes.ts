@@ -28,6 +28,8 @@ export interface Recipe {
    * the web registry's `stepOptions`.
    */
   stepOptions?: Record<string, OptionValues>;
+  /** True for a user-built recipe (stored on this machine), absent for a built-in. */
+  custom?: boolean;
 }
 
 // A4 + 8 mm margin pages -- identical to the web registry's A4_PAGES.
