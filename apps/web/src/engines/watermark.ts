@@ -1,4 +1,5 @@
-import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, degrees, type PDFImage } from "pdf-lib";
+import { embedImageBytes } from "@/lib/embedImage";
 import { parseRanges } from "@/lib/ranges";
 import type { Engine } from "./types";
 
@@ -56,9 +57,7 @@ function resolvePages(spec: string, pageCount: number): number[] {
 }
 
 async function embedImageFromDataUrl(doc: PDFDocument, dataUrl: string) {
-  const bytes = dataUrlToBytes(dataUrl);
-  const isJpeg = dataUrl.startsWith("data:image/jpeg") || dataUrl.startsWith("data:image/jpg");
-  return isJpeg ? doc.embedJpg(bytes) : doc.embedPng(bytes);
+  return embedImageBytes(doc, dataUrlToBytes(dataUrl));
 }
 
 /** x/y of the content's own drawing anchor (bottom-left before rotation), aligned per h/vAlign. */
@@ -94,7 +93,7 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
     if (!spec.placement || !["single", "tiled"].includes(spec.placement)) {
       throw new Error(`Unknown placement: ${spec.placement}`);
     }
-    let image: Awaited<ReturnType<typeof doc.embedPng>> | undefined;
+    let image: PDFImage | undefined;
     if (spec.content === "image") {
       if (!spec.imageDataUrl) throw new Error("Add an image for the watermark.");
       image = await embedImageFromDataUrl(doc, spec.imageDataUrl);
@@ -159,7 +158,7 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
       throw new Error(`Unknown stamp position: ${spec.position}`);
     }
     const [xPct, yPct, hAlign, vAlign] = ALL_POSITIONS[spec.position];
-    let image: Awaited<ReturnType<typeof doc.embedPng>> | undefined;
+    let image: PDFImage | undefined;
     if (spec.content === "image") {
       if (!spec.imageDataUrl) throw new Error("Add a stamp image.");
       image = await embedImageFromDataUrl(doc, spec.imageDataUrl);

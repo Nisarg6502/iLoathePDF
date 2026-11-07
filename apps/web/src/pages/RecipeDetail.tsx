@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { deleteCustomRecipe } from "@/recipes/customRecipes";
 import { AnimatePresence, motion } from "motion/react";
 import { getRecipe, recipeHasPreviewStep } from "@/recipes/registry";
 import { getTool } from "@/tools/registry";
@@ -23,6 +24,7 @@ const stepFade = {
 export function RecipeDetail() {
   const { slug } = useParams<{ slug: string }>();
   const recipe = slug ? getRecipe(slug) : undefined;
+  const navigate = useNavigate();
 
   const [step, setStep] = useState<Step>("empty");
   const [files, setFiles] = useState<File[]>([]);
@@ -68,6 +70,9 @@ export function RecipeDetail() {
 
   const firstTool = getTool(recipe.steps[0]);
 
+  // Same rule standalone Merge and the desktop recipe workspace enforce.
+  const mergeNeedsTwo = recipe.steps[0] === "merge" && files.length < 2;
+
   function handleFiles(newFiles: File[]) {
     setFiles(newFiles);
     setDismissedSizeWarning(false);
@@ -105,6 +110,24 @@ export function RecipeDetail() {
             {recipeHasPreviewStep(recipe) && <PreviewBadge />}
           </div>
           <p className="mt-1 text-sm text-muted">{recipe.description}</p>
+          {recipe.custom && (
+            <div className="mt-2 flex gap-4 text-[12.5px]">
+              <Link to={`/recipes/${recipe.slug}/edit`} className="text-accent">Edit</Link>
+              <button
+                type="button"
+                disabled={step === "running"}
+                onClick={() => {
+                  if (window.confirm(`Delete "${recipe.title}"? This can't be undone.`)) {
+                    deleteCustomRecipe(recipe.slug);
+                    navigate("/recipes");
+                  }
+                }}
+                className="text-muted hover:text-danger disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -208,7 +231,7 @@ export function RecipeDetail() {
               <button
                 type="button"
                 onClick={run}
-                disabled={step === "empty" || step === "running"}
+                disabled={step === "empty" || step === "running" || mergeNeedsTwo}
                 className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-tint transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
               >
                 {step === "running" && (
@@ -219,6 +242,9 @@ export function RecipeDetail() {
                 )}
                 {step === "running" ? "Working…" : step === "done" ? "Run again" : "Run"}
               </button>
+              {step === "ready" && mergeNeedsTwo && (
+                <p className="mt-2 text-center text-[12.5px] text-muted">Merging needs at least two PDFs.</p>
+              )}
             </div>
           </div>
         </div>

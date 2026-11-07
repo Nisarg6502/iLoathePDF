@@ -6,6 +6,7 @@ import { tintButtonBg } from "@/tools/tint";
 import { FileDropZone } from "./FileDropZone";
 import { ResultCard } from "./ResultCard";
 import { ImageInputList } from "./ImageInputList";
+import { PdfInputList } from "./PdfInputList";
 import { CameraCapture } from "./CameraCapture";
 import { LargeFileWarning, LARGE_FILE_WARNING_BYTES } from "./LargeFileWarning";
 
@@ -40,10 +41,21 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
       return false;
     })();
 
+  // Same rule the desktop app enforces: joining one file to nothing is a mistake, not a merge.
+  const mergeNeedsTwo = tool.slug === "merge" && files.length < 2;
+
   function handleFiles(newFiles: File[]) {
     setFiles(newFiles);
     setDismissedSizeWarning(false);
     setStep("ready");
+  }
+
+  // The image list reorders, removes and adds in place. Emptying it is the same
+  // as removing everything, so go back to the drop zone rather than a blank list.
+  function handleListChange(next: File[]) {
+    if (next.length === 0) return reset();
+    setFiles(next);
+    setDismissedSizeWarning(false);
   }
 
   function reset() {
@@ -112,7 +124,22 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
                   </button>
                 </div>
                 {tool.category === "image" ? (
-                  <ImageInputList files={files} options={options} onChange={setOptions} disabled={step === "running"} />
+                  <ImageInputList
+                    files={files}
+                    options={options}
+                    onChange={setOptions}
+                    disabled={step === "running"}
+                    accept={tool.accept}
+                    onFilesChange={tool.multiple ? handleListChange : undefined}
+                  />
+                ) : tool.multiple ? (
+                  <PdfInputList
+                    files={files}
+                    onFilesChange={handleListChange}
+                    accept={tool.accept}
+                    disabled={step === "running"}
+                    running={step === "running"}
+                  />
                 ) : (
                   <ul className="flex flex-col gap-2">
                     {files.map((f) => (
@@ -176,8 +203,8 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             <button
               type="button"
               onClick={run}
-              disabled={step === "empty" || step === "running" || protectInvalid}
-              style={step === "empty" || step === "running" || protectInvalid ? undefined : { background: tintButtonBg(tool.tint) }}
+              disabled={step === "empty" || step === "running" || protectInvalid || mergeNeedsTwo}
+              style={step === "empty" || step === "running" || protectInvalid || mergeNeedsTwo ? undefined : { background: tintButtonBg(tool.tint) }}
               className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-tint transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
             >
               {step === "running" && (
@@ -188,6 +215,9 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
               )}
               {step === "running" ? "Working…" : step === "done" ? "Run again" : "Run"}
             </button>
+            {step === "ready" && mergeNeedsTwo && (
+              <p className="mt-2 text-center text-[12.5px] text-muted">Merging needs at least two PDFs.</p>
+            )}
           </div>
         </div>
       </div>

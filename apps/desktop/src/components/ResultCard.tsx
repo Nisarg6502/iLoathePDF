@@ -74,6 +74,7 @@ export function ResultCard({
           <p className="truncate text-xs text-muted">
             {primary ? fileName(primary.path) : "No output"}
             {many && ` and ${files.length - 1} more`}
+            {primary && ` · ${formatBytes(files.reduce((sum, f) => sum + f.bytes, 0))}${many ? " total" : ""}`}
           </p>
         </div>
       </header>

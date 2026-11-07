@@ -133,6 +133,16 @@ export class PdfPreviewDocument {
     return this.#destroyed;
   }
 
+  /**
+   * The page's own /Rotate, normalised to 0 | 90 | 180 | 270. Rendering with an
+   * explicit `rotation` is ABSOLUTE in pdf.js (it replaces this value), so a
+   * caller that wants the page as a reader shows it must start from this.
+   */
+  async rotationOf(pageNumber: number): Promise<number> {
+    const page = await this.#page(pageNumber);
+    return normalizeRotation(page.rotate);
+  }
+
   /** Page size at scale 1. Cheap, cached; use it to size skeletons. */
   async dimensions(pageNumber: number): Promise<PageDimensions> {
     const hit = this.#dims.get(pageNumber);

@@ -59,4 +59,35 @@ describe("convertImagesEngine", () => {
     expect(bitmap.width).toBe(20);
     expect(bitmap.height).toBe(10);
   });
+
+  it("flattens transparency onto white when converting to JPG (not black)", async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 8;
+    canvas.height = 8; // left fully transparent
+    const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
+    const file = new File([blob], "clear.png", { type: "image/png" });
+
+    const result = await convertImagesEngine({ files: [file], options: { to: "jpg" } });
+
+    const bitmap = await createImageBitmap(result.files[0].blob);
+    const probe = document.createElement("canvas");
+    probe.width = bitmap.width;
+    probe.height = bitmap.height;
+    const ctx = probe.getContext("2d")!;
+    ctx.drawImage(bitmap, 0, 0);
+    const [r, g, b] = ctx.getImageData(4, 4, 1, 1).data;
+    expect(Math.min(r, g, b)).toBeGreaterThan(240);
+  });
+
+  it("never lets two inputs overwrite each other when their stems collide", async () => {
+    const a = await makeTestImageFile(10, 10, "photo.png");
+    const b = await makeTestImageFile(10, 10, "photo.jpg");
+    const result = await convertImagesEngine({ files: [a, b], options: { to: "png" } });
+    expect(result.files.map((f) => f.name)).toEqual(["photo.png", "photo (2).png"]);
+  });
+
+  it("rejects an out-of-range quality", async () => {
+    const a = await makeTestImageFile(10, 10, "a.png");
+    await expect(convertImagesEngine({ files: [a], options: { to: "jpg", quality: 0 } })).rejects.toThrow(/Quality/);
+  });
 });
