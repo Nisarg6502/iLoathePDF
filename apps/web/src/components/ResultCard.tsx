@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { PreviewBadge } from "./PreviewBadge";
 import type { EngineResult } from "@/engines/types";
+import { formatBytes } from "@/lib/formatBytes";
 
 export function ResultCard({
   result,
@@ -27,6 +28,11 @@ export function ResultCard({
         {result.isPreview && <PreviewBadge />}
       </div>
       <div className="mt-5 text-lg font-semibold">{result.summary}</div>
+      {result.files.length > 1 && (
+        <div className="mt-1 font-mono text-[12px] text-muted" data-testid="result-total">
+          {result.files.length} files · {formatBytes(result.files.reduce((sum, f) => sum + f.blob.size, 0))} total
+        </div>
+      )}
       <div className="mt-5 flex flex-col gap-2.5">
         {result.files.map((f, i) => (
           <div
@@ -36,7 +42,7 @@ export function ResultCard({
           >
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] font-medium">{f.name}</div>
-              {f.detail && <div className="mt-0.5 font-mono text-[11.5px] text-muted">{f.detail}</div>}
+              <div className="mt-0.5 font-mono text-[11.5px] text-muted">{f.detail ?? formatBytes(f.blob.size)}</div>
             </div>
             <a
               href={urls[i]}
