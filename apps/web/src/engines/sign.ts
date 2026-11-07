@@ -1,4 +1,5 @@
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, type PDFImage } from "pdf-lib";
+import { embedImageBytes } from "@/lib/embedImage";
 import type { Engine } from "./types";
 import type { SignElement } from "@/tools/sign/types";
 import { isImageElement } from "@/tools/sign/types";
@@ -32,7 +33,7 @@ export const signEngine: Engine = async ({ files, options }) => {
   // Embedding is async and keyed by the exact data URL, so do it once per
   // distinct image rather than once per element (the same signature is
   // often placed more than once).
-  const imageCache = new Map<string, Awaited<ReturnType<typeof doc.embedPng>>>();
+  const imageCache = new Map<string, PDFImage>();
 
   for (const el of elements) {
     if (el.pageIndex < 0 || el.pageIndex >= pages.length) {
@@ -50,7 +51,7 @@ export const signEngine: Engine = async ({ files, options }) => {
     if (isImageElement(el)) {
       let image = imageCache.get(el.imageDataUrl);
       if (!image) {
-        image = await doc.embedPng(dataUrlToBytes(el.imageDataUrl));
+        image = await embedImageBytes(doc, dataUrlToBytes(el.imageDataUrl));
         imageCache.set(el.imageDataUrl, image);
       }
       page.drawImage(image, { x: xPt, y: yPt, width: wPt, height: boxHeightPt });

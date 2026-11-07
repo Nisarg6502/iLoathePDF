@@ -45,4 +45,23 @@ describe("signEngine", () => {
     const out = await PDFDocument.load(await result.files[0].blob.arrayBuffer());
     expect(out.getPageCount()).toBe(2);
   });
+
+  it("accepts a JPEG signature image, not just PNG", async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 8;
+    canvas.height = 4;
+    canvas.getContext("2d")!.fillRect(0, 0, 8, 4);
+    const jpeg: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg"));
+    const bytes = new Uint8Array(await jpeg.arrayBuffer());
+    let binary = "";
+    for (const b of bytes) binary += String.fromCharCode(b);
+    const elements: SignElement[] = [
+      { id: "1", kind: "signature", pageIndex: 0, xPct: 0.1, yPct: 0.1, wPct: 0.3, hPct: 0.1, imageDataUrl: `data:image/jpeg;base64,${btoa(binary)}` },
+    ];
+    const file = await toFile(await makeTestPdf(1));
+
+    const result = await signEngine({ files: [file], options: { elements } });
+
+    expect(result.files).toHaveLength(1);
+  });
 });

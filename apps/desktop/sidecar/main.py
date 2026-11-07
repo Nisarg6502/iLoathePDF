@@ -19,7 +19,7 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
 
 from ops._common import Cancelled, OpError  # noqa: E402
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 # op name -> "module:function". Modules are imported on first use so that a
 # half-finished op can never stop the sidecar from starting.

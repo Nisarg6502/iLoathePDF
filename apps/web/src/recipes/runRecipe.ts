@@ -41,7 +41,7 @@ export async function runRecipe(
       : undefined;
 
     try {
-      const result = await tool.engine({ files: currentFiles, options: tool.defaultOptions, onProgress: stepProgress });
+      const result = await tool.engine({ files: currentFiles, options: { ...tool.defaultOptions, ...recipe.stepOptions?.[slug] }, onProgress: stepProgress });
       lastResult = result;
       currentFiles = outputsToFiles(result.files);
     } catch (err) {

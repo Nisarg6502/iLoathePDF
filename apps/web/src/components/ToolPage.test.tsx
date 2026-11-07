@@ -71,6 +71,61 @@ describe("ToolPage", () => {
     expect(await screen.findByRole("button", { name: "Edit" })).toBeInTheDocument();
   });
 
+  it("lets image tools reorder and remove files, and returns to the drop zone when the last is removed", async () => {
+    const tool = makeTool({ category: "image", accept: [".png"], multiple: true });
+    render(<ToolPage tool={tool} />);
+
+    const png = (name: string) => new File([new Uint8Array([1])], name, { type: "image/png" });
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [png("a.png"), png("b.png")] } });
+
+    await screen.findByText("a.png");
+    const order = () => screen.getAllByRole("button", { name: /^Move .* up$/ }).map((b) => b.getAttribute("aria-label"));
+    expect(order()).toEqual(["Move a.png up", "Move b.png up"]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Move b.png up" }));
+    await waitFor(() => expect(order()).toEqual(["Move b.png up", "Move a.png up"]));
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove b.png" }));
+    await waitFor(() => expect(screen.queryByText("b.png")).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "Remove a.png" }));
+
+    expect(await screen.findByText(/drop a file here/i)).toBeInTheDocument();
+  });
+
+  it("merge: reorders and removes PDFs, and needs at least two to run", async () => {
+    const tool = makeTool({ slug: "merge", accept: [".pdf"], multiple: true });
+    render(<ToolPage tool={tool} />);
+
+    const pdf = (name: string) => new File(["x"], name, { type: "application/pdf" });
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [pdf("a.pdf"), pdf("b.pdf")] } });
+    await screen.findByText("a.pdf");
+
+    fireEvent.click(screen.getByRole("button", { name: "Move b.pdf up" }));
+    await waitFor(() =>
+      expect(screen.getAllByRole("button", { name: /^Move .* up$/ }).map((b) => b.getAttribute("aria-label"))).toEqual([
+        "Move b.pdf up",
+        "Move a.pdf up",
+      ]),
+    );
+    expect(screen.getByRole("button", { name: "Run" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove a.pdf" }));
+    await waitFor(() => expect(screen.queryByText("a.pdf")).toBeNull());
+    expect(screen.getByRole("button", { name: "Run" })).toBeDisabled();
+    expect(screen.getByText(/at least two PDFs/)).toBeInTheDocument();
+  });
+
+  it("ignores dropped files of the wrong type and says so", async () => {
+    render(<ToolPage tool={makeTool({ accept: [".pdf"] })} />);
+    const zone = screen.getByText(/drop a file here/i).closest("div[class*='cursor-pointer']")!;
+
+    const png = new File(["x"], "pic.png", { type: "image/png" });
+    fireEvent.drop(zone, { dataTransfer: { files: [png] } });
+
+    expect(await screen.findByText(/1 file was skipped/)).toBeInTheDocument();
+    expect(screen.getByText(/drop a file here/i)).toBeInTheDocument(); // still on the empty step
+  });
+
   it("does not offer camera scan for pdf-category tools", () => {
     const tool = makeTool({ category: "pdf" });
     render(<ToolPage tool={tool} />);

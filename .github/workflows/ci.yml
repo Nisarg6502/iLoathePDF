@@ -29,6 +29,10 @@ jobs:
         run: npm run lint --workspace=apps/desktop
       - name: Typecheck
         run: npm run typecheck --workspace=apps/desktop
+      - name: Version consistency guard
+        run: npm run check:version --workspace=apps/desktop
+      - name: Path helper guard
+        run: npm run check:paths --workspace=apps/desktop
       - name: Build
         run: npm run build --workspace=apps/desktop
 

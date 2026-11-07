@@ -12,7 +12,7 @@
  *    result once appeared to vanish.
  */
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderOpen, Loader2, Play, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowUp, FolderOpen, Loader2, Play, Plus, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { JobProgress } from "@/components/JobProgress";
@@ -604,6 +604,15 @@ function FileList({
   onChange: (files: PickedFile[]) => void;
   ordered: boolean;
 }) {
+  // Order is part of the result for these tools (page order in the PDF), so
+  // it must be changeable, not just displayed.
+  const move = (from: number, to: number) => {
+    const next = files.slice();
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  };
+
   return (
     <ul className="grid gap-1.5">
       {files.map((file, i) => (
@@ -627,6 +636,28 @@ function FileList({
             <span className="flex-none text-[12.5px] text-muted tabular-nums">
               {formatBytes(file.size)}
             </span>
+          ) : null}
+          {ordered && files.length > 1 ? (
+            <>
+              <Button
+                variant="ghost"
+                size="iconSm"
+                aria-label={`Move ${file.name} up`}
+                disabled={i === 0}
+                onClick={() => move(i, i - 1)}
+              >
+                <ArrowUp />
+              </Button>
+              <Button
+                variant="ghost"
+                size="iconSm"
+                aria-label={`Move ${file.name} down`}
+                disabled={i === files.length - 1}
+                onClick={() => move(i, i + 1)}
+              >
+                <ArrowDown />
+              </Button>
+            </>
           ) : null}
           <Button
             variant="danger"

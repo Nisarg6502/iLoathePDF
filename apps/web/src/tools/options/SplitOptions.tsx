@@ -46,7 +46,9 @@ export function SplitOptions({ options, onChange, disabled }: OptionsPanelProps)
         </label>
       ) : (
         <label className="flex flex-col gap-1.5">
-          <span className="text-[12.5px] font-semibold">Page ranges</span>
+          <span className="text-[12.5px] font-semibold">
+            {mode === "extract" ? "Pages to keep" : mode === "delete" ? "Pages to remove" : "Page ranges"}
+          </span>
           <input
             type="text"
             placeholder="1-3,5"
