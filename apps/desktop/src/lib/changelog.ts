@@ -19,6 +19,14 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.3.0",
+    date: "2026-11-08",
+    highlights: [
+      "New, optional and off by default: Settings → Updates can tell you when a newer version is available. When on, the app asks GitHub for the latest release number and sends nothing about you or your files; nothing is downloaded or installed for you.",
+      "The title bar shows UPDATE CHECK ON instead of OFFLINE while the check is enabled, and switching it off stops all requests.",
+    ],
+  },
+  {
     version: "0.2.0",
     date: "2026-11-07",
     highlights: [
