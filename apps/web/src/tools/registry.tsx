@@ -1,34 +1,6 @@
 import type { ToolConfig } from "./ToolConfig";
 import type { Engine } from "@/engines/types";
-import { MergeOptions } from "./options/MergeOptions";
-import { mergeEngine } from "@/engines/merge";
-import { SplitOptions } from "./options/SplitOptions";
-import { splitEngine } from "@/engines/split";
-import { OrganizeOptions } from "./options/OrganizeOptions";
-import { organizeEngine } from "@/engines/organize";
-import { PdfToImagesOptions } from "./options/PdfToImagesOptions";
-import { pdfToImagesEngine } from "@/engines/pdfToImages";
-import { ImagesToPdfOptions } from "./options/ImagesToPdfOptions";
-import { imagesToPdfEngine } from "@/engines/imagesToPdf";
-import { CompressOptions } from "./options/CompressOptions";
-import { compressEngine } from "@/engines/compress";
-import { ConvertImagesOptions } from "./options/ConvertImagesOptions";
-import { convertImagesEngine } from "@/engines/convertImages";
-import { CompressImagesOptions } from "./options/CompressImagesOptions";
-import { compressImagesEngine } from "@/engines/compressImages";
-import { SignOptions } from "./options/SignOptions";
-import { signEngine } from "@/engines/sign";
-import { SignWorkspace } from "./sign/SignWorkspace";
-import { ProtectOptions } from "./options/ProtectOptions";
-import { protectEngine } from "@/engines/protect";
-import { WatermarkOptions } from "./options/WatermarkOptions";
-import { watermarkEngine } from "@/engines/watermark";
-import { RedactOptions } from "./options/RedactOptions";
-import { redactEngine } from "@/engines/redact";
-import { RedactWorkspace } from "./redact/RedactWorkspace";
-import { OcrOptions } from "./options/OcrOptions";
-import { ocrEngine } from "@/engines/ocr";
-import { PdfToExcelOptions } from "./options/PdfToExcelOptions";
+import { lazyComponent, lazyEngine } from "./lazy";
 import {
   CompressIcon,
   MergeIcon,
@@ -45,6 +17,36 @@ import {
   OcrIcon,
   PdfToExcelIcon,
 } from "./icons";
+
+const MergeOptions = lazyComponent(() => import("./options/MergeOptions").then((m) => m.MergeOptions));
+const mergeEngine = lazyEngine(() => import("@/engines/merge").then((m) => m.mergeEngine));
+const SplitOptions = lazyComponent(() => import("./options/SplitOptions").then((m) => m.SplitOptions));
+const splitEngine = lazyEngine(() => import("@/engines/split").then((m) => m.splitEngine));
+const OrganizeOptions = lazyComponent(() => import("./options/OrganizeOptions").then((m) => m.OrganizeOptions));
+const organizeEngine = lazyEngine(() => import("@/engines/organize").then((m) => m.organizeEngine));
+const PdfToImagesOptions = lazyComponent(() => import("./options/PdfToImagesOptions").then((m) => m.PdfToImagesOptions));
+const pdfToImagesEngine = lazyEngine(() => import("@/engines/pdfToImages").then((m) => m.pdfToImagesEngine));
+const ImagesToPdfOptions = lazyComponent(() => import("./options/ImagesToPdfOptions").then((m) => m.ImagesToPdfOptions));
+const imagesToPdfEngine = lazyEngine(() => import("@/engines/imagesToPdf").then((m) => m.imagesToPdfEngine));
+const CompressOptions = lazyComponent(() => import("./options/CompressOptions").then((m) => m.CompressOptions));
+const compressEngine = lazyEngine(() => import("@/engines/compress").then((m) => m.compressEngine));
+const ConvertImagesOptions = lazyComponent(() => import("./options/ConvertImagesOptions").then((m) => m.ConvertImagesOptions));
+const convertImagesEngine = lazyEngine(() => import("@/engines/convertImages").then((m) => m.convertImagesEngine));
+const CompressImagesOptions = lazyComponent(() => import("./options/CompressImagesOptions").then((m) => m.CompressImagesOptions));
+const compressImagesEngine = lazyEngine(() => import("@/engines/compressImages").then((m) => m.compressImagesEngine));
+const SignOptions = lazyComponent(() => import("./options/SignOptions").then((m) => m.SignOptions));
+const signEngine = lazyEngine(() => import("@/engines/sign").then((m) => m.signEngine));
+const SignWorkspace = lazyComponent(() => import("./sign/SignWorkspace").then((m) => m.SignWorkspace));
+const ProtectOptions = lazyComponent(() => import("./options/ProtectOptions").then((m) => m.ProtectOptions));
+const protectEngine = lazyEngine(() => import("@/engines/protect").then((m) => m.protectEngine));
+const WatermarkOptions = lazyComponent(() => import("./options/WatermarkOptions").then((m) => m.WatermarkOptions));
+const watermarkEngine = lazyEngine(() => import("@/engines/watermark").then((m) => m.watermarkEngine));
+const RedactOptions = lazyComponent(() => import("./options/RedactOptions").then((m) => m.RedactOptions));
+const redactEngine = lazyEngine(() => import("@/engines/redact").then((m) => m.redactEngine));
+const RedactWorkspace = lazyComponent(() => import("./redact/RedactWorkspace").then((m) => m.RedactWorkspace));
+const OcrOptions = lazyComponent(() => import("./options/OcrOptions").then((m) => m.OcrOptions));
+const ocrEngine = lazyEngine(() => import("@/engines/ocr").then((m) => m.ocrEngine));
+const PdfToExcelOptions = lazyComponent(() => import("./options/PdfToExcelOptions").then((m) => m.PdfToExcelOptions));
 
 const desktopOnlyEngine: Engine = async () => {
   throw new Error("This tool is only available in the desktop app.");
