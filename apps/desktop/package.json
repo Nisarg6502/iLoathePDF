@@ -16,6 +16,7 @@
     "check:custom-recipes": "node --experimental-strip-types scripts/check-custom-recipes.ts",
     "check:version": "node --experimental-strip-types scripts/check-version.ts",
     "check:paths": "node --experimental-strip-types scripts/check-paths.ts",
+    "check:updates": "node --experimental-strip-types scripts/check-updates.ts",
     "build:sidecar": "powershell -ExecutionPolicy Bypass -File scripts/build-sidecar.ps1",
     "build:app": "npm run build:sidecar && tauri build"
   },

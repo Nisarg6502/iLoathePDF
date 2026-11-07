@@ -64,9 +64,12 @@ export function Privacy() {
       <h2 className="mt-11 text-xl font-semibold tracking-[-0.02em]">The desktop build goes further</h2>
       <p className="mt-2.5 text-[14.5px] leading-relaxed text-muted">
         A browser can always be told to make a request by something else on
-        the page. The Windows app removes that possibility: it ships with no
-        networking code, no analytics, no auto-updater and no web fonts.
-        Nothing in it can be switched on.
+        the page. The Windows app removes that possibility: it has no
+        analytics, no crash reporting, no web fonts and nothing that
+        downloads or installs itself. Its one network feature is an optional
+        update check that is off by default; if you switch it on, the app asks
+        GitHub for the latest release number and sends nothing about you or
+        your files. Switch it off and it stops.
       </p>
       <Link to="/download" className="mt-4.5 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
         Get the desktop app

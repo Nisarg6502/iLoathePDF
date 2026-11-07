@@ -7,9 +7,15 @@ import { useEffect, useState } from "react";
 import { FolderOpen, RotateCcw, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { CHANGELOG } from "@/lib/changelog";
 import { isTauri, ping, type PingResult } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
+import {
+  checkForUpdate,
+  setUpdateCheckEnabled,
+  useUpdateCheck,
+} from "@/lib/useUpdateCheck";
 
 function Section({
   title,
@@ -27,6 +33,96 @@ function Section({
       <div className="mt-3.5">{children}</div>
     </section>
   );
+}
+
+function UpdatesPanel() {
+  const update = useUpdateCheck();
+  const { enabled, status, latest, checkedAt, error } = update;
+
+  return (
+    <div className="grid gap-4">
+      <div className="flex items-start gap-3">
+        <Switch
+          id="update-check"
+          checked={enabled}
+          onCheckedChange={setUpdateCheckEnabled}
+          aria-labelledby="update-check-label"
+        />
+        <div className="min-w-0">
+          <label
+            id="update-check-label"
+            htmlFor="update-check"
+            className="text-[13.5px] font-semibold text-text"
+          >
+            Tell me when a new version is available
+          </label>
+          <p className="mt-0.5 text-[13px] text-muted">
+            {enabled
+              ? "On. The app checks when it starts and shows a notice if there is a newer release. Switch this off at any time and it stops."
+              : "Off. The app makes no network requests."}
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-[62ch] rounded-lg border border-border bg-surface px-3.5 py-3 text-[13px] text-muted">
+        <div className="mb-1.5 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
+          WHAT HAPPENS WHEN THIS IS ON
+        </div>
+        <ul className="grid gap-1.5">
+          <li>
+            The app asks GitHub one question — “what is the latest release of iLoathePDF?” — by
+            fetching{" "}
+            <span className="font-mono text-[12px] text-text">
+              api.github.com/repos/Nisarg6502/iLoathePDF/releases/latest
+            </span>
+            .
+          </li>
+          <li>
+            Nothing about you goes out: no files, no file names, no settings, no installed version,
+            no ID, no cookies. The comparison with your version happens on this computer.
+          </li>
+          <li>
+            Like any website you visit, GitHub can see that a connection came from your internet
+            address. We receive nothing and keep no record.
+          </li>
+          <li>
+            Nothing is downloaded or installed for you. If there is a newer version you get a link
+            to its release page, and you decide whether to use it.
+          </li>
+        </ul>
+      </div>
+
+      {enabled ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => void checkForUpdate()}
+            disabled={status === "checking"}
+          >
+            {status === "checking" ? "Checking…" : "Check now"}
+          </Button>
+          <span
+            className={`text-[13.5px] ${status === "error" ? "text-danger" : "text-muted"}`}
+            role="status"
+          >
+            {status === "error"
+              ? (error ?? "The check failed.")
+              : status === "available" && latest
+                ? `Version ${latest.version} is available (you have ${__APP_VERSION__}).`
+                : status === "current"
+                  ? `You are up to date${checkedAt ? ` — checked ${formatChecked(checkedAt)}` : ""}.`
+                  : ""}
+          </span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function formatChecked(at: number): string {
+  const seconds = Math.round((Date.now() - at) / 1000);
+  if (seconds < 60) return "just now";
+  return new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 export default function Settings() {
@@ -56,7 +152,7 @@ export default function Settings() {
 
         <Section
           title={`iLoathePDF ${__APP_VERSION__}`}
-          hint="Updates are manual — the app never checks the network. To update, download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one."
+          hint="To update, download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one. Or let the app tell you when there is one — see Updates below."
         >
           <div className="mb-2 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
             WHAT’S NEW
@@ -84,6 +180,13 @@ export default function Settings() {
               </div>
             ))}
           </div>
+        </Section>
+
+        <Section
+          title="Updates"
+          hint="Off by default. iLoathePDF is otherwise fully offline; this is the one thing that can change that, and only if you switch it on."
+        >
+          <UpdatesPanel />
         </Section>
 
         <Section
@@ -121,12 +224,12 @@ export default function Settings() {
 
         <Section
           title="Privacy"
-          hint="These are properties of the build, not preferences — there is nothing here to switch off, which is the point."
+          hint="Everything below is true of the build whether or not you turn on the update check."
         >
           <ul className="grid gap-2">
             {[
-              "No network code. The app makes no requests, and the window blocks every remote origin.",
-              "No analytics, no crash reporting, no auto-updater.",
+              "Your files never touch the network. The only network code is the optional update check above, and it is off unless you turn it on. The window itself blocks every remote origin.",
+              "No analytics, no crash reporting, and nothing is ever downloaded or installed automatically.",
               "EXIF, including GPS, is stripped from converted images by default.",
               "Results are written atomically and never overwrite an existing file.",
             ].map((line) => (

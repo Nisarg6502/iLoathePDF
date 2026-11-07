@@ -1,5 +1,6 @@
 mod commands;
 mod sidecar;
+mod updates;
 
 use std::sync::Arc;
 
@@ -45,6 +46,7 @@ pub fn run() {
             commands::cancel_job,
             commands::sidecar_health,
             commands::read_file_bytes,
+            updates::fetch_latest_release,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

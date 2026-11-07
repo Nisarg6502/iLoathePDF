@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const FAQS: [string, React.ReactNode][] = [
   [
     "Do my files actually get uploaded anywhere?",
-    "No. The web app has no upload endpoint to send them to — processing runs in this browser tab using pdf-lib and pdf.js. The desktop app goes further and ships with no networking code at all, so it can't phone home even if something tried.",
+    "No. The web app has no upload endpoint to send them to — processing runs in this browser tab using pdf-lib and pdf.js. The desktop app goes further: it is offline by default, and its only network code is an optional update check that stays off until you switch it on and never sends your files or anything about you.",
   ],
   [
     "Do I need to sign up or make an account?",
