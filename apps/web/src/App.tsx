@@ -11,6 +11,7 @@ import { ToolsIndex } from "@/pages/ToolsIndex";
 const ToolDetail = lazy(() => import("@/pages/ToolDetail").then((m) => ({ default: m.ToolDetail })));
 const RecipesIndex = lazy(() => import("@/pages/RecipesIndex").then((m) => ({ default: m.RecipesIndex })));
 const RecipeDetail = lazy(() => import("@/pages/RecipeDetail").then((m) => ({ default: m.RecipeDetail })));
+const RecipeBuilder = lazy(() => import("@/pages/RecipeBuilder").then((m) => ({ default: m.RecipeBuilder })));
 const HowItWorks = lazy(() => import("@/pages/HowItWorks").then((m) => ({ default: m.HowItWorks })));
 const Privacy = lazy(() => import("@/pages/Privacy").then((m) => ({ default: m.Privacy })));
 const Download = lazy(() => import("@/pages/Download").then((m) => ({ default: m.Download })));
@@ -39,6 +40,8 @@ export default function App() {
           <Route path="tools" element={<ToolsIndex />} />
           <Route path="tools/:slug" element={<ToolDetail />} />
           <Route path="recipes" element={<RecipesIndex />} />
+          <Route path="recipes/new" element={<RecipeBuilder />} />
+          <Route path="recipes/:slug/edit" element={<RecipeBuilder />} />
           <Route path="recipes/:slug" element={<RecipeDetail />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />

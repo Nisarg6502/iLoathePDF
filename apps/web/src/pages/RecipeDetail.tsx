@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { deleteCustomRecipe } from "@/recipes/customRecipes";
 import { AnimatePresence, motion } from "motion/react";
 import { getRecipe, recipeHasPreviewStep } from "@/recipes/registry";
 import { getTool } from "@/tools/registry";
@@ -23,6 +24,7 @@ const stepFade = {
 export function RecipeDetail() {
   const { slug } = useParams<{ slug: string }>();
   const recipe = slug ? getRecipe(slug) : undefined;
+  const navigate = useNavigate();
 
   const [step, setStep] = useState<Step>("empty");
   const [files, setFiles] = useState<File[]>([]);
@@ -108,6 +110,24 @@ export function RecipeDetail() {
             {recipeHasPreviewStep(recipe) && <PreviewBadge />}
           </div>
           <p className="mt-1 text-sm text-muted">{recipe.description}</p>
+          {recipe.custom && (
+            <div className="mt-2 flex gap-4 text-[12.5px]">
+              <Link to={`/recipes/${recipe.slug}/edit`} className="text-accent">Edit</Link>
+              <button
+                type="button"
+                disabled={step === "running"}
+                onClick={() => {
+                  if (window.confirm(`Delete "${recipe.title}"? This can't be undone.`)) {
+                    deleteCustomRecipe(recipe.slug);
+                    navigate("/recipes");
+                  }
+                }}
+                className="text-muted hover:text-danger disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -6,6 +6,8 @@ import Home from "./routes/Home";
 import Settings from "./routes/Settings";
 import ToolWorkspace from "./routes/ToolWorkspace";
 import RecipeWorkspace from "./routes/RecipeWorkspace";
+import RecipeBuilder from "./routes/RecipeBuilder";
+import { useCustomRecipes } from "./lib/useCustomRecipes";
 import { TOOLS } from "./lib/tools";
 import { RECIPES } from "./lib/recipes";
 import { MotionConfig } from "motion/react";
@@ -22,12 +24,11 @@ export default function App() {
           {TOOLS.map((tool) => (
             <Route key={tool.id} path={tool.path} element={<ToolWorkspace tool={tool} />} />
           ))}
-          {RECIPES.map((recipe) => (
-            <Route key={recipe.id} path={`/r/${recipe.id}`} element={<RecipeWorkspace recipe={recipe} />} />
-          ))}
+          <Route path="/r/new" element={<RecipeBuilder />} />
+          <Route path="/r/:id/edit" element={<RecipeBuilder />} />
+          <Route path="/r/:id" element={<RecipeRoute />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/t/:id" element={<UnknownTool />} />
-          <Route path="/r/:id" element={<UnknownTool />} />
           {/* Component workbench; dev builds only, never shipped. */}
           {import.meta.env.DEV ? (
             <Route
@@ -45,6 +46,14 @@ export default function App() {
       </HashRouter>
     </MotionConfig>
   );
+}
+
+/** Resolves /r/:id to a built-in or a saved custom recipe. */
+function RecipeRoute() {
+  const { id } = useParams();
+  const custom = useCustomRecipes();
+  const recipe = RECIPES.find((r) => r.id === id) ?? custom.find((r) => r.id === id);
+  return recipe ? <RecipeWorkspace key={recipe.id} recipe={recipe} /> : <UnknownTool />;
 }
 
 function UnknownTool() {

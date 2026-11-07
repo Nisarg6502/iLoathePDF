@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Sparkles, X } from "lucide-react";
+import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import {
   GROUP_LABEL,
@@ -10,6 +10,7 @@ import {
   type ToolGroup,
 } from "../lib/tools";
 import { RECIPES, type Recipe } from "../lib/recipes";
+import { useCustomRecipes } from "../lib/useCustomRecipes";
 import { AnimatePresence, motion } from "motion/react";
 import { useWindowFileDrop, type PickedFile } from "../components/FileDropZone";
 import { scrimVariants, sheetVariants } from "../lib/motion";
@@ -18,6 +19,7 @@ import { Button } from "../components/ui/button";
 
 export default function Home() {
   const navigate = useNavigate();
+  const customRecipes = useCustomRecipes();
   const [dropped, setDropped] = useState<PickedFile[] | null>(null);
 
   const onDrop = useCallback((files: PickedFile[]) => setDropped(files), []);
@@ -114,9 +116,10 @@ export default function Home() {
           </div>
 
           <div className="mt-3 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
-            {RECIPES.map((recipe) => (
+            {[...RECIPES, ...customRecipes].map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} index={cardIndex++} />
             ))}
+            <NewRecipeCard index={cardIndex++} />
           </div>
         </section>
       </div>
@@ -191,6 +194,25 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 }
 
 // ---------------------------------------------------------------------------
+
+function NewRecipeCard({ index }: { index: number }) {
+  return (
+    <Link
+      to="/r/new"
+      style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+      className={cn(
+        "ihp-rise group flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-card border border-dashed border-border-hi bg-transparent p-4",
+        "text-muted outline-none transition-[transform,border-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        "hover:-translate-y-0.5 hover:border-accent hover:text-text",
+        "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
+        "active:translate-y-0 active:scale-[0.99]",
+      )}
+    >
+      <Plus aria-hidden className="size-5" />
+      <span className="text-[14px] font-medium">New recipe</span>
+    </Link>
+  );
+}
 
 function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
   return (

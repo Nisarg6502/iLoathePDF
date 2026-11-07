@@ -130,3 +130,14 @@ export function PdfToExcelIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function CompressImagesIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-n)" strokeWidth="1.5" {...props}>
+      <rect x="2.5" y="2.5" width="13" height="13" rx="1.2" />
+      <circle cx="6.5" cy="6.5" r="1.2" strokeOpacity="0.5" />
+      <path d="M2.5 13l4-3.5 3 2.5 2-1.5 4 3" strokeOpacity="0.5" strokeLinejoin="round" />
+      <path d="M12.5 2.5v4M10.8 4.8l1.7 1.7 1.7-1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
