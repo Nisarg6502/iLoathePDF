@@ -6,6 +6,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # pdfjs-dist 6.4+ needs newer JS features (Map.getOrInsertComputed) than
+      # our Node 22 test environment and older browsers provide; hold at 6.3.x
+      # until that's a deliberate upgrade.
+      - dependency-name: pdfjs-dist
+        versions: [">= 6.4.0"]
     groups:
       # One PR for the routine patch churn, individual PRs for anything larger.
       minor-and-patch:
