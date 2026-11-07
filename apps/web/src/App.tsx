@@ -1,15 +1,19 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { RequestStatusProvider } from "@/components/layout/RequestStatusContext";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Home } from "@/pages/Home";
 import { ToolsIndex } from "@/pages/ToolsIndex";
-import { ToolDetail } from "@/pages/ToolDetail";
-import { RecipesIndex } from "@/pages/RecipesIndex";
-import { RecipeDetail } from "@/pages/RecipeDetail";
-import { HowItWorks } from "@/pages/HowItWorks";
-import { Privacy } from "@/pages/Privacy";
-import { Download } from "@/pages/Download";
+
+// Everything below the landing pages loads on demand, so the first visit only
+// downloads what the home page and tool list need.
+const ToolDetail = lazy(() => import("@/pages/ToolDetail").then((m) => ({ default: m.ToolDetail })));
+const RecipesIndex = lazy(() => import("@/pages/RecipesIndex").then((m) => ({ default: m.RecipesIndex })));
+const RecipeDetail = lazy(() => import("@/pages/RecipeDetail").then((m) => ({ default: m.RecipeDetail })));
+const HowItWorks = lazy(() => import("@/pages/HowItWorks").then((m) => ({ default: m.HowItWorks })));
+const Privacy = lazy(() => import("@/pages/Privacy").then((m) => ({ default: m.Privacy })));
+const Download = lazy(() => import("@/pages/Download").then((m) => ({ default: m.Download })));
 
 function Layout() {
   const { pathname } = useLocation();
@@ -17,7 +21,9 @@ function Layout() {
     <div className="min-h-screen bg-bg text-text">
       <SiteHeader />
       <div key={pathname} className="page-in">
-        <Outlet />
+        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+          <Outlet />
+        </Suspense>
       </div>
       <SiteFooter />
     </div>
