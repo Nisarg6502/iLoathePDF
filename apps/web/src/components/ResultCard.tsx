@@ -36,6 +36,7 @@ export function ResultCard({
           >
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] font-medium">{f.name}</div>
+              {f.detail && <div className="mt-0.5 font-mono text-[11.5px] text-muted">{f.detail}</div>}
             </div>
             <a
               href={urls[i]}
