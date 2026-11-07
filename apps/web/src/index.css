@@ -247,6 +247,17 @@ input[type="range"].ihp-slider:focus-visible::-webkit-slider-thumb {
   animation: page-in 260ms var(--ease-out-strong);
 }
 
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+.menu-in {
+  transform-origin: top left;
+  animation: menu-in 160ms var(--ease-out-strong);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
