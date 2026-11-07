@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { HeroDemo } from "@/components/HeroDemo";
 import { PipelineArt } from "@/components/PipelineArt";
+import { RecipeDemo } from "@/components/RecipeDemo";
 import { Faq } from "@/components/Faq";
 import { TOOLS } from "@/tools/registry";
 import { tintColor, tintWash } from "@/tools/tint";
@@ -53,6 +54,47 @@ export function Home() {
         </div>
 
         <HeroDemo />
+      </div>
+
+      <div className="border-t border-border">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-8 py-16 md:grid-cols-2 md:gap-16">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
+            whileInView={{ opacity: 1, transform: "translateY(0px)" }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <div className="mb-4 flex items-center gap-2">
+              <span className="size-1.5 rounded-sm bg-accent" />
+              <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-muted">RECIPES</span>
+            </div>
+            <h2 className="m-0 text-[clamp(28px,3vw,40px)] font-semibold leading-[1.08] tracking-[-0.03em] text-balance">
+              Chain tools. Drop once. Get one result.
+            </h2>
+            <p className="mt-4 max-w-[46ch] text-[15.5px] leading-relaxed text-muted text-pretty">
+              A recipe runs several tools back to back on your files — photos
+              to a small, searchable PDF in a single click. Pick one of ours,
+              or build your own from the tools you use most. Still all in
+              this tab, still no uploads.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-2.5">
+              <Link
+                to="/recipes"
+                className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97] active:bg-accent-deep"
+              >
+                Browse recipes
+              </Link>
+              <Link
+                to="/recipes/new"
+                className="inline-flex h-11 items-center rounded-[11px] border border-border-hi bg-surface px-4.5 text-[14.5px] font-medium text-text transition-transform duration-100 hover:bg-surface-2 active:scale-[0.97]"
+              >
+                Build your own
+              </Link>
+            </div>
+          </motion.div>
+
+          <RecipeDemo />
+        </div>
       </div>
 
       <div className="border-t border-border bg-surface">
