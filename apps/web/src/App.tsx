@@ -7,6 +7,7 @@ import { ToolsIndex } from "@/pages/ToolsIndex";
 import { ToolDetail } from "@/pages/ToolDetail";
 import { RecipesIndex } from "@/pages/RecipesIndex";
 import { RecipeDetail } from "@/pages/RecipeDetail";
+import { RecipeBuilder } from "@/pages/RecipeBuilder";
 import { HowItWorks } from "@/pages/HowItWorks";
 import { Privacy } from "@/pages/Privacy";
 import { Download } from "@/pages/Download";
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="tools" element={<ToolsIndex />} />
           <Route path="tools/:slug" element={<ToolDetail />} />
           <Route path="recipes" element={<RecipesIndex />} />
+          <Route path="recipes/new" element={<RecipeBuilder />} />
+          <Route path="recipes/:slug/edit" element={<RecipeBuilder />} />
           <Route path="recipes/:slug" element={<RecipeDetail />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />
