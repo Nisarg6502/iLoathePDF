@@ -6,6 +6,7 @@
  * runRecipe.ts), never duplicated here.
  */
 import { getTool } from "@/tools/registry";
+import { A4_PAGES, getCustomRecipe } from "./customRecipes";
 
 export interface RecipeConfig {
   slug: string;
@@ -21,10 +22,9 @@ export interface RecipeConfig {
    */
   stepOptions?: Record<string, Record<string, unknown>>;
   status: "live" | "desktop-only";
+  /** True for a user-built recipe (stored in this browser), false/absent for a built-in. */
+  custom?: boolean;
 }
-
-// The A4 + ~8 mm margin layout Images to PDF used before its page-size option existed.
-const A4_PAGES = { "images-to-pdf": { page_size: "a4", margin_mm: 8 } };
 
 export const RECIPES: RecipeConfig[] = [
   {
@@ -66,7 +66,7 @@ export const RECIPES: RecipeConfig[] = [
 ];
 
 export function getRecipe(slug: string): RecipeConfig | undefined {
-  return RECIPES.find((r) => r.slug === slug);
+  return RECIPES.find((r) => r.slug === slug) ?? getCustomRecipe(slug);
 }
 
 /**
