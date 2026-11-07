@@ -51,12 +51,20 @@ export function OrganizeCanvas({ file, pages, onChange, className }: OrganizeCan
         }
         opened = doc;
         setState({ phase: "ready", doc });
+        // Start each page at its own /Rotate. The preview renders `rotation`
+        // as an absolute angle and pdf.organize writes it as one, so starting
+        // at 0 would show (and, once touched, save) a /Rotate 90 page unrotated.
+        const own = await Promise.all(Array.from({ length: doc.pageCount }, (_, i) => doc.rotationOf(i + 1)));
+        if (cancelled) {
+          doc.destroy();
+          return;
+        }
         emit.current(
           Array.from({ length: doc.pageCount }, (_, i) => ({
             id: `${file.id}:${i + 1}`,
             docId: file.id,
             pageNumber: i + 1,
-            rotation: 0,
+            rotation: own[i],
             docLabel: file.name,
           })),
         );

@@ -158,7 +158,7 @@ export function ToolOptions({
                 id={id}
                 value={str("outputName")}
                 onChange={(e) => set({ outputName: e.currentTarget.value })}
-                placeholder="organized"
+                placeholder="Original name + -organized"
               />
             )}
           </Field>

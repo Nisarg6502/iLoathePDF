@@ -13,7 +13,8 @@ export function ToolsIndex() {
       <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">All tools</h1>
       <p className="mt-2.5 max-w-[58ch] text-[15.5px] text-muted">
         Each one runs right here — pick a tool, drop a file, get a file.
-        Twelve of the desktop app's thirteen tools work in the browser; PDF
+        Twelve of the desktop app's thirteen tools work in the browser, plus
+        Compress images, which is browser-only for now; PDF
         to Excel needs the desktop build.
       </p>
 

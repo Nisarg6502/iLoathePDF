@@ -6,6 +6,7 @@
  * runRecipe.ts), never duplicated here.
  */
 import { getTool } from "@/tools/registry";
+import { A4_PAGES, getCustomRecipe } from "./customRecipes";
 
 export interface RecipeConfig {
   slug: string;
@@ -13,7 +14,16 @@ export interface RecipeConfig {
   description: string;
   /** Tool slugs, in order. */
   steps: string[];
+  /**
+   * Per-step option overrides, keyed by tool slug, merged over that tool's
+   * defaultOptions. Needed where a recipe must not inherit a default meant for
+   * standalone use (e.g. Images to PDF defaults to "fit", which would blow a
+   * 4000px photo up to a 3000pt page before Compress/OCR rasterise it again).
+   */
+  stepOptions?: Record<string, Record<string, unknown>>;
   status: "live" | "desktop-only";
+  /** True for a user-built recipe (stored in this browser), false/absent for a built-in. */
+  custom?: boolean;
 }
 
 export const RECIPES: RecipeConfig[] = [
@@ -35,6 +45,7 @@ export const RECIPES: RecipeConfig[] = [
     // way), so putting it last is safe and is what actually keeps the
     // final result searchable, as the recipe's name promises.
     steps: ["images-to-pdf", "compress", "ocr"],
+    stepOptions: A4_PAGES,
     status: "live",
   },
   {
@@ -42,6 +53,7 @@ export const RECIPES: RecipeConfig[] = [
     title: "Flatten PDF",
     description: "Rasterize every page and rebuild the PDF from the images, stripping anything but the visual page content.",
     steps: ["pdf-to-images", "images-to-pdf"],
+    stepOptions: A4_PAGES,
     status: "live",
   },
   {
@@ -54,7 +66,7 @@ export const RECIPES: RecipeConfig[] = [
 ];
 
 export function getRecipe(slug: string): RecipeConfig | undefined {
-  return RECIPES.find((r) => r.slug === slug);
+  return RECIPES.find((r) => r.slug === slug) ?? getCustomRecipe(slug);
 }
 
 /**

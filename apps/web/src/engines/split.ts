@@ -11,6 +11,17 @@ async function buildPdf(src: PDFDocument, indices: number[]): Promise<Uint8Array
   return out.save();
 }
 
+/**
+ * An empty page spec means "every page" to parseRanges, which is right for
+ * Merge and Watermark but wrong here: splitting, extracting or deleting
+ * "nothing" must be an error, not a copy of the whole document.
+ */
+function requireSpec(raw: unknown, what: string): string {
+  const spec = String(raw ?? "").trim();
+  if (!spec.split(",").some((s) => s.trim() !== "")) throw new Error(`Enter ${what}.`);
+  return spec;
+}
+
 export const splitEngine: Engine = async ({ files, options }) => {
   const file = files[0];
   if (!file) throw new Error("Add a PDF to split.");
@@ -22,7 +33,10 @@ export const splitEngine: Engine = async ({ files, options }) => {
   const baseName = file.name.replace(/\.pdf$/i, "");
 
   if (mode === "ranges") {
-    const specs = String(options.ranges ?? "").split(",").map((s) => s.trim());
+    const specs = requireSpec(options.ranges, "at least one page range, like 1-3,5")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== ""); // "1-3,,5" and a trailing comma are not extra empty files
     const outputs = await Promise.all(
       specs.map(async (spec, i) => {
         const indices = parseRanges(spec, pageCount);
@@ -49,7 +63,7 @@ export const splitEngine: Engine = async ({ files, options }) => {
   }
 
   if (mode === "extract") {
-    const indices = parseRanges(String(options.ranges ?? ""), pageCount);
+    const indices = parseRanges(requireSpec(options.ranges, "the pages to keep, like 1-3,5"), pageCount);
     const pdfBytes = await buildPdf(src, indices);
     return {
       files: [{ name: `${baseName}-extracted.pdf`, blob: new Blob([pdfBytes as BlobPart], { type: "application/pdf" }) }],
@@ -59,8 +73,9 @@ export const splitEngine: Engine = async ({ files, options }) => {
   }
 
   if (mode === "delete") {
-    const toRemove = new Set(parseRanges(String(options.ranges ?? ""), pageCount));
+    const toRemove = new Set(parseRanges(requireSpec(options.ranges, "the pages to remove, like 2,4"), pageCount));
     const indices = Array.from({ length: pageCount }, (_, i) => i).filter((i) => !toRemove.has(i));
+    if (indices.length === 0) throw new Error("That would remove every page. Keep at least one.");
     const pdfBytes = await buildPdf(src, indices);
     return {
       files: [{ name: `${baseName}-deleted.pdf`, blob: new Blob([pdfBytes as BlobPart], { type: "application/pdf" }) }],

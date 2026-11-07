@@ -118,7 +118,8 @@ export const TOOLS: Tool[] = [
     multiple: false,
     ordered: false,
     action: "Save PDF",
-    defaults: { outputName: "organized" },
+    // Blank = "<original name>-organized", like the web app; a fixed default made every run write the same organized.pdf over the last.
+    defaults: { outputName: "" },
   },
   {
     id: "sign",
@@ -134,7 +135,7 @@ export const TOOLS: Tool[] = [
     multiple: false,
     ordered: false,
     action: "Export signed PDF",
-    defaults: { outputName: "signed" },
+    defaults: {},
   },
   {
     id: "protect",

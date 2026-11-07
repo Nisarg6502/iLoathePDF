@@ -78,6 +78,16 @@ jobs:
           }
           Remove-Item gs-installer.exe
 
+      - name: Check version consistency
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            npm run check:version --workspace=apps/desktop -- "${{ github.ref_name }}"
+          } else {
+            npm run check:version --workspace=apps/desktop
+          }
+          if ($LASTEXITCODE -ne 0) { throw "Version check failed" }
+
       - name: Build frontend
         run: npm run build --workspace=apps/desktop
 

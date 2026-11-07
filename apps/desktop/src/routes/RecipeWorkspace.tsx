@@ -11,14 +11,16 @@
  * the fixed step list instead.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowRight, FolderOpen, Loader2, Play, Plus, RotateCcw, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, FolderOpen, Loader2, Pencil, Play, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
 
 import { JobProgress } from "@/components/JobProgress";
 import { JobOutcome } from "@/components/ResultCard";
 import { useFilePicker, type PickedFile } from "@/components/FileDropZone";
 import { Button } from "@/components/ui/button";
 import { JobError, isTauri, type Progress } from "@/lib/jobs";
+import { deleteCustomRecipe } from "@/lib/customRecipes";
 import { runRecipe } from "@/lib/recipeRun";
 import type { JobResult } from "@/lib/run";
 import { takePendingFiles } from "@/lib/handoff";
@@ -148,6 +150,8 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         </div>
 
         <div className="flex-1" />
+
+        {recipe.custom ? <CustomRecipeActions recipe={recipe} disabled={running} /> : null}
 
         {files.length > 0 ? (
           <div className="flex items-center gap-2">
@@ -321,6 +325,44 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
           />
         </aside>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/** Edit / delete for a user-built recipe. Delete asks for a second click rather than a native dialog. */
+function CustomRecipeActions({ recipe, disabled }: { recipe: Recipe; disabled: boolean }) {
+  const navigate = useNavigate();
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <div className="mr-2 flex items-center gap-2">
+      <Button variant="secondary" size="sm" disabled={disabled} onClick={() => navigate(`/r/${recipe.id}/edit`)}>
+        <Pencil />
+        Edit
+      </Button>
+      {confirming ? (
+        <>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => {
+              deleteCustomRecipe(recipe.id);
+              navigate("/");
+            }}
+          >
+            Delete for good?
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setConfirming(false)}>
+            Keep
+          </Button>
+        </>
+      ) : (
+        <Button variant="danger" size="sm" disabled={disabled} onClick={() => setConfirming(true)}>
+          <Trash2 />
+          Delete
+        </Button>
+      )}
     </div>
   );
 }
