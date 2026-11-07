@@ -1,9 +1,10 @@
 import { NavLink, Link } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
+import { ToolsMenu } from "./ToolsMenu";
 
 const NAV_LINKS = [
   { to: "/", label: "Home", end: true },
-  { to: "/tools", label: "Tools" },
+  { to: "/tools", label: "Tools", menu: true },
   { to: "/recipes", label: "Recipes" },
   { to: "/how-it-works", label: "How it works" },
   { to: "/privacy", label: "Privacy" },
@@ -24,18 +25,22 @@ export function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-0.5">
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.end}
-              className={({ isActive }) =>
-                `rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors duration-150 hover:bg-surface-2 ${isActive ? "text-text" : "text-muted"}`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.menu ? (
+              <ToolsMenu key={link.to} />
+            ) : (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={({ isActive }) =>
+                  `rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors duration-150 hover:bg-surface-2 ${isActive ? "text-text" : "text-muted"}`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ),
+          )}
         </nav>
 
         <div className="flex-1" />
