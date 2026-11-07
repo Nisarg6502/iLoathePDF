@@ -1,5 +1,6 @@
 import { PDFDocument } from "pdf-lib";
 import { parseRanges } from "@/lib/ranges";
+import { outputFileName } from "@/lib/outputName";
 import type { Engine } from "./types";
 
 export const mergeEngine: Engine = async ({ files, options }) => {
@@ -23,7 +24,7 @@ export const mergeEngine: Engine = async ({ files, options }) => {
 
   const bytes = await out.save();
   return {
-    files: [{ name: "merged.pdf", blob: new Blob([bytes as BlobPart], { type: "application/pdf" }) }],
+    files: [{ name: outputFileName(options.outputName, "merged"), blob: new Blob([bytes as BlobPart], { type: "application/pdf" }) }],
     summary: `${files.length} files → 1 file, ${totalPages} pages`,
     isPreview: false,
   };

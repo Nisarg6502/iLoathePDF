@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { FolderOpen, RotateCcw, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { CHANGELOG } from "@/lib/changelog";
 import { isTauri, ping, type PingResult } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
 
@@ -52,6 +53,38 @@ export default function Settings() {
             SETTINGS
           </span>
         </div>
+
+        <Section
+          title={`iLoathePDF ${__APP_VERSION__}`}
+          hint="Updates are manual — the app never checks the network. To update, download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one."
+        >
+          <div className="mb-2 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
+            WHAT’S NEW
+          </div>
+          <div className="grid gap-4">
+            {CHANGELOG.map((release) => (
+              <div key={release.version}>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[13.5px] font-semibold text-text">v{release.version}</span>
+                  <span className="font-mono text-[11.5px] text-faint">{release.date}</span>
+                  {release.version === __APP_VERSION__ ? (
+                    <span className="rounded bg-accent-soft px-1.5 py-px font-mono text-[10.5px] font-bold tracking-[0.06em] text-accent">
+                      INSTALLED
+                    </span>
+                  ) : null}
+                </div>
+                <ul className="mt-1.5 grid gap-1">
+                  {release.highlights.map((line) => (
+                    <li key={line} className="flex items-start gap-2 text-[13.5px] text-muted">
+                      <span className="mt-[9px] size-1 flex-none rounded-full bg-faint" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
 
         <Section
           title="Where results are saved"

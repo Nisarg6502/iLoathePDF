@@ -1,4 +1,4 @@
-export type TintKey = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m";
+export type TintKey = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n";
 
 export function tintColor(tint: TintKey): string {
   return `var(--tint-${tint})`;

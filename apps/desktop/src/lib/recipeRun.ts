@@ -9,6 +9,8 @@
  * Each step runs with its tool's own existing `defaults` -- never a
  * separately-maintained copy -- so a future change to e.g. Compress's
  * default level automatically applies inside every recipe that uses it.
+ * The recipe's `stepOptions` (if any) are merged over those defaults, same
+ * as the web runner.
  *
  * No cleanup of intermediate step outputs: this app has no file-deletion
  * capability anywhere (no Tauri fs plugin, no matching Rust command), so
@@ -61,7 +63,14 @@ export async function runRecipe(
     const stepProgress = (p: Progress) =>
       onProgress({ ...p, pct: (i * 100 + p.pct) / recipe.steps.length });
     try {
-      const result = await execute(tool, currentFiles, tool.defaults, [], stepProgress, signal);
+      const result = await execute(
+        tool,
+        currentFiles,
+        { ...tool.defaults, ...recipe.stepOptions?.[toolId] },
+        [],
+        stepProgress,
+        signal,
+      );
       lastResult = result;
       currentFiles = outputsToPickedFiles(result.outputs);
     } catch (err) {

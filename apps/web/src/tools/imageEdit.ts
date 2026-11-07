@@ -68,3 +68,28 @@ export function renderRotatedCropped(image: DrawableImage, edit: ImageEdit): HTM
   cctx.drawImage(rotatedCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
   return cropCanvas;
 }
+
+/**
+ * Edits are keyed by a file's position in the list, so moving or removing a
+ * file has to move its edit with it or the rotation lands on the wrong image.
+ */
+export function reorderEdits(edits: ImageEdits, count: number, from: number, to: number): ImageEdits {
+  const order = Array.from({ length: count }, (_, i) => i);
+  const [moved] = order.splice(from, 1);
+  order.splice(to, 0, moved);
+  const next: ImageEdits = {};
+  order.forEach((oldIndex, newIndex) => {
+    if (edits[oldIndex]) next[newIndex] = edits[oldIndex];
+  });
+  return next;
+}
+
+export function removeEdit(edits: ImageEdits, index: number): ImageEdits {
+  const next: ImageEdits = {};
+  for (const [key, edit] of Object.entries(edits)) {
+    const i = Number(key);
+    if (i < index) next[i] = edit;
+    else if (i > index) next[i - 1] = edit;
+  }
+  return next;
+}

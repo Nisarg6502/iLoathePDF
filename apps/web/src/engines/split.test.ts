@@ -66,4 +66,24 @@ describe("splitEngine", () => {
       splitEngine({ files: [file], options: { mode: "everyN", n: 0 } }),
     ).rejects.toThrow();
   });
+
+  it("rejects an empty selection instead of copying the whole document", async () => {
+    const file = await toFile(await makeTestPdf(4));
+    for (const mode of ["ranges", "extract", "delete"]) {
+      await expect(splitEngine({ files: [file], options: { mode, ranges: "  " } })).rejects.toThrow(/Enter/);
+    }
+  });
+
+  it("ignores stray commas when splitting by ranges", async () => {
+    const file = await toFile(await makeTestPdf(4));
+    const result = await splitEngine({ files: [file], options: { mode: "ranges", ranges: "1-2,,3-4," } });
+    expect(result.files).toHaveLength(2);
+  });
+
+  it("refuses to delete every page", async () => {
+    const file = await toFile(await makeTestPdf(3));
+    await expect(
+      splitEngine({ files: [file], options: { mode: "delete", ranges: "1-3" } }),
+    ).rejects.toThrow(/every page/);
+  });
 });
