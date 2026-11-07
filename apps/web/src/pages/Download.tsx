@@ -52,7 +52,7 @@ export function Download() {
     ["Batch and folders", "Point it at 300 scans and walk away."],
     ["Output where you want it", "Per-tool destinations, remembered."],
     ["Ghostscript compression", "The full engine, not the browser preview."],
-    ["Zero network code", "Not \"we don't send\" — it cannot send."],
+    ["Offline by default", "An optional update check is off until you turn it on."],
   ];
 
   return (
@@ -65,8 +65,8 @@ export function Download() {
           </h1>
           <p className="mt-4 max-w-[48ch] text-base leading-relaxed text-muted">
             Bigger files, whole folders at once, output saved where you want
-            it. Contains no networking code at all — the build cannot phone
-            home even if you ask it to.
+            it. Your files never touch the network. The only network feature
+            is an optional update check, off until you switch it on.
           </p>
 
           <div className="mt-7 flex items-center gap-3">

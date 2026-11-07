@@ -11,6 +11,7 @@ import { TOOLS, type Tool } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 import { isTauri } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
+import { checkForUpdate, dismissUpdate, useUpdateCheck } from "@/lib/useUpdateCheck";
 
 type Theme = "light" | "dark";
 
@@ -90,6 +91,7 @@ function WindowButton({
 }
 
 function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
+  const { enabled: updateCheckOn } = useUpdateCheck();
   return (
     <div className="flex h-9 flex-none items-center gap-2.5 border-b border-border bg-surface pl-3 select-none">
       <Link
@@ -113,11 +115,25 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
       {/* The only draggable area, so no control can ever be inside it. */}
       <div data-tauri-drag-region className="h-full flex-1" />
 
-      {/* Not decoration: the whole product promise, stated in the chrome. */}
-      <div className="flex items-center gap-1.5 rounded-[7px] bg-ok-soft px-2.5 py-[3px]">
-        <span className="size-[5px] rounded-full bg-ok" />
-        <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-ok">OFFLINE</span>
-      </div>
+      {/* Not decoration: the whole product promise, stated in the chrome. When
+          the user has opted in to the update check it must say so, or the
+          badge would be a lie. */}
+      {updateCheckOn ? (
+        <div
+          className="flex items-center gap-1.5 rounded-[7px] bg-surface-2 px-2.5 py-[3px]"
+          title="The update check is on: the app asks GitHub for the latest release number and sends nothing else. Turn it off in Settings."
+        >
+          <span className="size-[5px] rounded-full bg-accent" />
+          <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-muted">
+            UPDATE CHECK ON
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 rounded-[7px] bg-ok-soft px-2.5 py-[3px]">
+          <span className="size-[5px] rounded-full bg-ok" />
+          <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-ok">OFFLINE</span>
+        </div>
+      )}
 
       <button
         type="button"
@@ -313,6 +329,7 @@ function Rail() {
 
 function StatusBar() {
   const { outputDir, label, choose } = useOutputDir();
+  const { enabled: updateCheckOn } = useUpdateCheck();
 
   return (
     <div className="flex h-[30px] flex-none items-center gap-2.5 border-t border-border bg-surface px-3.5 select-none">
@@ -322,7 +339,7 @@ function StatusBar() {
       </svg>
       <span className="text-[12.5px] text-text">Files never leave this computer.</span>
       <span className="hidden text-[12.5px] text-faint lg:inline">
-        No network code in this build
+        {updateCheckOn ? "Only the update check goes online" : "Nothing goes online"}
       </span>
 
       <div className="flex-1" />
@@ -351,14 +368,69 @@ function StatusBar() {
 }
 
 // ---------------------------------------------------------------------------
+// Update notice (only ever shown to someone who opted in to the check)
+// ---------------------------------------------------------------------------
+
+function UpdateBanner() {
+  const { status, latest, dismissed } = useUpdateCheck();
+  if (status !== "available" || !latest || dismissed === latest.version) return null;
+
+  const open = async () => {
+    try {
+      const { openUrl } = await import("@tauri-apps/plugin-opener");
+      await openUrl(latest.url);
+    } catch {
+      /* the link is also on Settings and the website; nothing else to do */
+    }
+  };
+
+  return (
+    <div
+      role="status"
+      className="flex h-9 flex-none items-center gap-3 border-b border-border bg-accent-soft px-3.5"
+    >
+      <span className="text-[13px] text-text">
+        <span className="font-semibold">iLoathePDF {latest.version} is available.</span>{" "}
+        <span className="text-muted">You have {__APP_VERSION__}.</span>
+      </span>
+      <button
+        type="button"
+        onClick={() => void open()}
+        className="rounded text-[13px] font-semibold text-accent underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        View release
+      </button>
+      <div className="flex-1" />
+      <button
+        type="button"
+        onClick={() => dismissUpdate(latest.version)}
+        aria-label="Dismiss this notice"
+        className="grid size-6 place-items-center rounded text-muted outline-none hover:text-text focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1.2">
+          <path d="M1 1l8 8M9 1L1 9" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 
 export function AppShell() {
   const { theme, toggle } = useTheme();
   const location = useLocation();
 
+  // Once per launch, and only if the user opted in (checkForUpdate does
+  // nothing otherwise).
+  useEffect(() => {
+    void checkForUpdate();
+  }, []);
+
   return (
     <div className="flex h-full flex-col overflow-hidden bg-bg text-text">
       <TitleBar theme={theme} onToggleTheme={toggle} />
+      <UpdateBanner />
       <div className="flex min-h-0 flex-1">
         <Rail />
         <main key={location.pathname} className="ihp-fade flex min-w-0 flex-1 flex-col">

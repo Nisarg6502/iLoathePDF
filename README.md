@@ -16,7 +16,7 @@ so every file you feed them gets uploaded to someone else's server. That's
 fine for a holiday photo. It's not fine for an Aadhaar card, a PAN card, a
 signed contract, or anything else you'd rather not hand to a stranger's
 backend. iLoathePDF does the same jobs with the same quality of interface,
-without the upload — as a Windows desktop app with zero networking code, and
+without the upload — as a Windows desktop app that is offline unless you opt in to an update check, and
 as a website that processes files client-side and never sends them anywhere.
 
 ## Two ways to run it
@@ -27,7 +27,7 @@ as a website that processes files client-side and never sends them anywhere.
 | **Engine** | Native Rust + Python + Ghostscript | `pdf-lib` / `pdf.js`, in your browser |
 | **File size limits** | Disk-bound | ~200 MB (browser memory) |
 | **Batch / whole folders** | Yes | No |
-| **Networking code** | None at all — cannot phone home | None — verify in DevTools → Network |
+| **Networking code** | One optional update check, off by default; never touches your files | None — verify in DevTools → Network |
 | **Compress quality** | Full (Ghostscript) | Preview (rasterizes pages, no selectable text yet) |
 | **HEIC → JPG** | Yes | Preview badge (decoder not wired up yet) |
 | **PDF to Excel** | Yes | No — no client-side library extracts tables well enough |

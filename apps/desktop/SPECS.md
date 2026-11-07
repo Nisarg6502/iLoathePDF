@@ -117,7 +117,11 @@ in a plain browser with no Tauri — which is how UI work gets done.
 These are built in, not just claimed:
 
 - CSP forbids every remote origin. No web fonts, no CDN, no analytics, no
-  auto-updater, no crash reporting.
+  crash reporting, nothing downloaded or installed automatically.
+- The one exception to "no network" is the opt-in update check
+  (`src-tauri/src/updates.rs`): off by default, one GET to GitHub's public
+  latest-release endpoint made by the Rust core (not the webview, so the CSP is
+  unchanged), no version/ID/cookies sent, and it only links to the release page.
 - The engine imports no networking library.
 - Ghostscript always runs with `-dSAFER`, list argv, never `shell=True`, and
   `CREATE_NO_WINDOW` so no console flashes.

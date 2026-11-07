@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Local file picking, and opening results in Explorer. Nothing here reaches the network.",
+  "description": "Local file picking, and opening results in Explorer. The only network access is the opt-in update check, made by the Rust core (updates.rs), not the window; the one URL the window may open is this app's GitHub releases page.",
   "windows": [
     "main"
   ],
@@ -19,6 +19,14 @@
       "allow": [
         {
           "path": "**"
+        }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/Nisarg6502/iLoathePDF/releases/**"
         }
       ]
     },

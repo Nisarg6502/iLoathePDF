@@ -23,8 +23,9 @@ without the upload"**. Every design decision should serve one of those two
 halves: as easy as iLovePDF, and visibly, believably private.
 
 Privacy is enforced in code, not just claimed: the app makes no network requests
-of any kind, has no analytics, no auto-updater, no web fonts, and strips EXIF
-from converted images by default.
+unless the user opts in to the update check (off by default; it sends nothing
+about them and downloads nothing), has no analytics, no auto-installer, no web
+fonts, and strips EXIF from converted images by default.
 
 ## Who uses it
 

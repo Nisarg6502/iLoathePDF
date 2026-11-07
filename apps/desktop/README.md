@@ -8,8 +8,10 @@ server. That is fine for a holiday photo and not fine for an Aadhaar card, a PAN
 card or a contract. iLoathePDF does the same jobs with the same quality of
 interface, entirely on your own machine.
 
-There is no network code in the build. Not "we promise not to look" — there is
-nowhere for a file to go.
+Your files have nowhere to go. The only network code in the build is an
+optional update check, **off until you turn it on** in Settings: it asks GitHub
+for the latest release number, sends nothing about you or your files, and
+downloads nothing. Leave it off and the app makes no network requests at all.
 
 ## Tools
 
