@@ -10,6 +10,9 @@ import type { LucideIcon } from "lucide-react";
 import {
   Combine,
   Crop,
+  FileArchive,
+  FileCode,
+  FileText,
   EyeOff,
   FileImage,
   FileOutput,
@@ -23,12 +26,13 @@ import {
   Scissors,
   Signature,
   Stamp,
+  Table,
 } from "lucide-react";
 import type { OpName } from "./jobs";
 
-export type ToolGroup = "pdf" | "image";
+export type ToolGroup = "pdf" | "image" | "document";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -331,16 +335,82 @@ export const TOOLS: Tool[] = [
     action: "Flatten PDF",
     defaults: {},
   },
+  {
+    id: "txt-to-pdf",
+    path: "/t/txt-to-pdf",
+    title: "TXT to PDF",
+    description: "Turn plain-text files into PDFs, one PDF per file.",
+    icon: FileText,
+    group: "document",
+    tint: "q",
+    op: "txt.to_pdf",
+    accepts: ["txt", "text", "log"],
+    acceptsLabel: "text files",
+    multiple: true,
+    ordered: false,
+    action: "Create PDFs",
+    defaults: { page_size: "a4", orientation: "portrait", margin_mm: 20, font: "sans", font_size: 11 },
+  },
+  {
+    id: "csv-to-pdf",
+    path: "/t/csv-to-pdf",
+    title: "CSV to PDF",
+    description: "Lay a CSV out as a table, with the header repeated on every page.",
+    icon: Table,
+    group: "document",
+    tint: "r",
+    op: "csv.to_pdf",
+    accepts: ["csv", "tsv"],
+    acceptsLabel: "CSV files",
+    multiple: true,
+    ordered: false,
+    action: "Create PDFs",
+    defaults: { page_size: "a4", orientation: "auto", margin_mm: 15 },
+  },
+  {
+    id: "html-to-pdf",
+    path: "/t/html-to-pdf",
+    title: "HTML to PDF",
+    description: "Convert simple HTML pages (headings, lists, tables) into PDFs.",
+    icon: FileCode,
+    group: "document",
+    tint: "s",
+    op: "html.to_pdf",
+    accepts: ["html", "htm"],
+    acceptsLabel: "HTML files",
+    multiple: true,
+    ordered: false,
+    action: "Create PDFs",
+    defaults: { page_size: "a4", orientation: "portrait", margin_mm: 20, font_size: 11 },
+  },
+  {
+    id: "zip-to-pdf",
+    path: "/t/zip-to-pdf",
+    title: "ZIP to PDF",
+    description: "Join the images, PDFs and text files inside a ZIP into one PDF.",
+    icon: FileArchive,
+    group: "document",
+    tint: "t",
+    op: "zip.to_pdf",
+    accepts: ["zip"],
+    acceptsLabel: "a ZIP file",
+    multiple: false,
+    ordered: false,
+    action: "Create PDF",
+    defaults: { page_size: "fit", orientation: "auto" },
+  },
 ];
 
 export const GROUP_LABEL: Record<ToolGroup, string> = {
   pdf: "PDF tools",
   image: "Image tools",
+  document: "Documents to PDF",
 };
 
 export const GROUP_BLURB: Record<ToolGroup, string> = {
   pdf: "Everything that reads or writes a PDF.",
   image: "Photos and scans, in and out of PDF.",
+  document: "Text, tables, web pages and archives, turned into PDFs.",
 };
 
 export function toolById(id: string | undefined): Tool | undefined {

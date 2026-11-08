@@ -14,7 +14,7 @@ export interface ToolConfig {
   slug: string;
   name: string;
   description: string;
-  category: "pdf" | "image";
+  category: "pdf" | "image" | "document";
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
   accept: string[];
   multiple: boolean;

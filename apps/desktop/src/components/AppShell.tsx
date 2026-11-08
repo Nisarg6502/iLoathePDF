@@ -255,6 +255,7 @@ function Rail() {
 
   const pdfTools = TOOLS.filter((t) => t.group === "pdf");
   const imageTools = TOOLS.filter((t) => t.group === "image");
+  const documentTools = TOOLS.filter((t) => t.group === "document");
 
   return (
     <nav
@@ -279,6 +280,13 @@ function Rail() {
 
       <RailHeading show={expanded}>IMAGES</RailHeading>
       {imageTools.map((tool) => (
+        <RailItem key={tool.id} to={tool.path} label={tool.title} showLabel={expanded}>
+          <ToolIcon tool={tool} />
+        </RailItem>
+      ))}
+
+      <RailHeading show={expanded}>TO PDF</RailHeading>
+      {documentTools.map((tool) => (
         <RailItem key={tool.id} to={tool.path} label={tool.title} showLabel={expanded}>
           <ToolIcon tool={tool} />
         </RailItem>

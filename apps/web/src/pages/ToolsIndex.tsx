@@ -7,6 +7,7 @@ import { tintColor, tintWash } from "@/tools/tint";
 export function ToolsIndex() {
   const pdfTools = TOOLS.filter((t) => t.category === "pdf");
   const imageTools = TOOLS.filter((t) => t.category === "image");
+  const documentTools = TOOLS.filter((t) => t.category === "document");
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-13">
@@ -21,6 +22,7 @@ export function ToolsIndex() {
       {[
         { label: "PDF TOOLS", tools: pdfTools },
         { label: "IMAGE TOOLS", tools: imageTools },
+        { label: "TO PDF", tools: documentTools },
       ].map((group) => (
         <div key={group.label}>
           <div className="mt-9 flex items-center gap-3">

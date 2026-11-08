@@ -11,6 +11,7 @@ const CLOSE_DELAY_MS = 140;
 const GROUPS = [
   { label: "PDF TOOLS", category: "pdf" },
   { label: "IMAGE TOOLS", category: "image" },
+  { label: "TO PDF", category: "document" },
 ] as const;
 
 function isKeyboardFocus(el: HTMLElement): boolean {
