@@ -141,3 +141,20 @@ export function CompressImagesIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function CropIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-o)" strokeWidth="1.5" {...props}>
+      <path d="M5 1.5v11.5h11.5M1.5 5H13V16.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function FlattenIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-p)" strokeWidth="1.5" {...props}>
+      <path d="M9 2.5l6.5 3.2L9 9 2.5 5.7 9 2.5z" strokeLinejoin="round" />
+      <path d="M2.5 9.2L9 12.5l6.5-3.3M2.5 12.7L9 16l6.5-3.3" strokeOpacity="0.5" strokeLinejoin="round" />
+    </svg>
+  );
+}

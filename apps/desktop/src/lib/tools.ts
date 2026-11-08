@@ -9,11 +9,13 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Combine,
+  Crop,
   EyeOff,
   FileImage,
   FileOutput,
   FileSpreadsheet,
   Images,
+  Layers,
   Lock,
   Minimize2,
   Replace,
@@ -26,7 +28,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -295,6 +297,38 @@ export const TOOLS: Tool[] = [
     multiple: false,
     ordered: false,
     action: "Save Excel",
+    defaults: {},
+  },
+  {
+    id: "crop",
+    path: "/t/crop",
+    title: "Crop PDF",
+    description: "Trim the margins off every page, or just the pages you pick.",
+    icon: Crop,
+    group: "pdf",
+    tint: "o",
+    op: "pdf.crop",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Crop PDF",
+    defaults: { top: 0, right: 0, bottom: 0, left: 0, pages: "" },
+  },
+  {
+    id: "flatten",
+    path: "/t/flatten",
+    title: "Flatten PDF",
+    description: "Bake form fields and annotations into the page so they can't be edited.",
+    icon: Layers,
+    group: "pdf",
+    tint: "p",
+    op: "pdf.flatten",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Flatten PDF",
     defaults: {},
   },
 ];

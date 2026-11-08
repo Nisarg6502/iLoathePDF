@@ -106,6 +106,8 @@
   --tint-k: oklch(0.575 0.145 10);
   --tint-l: oklch(0.575 0.145 140);
   --tint-m: oklch(0.575 0.145 190);
+  --tint-o: oklch(0.575 0.145 95);
+  --tint-p: oklch(0.575 0.145 285);
 
   /* Motion. The browser's built-in easings are too weak to read as intended. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
@@ -154,6 +156,8 @@
   --tint-k: oklch(0.8 0.125 10);
   --tint-l: oklch(0.8 0.125 140);
   --tint-m: oklch(0.8 0.125 190);
+  --tint-o: oklch(0.8 0.125 95);
+  --tint-p: oklch(0.8 0.125 285);
 }
 
 /* Expose the tokens to Tailwind, so `bg-surface` and `text-muted` work. */

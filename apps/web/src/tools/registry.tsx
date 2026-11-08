@@ -16,6 +16,8 @@ import {
   RedactIcon,
   OcrIcon,
   PdfToExcelIcon,
+  CropIcon,
+  FlattenIcon,
 } from "./icons";
 
 const MergeOptions = lazyComponent(() => import("./options/MergeOptions").then((m) => m.MergeOptions));
@@ -46,6 +48,10 @@ const redactEngine = lazyEngine(() => import("@/engines/redact").then((m) => m.r
 const RedactWorkspace = lazyComponent(() => import("./redact/RedactWorkspace").then((m) => m.RedactWorkspace));
 const OcrOptions = lazyComponent(() => import("./options/OcrOptions").then((m) => m.OcrOptions));
 const ocrEngine = lazyEngine(() => import("@/engines/ocr").then((m) => m.ocrEngine));
+const CropOptions = lazyComponent(() => import("./options/CropOptions").then((m) => m.CropOptions));
+const cropEngine = lazyEngine(() => import("@/engines/crop").then((m) => m.cropEngine));
+const FlattenOptions = lazyComponent(() => import("./options/FlattenOptions").then((m) => m.FlattenOptions));
+const flattenEngine = lazyEngine(() => import("@/engines/flatten").then((m) => m.flattenEngine));
 const PdfToExcelOptions = lazyComponent(() => import("./options/PdfToExcelOptions").then((m) => m.PdfToExcelOptions));
 
 const desktopOnlyEngine: Engine = async () => {
@@ -67,6 +73,8 @@ export const TOOLS: ToolConfig[] = [
   { slug: "redact", name: "Redact PDF", description: "Black out sensitive text, photos or signatures — visually or for good.", category: "pdf", Icon: RedactIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "visual", boxes: [] }, OptionsPanel: RedactOptions, engine: redactEngine, status: "live", tint: "k", Workspace: RedactWorkspace },
   { slug: "ocr", name: "OCR → Searchable PDF", description: "Add an invisible text layer to a scanned PDF so it's searchable and selectable.", category: "pdf", Icon: OcrIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: OcrOptions, engine: ocrEngine, status: "live", tint: "l" },
   { slug: "pdf-to-excel", name: "PDF to Excel", description: "Extract tables from a PDF into a real, editable spreadsheet.", category: "pdf", Icon: PdfToExcelIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfToExcelOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "m" },
+  { slug: "crop", name: "Crop PDF", description: "Trim the margins off every page, or just the pages you pick.", category: "pdf", Icon: CropIcon, accept: [".pdf"], multiple: false, defaultOptions: { top: 0, right: 0, bottom: 0, left: 0, pages: "" }, OptionsPanel: CropOptions, engine: cropEngine, status: "live", tint: "o" },
+  { slug: "flatten", name: "Flatten PDF", description: "Bake form fields and annotations into the page so they can't be edited.", category: "pdf", Icon: FlattenIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: FlattenOptions, engine: flattenEngine, status: "live", tint: "p" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {
