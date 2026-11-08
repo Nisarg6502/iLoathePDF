@@ -291,6 +291,21 @@ export async function execute(
       };
     }
 
+    case "scan.to_pdf": {
+      const r = await runJob(
+        "scan.to_pdf",
+        {
+          inputs: files.map((f) => f.path),
+          output: join(`${safeFileStem(v.outputName, "scan")}.pdf`),
+          mode: str("mode", "enhanced") as "color" | "enhanced" | "bw",
+          page_size: str("page_size", "a4") as "fit" | "a4" | "letter",
+          orientation: str("orientation", "auto") as "auto" | "portrait" | "landscape",
+        },
+        opts,
+      );
+      return { outputs: [{ path: r.output, bytes: r.bytes }], summary: `${r.pages} page PDF created.` };
+    }
+
     case "pdf.pdfa": {
       const r = await runJob("pdf.pdfa", { input: first.path, output: join(`${base}-pdfa.pdf`) }, opts);
       return {

@@ -20,6 +20,7 @@ import {
   FileSpreadsheet,
   Images,
   Layers,
+  ScanLine,
   Lock,
   ShieldCheck,
   Minimize2,
@@ -34,7 +35,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image" | "document";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -208,6 +209,22 @@ export const TOOLS: Tool[] = [
     ordered: true,
     action: "Create PDF",
     defaults: { outputName: "images", page_size: "fit", orientation: "auto", margin_mm: 0 },
+  },
+  {
+    id: "scan",
+    path: "/t/scan",
+    title: "PDF Scanner",
+    description: "Clean up photos of paper (shadows, dull colour) and join them into one PDF.",
+    icon: ScanLine,
+    group: "image",
+    tint: "w",
+    op: "scan.to_pdf",
+    accepts: IMAGE_EXTS,
+    acceptsLabel: "photos of pages",
+    multiple: true,
+    ordered: true,
+    action: "Create PDF",
+    defaults: { outputName: "scan", mode: "enhanced", page_size: "a4", orientation: "auto" },
   },
   {
     id: "convert-image",
