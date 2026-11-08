@@ -22,6 +22,7 @@ export type OpName =
   | "pdf.crop"
   | "pdf.flatten"
   | "pdf.pdfa"
+  | "scan.to_pdf"
   | "txt.to_pdf"
   | "csv.to_pdf"
   | "html.to_pdf"
@@ -226,6 +227,16 @@ export interface PdfFlattenResult { output: string; bytes: number; pages: number
 export interface PdfPdfaParams { input: string; output: string }
 export interface PdfPdfaResult { output: string; bytes: number; pages: number; part: number; conformance: string }
 
+export type ScanMode = "color" | "enhanced" | "bw";
+export interface ScanToPdfParams {
+  inputs: string[];
+  output: string;
+  mode: ScanMode;
+  page_size?: "fit" | "a4" | "letter";
+  orientation?: "auto" | "portrait" | "landscape";
+}
+export interface ScanToPdfResult { output: string; bytes: number; pages: number }
+
 export type PageSizeName = "a4" | "letter";
 export interface DocToPdfParams {
   inputs: string[];
@@ -267,6 +278,7 @@ export interface OpMap {
   "pdf.crop": [PdfCropParams, PdfCropResult];
   "pdf.flatten": [PdfFlattenParams, PdfFlattenResult];
   "pdf.pdfa": [PdfPdfaParams, PdfPdfaResult];
+  "scan.to_pdf": [ScanToPdfParams, ScanToPdfResult];
   "txt.to_pdf": [DocToPdfParams, DocToPdfResult];
   "csv.to_pdf": [DocToPdfParams, DocToPdfResult];
   "html.to_pdf": [DocToPdfParams, DocToPdfResult];

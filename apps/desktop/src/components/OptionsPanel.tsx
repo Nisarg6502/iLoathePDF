@@ -969,6 +969,47 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "scan":
+      return (
+        <OptionsPanel
+          className={className}
+          description="Photos are straightened, cleaned up and joined in the order shown. To scan with a camera, use the web app."
+        >
+          <Field label="Cleanup">
+            {() => (
+              <RadioGroup
+                value={str("mode")}
+                onValueChange={(v) => set({ mode: v })}
+                aria-label="Cleanup"
+              >
+                <RadioGroupItem value="enhanced" label="Enhanced" hint="Stronger contrast: paper reads white, ink reads dark." />
+                <RadioGroupItem value="bw" label="Black & white" hint="Crisp ink on white. Ignores shadows and uneven light." />
+                <RadioGroupItem value="color" label="Original colour" hint="The photo as it is." />
+              </RadioGroup>
+            )}
+          </Field>
+          <Field label="Page size">
+            {(id) => (
+              <Select
+                id={id}
+                value={str("page_size")}
+                onChange={(e) => set({ page_size: e.currentTarget.value })}
+                options={[
+                  { value: "a4", label: "A4" },
+                  { value: "letter", label: "US Letter" },
+                  { value: "fit", label: "Fit each photo" },
+                ]}
+              />
+            )}
+          </Field>
+          <Field label="Output name">
+            {(id) => (
+              <Input id={id} value={str("outputName")} onChange={(e) => set({ outputName: e.currentTarget.value })} placeholder="scan" />
+            )}
+          </Field>
+        </OptionsPanel>
+      );
+
     case "pdfa":
       return (
         <OptionsPanel

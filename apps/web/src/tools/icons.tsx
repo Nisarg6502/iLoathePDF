@@ -213,3 +213,12 @@ export function ReaderIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ScanIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-w)" strokeWidth="1.5" {...props}>
+      <path d="M2.5 6V3.5a1 1 0 011-1H6M12 2.5h2.5a1 1 0 011 1V6M15.5 12v2.5a1 1 0 01-1 1H12M6 15.5H3.5a1 1 0 01-1-1V12" strokeLinecap="round" />
+      <path d="M5 9h8" strokeLinecap="round" />
+    </svg>
+  );
+}
