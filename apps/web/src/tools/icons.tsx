@@ -204,3 +204,12 @@ export function PdfaIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ReaderIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-v)" strokeWidth="1.5" {...props}>
+      <path d="M2.5 4.5C4.5 3.3 7 3.3 9 4.8c2-1.5 4.5-1.5 6.5-.3v9.2c-2-1.2-4.5-1.2-6.5.3-2-1.5-4.5-1.5-6.5-.3z" strokeLinejoin="round" />
+      <path d="M9 4.8v9.2" strokeOpacity="0.5" />
+    </svg>
+  );
+}

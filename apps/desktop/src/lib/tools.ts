@@ -9,6 +9,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Combine,
+  BookOpen,
   Crop,
   FileArchive,
   FileCode,
@@ -33,7 +34,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image" | "document";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t" | "u";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -350,6 +351,23 @@ export const TOOLS: Tool[] = [
     multiple: false,
     ordered: false,
     action: "Convert to PDF/A",
+    defaults: {},
+  },
+  {
+    id: "reader",
+    path: "/t/reader",
+    title: "PDF Reader",
+    description: "Read a PDF here: scroll, zoom and search. Nothing leaves your machine.",
+    icon: BookOpen,
+    group: "pdf",
+    tint: "v",
+    // A viewer has nothing to run; the workspace never calls this.
+    op: "pdf.info",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Open",
     defaults: {},
   },
   {

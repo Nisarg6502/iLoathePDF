@@ -23,6 +23,7 @@ import {
   HtmlToPdfIcon,
   ZipToPdfIcon,
   PdfaIcon,
+  ReaderIcon,
 } from "./icons";
 
 const MergeOptions = lazyComponent(() => import("./options/MergeOptions").then((m) => m.MergeOptions));
@@ -66,6 +67,11 @@ const csvToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) =>
 const htmlToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) => m.htmlToPdfEngine));
 const zipToPdfEngine = lazyEngine(() => import("@/engines/zipToPdf").then((m) => m.zipToPdfEngine));
 const PdfaOptions = lazyComponent(() => import("./options/PdfaOptions").then((m) => m.PdfaOptions));
+const ReaderOptions = lazyComponent(() => import("./options/ReaderOptions").then((m) => m.ReaderOptions));
+const ReaderWorkspace = lazyComponent(() => import("./reader/ReaderWorkspace").then((m) => m.ReaderWorkspace));
+const readerEngine: Engine = async () => {
+  throw new Error("The reader only displays a PDF; it has nothing to save.");
+};
 const PdfToExcelOptions = lazyComponent(() => import("./options/PdfToExcelOptions").then((m) => m.PdfToExcelOptions));
 
 const desktopOnlyEngine: Engine = async () => {
@@ -86,14 +92,15 @@ export const TOOLS: ToolConfig[] = [
   { slug: "watermark", name: "Watermark, Page Numbers & Stamp", description: "Add a repeating watermark, sequential page numbers, or a fixed stamp to every page.", category: "pdf", Icon: WatermarkIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "watermark", pages: "all", watermark: { content: "text", text: "", opacity: 0.35, rotation: 45, placement: "single" }, page_numbers: { position: "bottom-center", format: "n", start: 1 }, stamp: { content: "text", text: "", position: "bottom-right", maxWidthPct: 0.2 } }, OptionsPanel: WatermarkOptions, engine: watermarkEngine, status: "live", tint: "j" },
   { slug: "redact", name: "Redact PDF", description: "Black out sensitive text, photos or signatures — visually or for good.", category: "pdf", Icon: RedactIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "visual", boxes: [] }, OptionsPanel: RedactOptions, engine: redactEngine, status: "live", tint: "k", Workspace: RedactWorkspace },
   { slug: "ocr", name: "OCR → Searchable PDF", description: "Add an invisible text layer to a scanned PDF so it's searchable and selectable.", category: "pdf", Icon: OcrIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: OcrOptions, engine: ocrEngine, status: "live", tint: "l" },
-  { slug: "pdf-to-excel", name: "PDF to Excel", description: "Extract tables from a PDF into a real, editable spreadsheet.", category: "pdf", Icon: PdfToExcelIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfToExcelOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "m" },
+  { slug: "pdf-to-excel", name: "PDF to Excel", description: "Extract tables from a PDF into a real, editable spreadsheet.", category: "pdf", Icon: PdfToExcelIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfToExcelOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "m", desktopOnlyNote: "This tool needs a local table-extraction engine that isn't available in a browser yet — it's desktop-only for now." },
   { slug: "crop", name: "Crop PDF", description: "Trim the margins off every page, or just the pages you pick.", category: "pdf", Icon: CropIcon, accept: [".pdf"], multiple: false, defaultOptions: { top: 0, right: 0, bottom: 0, left: 0, pages: "" }, OptionsPanel: CropOptions, engine: cropEngine, status: "live", tint: "o" },
   { slug: "flatten", name: "Flatten PDF", description: "Bake form fields and annotations into the page so they can't be edited.", category: "pdf", Icon: FlattenIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: FlattenOptions, engine: flattenEngine, status: "live", tint: "p" },
   { slug: "txt-to-pdf", name: "TXT to PDF", description: "Turn plain-text files into PDFs, one PDF per file.", category: "document", Icon: TxtToPdfIcon, accept: [".txt", ".text", ".log"], multiple: true, defaultOptions: { page_size: "a4", orientation: "portrait", margin_mm: 20, font: "sans", font_size: 11 }, OptionsPanel: TxtToPdfOptions, engine: txtToPdfEngine, status: "live", tint: "q" },
   { slug: "csv-to-pdf", name: "CSV to PDF", description: "Lay a CSV out as a table, with the header repeated on every page.", category: "document", Icon: CsvToPdfIcon, accept: [".csv", ".tsv"], multiple: true, defaultOptions: { page_size: "a4", orientation: "auto", margin_mm: 15 }, OptionsPanel: CsvToPdfOptions, engine: csvToPdfEngine, status: "live", tint: "r" },
   { slug: "html-to-pdf", name: "HTML to PDF", description: "Convert simple HTML pages (headings, lists, tables) into PDFs.", category: "document", Icon: HtmlToPdfIcon, accept: [".html", ".htm"], multiple: true, defaultOptions: { page_size: "a4", orientation: "portrait", margin_mm: 20, font_size: 11 }, OptionsPanel: HtmlToPdfOptions, engine: htmlToPdfEngine, status: "live", tint: "s" },
   { slug: "zip-to-pdf", name: "ZIP to PDF", description: "Join the images, PDFs and text files inside a ZIP into one PDF.", category: "document", Icon: ZipToPdfIcon, accept: [".zip"], multiple: false, defaultOptions: { page_size: "fit", orientation: "auto" }, OptionsPanel: ZipToPdfOptions, engine: zipToPdfEngine, status: "live", tint: "t" },
-  { slug: "pdfa", name: "PDF to PDF/A", description: "Convert a PDF to PDF/A-2b for long-term archiving.", category: "pdf", Icon: PdfaIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfaOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "u" },
+  { slug: "pdfa", name: "PDF to PDF/A", description: "Convert a PDF to PDF/A-2b for long-term archiving.", category: "pdf", Icon: PdfaIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfaOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "u", desktopOnlyNote: "PDF/A conversion runs on Ghostscript, which isn't available in a browser — it's desktop-only." },
+  { slug: "reader", name: "PDF Reader", description: "Read a PDF right here: scroll, zoom, select text and search. Nothing is uploaded.", category: "pdf", Icon: ReaderIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: ReaderOptions, engine: readerEngine, status: "live", tint: "v", Workspace: ReaderWorkspace },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {

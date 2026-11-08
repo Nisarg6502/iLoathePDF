@@ -22,6 +22,8 @@ export interface ToolConfig {
   OptionsPanel: ComponentType<OptionsPanelProps>;
   engine: Engine;
   status: "live" | "preview" | "desktop-only";
+  /** For desktop-only tools: why the browser can't do it. Shown on the tool's page. */
+  desktopOnlyNote?: string;
   tint: TintKey;
   /**
    * When set, ToolDetail renders this instead of the generic ToolPage

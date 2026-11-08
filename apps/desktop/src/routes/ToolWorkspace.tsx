@@ -41,6 +41,9 @@ const OrganizeCanvas = lazy(() =>
 const SignCanvas = lazy(() =>
   import("@/components/SignCanvas").then((m) => ({ default: m.SignCanvas })),
 );
+const PdfReader = lazy(() =>
+  import("@/components/PdfReader").then((m) => ({ default: m.PdfReader })),
+);
 const RedactCanvas = lazy(() =>
   import("@/components/RedactCanvas").then((m) => ({ default: m.RedactCanvas })),
 );
@@ -386,6 +389,21 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                   </span>
                 ) : null}
               </motion.button>
+            ) : tool.id === "reader" ? (
+              <motion.div
+                key="reader"
+                variants={panelVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="flex min-h-0 flex-1 flex-col"
+              >
+                <Suspense
+                  fallback={<div className="grid h-full place-items-center text-[14px] text-muted">Loading the reader…</div>}
+                >
+                  <PdfReader file={files[0]} onClose={() => setFiles([])} />
+                </Suspense>
+              </motion.div>
             ) : tool.id === "organize" ? (
               <motion.div
                 key="canvas"
@@ -477,7 +495,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
         </div>
 
         {/* ── options ──────────────────────────────────────────────────── */}
-        <aside className="flex w-[344px] flex-none flex-col border-l border-border bg-surface">
+        <aside className={cn("flex w-[344px] flex-none flex-col border-l border-border bg-surface", tool.id === "reader" && "hidden")}>
           <div className="min-h-0 flex-1 overflow-auto p-4">
             <div className="mb-2.5 font-mono text-[12px] font-bold tracking-[0.13em] text-faint">
               OPTIONS

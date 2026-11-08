@@ -37,7 +37,7 @@ export function ToolDetail() {
         </div>
         <div className="mx-auto max-w-6xl px-8 py-10">
           <p className="max-w-[58ch] text-[14px] leading-relaxed text-muted">
-            This tool needs a local table-extraction engine that isn't available in a browser yet — it's desktop-only for now.
+            {tool.desktopOnlyNote ?? "This tool needs an engine that isn't available in a browser — it's desktop-only for now."}
           </p>
           <Link to="/download" className="mt-4 inline-block font-mono text-[12px]" style={{ color: tintColor(tool.tint) }}>
             Get the desktop app →
