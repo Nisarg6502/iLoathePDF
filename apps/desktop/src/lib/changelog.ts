@@ -19,6 +19,16 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.4.0",
+    date: "2026-11-09",
+    highlights: [
+      "Nine new tools: Crop PDF, Flatten PDF, PDF to PDF/A, PDF Reader, PDF Scanner, and TXT, CSV, HTML and ZIP to PDF (under a new “To PDF” group).",
+      "Sign & Fill can now highlight and draw boxes on the page, as well as sign and add text.",
+      "PDF to PDF/A is best-effort: it produces PDF/A-2b with Ghostscript but the result has not been checked with a validator.",
+      "The desktop reader can search and zoom but not select text yet; TXT to PDF and its siblings use a system font, so scripts that need shaping (Devanagari, Arabic) are not supported.",
+    ],
+  },
+  {
     version: "0.3.0",
     date: "2026-11-08",
     highlights: [
