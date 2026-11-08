@@ -836,6 +836,103 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "txt-to-pdf":
+    case "csv-to-pdf":
+    case "html-to-pdf":
+    case "zip-to-pdf": {
+      const isZip = tool.id === "zip-to-pdf";
+      const isCsv = tool.id === "csv-to-pdf";
+      const isTxt = tool.id === "txt-to-pdf";
+      const description = isZip
+        ? "Entries are joined in filename order. Images, PDFs and .txt files are used; anything else is skipped."
+        : isCsv
+          ? "The delimiter is detected for you. Wide tables switch to landscape on Auto."
+          : isTxt
+            ? "Each file becomes its own PDF, saved next to the original."
+            : "Headings, paragraphs, lists, tables and preformatted text are kept. Scripts, styles and images are ignored.";
+      return (
+        <OptionsPanel className={className} description={description}>
+          <Field label="Page size">
+            {(id) => (
+              <Select
+                id={id}
+                value={str("page_size")}
+                onChange={(e) => set({ page_size: e.currentTarget.value })}
+                options={[
+                  ...(isZip ? [{ value: "fit", label: "Fit each image" }] : []),
+                  { value: "a4", label: "A4" },
+                  { value: "letter", label: "US Letter" },
+                ]}
+              />
+            )}
+          </Field>
+          <Field label="Orientation">
+            {() => (
+              <RadioGroup
+                value={str("orientation")}
+                onValueChange={(v) => set({ orientation: v })}
+                className="grid-cols-3"
+                aria-label="Orientation"
+              >
+                {isCsv || isZip ? <RadioGroupItem value="auto" label="Auto" /> : null}
+                <RadioGroupItem value="portrait" label="Portrait" />
+                <RadioGroupItem value="landscape" label="Landscape" />
+              </RadioGroup>
+            )}
+          </Field>
+          {isZip ? null : (
+            <Field label="Margins">
+              {(id) => (
+                <Select
+                  id={id}
+                  value={str("margin_mm")}
+                  onChange={(e) => set({ margin_mm: Number(e.currentTarget.value) })}
+                  options={[
+                    { value: "10", label: "Narrow" },
+                    { value: "15", label: "Medium" },
+                    { value: "20", label: "Normal" },
+                    { value: "30", label: "Wide" },
+                  ]}
+                />
+              )}
+            </Field>
+          )}
+          {isTxt ? (
+            <Field label="Font">
+              {() => (
+                <RadioGroup
+                  value={str("font")}
+                  onValueChange={(v) => set({ font: v })}
+                  className="grid-cols-2"
+                  aria-label="Font"
+                >
+                  <RadioGroupItem value="sans" label="Proportional" />
+                  <RadioGroupItem value="mono" label="Monospaced" />
+                </RadioGroup>
+              )}
+            </Field>
+          ) : null}
+          {isTxt || tool.id === "html-to-pdf" ? (
+            <Field label="Text size">
+              {(id) => (
+                <Select
+                  id={id}
+                  value={str("font_size")}
+                  onChange={(e) => set({ font_size: Number(e.currentTarget.value) })}
+                  options={[
+                    { value: "9", label: "Small (9 pt)" },
+                    { value: "11", label: "Normal (11 pt)" },
+                    { value: "13", label: "Large (13 pt)" },
+                    { value: "16", label: "Extra large (16 pt)" },
+                  ]}
+                />
+              )}
+            </Field>
+          ) : null}
+        </OptionsPanel>
+      );
+    }
+
     case "crop":
       return (
         <OptionsPanel

@@ -35,7 +35,7 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKey);
   }, [dropped]);
 
-  const groups: ToolGroup[] = ["pdf", "image"];
+  const groups: ToolGroup[] = ["pdf", "image", "document"];
   let cardIndex = 0;
 
   return (

@@ -21,6 +21,10 @@ export type OpName =
   | "pdf.to_excel"
   | "pdf.crop"
   | "pdf.flatten"
+  | "txt.to_pdf"
+  | "csv.to_pdf"
+  | "html.to_pdf"
+  | "zip.to_pdf"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -218,6 +222,28 @@ export interface PdfCropResult { output: string; bytes: number; pages: number; p
 export interface PdfFlattenParams { input: string; output: string }
 export interface PdfFlattenResult { output: string; bytes: number; pages: number; flattened: number; had_form: boolean }
 
+export type PageSizeName = "a4" | "letter";
+export interface DocToPdfParams {
+  inputs: string[];
+  output_dir: string;
+  page_size?: PageSizeName;
+  orientation?: "portrait" | "landscape" | "auto";
+  margin_mm?: number;
+  /** txt only */
+  font?: "sans" | "mono";
+  /** txt and html */
+  font_size?: number;
+}
+export interface DocToPdfResult { outputs: OutputFile[]; count: number }
+
+export interface ZipToPdfParams {
+  input: string;
+  output: string;
+  page_size?: "fit" | PageSizeName;
+  orientation?: "auto" | "portrait" | "landscape";
+}
+export interface ZipToPdfResult { output: string; bytes: number; pages: number; files: number; skipped: number }
+
 export interface PingResult { pong: boolean; version: string; python: string }
 
 /** Maps each op to its params and result types, so runJob() is fully typed. */
@@ -236,6 +262,10 @@ export interface OpMap {
   "pdf.to_excel": [PdfToExcelParams, PdfToExcelResult];
   "pdf.crop": [PdfCropParams, PdfCropResult];
   "pdf.flatten": [PdfFlattenParams, PdfFlattenResult];
+  "txt.to_pdf": [DocToPdfParams, DocToPdfResult];
+  "csv.to_pdf": [DocToPdfParams, DocToPdfResult];
+  "html.to_pdf": [DocToPdfParams, DocToPdfResult];
+  "zip.to_pdf": [ZipToPdfParams, ZipToPdfResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];
@@ -351,6 +381,9 @@ async function mockJob(
       return { output: out, bytes: 128432, pages: 6, elements };
     }
     case "pdf.split":
+    case "txt.to_pdf":
+    case "csv.to_pdf":
+    case "html.to_pdf":
     case "img.convert":
     case "pdf.to_img": {
       const outputs = [1, 2, 3].map((n) => ({ path: `${out} ${n}`, bytes: 40000 + n * 900 }));

@@ -291,6 +291,41 @@ export async function execute(
       };
     }
 
+    case "txt.to_pdf":
+    case "csv.to_pdf":
+    case "html.to_pdf": {
+      const params: import("./jobs").DocToPdfParams = {
+        inputs: files.map((f) => f.path),
+        output_dir: dir,
+        page_size: str("page_size", "a4") as "a4" | "letter",
+        orientation: str("orientation", op === "csv.to_pdf" ? "auto" : "portrait") as "portrait" | "landscape" | "auto",
+        margin_mm: num("margin_mm", 20),
+      };
+      if (op !== "csv.to_pdf") params.font_size = num("font_size", 11);
+      if (op === "txt.to_pdf") params.font = str("font", "sans") as "sans" | "mono";
+      const r = await runJob(op, params, opts);
+      return { outputs: r.outputs, summary: `${r.count} PDF${r.count === 1 ? "" : "s"} created.` };
+    }
+
+    case "zip.to_pdf": {
+      const r = await runJob(
+        "zip.to_pdf",
+        {
+          input: first.path,
+          output: join(`${base}.pdf`),
+          page_size: str("page_size", "fit") as "fit" | "a4" | "letter",
+          orientation: str("orientation", "auto") as "auto" | "portrait" | "landscape",
+        },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.files} file${r.files === 1 ? "" : "s"} joined into ${r.pages} page${r.pages === 1 ? "" : "s"}${
+          r.skipped ? ` (${r.skipped} unsupported skipped)` : ""
+        }.`,
+      };
+    }
+
     case "pdf.to_img": {
       const pages = str("pages").trim();
       const r = await runJob(

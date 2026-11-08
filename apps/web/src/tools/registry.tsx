@@ -18,6 +18,10 @@ import {
   PdfToExcelIcon,
   CropIcon,
   FlattenIcon,
+  TxtToPdfIcon,
+  CsvToPdfIcon,
+  HtmlToPdfIcon,
+  ZipToPdfIcon,
 } from "./icons";
 
 const MergeOptions = lazyComponent(() => import("./options/MergeOptions").then((m) => m.MergeOptions));
@@ -52,6 +56,14 @@ const CropOptions = lazyComponent(() => import("./options/CropOptions").then((m)
 const cropEngine = lazyEngine(() => import("@/engines/crop").then((m) => m.cropEngine));
 const FlattenOptions = lazyComponent(() => import("./options/FlattenOptions").then((m) => m.FlattenOptions));
 const flattenEngine = lazyEngine(() => import("@/engines/flatten").then((m) => m.flattenEngine));
+const TxtToPdfOptions = lazyComponent(() => import("./options/DocToPdfOptions").then((m) => m.TxtToPdfOptions));
+const CsvToPdfOptions = lazyComponent(() => import("./options/DocToPdfOptions").then((m) => m.CsvToPdfOptions));
+const HtmlToPdfOptions = lazyComponent(() => import("./options/DocToPdfOptions").then((m) => m.HtmlToPdfOptions));
+const ZipToPdfOptions = lazyComponent(() => import("./options/DocToPdfOptions").then((m) => m.ZipToPdfOptions));
+const txtToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) => m.txtToPdfEngine));
+const csvToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) => m.csvToPdfEngine));
+const htmlToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) => m.htmlToPdfEngine));
+const zipToPdfEngine = lazyEngine(() => import("@/engines/zipToPdf").then((m) => m.zipToPdfEngine));
 const PdfToExcelOptions = lazyComponent(() => import("./options/PdfToExcelOptions").then((m) => m.PdfToExcelOptions));
 
 const desktopOnlyEngine: Engine = async () => {
@@ -75,6 +87,10 @@ export const TOOLS: ToolConfig[] = [
   { slug: "pdf-to-excel", name: "PDF to Excel", description: "Extract tables from a PDF into a real, editable spreadsheet.", category: "pdf", Icon: PdfToExcelIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfToExcelOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "m" },
   { slug: "crop", name: "Crop PDF", description: "Trim the margins off every page, or just the pages you pick.", category: "pdf", Icon: CropIcon, accept: [".pdf"], multiple: false, defaultOptions: { top: 0, right: 0, bottom: 0, left: 0, pages: "" }, OptionsPanel: CropOptions, engine: cropEngine, status: "live", tint: "o" },
   { slug: "flatten", name: "Flatten PDF", description: "Bake form fields and annotations into the page so they can't be edited.", category: "pdf", Icon: FlattenIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: FlattenOptions, engine: flattenEngine, status: "live", tint: "p" },
+  { slug: "txt-to-pdf", name: "TXT to PDF", description: "Turn plain-text files into PDFs, one PDF per file.", category: "document", Icon: TxtToPdfIcon, accept: [".txt", ".text", ".log"], multiple: true, defaultOptions: { page_size: "a4", orientation: "portrait", margin_mm: 20, font: "sans", font_size: 11 }, OptionsPanel: TxtToPdfOptions, engine: txtToPdfEngine, status: "live", tint: "q" },
+  { slug: "csv-to-pdf", name: "CSV to PDF", description: "Lay a CSV out as a table, with the header repeated on every page.", category: "document", Icon: CsvToPdfIcon, accept: [".csv", ".tsv"], multiple: true, defaultOptions: { page_size: "a4", orientation: "auto", margin_mm: 15 }, OptionsPanel: CsvToPdfOptions, engine: csvToPdfEngine, status: "live", tint: "r" },
+  { slug: "html-to-pdf", name: "HTML to PDF", description: "Convert simple HTML pages (headings, lists, tables) into PDFs.", category: "document", Icon: HtmlToPdfIcon, accept: [".html", ".htm"], multiple: true, defaultOptions: { page_size: "a4", orientation: "portrait", margin_mm: 20, font_size: 11 }, OptionsPanel: HtmlToPdfOptions, engine: htmlToPdfEngine, status: "live", tint: "s" },
+  { slug: "zip-to-pdf", name: "ZIP to PDF", description: "Join the images, PDFs and text files inside a ZIP into one PDF.", category: "document", Icon: ZipToPdfIcon, accept: [".zip"], multiple: false, defaultOptions: { page_size: "fit", orientation: "auto" }, OptionsPanel: ZipToPdfOptions, engine: zipToPdfEngine, status: "live", tint: "t" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {

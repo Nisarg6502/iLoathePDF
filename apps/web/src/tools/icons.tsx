@@ -158,3 +158,40 @@ export function FlattenIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function TxtToPdfIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-q)" strokeWidth="1.5" {...props}>
+      <path d="M4 2.5h6.5L14 6v9.5H4z" strokeLinejoin="round" />
+      <path d="M6.5 9h5M6.5 11.5h5M6.5 14h3" strokeOpacity="0.5" />
+    </svg>
+  );
+}
+
+export function CsvToPdfIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-r)" strokeWidth="1.5" {...props}>
+      <rect x="2.5" y="3" width="13" height="12" rx="1.2" />
+      <path d="M2.5 7h13M2.5 11h13M8 3v12" strokeOpacity="0.5" />
+    </svg>
+  );
+}
+
+export function HtmlToPdfIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-s)" strokeWidth="1.5" {...props}>
+      <path d="M6.5 5L2.5 9l4 4M11.5 5l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10.2 3.5L7.8 14.5" strokeOpacity="0.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function ZipToPdfIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-t)" strokeWidth="1.5" {...props}>
+      <rect x="3" y="2.5" width="12" height="13" rx="1.2" />
+      <path d="M9 2.5v2.2M9 6.2v2M9 9.7v2" strokeLinecap="round" />
+      <rect x="7.5" y="12" width="3" height="2.5" rx="0.6" strokeOpacity="0.5" />
+    </svg>
+  );
+}

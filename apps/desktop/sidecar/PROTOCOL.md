@@ -228,6 +228,41 @@ present, else MediaBox) and written to both `/MediaBox` and `/CropBox`.
 Cropping hides content, it does not remove it -- use `pdf.redact` for that.
 result: `{"output": "...", "bytes": 4096, "pages": 12, "pages_cropped": 4}`
 
+### `txt.to_pdf`, `csv.to_pdf`, `html.to_pdf`
+params:
+```json
+{"inputs": ["a.txt", "b.txt"], "output_dir": "C:\\out",
+ "page_size": "a4|letter", "orientation": "portrait|landscape|auto",
+ "margin_mm": 20, "font": "sans|mono", "font_size": 11}
+```
+One PDF per input, named `<input stem>.pdf` in `output_dir` (an existing file
+is never overwritten: `a (2).pdf`). `font` applies to `txt` only; `font_size`
+(6..36) to `txt` and `html`; `orientation: "auto"` only differs from
+`portrait` for `csv`, where it picks landscape above six columns. Text files
+are decoded as UTF-8 (with or without BOM), falling back to Windows-1252. CSV
+delimiters (`, ; tab |`) are sniffed; the first row is the header and repeats
+on every page. HTML support is deliberately modest -- headings, paragraphs,
+bullet and numbered lists, tables, `pre`, quotes, rules, bold and italic;
+scripts, styles and images are ignored. Text is set in the first complete
+TrueType family found among the system fonts (Segoe UI, Arial, DejaVu), else
+the Bitstream Vera family bundled with reportlab; scripts needing shaping
+(Devanagari, Arabic) are not supported. An empty CSV is `UNSUPPORTED_FORMAT`.
+result: `{"outputs": [{"path": "...", "bytes": 4096, "pages": 2}], "count": 1}`
+
+### `zip.to_pdf`
+params:
+```json
+{"input": "a.zip", "output": "out.pdf",
+ "page_size": "fit|a4|letter", "orientation": "auto|portrait|landscape"}
+```
+Joins the images, PDFs and `.txt` files inside the archive into one PDF, in
+natural filename order across the whole archive. Everything else is skipped
+and counted. Entries are never extracted by their archive path (zip slip is
+harmless), at most 1000 entries and 500 MB are read, and a password-protected
+archive is `ENCRYPTED_PDF`. An archive with nothing usable, or one that is not
+a ZIP, is `UNSUPPORTED_FORMAT`.
+result: `{"output": "...", "bytes": 4096, "pages": 7, "files": 5, "skipped": 2}`
+
 ### `pdf.flatten`
 params: `{"input": "a.pdf", "output": "out.pdf"}`
 Gives every form field a fresh appearance stream, merges every visible
