@@ -22,6 +22,7 @@ import {
   CsvToPdfIcon,
   HtmlToPdfIcon,
   ZipToPdfIcon,
+  PdfaIcon,
 } from "./icons";
 
 const MergeOptions = lazyComponent(() => import("./options/MergeOptions").then((m) => m.MergeOptions));
@@ -64,6 +65,7 @@ const txtToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) =>
 const csvToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) => m.csvToPdfEngine));
 const htmlToPdfEngine = lazyEngine(() => import("@/engines/docToPdf").then((m) => m.htmlToPdfEngine));
 const zipToPdfEngine = lazyEngine(() => import("@/engines/zipToPdf").then((m) => m.zipToPdfEngine));
+const PdfaOptions = lazyComponent(() => import("./options/PdfaOptions").then((m) => m.PdfaOptions));
 const PdfToExcelOptions = lazyComponent(() => import("./options/PdfToExcelOptions").then((m) => m.PdfToExcelOptions));
 
 const desktopOnlyEngine: Engine = async () => {
@@ -91,6 +93,7 @@ export const TOOLS: ToolConfig[] = [
   { slug: "csv-to-pdf", name: "CSV to PDF", description: "Lay a CSV out as a table, with the header repeated on every page.", category: "document", Icon: CsvToPdfIcon, accept: [".csv", ".tsv"], multiple: true, defaultOptions: { page_size: "a4", orientation: "auto", margin_mm: 15 }, OptionsPanel: CsvToPdfOptions, engine: csvToPdfEngine, status: "live", tint: "r" },
   { slug: "html-to-pdf", name: "HTML to PDF", description: "Convert simple HTML pages (headings, lists, tables) into PDFs.", category: "document", Icon: HtmlToPdfIcon, accept: [".html", ".htm"], multiple: true, defaultOptions: { page_size: "a4", orientation: "portrait", margin_mm: 20, font_size: 11 }, OptionsPanel: HtmlToPdfOptions, engine: htmlToPdfEngine, status: "live", tint: "s" },
   { slug: "zip-to-pdf", name: "ZIP to PDF", description: "Join the images, PDFs and text files inside a ZIP into one PDF.", category: "document", Icon: ZipToPdfIcon, accept: [".zip"], multiple: false, defaultOptions: { page_size: "fit", orientation: "auto" }, OptionsPanel: ZipToPdfOptions, engine: zipToPdfEngine, status: "live", tint: "t" },
+  { slug: "pdfa", name: "PDF to PDF/A", description: "Convert a PDF to PDF/A-2b for long-term archiving.", category: "pdf", Icon: PdfaIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfaOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "u" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {

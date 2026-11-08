@@ -263,6 +263,16 @@ archive is `ENCRYPTED_PDF`. An archive with nothing usable, or one that is not
 a ZIP, is `UNSUPPORTED_FORMAT`.
 result: `{"output": "...", "bytes": 4096, "pages": 7, "files": 5, "skipped": 2}`
 
+### `pdf.pdfa`
+params: `{"input": "a.pdf", "output": "out.pdf"}`
+Converts to PDF/A-2b with Ghostscript (`-dPDFA=2`, sRGB output intent, fonts
+embedded, PDF/A XMP written). Best-effort: the result has not been run through
+a validator such as veraPDF, and features PDF/A forbids are dropped rather than
+rejected (`-dPDFACompatibilityPolicy=1`). Needs Ghostscript's `PDFA_def.ps` and
+sRGB profile; without them the op fails with `GHOSTSCRIPT_MISSING`. An
+encrypted input is `ENCRYPTED_PDF`.
+result: `{"output": "...", "bytes": 4096, "pages": 12, "part": 2, "conformance": "B"}`
+
 ### `pdf.flatten`
 params: `{"input": "a.pdf", "output": "out.pdf"}`
 Gives every form field a fresh appearance stream, merges every visible

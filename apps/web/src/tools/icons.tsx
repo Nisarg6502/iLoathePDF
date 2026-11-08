@@ -195,3 +195,12 @@ export function ZipToPdfIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function PdfaIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" stroke="var(--tint-u)" strokeWidth="1.5" {...props}>
+      <path d="M9 2l6 2.2v4.6c0 3.4-2.4 5.8-6 7.2-3.6-1.4-6-3.8-6-7.2V4.2z" strokeLinejoin="round" />
+      <path d="M6.4 9l1.9 1.9 3.4-3.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

@@ -969,6 +969,16 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "pdfa":
+      return (
+        <OptionsPanel
+          className={className}
+          description="Embeds fonts, converts colours to sRGB and marks the file as PDF/A-2b for archiving. Best-effort: it has not been run through a validator such as veraPDF, and features PDF/A forbids are dropped. No options to configure."
+        >
+          {null}
+        </OptionsPanel>
+      );
+
     case "flatten":
       return (
         <OptionsPanel

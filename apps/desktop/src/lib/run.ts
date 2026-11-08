@@ -291,6 +291,14 @@ export async function execute(
       };
     }
 
+    case "pdf.pdfa": {
+      const r = await runJob("pdf.pdfa", { input: first.path, output: join(`${base}-pdfa.pdf`) }, opts);
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.pages} page${r.pages === 1 ? "" : "s"} converted to PDF/A-${r.part}${r.conformance.toLowerCase()}.`,
+      };
+    }
+
     case "txt.to_pdf":
     case "csv.to_pdf":
     case "html.to_pdf": {
