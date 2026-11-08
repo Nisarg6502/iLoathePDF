@@ -1,5 +1,12 @@
 import { Button } from "./ui/button";
-import { SIGN_TEXT_COLORS, isImageSignElement, type SignElement } from "@/lib/signTypes";
+import {
+  SIGN_BOX_COLORS,
+  SIGN_HIGHLIGHT_COLORS,
+  SIGN_TEXT_COLORS,
+  isImageSignElement,
+  isShapeSignElement,
+  type SignElement,
+} from "@/lib/signTypes";
 
 export function SignOptionsPanel({
   elements,
@@ -7,6 +14,7 @@ export function SignOptionsPanel({
   activePageIndex,
   onAddCapture,
   onAddText,
+  onAddShape,
   onSelect,
   onUpdate,
   onDelete,
@@ -16,6 +24,7 @@ export function SignOptionsPanel({
   activePageIndex: number;
   onAddCapture: (kind: "signature" | "initials") => void;
   onAddText: (kind: "text" | "date") => void;
+  onAddShape: (kind: "highlight" | "box") => void;
   onSelect: (id: string) => void;
   onUpdate: (id: string, patch: Partial<SignElement>) => void;
   onDelete: (id: string) => void;
@@ -41,10 +50,34 @@ export function SignOptionsPanel({
           <Button variant="secondary" size="sm" onClick={() => onAddText("date")}>
             Date
           </Button>
+          <Button variant="secondary" size="sm" onClick={() => onAddShape("highlight")}>
+            Highlight
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => onAddShape("box")}>
+            Box
+          </Button>
         </div>
       </div>
 
-      {selected && !isImageSignElement(selected) && (
+      {selected && isShapeSignElement(selected) && (
+        <div className="rounded-lg border border-border bg-surface-2 p-3">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
+          <div className="mt-2 flex items-center gap-1.5">
+            {(selected.kind === "highlight" ? SIGN_HIGHLIGHT_COLORS : SIGN_BOX_COLORS).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => onUpdate(selected.id, { color: c })}
+                className={`size-5.5 rounded-full border-2 ${selected.color === c ? "border-accent" : "border-transparent"}`}
+                style={{ backgroundColor: c }}
+                aria-label={`Color ${c}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selected && !isImageSignElement(selected) && !isShapeSignElement(selected) && (
         <div className="rounded-lg border border-border bg-surface-2 p-3">
           <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
           <input

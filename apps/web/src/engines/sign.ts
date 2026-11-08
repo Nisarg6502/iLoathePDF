@@ -2,7 +2,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFImage } from "pdf-lib";
 import { embedImageBytes } from "@/lib/embedImage";
 import type { Engine } from "./types";
 import type { SignElement } from "@/tools/sign/types";
-import { isImageElement } from "@/tools/sign/types";
+import { isImageElement, isShapeElement } from "@/tools/sign/types";
 
 function hexToRgb(hex: string) {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex.trim());
@@ -23,7 +23,7 @@ export const signEngine: Engine = async ({ files, options }) => {
   if (!file) throw new Error("Add a PDF to sign.");
 
   const elements = (options.elements as SignElement[] | undefined) ?? [];
-  if (elements.length === 0) throw new Error("Add at least one signature, text, date or initials before exporting.");
+  if (elements.length === 0) throw new Error("Add at least one signature, text, date, initials, highlight or box before exporting.");
 
   const bytes = await file.arrayBuffer();
   const doc = await PDFDocument.load(bytes);
@@ -55,6 +55,13 @@ export const signEngine: Engine = async ({ files, options }) => {
         imageCache.set(el.imageDataUrl, image);
       }
       page.drawImage(image, { x: xPt, y: yPt, width: wPt, height: boxHeightPt });
+    } else if (isShapeElement(el)) {
+      const color = hexToRgb(el.color);
+      if (el.kind === "highlight") {
+        page.drawRectangle({ x: xPt, y: yPt, width: wPt, height: boxHeightPt, color, opacity: 0.4 });
+      } else {
+        page.drawRectangle({ x: xPt, y: yPt, width: wPt, height: boxHeightPt, borderColor: color, borderWidth: 1.5 });
+      }
     } else {
       const size = Math.max(4, el.fontSize);
       const baselineY = yPt + Math.max(0, (boxHeightPt - size) / 2) + size * 0.18;

@@ -32,7 +32,7 @@ import { panelVariants } from "@/lib/motion";
 import type { OptionValues, Tool } from "@/lib/tools";
 import { cn, formatBytes } from "@/lib/utils";
 import type { SavedSignKind } from "@/lib/signatureStore";
-import type { SignElement } from "@/lib/signTypes";
+import { SIGN_BOX_COLORS, SIGN_HIGHLIGHT_COLORS, type SignElement } from "@/lib/signTypes";
 import type { RedactBox, RedactMode } from "@/lib/redactTypes";
 
 const OrganizeCanvas = lazy(() =>
@@ -116,7 +116,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     if (files.length === 0) return `Add ${tool.acceptsLabel} to continue.`;
     if (tool.id === "merge" && files.length < 2) return "Merging needs at least two PDFs.";
     if (tool.id === "sign" && signElements.length === 0) {
-      return "Add a signature, text, date or initials to continue.";
+      return "Add a signature, text, date, initials, highlight or box to continue.";
     }
     if (tool.id === "redact" && redactBoxes.length === 0) {
       return "Add at least one box to continue.";
@@ -196,6 +196,21 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
       text: kind === "date" ? todayFormatted() : "Text",
       fontSize: 16,
       color: "#000000",
+    };
+    setSignElements((prev) => [...prev, el]);
+    setSignSelectedId(el.id);
+  }
+
+  function addShapeSignElement(kind: "highlight" | "box") {
+    const el: SignElement = {
+      id: newSignId(),
+      kind,
+      pageIndex: signActivePage,
+      xPct: 0.3,
+      yPct: 0.4,
+      wPct: kind === "highlight" ? 0.35 : 0.3,
+      hPct: kind === "highlight" ? 0.03 : 0.1,
+      color: kind === "highlight" ? SIGN_HIGHLIGHT_COLORS[0] : SIGN_BOX_COLORS[0],
     };
     setSignElements((prev) => [...prev, el]);
     setSignSelectedId(el.id);
@@ -507,6 +522,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 activePageIndex={signActivePage}
                 onAddCapture={setSignCaptureKind}
                 onAddText={addTextSignElement}
+                onAddShape={addShapeSignElement}
                 onSelect={setSignSelectedId}
                 onUpdate={updateSignElement}
                 onDelete={deleteSignElement}

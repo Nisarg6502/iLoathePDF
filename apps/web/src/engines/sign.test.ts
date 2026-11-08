@@ -65,3 +65,35 @@ describe("signEngine", () => {
     expect(result.files).toHaveLength(1);
   });
 });
+
+describe("signEngine shapes", () => {
+  it("draws a translucent highlight and an outlined box", async () => {
+    const file = await toFile(await makeTestPdf(2));
+    const elements: SignElement[] = [
+      { id: "1", kind: "highlight", pageIndex: 0, xPct: 0.1, yPct: 0.1, wPct: 0.5, hPct: 0.05, color: "#ffe14d" },
+      { id: "2", kind: "box", pageIndex: 1, xPct: 0.2, yPct: 0.3, wPct: 0.4, hPct: 0.1, color: "#b91c1c" },
+    ];
+    const result = await signEngine({ files: [file], options: { elements } });
+    expect(result.summary).toMatch(/2 elements/);
+
+    const doc = await PDFDocument.load(await result.files[0].blob.arrayBuffer());
+    expect(doc.getPageCount()).toBe(2);
+    // The highlight page gets a graphics state with 40% fill opacity; the box page needs none.
+    const opacities = new Set<number>();
+    for (const [, obj] of doc.context.enumerateIndirectObjects()) {
+      const text = String(obj);
+      const m = /\/ca\s+([0-9.]+)/.exec(text);
+      if (m) opacities.add(Number(m[1]));
+    }
+    expect(opacities.has(0.4)).toBe(true);
+  });
+
+  it("accepts a shape alone as the only element", async () => {
+    const file = await toFile(await makeTestPdf(1));
+    const elements: SignElement[] = [
+      { id: "1", kind: "box", pageIndex: 0, xPct: 0.1, yPct: 0.1, wPct: 0.3, hPct: 0.1, color: "#000000" },
+    ];
+    const result = await signEngine({ files: [file], options: { elements } });
+    expect(result.files[0].blob.size).toBeGreaterThan((await file.arrayBuffer()).byteLength);
+  });
+});

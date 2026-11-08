@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { SignElement } from "@/lib/signTypes";
-import { isImageSignElement } from "@/lib/signTypes";
+import { isImageSignElement, isShapeSignElement } from "@/lib/signTypes";
 
 /** One placed element: draggable by its body, resizable from the bottom-right handle. */
 export function SignElementBox({
@@ -72,6 +72,15 @@ export function SignElementBox({
     >
       {isImageSignElement(element) ? (
         <img src={element.imageDataUrl} alt="" className="pointer-events-none size-full object-contain" draggable={false} />
+      ) : isShapeSignElement(element) ? (
+        <div
+          className="pointer-events-none size-full"
+          style={
+            element.kind === "highlight"
+              ? { background: element.color, opacity: 0.4 }
+              : { border: `${Math.max(1, 1.5 * pxPerPt)}px solid ${element.color}` }
+          }
+        />
       ) : (
         <div
           className="pointer-events-none flex size-full items-center overflow-hidden whitespace-nowrap"

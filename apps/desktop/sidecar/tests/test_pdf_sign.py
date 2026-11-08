@@ -116,3 +116,62 @@ def test_sign_propagates_encrypted_and_corrupt(encrypted_pdf, corrupt_pdf, out_d
             pdf_sign.run({"input": str(src), "output": str(out_dir / "s.pdf"), "elements": elements}, Recorder())
         assert exc.value.code == code
     assert not (out_dir / "s.pdf").exists()
+
+
+# -- highlight and box annotations ------------------------------------------
+
+def _opacities(path) -> set:
+    """Every fill-opacity (/ca) in any graphics state, however deeply nested."""
+    found: set = set()
+    seen: set = set()
+
+    def walk(obj) -> None:
+        if isinstance(obj, (pikepdf.Dictionary, pikepdf.Stream)):
+            if obj.is_indirect:
+                key = obj.objgen
+                if key in seen:
+                    return
+                seen.add(key)
+            if "/ca" in obj:
+                found.add(round(float(obj["/ca"]), 3))
+            for name, value in obj.items():
+                if name != "/Parent":
+                    walk(value)
+        elif isinstance(obj, pikepdf.Array):
+            for item in obj:
+                walk(item)
+
+    with pikepdf.open(str(path)) as pdf:
+        for page in pdf.pages:
+            walk(page.obj)
+    return found
+
+
+def test_highlight_is_a_translucent_fill_and_box_is_an_outline(make_pdf, out_dir):
+    src = make_pdf("a", pages=2)
+    dest = out_dir / "annotated.pdf"
+    elements = [
+        {"page": 0, "kind": "highlight", "x_pct": 0.1, "y_pct": 0.1, "w_pct": 0.5, "h_pct": 0.05, "color": "#ffe14d"},
+        {"page": 1, "kind": "box", "x_pct": 0.2, "y_pct": 0.3, "w_pct": 0.4, "h_pct": 0.1},
+    ]
+    result = pdf_sign.run({"input": str(src), "output": str(dest), "elements": elements}, Recorder())
+    assert result["elements"] == 2 and result["pages"] == 2
+    assert page_count(dest) == 2
+    assert 0.4 in _opacities(dest)  # the highlight; the box adds no transparency
+
+
+def test_box_alone_adds_no_transparency_and_defaults_its_colour(make_pdf, out_dir):
+    src = make_pdf("a", pages=1)
+    dest = out_dir / "box.pdf"
+    elements = [{"page": 0, "kind": "box", "x_pct": 0.2, "y_pct": 0.3, "w_pct": 0.4, "h_pct": 0.1}]
+    pdf_sign.run({"input": str(src), "output": str(dest), "elements": elements}, Recorder())
+    assert _opacities(dest) == set()
+    assert dest.stat().st_size > src.stat().st_size
+
+
+def test_shapes_validate_their_placement(make_pdf, out_dir):
+    src = make_pdf("a", pages=1)
+    bad = [{"page": 0, "kind": "highlight", "x_pct": 2, "y_pct": 0.1, "w_pct": 0.5, "h_pct": 0.05}]
+    with pytest.raises(OpError) as exc:
+        pdf_sign.run({"input": str(src), "output": str(out_dir / "o.pdf"), "elements": bad}, Recorder())
+    assert exc.value.code == "BAD_PARAMS"

@@ -109,7 +109,7 @@ export interface PdfOrganizeParams {
 }
 export interface PdfOrganizeResult { output: string; bytes: number; pages: number }
 
-export type SignElementKind = "signature" | "initials" | "text" | "date";
+export type SignElementKind = "signature" | "initials" | "text" | "date" | "highlight" | "box";
 export interface SignElementParams {
   page: number;
   kind: SignElementKind;
@@ -122,6 +122,7 @@ export interface SignElementParams {
   /** required for text/date. */
   text?: string;
   font_size?: number;
+  /** text colour, or the fill/outline colour of a highlight or box. */
   color?: string;
 }
 export interface PdfSignParams {

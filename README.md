@@ -31,18 +31,20 @@ as a website that processes files client-side and never sends them anywhere.
 | **Compress quality** | Full (Ghostscript) | Preview (rasterizes pages, no selectable text yet) |
 | **HEIC → JPG** | Yes | Preview badge (decoder not wired up yet) |
 | **PDF to Excel** | Yes | No — no client-side library extracts tables well enough |
+| **PDF to PDF/A** | Yes (Ghostscript) | No — needs Ghostscript |
+| **Compress images** | No | Yes |
 
 Both share the same rule: your files never leave the machine they're opened
 on. Pick whichever fits — there's no reason to pick only one.
 
-## The thirteen tools
+## The twenty-two tools
 
 | Tool | What it does |
 | --- | --- |
 | Merge PDF | Combine PDFs in the order you choose, with page ranges per file |
 | Split PDF | Cut into ranges, chop every N pages, extract or delete a selection |
 | Organize pages | Reorder, rotate and drop pages on a page canvas |
-| Sign & Fill | Draw or upload a signature, then add text, dates and initials on the page |
+| Sign & Fill | Draw or upload a signature, add text, dates and initials, or mark the page up with highlights and boxes |
 | Protect & Unlock PDF | Add or remove a password that's required to open the file |
 | Watermark, Page Numbers & Stamp | Add a repeating watermark, sequential page numbers, or a fixed stamp to every page |
 | Redact PDF | Black out sensitive text, photos or signatures — visually or for good |
@@ -52,13 +54,35 @@ on. Pick whichever fits — there's no reason to pick only one.
 | PDF to images | Render pages to PNG or JPG at a chosen DPI |
 | Images to PDF | Scans and photos into one PDF, one image per page |
 | Convert images | PNG, JPG and WebP any direction — and HEIC off an iPhone |
+| Crop PDF | Trim the margins off every page, or just the pages you pick |
+| Flatten PDF | Bake form fields and annotations into the page so they can't be edited |
+| PDF to PDF/A | Convert to PDF/A-2b for archiving — desktop only, best-effort (not run through a validator) |
+| PDF Reader | Scroll, zoom and search a PDF without leaving the app |
+| PDF Scanner | Clean up photos of paper (enhanced, or black and white that ignores shadows) into one PDF |
+| TXT to PDF | Plain-text files to PDFs, one per file |
+| CSV to PDF | A CSV laid out as a table, header repeated on every page |
+| HTML to PDF | Simple HTML pages — headings, lists, tables — to PDFs |
+| ZIP to PDF | The images, PDFs and text files inside a ZIP, joined into one PDF |
 
 On the web app, Compress and the HEIC direction of Convert Images carry a
 visible **Preview** badge: real files go in and real processing happens, but
-the output isn't yet full quality — see the table above. PDF to Excel is
-desktop only — no client-side library extracts tables well enough to ship on
-the web, so it shows there as a disabled card pointing to the download.
-Every other tool is fully live in both the desktop app and the browser.
+the output isn't yet full quality — see the table above. PDF to Excel and PDF
+to PDF/A are desktop only — no client-side library extracts tables well enough,
+and PDF/A needs Ghostscript — so they show on the web as disabled cards
+pointing to the download. Every other tool is live in both the desktop app and
+the browser, with a few differences worth knowing:
+
+- **Text to PDF (TXT, CSV, HTML, ZIP):** the web app draws with the PDF
+  standard fonts, so characters outside Latin-1 (Hindi, Arabic, emoji) become
+  `?` and the result says how many. The desktop app uses a system font with
+  wider coverage, though scripts that need shaping are still unsupported.
+- **PDF Reader:** the web reader has a selectable text layer and highlights
+  search hits; the desktop reader draws pages as images, so it can search but
+  not select text.
+- **PDF Scanner:** the web app can scan with a camera; the desktop app takes
+  image files.
+- **PDF to PDF/A** is best-effort — Ghostscript produces PDF/A-2b, but the
+  result hasn't been checked with a validator such as veraPDF.
 
 ## Recipes
 
@@ -68,7 +92,7 @@ pick a recipe, get the final result, with no per-step configuration:
 Compress), **Flatten PDF** (PDF to Images → Images to PDF), and
 **Merge → Extract Tables** (desktop only, since it ends in PDF to Excel).
 Recipes aren't a general pipeline builder and aren't counted among the
-thirteen tools above — they're compositions of existing tools, reusing each
+twenty-two tools above — they're compositions of existing tools, reusing each
 one's own default settings.
 
 ## How it's built

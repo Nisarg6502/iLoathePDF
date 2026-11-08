@@ -1,4 +1,4 @@
-"""`pdf.sign` -- stamp signatures, initials, free text and dates onto a PDF.
+"""`pdf.sign` -- stamp signatures, initials, free text, dates, highlights and boxes onto a PDF.
 
 Placement arrives as percentages of each page's own box (top-left origin,
 0..1), the same convention the React canvas and the website's browser
@@ -27,6 +27,9 @@ from ._common import (
 
 IMAGE_KINDS = ("signature", "initials")
 TEXT_KINDS = ("text", "date")
+SHAPE_KINDS = ("highlight", "box")
+HIGHLIGHT_OPACITY = 0.4
+BOX_LINE_WIDTH_PT = 1.5
 
 
 def _pct(el: dict, key: str) -> float:
@@ -49,7 +52,7 @@ def _validate(elements: object, page_count: int) -> list[dict]:
         if not isinstance(page, int) or isinstance(page, bool) or not 0 <= page < page_count:
             raise OpError("BAD_PARAMS", f"Element targets page {page!r}, but the PDF has {page_count} pages")
         kind = raw.get("kind")
-        if kind not in IMAGE_KINDS + TEXT_KINDS:
+        if kind not in IMAGE_KINDS + TEXT_KINDS + SHAPE_KINDS:
             raise OpError("BAD_PARAMS", f"Unknown element kind {kind!r}")
         el = {
             "page": page,
@@ -64,6 +67,8 @@ def _validate(elements: object, page_count: int) -> list[dict]:
             if not isinstance(image_b64, str) or not image_b64:
                 raise OpError("BAD_PARAMS", f"'{kind}' element is missing 'image_b64'")
             el["image_b64"] = image_b64
+        elif kind in SHAPE_KINDS:
+            el["color"] = str(raw.get("color") or ("#ffe14d" if kind == "highlight" else "#b91c1c"))
         else:
             text = raw.get("text")
             if not isinstance(text, str) or not text:
@@ -107,6 +112,18 @@ def _build_overlay_bytes(elements: list[dict], width_pt: float, height_pt: float
             image_bytes = base64.b64decode(el["image_b64"])
             reader = ImageReader(io.BytesIO(image_bytes))
             c.drawImage(reader, x_pt, y_pt, width=w_pt, height=box_h_pt, mask="auto", preserveAspectRatio=False)
+        elif el["kind"] == "highlight":
+            c.saveState()
+            c.setFillColor(Color(*_hex_to_rgb(el["color"])))
+            c.setFillAlpha(HIGHLIGHT_OPACITY)
+            c.rect(x_pt, y_pt, w_pt, box_h_pt, stroke=0, fill=1)
+            c.restoreState()
+        elif el["kind"] == "box":
+            c.saveState()
+            c.setStrokeColor(Color(*_hex_to_rgb(el["color"])))
+            c.setLineWidth(BOX_LINE_WIDTH_PT)
+            c.rect(x_pt, y_pt, w_pt, box_h_pt, stroke=1, fill=0)
+            c.restoreState()
         else:
             size = max(4.0, el["font_size"])
             baseline_y = y_pt + max(0.0, (box_h_pt - size) / 2) + size * 0.18
