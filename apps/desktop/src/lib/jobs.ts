@@ -19,6 +19,8 @@ export type OpName =
   | "pdf.redact"
   | "pdf.ocr"
   | "pdf.to_excel"
+  | "pdf.crop"
+  | "pdf.flatten"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -209,6 +211,13 @@ export interface PdfWatermarkParams {
 }
 export interface PdfWatermarkResult { output: string; bytes: number; pages: number; pages_affected: number }
 
+export interface CropMargins { top: number; right: number; bottom: number; left: number }
+export interface PdfCropParams { input: string; output: string; pages?: string; margins: CropMargins }
+export interface PdfCropResult { output: string; bytes: number; pages: number; pages_cropped: number }
+
+export interface PdfFlattenParams { input: string; output: string }
+export interface PdfFlattenResult { output: string; bytes: number; pages: number; flattened: number; had_form: boolean }
+
 export interface PingResult { pong: boolean; version: string; python: string }
 
 /** Maps each op to its params and result types, so runJob() is fully typed. */
@@ -225,6 +234,8 @@ export interface OpMap {
   "pdf.redact": [PdfRedactParams, PdfRedactResult];
   "pdf.ocr": [PdfOcrParams, PdfOcrResult];
   "pdf.to_excel": [PdfToExcelParams, PdfToExcelResult];
+  "pdf.crop": [PdfCropParams, PdfCropResult];
+  "pdf.flatten": [PdfFlattenParams, PdfFlattenResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];

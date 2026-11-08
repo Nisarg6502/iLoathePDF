@@ -118,6 +118,12 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     if (tool.id === "redact" && redactBoxes.length === 0) {
       return "Add at least one box to continue.";
     }
+    if (tool.id === "crop") {
+      const m = ["top", "right", "bottom", "left"].map((k) => Number(values[k] ?? 0));
+      if (m.some((n) => !Number.isFinite(n) || n < 0 || n >= 100)) return "Margins must be between 0 and 99%.";
+      if (m.every((n) => n === 0)) return "Set at least one margin above 0.";
+      if (m[0] + m[2] >= 100 || m[1] + m[3] >= 100) return "Those margins would crop away the whole page.";
+    }
     if (tool.id === "protect") {
       const password = String(values.password ?? "");
       const mode = String(values.mode ?? "protect");

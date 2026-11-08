@@ -836,6 +836,52 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "crop":
+      return (
+        <OptionsPanel
+          className={className}
+          description="Trim each side by a percentage of the page. Cropped-out content stays inside the file, hidden — use Redact to remove it for good."
+        >
+          <div className="grid grid-cols-2 gap-3">
+            {(["top", "right", "bottom", "left"] as const).map((side) => (
+              <Field key={side} label={`${side[0].toUpperCase()}${side.slice(1)} (%)`}>
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="number"
+                    min={0}
+                    max={99}
+                    step={1}
+                    value={String(values[side] ?? 0)}
+                    onChange={(e) => set({ [side]: Number(e.currentTarget.value) })}
+                  />
+                )}
+              </Field>
+            ))}
+          </div>
+          <Field label="Pages" hint="Leave empty for every page. Example: 1-3, 8">
+            {(id) => (
+              <Input
+                id={id}
+                value={str("pages")}
+                onChange={(e) => set({ pages: e.currentTarget.value })}
+                placeholder="All pages"
+              />
+            )}
+          </Field>
+        </OptionsPanel>
+      );
+
+    case "flatten":
+      return (
+        <OptionsPanel
+          className={className}
+          description="Turns form fields and annotations into ordinary page content. Text stays selectable and the file stays small. No options to configure."
+        >
+          {null}
+        </OptionsPanel>
+      );
+
     case "pdf-to-excel":
       return (
         <OptionsPanel

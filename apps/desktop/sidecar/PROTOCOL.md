@@ -213,6 +213,29 @@ its MediaBox with `BAD_PARAMS` (not yet supported -- use `visual` mode, or
 rotate the PDF to its default orientation first).
 result: `{"output": "...", "bytes": 4096, "pages": 12, "boxes": 3, "mode": "true"}`
 
+### `pdf.crop`
+params:
+```json
+{"input": "a.pdf", "output": "out.pdf", "pages": "1-3,5",
+ "margins": {"top": 10, "right": 0, "bottom": 5, "left": 0}}
+```
+`margins` are percentages (0 to under 100) of the page *as the reader sees
+it*, so they follow `/Rotate`. At least one must be above 0, and
+`top + bottom` and `left + right` must each stay under 100 (`BAD_PARAMS`
+otherwise). `pages` is a page-range spec; omit or leave empty for every page.
+The new rectangle is measured from the page's current visible box (CropBox if
+present, else MediaBox) and written to both `/MediaBox` and `/CropBox`.
+Cropping hides content, it does not remove it -- use `pdf.redact` for that.
+result: `{"output": "...", "bytes": 4096, "pages": 12, "pages_cropped": 4}`
+
+### `pdf.flatten`
+params: `{"input": "a.pdf", "output": "out.pdf"}`
+Gives every form field a fresh appearance stream, merges every visible
+annotation into its page content, and drops the `/AcroForm`. Not a rasterise:
+text stays text. Link annotations carry no appearance and are left alone.
+`flattened` is how many annotations the page `/Annots` arrays lost.
+result: `{"output": "...", "bytes": 4096, "pages": 12, "flattened": 3, "had_form": true}`
+
 ### `pdf.ocr`
 params:
 ```json

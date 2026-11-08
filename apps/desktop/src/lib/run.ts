@@ -257,6 +257,40 @@ export async function execute(
       };
     }
 
+    case "pdf.crop": {
+      const margins = {
+        top: num("top"),
+        right: num("right"),
+        bottom: num("bottom"),
+        left: num("left"),
+      };
+      const pages = str("pages").trim();
+      const r = await runJob(
+        "pdf.crop",
+        { input: first.path, output: join(`${base}-cropped.pdf`), pages: pages || undefined, margins },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary: `${r.pages_cropped} of ${r.pages} page${r.pages === 1 ? "" : "s"} cropped.`,
+      };
+    }
+
+    case "pdf.flatten": {
+      const r = await runJob(
+        "pdf.flatten",
+        { input: first.path, output: join(`${base}-flattened.pdf`) },
+        opts,
+      );
+      return {
+        outputs: [{ path: r.output, bytes: r.bytes }],
+        summary:
+          r.flattened === 0
+            ? "Nothing to flatten — this PDF had no form fields or annotations."
+            : `${r.flattened} form field${r.flattened === 1 ? "" : "s"} / annotation${r.flattened === 1 ? "" : "s"} flattened.`,
+      };
+    }
+
     case "pdf.to_img": {
       const pages = str("pages").trim();
       const r = await runJob(
