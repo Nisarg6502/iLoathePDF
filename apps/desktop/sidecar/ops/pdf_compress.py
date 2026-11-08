@@ -121,6 +121,15 @@ def _compress_ghostscript(
         f"-sOutputFile={tmp}",
         str(src),
     ]
+    run_gs(argv, tmp, progress, "Compressing")
+
+
+def run_gs(argv: list[str], tmp: Path, progress: ProgressFn, label: str) -> None:
+    """Run Ghostscript to completion, polling for cancellation.
+
+    Shared with pdf.pdfa. `tmp` is the file `argv` writes; it must exist and be
+    non-empty afterwards.
+    """
     creationflags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
 
     # Pipe both streams: besides letting us quote stderr in an error, it keeps
@@ -163,7 +172,7 @@ def _compress_ghostscript(
             # that stops short of the end -- a moving bar the user can trust
             # not to sit at 99% is better than a fake precise one.
             pct = min(90, pct + 1)
-            progress(pct, "Compressing")
+            progress(pct, label)
     except Cancelled:
         _kill(proc, reader)
         raise

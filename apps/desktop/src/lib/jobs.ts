@@ -21,6 +21,7 @@ export type OpName =
   | "pdf.to_excel"
   | "pdf.crop"
   | "pdf.flatten"
+  | "pdf.pdfa"
   | "txt.to_pdf"
   | "csv.to_pdf"
   | "html.to_pdf"
@@ -222,6 +223,9 @@ export interface PdfCropResult { output: string; bytes: number; pages: number; p
 export interface PdfFlattenParams { input: string; output: string }
 export interface PdfFlattenResult { output: string; bytes: number; pages: number; flattened: number; had_form: boolean }
 
+export interface PdfPdfaParams { input: string; output: string }
+export interface PdfPdfaResult { output: string; bytes: number; pages: number; part: number; conformance: string }
+
 export type PageSizeName = "a4" | "letter";
 export interface DocToPdfParams {
   inputs: string[];
@@ -262,6 +266,7 @@ export interface OpMap {
   "pdf.to_excel": [PdfToExcelParams, PdfToExcelResult];
   "pdf.crop": [PdfCropParams, PdfCropResult];
   "pdf.flatten": [PdfFlattenParams, PdfFlattenResult];
+  "pdf.pdfa": [PdfPdfaParams, PdfPdfaResult];
   "txt.to_pdf": [DocToPdfParams, DocToPdfResult];
   "csv.to_pdf": [DocToPdfParams, DocToPdfResult];
   "html.to_pdf": [DocToPdfParams, DocToPdfResult];

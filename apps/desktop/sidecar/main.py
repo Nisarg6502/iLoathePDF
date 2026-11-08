@@ -37,6 +37,7 @@ DISPATCH: dict[str, str] = {
     "pdf.to_excel": "ops.pdf_to_excel:run",
     "pdf.crop": "ops.pdf_crop:run",
     "pdf.flatten": "ops.pdf_flatten:run",
+    "pdf.pdfa": "ops.pdf_pdfa:run",
     "txt.to_pdf": "ops.doc_to_pdf:run_txt",
     "csv.to_pdf": "ops.doc_to_pdf:run_csv",
     "html.to_pdf": "ops.doc_to_pdf:run_html",

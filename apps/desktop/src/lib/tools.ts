@@ -20,6 +20,7 @@ import {
   Images,
   Layers,
   Lock,
+  ShieldCheck,
   Minimize2,
   Replace,
   ScanText,
@@ -32,7 +33,7 @@ import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image" | "document";
 
-export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t";
+export type Tint = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "o" | "p" | "q" | "r" | "s" | "t" | "u";
 
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
@@ -333,6 +334,22 @@ export const TOOLS: Tool[] = [
     multiple: false,
     ordered: false,
     action: "Flatten PDF",
+    defaults: {},
+  },
+  {
+    id: "pdfa",
+    path: "/t/pdfa",
+    title: "PDF to PDF/A",
+    description: "Convert a PDF to PDF/A-2b for long-term archiving.",
+    icon: ShieldCheck,
+    group: "pdf",
+    tint: "u",
+    op: "pdf.pdfa",
+    accepts: ["pdf"],
+    acceptsLabel: "a PDF file",
+    multiple: false,
+    ordered: false,
+    action: "Convert to PDF/A",
     defaults: {},
   },
   {
