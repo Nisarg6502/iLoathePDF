@@ -263,6 +263,21 @@ archive is `ENCRYPTED_PDF`. An archive with nothing usable, or one that is not
 a ZIP, is `UNSUPPORTED_FORMAT`.
 result: `{"output": "...", "bytes": 4096, "pages": 7, "files": 5, "skipped": 2}`
 
+### `scan.to_pdf`
+params:
+```json
+{"inputs": ["p1.jpg", "p2.jpg"], "output": "scan.pdf",
+ "mode": "color|enhanced|bw", "page_size": "fit|a4|letter",
+ "orientation": "auto|portrait|landscape"}
+```
+Photographed pages, cleaned up and joined into one PDF (one page per image, in
+order). `color` passes the images to `img.to_pdf` untouched; `enhanced`
+stretches contrast (darkest and brightest 1% clipped); `bw` thresholds each
+pixel against the blurred average of its surroundings, so shadows and uneven
+light do not turn paper grey. EXIF orientation is honoured. An unreadable image
+is `UNSUPPORTED_FORMAT`.
+result: `{"output": "...", "bytes": 4096, "pages": 2}`
+
 ### `pdf.pdfa`
 params: `{"input": "a.pdf", "output": "out.pdf"}`
 Converts to PDF/A-2b with Ghostscript (`-dPDFA=2`, sRGB output intent, fonts

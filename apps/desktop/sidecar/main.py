@@ -42,6 +42,7 @@ DISPATCH: dict[str, str] = {
     "csv.to_pdf": "ops.doc_to_pdf:run_csv",
     "html.to_pdf": "ops.doc_to_pdf:run_html",
     "zip.to_pdf": "ops.zip_to_pdf:run",
+    "scan.to_pdf": "ops.scan_to_pdf:run",
     "img.convert": "ops.img_convert:run",
     "img.to_pdf": "ops.img_to_pdf:run",
     "pdf.to_img": "ops.pdf_to_img:run",

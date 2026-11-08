@@ -24,6 +24,7 @@ import {
   ZipToPdfIcon,
   PdfaIcon,
   ReaderIcon,
+  ScanIcon,
 } from "./icons";
 
 const MergeOptions = lazyComponent(() => import("./options/MergeOptions").then((m) => m.MergeOptions));
@@ -72,6 +73,8 @@ const ReaderWorkspace = lazyComponent(() => import("./reader/ReaderWorkspace").t
 const readerEngine: Engine = async () => {
   throw new Error("The reader only displays a PDF; it has nothing to save.");
 };
+const ScanOptions = lazyComponent(() => import("./options/ScanOptions").then((m) => m.ScanOptions));
+const scanEngine = lazyEngine(() => import("@/engines/scanToPdf").then((m) => m.scanToPdfEngine));
 const PdfToExcelOptions = lazyComponent(() => import("./options/PdfToExcelOptions").then((m) => m.PdfToExcelOptions));
 
 const desktopOnlyEngine: Engine = async () => {
@@ -101,6 +104,7 @@ export const TOOLS: ToolConfig[] = [
   { slug: "zip-to-pdf", name: "ZIP to PDF", description: "Join the images, PDFs and text files inside a ZIP into one PDF.", category: "document", Icon: ZipToPdfIcon, accept: [".zip"], multiple: false, defaultOptions: { page_size: "fit", orientation: "auto" }, OptionsPanel: ZipToPdfOptions, engine: zipToPdfEngine, status: "live", tint: "t" },
   { slug: "pdfa", name: "PDF to PDF/A", description: "Convert a PDF to PDF/A-2b for long-term archiving.", category: "pdf", Icon: PdfaIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: PdfaOptions, engine: desktopOnlyEngine, status: "desktop-only", tint: "u", desktopOnlyNote: "PDF/A conversion runs on Ghostscript, which isn't available in a browser — it's desktop-only." },
   { slug: "reader", name: "PDF Reader", description: "Read a PDF right here: scroll, zoom, select text and search. Nothing is uploaded.", category: "pdf", Icon: ReaderIcon, accept: [".pdf"], multiple: false, defaultOptions: {}, OptionsPanel: ReaderOptions, engine: readerEngine, status: "live", tint: "v", Workspace: ReaderWorkspace },
+  { slug: "scan", name: "PDF Scanner", description: "Scan with your camera or pick photos of paper, clean them up and join them into one PDF.", category: "image", Icon: ScanIcon, accept: [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"], multiple: true, defaultOptions: { outputName: "scan", mode: "enhanced", page_size: "a4", orientation: "auto", margin_mm: 0 }, OptionsPanel: ScanOptions, engine: scanEngine, status: "live", tint: "w" },
 ];
 
 export function getTool(slug: string): ToolConfig | undefined {
