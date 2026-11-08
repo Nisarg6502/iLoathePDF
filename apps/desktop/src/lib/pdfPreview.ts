@@ -195,6 +195,18 @@ export class PdfPreviewDocument {
     return job;
   }
 
+  /** Plain text of one page, for find-in-document. */
+  async pageText(pageNumber: number): Promise<string> {
+    const page = await this.#page(pageNumber);
+    const content = await page.getTextContent();
+    return content.items.map((item) => ("str" in item ? item.str : "")).join(" ");
+  }
+
+  /** Drop one cached render, e.g. when a reader scrolls a page far out of view. */
+  forget(pageNumber: number, width: number, rotation = 0): void {
+    this.#cache.delete(cacheKey(pageNumber, Math.max(16, Math.round(width)), normalizeRotation(rotation)));
+  }
+
   /** Cancel every in-flight render (e.g. the user scrolled away fast). */
   cancelAll(): void {
     for (const task of this.#tasks) {
