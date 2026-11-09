@@ -155,6 +155,15 @@ impl Sidecar {
         let _ = self.write_line(&format!("{request}\n"));
     }
 
+    /// Stop the engine now. Used right before the app exits to run an update
+    /// installer, where `Drop` would never get to run.
+    pub fn shutdown(&self) {
+        if let Ok(mut child) = self.child.lock() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+    }
+
     fn write_line(&self, line: &str) -> std::io::Result<()> {
         let mut stdin = self.stdin.lock().unwrap();
         stdin.write_all(line.as_bytes())?;

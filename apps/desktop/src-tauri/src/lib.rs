@@ -13,6 +13,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updates::UpdateStore::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -46,7 +48,9 @@ pub fn run() {
             commands::cancel_job,
             commands::sidecar_health,
             commands::read_file_bytes,
-            updates::fetch_latest_release,
+            updates::check_for_update,
+            updates::download_update,
+            updates::install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
