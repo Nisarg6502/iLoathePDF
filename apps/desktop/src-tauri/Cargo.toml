@@ -1,6 +1,6 @@
 [package]
 name = "iloathepdf"
-version = "0.4.0"
+version = "0.5.0"
 description = "Offline PDF and image toolkit"
 authors = ["Nisarg6502"]
 license = "MIT"
@@ -25,4 +25,4 @@ tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
-ureq = "3"
+tauri-plugin-updater = "2"

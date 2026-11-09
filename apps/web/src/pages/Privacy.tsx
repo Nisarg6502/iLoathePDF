@@ -66,10 +66,12 @@ export function Privacy() {
         A browser can always be told to make a request by something else on
         the page. The Windows app removes that possibility: it has no
         analytics, no crash reporting, no web fonts and nothing that
-        downloads or installs itself. Its one network feature is an optional
-        update check that is off by default; if you switch it on, the app asks
-        GitHub for the latest release number and sends nothing about you or
-        your files. Switch it off and it stops.
+        downloads or installs without you asking. Its one network feature is an
+        optional update check that is off by default; if you switch it on, the
+        app asks GitHub for the latest release number and sends nothing about
+        you or your files. A new version downloads only when you press Update
+        now, is signature-checked, and installs only when you restart. Switch it
+        off and it stops.
       </p>
       <Link to="/download" className="mt-4.5 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
         Get the desktop app

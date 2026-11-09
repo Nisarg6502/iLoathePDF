@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "iLoathePDF",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "identifier": "com.nisarg.iloathepdf",
   "build": {
     "frontendDist": "../dist",
@@ -29,8 +29,20 @@
       "csp": "default-src 'self'; img-src 'self' data: blob: asset: http://asset.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'; worker-src 'self' blob:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost blob: data:"
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ2MkVGMDYyOUM3RUFGRTIKUldUaXIzNmNZdkF1Um1saE1jM3lTRkN0YmxoTFdiYko1YjQ3OEdJU2x6QWJuUXBYSmVFY05sUUcK",
+      "endpoints": [
+        "https://github.com/Nisarg6502/iLoathePDF/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": [
       "nsis"
     ],
