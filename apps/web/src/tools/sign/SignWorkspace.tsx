@@ -12,7 +12,7 @@ import type { ToolConfig } from "@/tools/ToolConfig";
 import type { EngineResult } from "@/engines/types";
 import { SignElementBox } from "./SignElementBox";
 import { SignatureCapture } from "./SignatureCapture";
-import { TEXT_COLORS, isImageElement, type SignElement } from "./types";
+import { BOX_COLORS, HIGHLIGHT_COLORS, TEXT_COLORS, isImageElement, isShapeElement, type SignElement } from "./types";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -131,6 +131,21 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
       text: kind === "date" ? todayFormatted() : "Text",
       fontSize: DEFAULT_FONT_SIZE,
       color: "#000000",
+    };
+    setElements((prev) => [...prev, el]);
+    setSelectedId(el.id);
+  }
+
+  function addShapeElement(kind: "highlight" | "box") {
+    const el: SignElement = {
+      id: newId(),
+      kind,
+      pageIndex: activePage,
+      xPct: 0.3,
+      yPct: 0.4,
+      wPct: kind === "highlight" ? 0.35 : 0.3,
+      hPct: kind === "highlight" ? 0.03 : 0.1,
+      color: kind === "highlight" ? HIGHLIGHT_COLORS[0] : BOX_COLORS[0],
     };
     setElements((prev) => [...prev, el]);
     setSelectedId(el.id);
@@ -262,10 +277,34 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
               <button type="button" onClick={() => addTextElement("date")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
                 Date
               </button>
+              <button type="button" onClick={() => addShapeElement("highlight")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
+                Highlight
+              </button>
+              <button type="button" onClick={() => addShapeElement("box")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
+                Box
+              </button>
             </div>
           </div>
 
-          {selected && !isImageElement(selected) && (
+          {selected && isShapeElement(selected) && (
+            <div className="rounded-[10px] border border-border bg-surface-2 p-3">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
+              <div className="mt-2 flex items-center gap-1.5">
+                {(selected.kind === "highlight" ? HIGHLIGHT_COLORS : BOX_COLORS).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => updateElement(selected.id, { color: c })}
+                    className={`size-5.5 rounded-full border-2 ${selected.color === c ? "border-accent" : "border-transparent"}`}
+                    style={{ backgroundColor: c }}
+                    aria-label={`Color ${c}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {selected && !isImageElement(selected) && !isShapeElement(selected) && (
             <div className="rounded-[10px] border border-border bg-surface-2 p-3">
               <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
               <input

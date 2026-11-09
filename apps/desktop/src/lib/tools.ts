@@ -134,7 +134,7 @@ export const TOOLS: Tool[] = [
     id: "sign",
     path: "/t/sign",
     title: "Sign & Fill",
-    description: "Draw or upload a signature, then add text, dates and initials on the page.",
+    description: "Draw or upload a signature, add text, dates and initials, or mark the page up with highlights and boxes.",
     icon: Signature,
     group: "pdf",
     tint: "h",

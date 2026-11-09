@@ -19,7 +19,7 @@ import type { PickedFile } from "@/components/FileDropZone";
 import type { PdfPageItem } from "@/components/PageThumbnailGrid";
 import type { CompressionSummary } from "@/components/ResultCard";
 import type { SignElement } from "./signTypes";
-import { isImageSignElement } from "./signTypes";
+import { isImageSignElement, isShapeSignElement } from "./signTypes";
 import type { RedactBoxParams } from "./jobs";
 import type { RedactBox } from "./redactTypes";
 
@@ -162,7 +162,7 @@ export async function execute(
 
     case "pdf.sign": {
       if (signElements.length === 0) {
-        throw new JobError("BAD_PARAMS", "Add at least one signature, text, date or initials before exporting.");
+        throw new JobError("BAD_PARAMS", "Add at least one signature, text, date, initials, highlight or box before exporting.");
       }
       const elements: SignElementParams[] = signElements.map((el) => ({
         page: el.pageIndex,
@@ -173,7 +173,9 @@ export async function execute(
         h_pct: el.hPct,
         ...(isImageSignElement(el)
           ? { image_b64: dataUrlToBase64(el.imageDataUrl) }
-          : { text: el.text, font_size: el.fontSize, color: el.color }),
+          : isShapeSignElement(el)
+            ? { color: el.color }
+            : { text: el.text, font_size: el.fontSize, color: el.color }),
       }));
       const r = await runJob(
         "pdf.sign",

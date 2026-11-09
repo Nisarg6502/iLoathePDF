@@ -27,9 +27,21 @@ export interface TextSignElement extends BaseSignElement {
   color: string; // hex
 }
 
-export type SignElement = ImageSignElement | TextSignElement;
+export interface ShapeSignElement extends BaseSignElement {
+  /** A translucent marker over existing content, or an outlined rectangle. */
+  kind: "highlight" | "box";
+  color: string; // hex
+}
+
+export type SignElement = ImageSignElement | TextSignElement | ShapeSignElement;
 
 export const SIGN_TEXT_COLORS = ["#000000", "#1d4ed8", "#b91c1c"] as const;
+export const SIGN_HIGHLIGHT_COLORS = ["#ffe14d", "#7cf29a", "#ff8fcf"] as const;
+export const SIGN_BOX_COLORS = ["#b91c1c", "#1d4ed8", "#000000"] as const;
+
+export function isShapeSignElement(el: SignElement): el is ShapeSignElement {
+  return el.kind === "highlight" || el.kind === "box";
+}
 
 export function isImageSignElement(el: SignElement): el is ImageSignElement {
   return el.kind === "signature" || el.kind === "initials";
