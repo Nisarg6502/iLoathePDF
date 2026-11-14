@@ -19,6 +19,14 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.5.1",
+    date: "2026-11-15",
+    highlights: [
+      "Security: updated the image libraries (Pillow 13 and HEIC support) that open your photos and scans, after published security advisories, and refreshed the app shell's Rust dependencies.",
+      "Nothing about how your files are handled changed: they still never leave your computer.",
+    ],
+  },
+  {
     version: "0.5.0",
     date: "2026-11-09",
     highlights: [

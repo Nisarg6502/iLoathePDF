@@ -1,0 +1,15 @@
+# Advisories reviewed and judged not reachable. Re-check each one when
+# tauri-plugin-updater is upgraded; delete the entry once a fix is available.
+
+[advisories]
+ignore = [
+  # `zip` 4.6.1 comes in through tauri-plugin-updater, which uses it only to
+  # unpack zip/tar update bundles on macOS and Linux (to our knowledge). This app ships a signed
+  # Windows NSIS installer (a single .exe), which the updater never extracts,
+  # and archives are only ever fetched from this repository's own releases.
+  # The fix is `zip` 9.0.0, a major version the updater does not allow yet.
+  "RUSTSEC-2026-0367",
+  "RUSTSEC-2026-0368",
+  "RUSTSEC-2026-0369",
+  "RUSTSEC-2026-0429",
+]

@@ -1,13 +1,29 @@
 # iLoathePDF
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Web app](https://img.shields.io/badge/web%20app-live-brightgreen)](https://nisarg6502.github.io/iLoathePDF/)
+<p align="center">
+  <b>PDF and image tools that never upload your files.</b><br>
+  Merge, split, compress, sign, redact, OCR and convert, entirely on your own machine.
+</p>
 
-PDF and image tools that don't upload your files anywhere — merge, split,
-compress, organize and convert, running entirely on your own machine.
+<p align="center">
+  <a href="https://github.com/Nisarg6502/iLoathePDF/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Nisarg6502/iLoathePDF/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/Nisarg6502/iLoathePDF/actions/workflows/security.yml"><img alt="Security" src="https://github.com/Nisarg6502/iLoathePDF/actions/workflows/security.yml/badge.svg"></a>
+  <a href="https://github.com/Nisarg6502/iLoathePDF/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Nisarg6502/iLoathePDF"></a>
+  <a href="https://github.com/Nisarg6502/iLoathePDF/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Nisarg6502/iLoathePDF/total"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <a href="https://nisarg6502.github.io/iLoathePDF/"><img alt="Web app" src="https://img.shields.io/badge/web%20app-live-brightgreen"></a>
+</p>
 
-**[Try the web app →](https://nisarg6502.github.io/iLoathePDF/)** — no
-install, runs in your browser tab.
+<p align="center">
+  <a href="https://nisarg6502.github.io/iLoathePDF/"><b>Try the web app</b></a> ·
+  <a href="https://github.com/Nisarg6502/iLoathePDF/releases/latest"><b>Download for Windows</b></a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="SECURITY.md">Security</a>
+</p>
+
+<p align="center">
+  <img alt="iLoathePDF desktop app, dark theme, showing the list of tools" src="docs/images/desktop-home-dark.png" width="820">
+</p>
 
 ## Why this exists
 
@@ -18,6 +34,34 @@ signed contract, or anything else you'd rather not hand to a stranger's
 backend. iLoathePDF does the same jobs with the same quality of interface,
 without the upload — as a Windows desktop app that is offline unless you opt in to an update check, and
 as a website that processes files client-side and never sends them anywhere.
+
+| | Typical online PDF sites | iLoathePDF |
+| --- | --- | --- |
+| Your file is uploaded to a server | Yes | **Never** |
+| Works offline | No | **Yes** (desktop app) |
+| Account or sign-up | Often | **None** |
+| Daily limits, watermarks, paywall | Common | **None, it's free and MIT licensed** |
+| You can check what it does | No | **Yes, the code is here, and the web app shows a live request counter** |
+
+### Don't take our word for it
+
+- **Web app:** open DevTools → Network, drop a file and run a tool. No request
+  carries your file, and the page's own request counter stays flat.
+- **Desktop app:** the document engine has no networking code at all. The one
+  network feature, an update check, is off until you switch it on in Settings,
+  and it sends nothing about you or your files. See [SECURITY.md](SECURITY.md)
+  for the full model.
+
+## Install
+
+**Desktop (Windows 10/11, 64-bit):** download the installer from the
+[latest release](https://github.com/Nisarg6502/iLoathePDF/releases/latest) and
+run it. The installer isn't code-signed yet, so Windows SmartScreen may say
+"Windows protected your PC". Choose **More info → Run anyway**. Each release is
+built by [GitHub Actions](.github/workflows/release-desktop.yml) from the tagged
+source, and the app only installs updates signed with the project's key.
+
+**Web:** nothing to install. Open <https://nisarg6502.github.io/iLoathePDF/>.
 
 ## Two ways to run it
 
@@ -118,8 +162,8 @@ Web:
 
 Design decisions and the reasoning behind them live in each app's own
 `SPECS.md`; the write-up of how the web app itself was designed and built is
-in [`docs/superpowers/specs`](docs/superpowers/specs) and
-[`docs/superpowers/plans`](docs/superpowers/plans).
+in [`docs/archive/specs`](docs/archive/specs) and
+[`docs/archive/plans`](docs/archive/plans).
 
 ## Repo layout
 
@@ -128,7 +172,8 @@ iLoathePDF/
 ├── apps/
 │   ├── desktop/   the Windows app — see apps/desktop/README.md
 │   └── web/       the website — see apps/web
-└── docs/          design specs and implementation plans
+├── docs/          images, plus archived design specs and plans
+└── .github/       CI, security scanning, release automation, templates
 ```
 
 ## Getting set up
@@ -176,6 +221,11 @@ Then see each app's own README for how to run and build it:
 
 ## Contributing
 
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first, and
+please report security problems privately as described in
+[SECURITY.md](SECURITY.md). Everyone taking part follows the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
 `main` is built through pull requests, and CI has to pass:
 
 ```bash
@@ -208,3 +258,6 @@ which keep their own terms regardless of this repo's license:
 
 The web app's dependencies (`pdf-lib`, `pdf.js`, React, etc.) are all
 permissively licensed (MIT/Apache-2.0) and impose no extra obligations.
+
+The full list, with versions and where to get the source of the copyleft
+components, is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
