@@ -137,12 +137,10 @@ pub async fn download_update(
     store: State<'_, UpdateStore>,
     on_event: Channel<DownloadEvent>,
 ) -> Result<(), JobError> {
-    let update = store
-        .pending
-        .lock()
-        .unwrap()
-        .clone()
-        .ok_or_else(|| JobError::internal("There is no update to download. Check again first."))?;
+    let update =
+        store.pending.lock().unwrap().clone().ok_or_else(|| {
+            JobError::internal("There is no update to download. Check again first.")
+        })?;
 
     let mut downloaded: u64 = 0;
     let bytes = update
@@ -184,7 +182,11 @@ pub async fn install_update(store: State<'_, UpdateStore>) -> Result<(), JobErro
 
     tauri::async_runtime::spawn_blocking(move || update.install(bytes))
         .await
-        .unwrap_or_else(|e| Err(tauri_plugin_updater::Error::Io(std::io::Error::other(e.to_string()))))
+        .unwrap_or_else(|e| {
+            Err(tauri_plugin_updater::Error::Io(std::io::Error::other(
+                e.to_string(),
+            )))
+        })
         .map_err(|e| error("The update could not be started.", e))
 }
 
@@ -195,7 +197,10 @@ mod tests {
     #[test]
     fn versions_are_cleaned_for_links() {
         assert_eq!(clean_version("v0.5.0").as_deref(), Some("0.5.0"));
-        assert_eq!(clean_version(" 1.2.3-beta.1 ").as_deref(), Some("1.2.3-beta.1"));
+        assert_eq!(
+            clean_version(" 1.2.3-beta.1 ").as_deref(),
+            Some("1.2.3-beta.1")
+        );
         assert_eq!(clean_version(""), None);
         assert_eq!(clean_version("1.0/../../evil"), None);
         assert_eq!(clean_version("1.0 0"), None);
