@@ -1,5 +1,9 @@
 version: 2
 
+# The `directory` of each ecosystem must point at the folder that holds its
+# manifest. The Python and Rust entries used to point at /sidecar and
+# /src-tauri (an old layout), so Dependabot silently never updated either.
+
 updates:
   - package-ecosystem: npm
     directory: /
@@ -18,7 +22,7 @@ updates:
         update-types: [minor, patch]
 
   - package-ecosystem: cargo
-    directory: /src-tauri
+    directory: /apps/desktop/src-tauri
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -27,12 +31,19 @@ updates:
         update-types: [minor, patch]
 
   - package-ecosystem: pip
-    directory: /sidecar
+    directory: /apps/desktop/sidecar
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        update-types: [minor, patch]

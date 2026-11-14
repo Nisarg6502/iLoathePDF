@@ -1,0 +1,81 @@
+name: Bug report
+description: Something doesn't work, or produces the wrong result
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Please don't attach real personal documents**,
+        a small sample file with made-up content is much better. For security
+        problems use the private form instead (see the link on the issue chooser).
+  - type: dropdown
+    id: app
+    attributes:
+      label: Which app?
+      options:
+        - Desktop app (Windows)
+        - Web app
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Desktop, Settings → About. Web, the date you used it.
+      placeholder: "0.5.1"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows version or browser
+      placeholder: "Windows 11 23H2, or Firefox 140"
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which tool?
+      options:
+        - Merge PDF
+        - Split PDF
+        - Organize pages
+        - Sign & Fill
+        - Protect & Unlock
+        - Watermark / Page numbers / Stamp
+        - Redact
+        - OCR
+        - PDF to Excel
+        - Compress
+        - PDF to images
+        - Images to PDF
+        - Convert images
+        - Crop / Flatten / PDF/A
+        - PDF Reader / Scanner
+        - TXT / CSV / HTML / ZIP to PDF
+        - Recipes
+        - Installer / updates
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Drop a PDF with ...
+        3. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Error text, file size or page count, screenshots.

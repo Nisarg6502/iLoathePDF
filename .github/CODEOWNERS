@@ -1,0 +1,6 @@
+# Everything is reviewed by the maintainer; the release and security files get
+# named so a change to them is never missed.
+*                          @Nisarg6502
+/.github/workflows/        @Nisarg6502
+/apps/desktop/src-tauri/   @Nisarg6502
+/SECURITY.md               @Nisarg6502
