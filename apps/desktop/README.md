@@ -10,8 +10,11 @@ interface, entirely on your own machine.
 
 Your files have nowhere to go. The only network code in the build is an
 optional update check, **off until you turn it on** in Settings: it asks GitHub
-for the latest release number, sends nothing about you or your files, and
-downloads nothing. Leave it off and the app makes no network requests at all.
+for the latest release number and sends nothing about you or your files.
+Nothing is downloaded until you press **Update now** (or switch on background
+downloads); each update is signature-checked before it can run, and installs
+only when you press **Restart & update**. Leave it off and the app makes no
+network requests at all.
 
 ## Tools
 

@@ -93,6 +93,12 @@ jobs:
 
       - name: Build installer
         run: npm run build:app --workspace=apps/desktop
+        env:
+          # Signs the installer so installed copies of the app can verify an
+          # update before running it. The matching public key is in
+          # apps/desktop/src-tauri/tauri.conf.json.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Locate installer
         id: installer
@@ -114,6 +120,28 @@ jobs:
             echo "prerelease=true" >> $env:GITHUB_OUTPUT
           }
 
+      - name: Write update manifest (latest.json)
+        shell: pwsh
+        run: |
+          $installer = Get-Item "${{ steps.installer.outputs.path }}"
+          $sigFile = "$($installer.FullName).sig"
+          if (-not (Test-Path $sigFile)) { throw "No signature file at $sigFile - is TAURI_SIGNING_PRIVATE_KEY set?" }
+          $version = "${{ steps.tag.outputs.tag }}".TrimStart("v")
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/$($installer.Name)"
+          $manifest = [ordered]@{
+            version  = $version
+            notes    = "See https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag.outputs.tag }}"
+            pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            platforms = [ordered]@{
+              "windows-x86_64" = [ordered]@{
+                signature = (Get-Content $sigFile -Raw).Trim()
+                url       = $url
+              }
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content -Path latest.json -Encoding utf8
+          Get-Content latest.json
+
       - name: Publish release
         uses: softprops/action-gh-release@v3
         with:
@@ -121,4 +149,6 @@ jobs:
           name: iLoathePDF ${{ steps.tag.outputs.tag }}
           prerelease: ${{ steps.tag.outputs.prerelease }}
           generate_release_notes: true
-          files: ${{ steps.installer.outputs.path }}
+          files: |
+            ${{ steps.installer.outputs.path }}
+            latest.json

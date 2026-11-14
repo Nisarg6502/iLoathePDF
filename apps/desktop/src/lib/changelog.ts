@@ -19,6 +19,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.5.0",
+    date: "2026-11-09",
+    highlights: [
+      "Updates install themselves: when the update check finds a new version, press Update now. It downloads in the background while you keep working, then Restart & update installs it and reopens the app.",
+      "Optional: switch on background downloads in Settings and new versions are fetched as soon as they are found (the installer is large, so it is off by default). Nothing is ever installed without you pressing Restart & update.",
+      "Updates are signed. The app checks every download against a key built into it and throws away anything that does not match. Versions before 0.5.0 cannot update themselves, so install 0.5.0 once by hand.",
+    ],
+  },
+  {
     version: "0.4.0",
     date: "2026-11-09",
     highlights: [

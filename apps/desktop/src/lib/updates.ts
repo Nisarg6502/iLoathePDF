@@ -3,13 +3,15 @@
  *
  * This is the ONLY feature in the app that touches the network, and it is off
  * until the user turns it on in Settings. When on, the Rust side makes one GET
- * to GitHub's public "latest release" endpoint (see src-tauri/src/updates.rs).
+ * for the latest release's `latest.json` on GitHub (see src-tauri/src/updates.rs).
  * Nothing about the user, their files or this install is sent: the request
  * carries no version, no ID and no cookies, and the comparison with the
- * installed version happens here, on this machine.
+ * installed version happens on this machine.
  *
- * The app never downloads or installs anything itself. An available update is
- * announced with a link to the release page; the user decides what to do.
+ * Finding an update downloads nothing. The user then chooses "Update now" (or
+ * opts in to background downloads): the installer is fetched from the release,
+ * checked against the signing key compiled into the app, and only run when the
+ * user presses "Restart & update". All of that lives in src-tauri/src/updates.rs.
  *
  * Kept free of React and Tauri imports so scripts/check-updates.ts can load
  * `isNewerVersion` under plain Node.

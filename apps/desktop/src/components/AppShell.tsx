@@ -11,7 +11,13 @@ import { TOOLS, type Tool } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 import { isTauri } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
-import { checkForUpdate, dismissUpdate, useUpdateCheck } from "@/lib/useUpdateCheck";
+import {
+  checkForUpdate,
+  dismissUpdate,
+  downloadUpdate,
+  installUpdate,
+  useUpdateCheck,
+} from "@/lib/useUpdateCheck";
 
 type Theme = "light" | "dark";
 
@@ -121,7 +127,7 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
       {updateCheckOn ? (
         <div
           className="flex items-center gap-1.5 rounded-[7px] bg-surface-2 px-2.5 py-[3px]"
-          title="The update check is on: the app asks GitHub for the latest release number and sends nothing else. Turn it off in Settings."
+          title="The update check is on: the app asks GitHub for the latest release number and sends nothing else. Nothing is downloaded unless you ask for it. Turn it off in Settings."
         >
           <span className="size-[5px] rounded-full bg-accent" />
           <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-muted">
@@ -379,11 +385,30 @@ function StatusBar() {
 // Update notice (only ever shown to someone who opted in to the check)
 // ---------------------------------------------------------------------------
 
-function UpdateBanner() {
-  const { status, latest, dismissed } = useUpdateCheck();
-  if (status !== "available" || !latest || dismissed === latest.version) return null;
+function formatMb(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)} MB`;
+}
 
-  const open = async () => {
+const bannerLink =
+  "rounded text-[13px] font-semibold text-accent underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent";
+const bannerButton =
+  "h-6 rounded-md bg-accent px-2.5 text-[12.5px] font-semibold text-white outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 disabled:opacity-60";
+
+function UpdateBanner() {
+  const { status, latest, dismissed, progress, error } = useUpdateCheck();
+  // "Later" on a downloaded update hides the banner until the next launch; the
+  // update stays ready in Settings.
+  const [readyHidden, setReadyHidden] = useState(false);
+
+  if (!latest) return null;
+  const visible =
+    status === "downloading" ||
+    status === "installing" ||
+    (status === "ready" && !readyHidden) ||
+    (status === "available" && dismissed !== latest.version);
+  if (!visible) return null;
+
+  const openRelease = async () => {
     try {
       const { openUrl } = await import("@tauri-apps/plugin-opener");
       await openUrl(latest.url);
@@ -392,33 +417,101 @@ function UpdateBanner() {
     }
   };
 
+  const pct =
+    progress && progress.total ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100)) : null;
+
+  let message: ReactNode;
+  let actions: ReactNode = null;
+
+  if (status === "downloading") {
+    message = (
+      <>
+        <span className="font-semibold">Downloading iLoathePDF {latest.version}…</span>{" "}
+        <span className="text-muted">
+          {pct !== null && progress?.total
+            ? `${pct}% of ${formatMb(progress.total)}`
+            : progress
+              ? formatMb(progress.downloaded)
+              : ""}
+          {" — "}keep working, it runs in the background.
+        </span>
+      </>
+    );
+  } else if (status === "installing") {
+    message = (
+      <>
+        <span className="font-semibold">Installing iLoathePDF {latest.version}…</span>{" "}
+        <span className="text-muted">The app closes, updates and reopens by itself.</span>
+      </>
+    );
+  } else if (status === "ready") {
+    message = (
+      <>
+        <span className="font-semibold">iLoathePDF {latest.version} is ready to install.</span>{" "}
+        <span className="text-muted">
+          {error ?? "Windows will ask for permission, then the app reopens."}
+        </span>
+      </>
+    );
+    actions = (
+      <>
+        <button type="button" onClick={() => void installUpdate()} className={bannerButton}>
+          {error ? "Retry" : "Restart & update"}
+        </button>
+        <button type="button" onClick={() => setReadyHidden(true)} className={bannerLink}>
+          Later
+        </button>
+      </>
+    );
+  } else {
+    message = (
+      <>
+        <span className="font-semibold">iLoathePDF {latest.version} is available.</span>{" "}
+        <span className={error ? "text-danger" : "text-muted"}>
+          {error ?? `You have ${__APP_VERSION__}.`}
+        </span>
+      </>
+    );
+    actions = (
+      <>
+        <button type="button" onClick={() => void downloadUpdate()} className={bannerButton}>
+          {error ? "Retry" : "Update now"}
+        </button>
+        <button type="button" onClick={() => void openRelease()} className={bannerLink}>
+          What’s new
+        </button>
+      </>
+    );
+  }
+
   return (
     <div
       role="status"
-      className="flex h-9 flex-none items-center gap-3 border-b border-border bg-accent-soft px-3.5"
+      className="relative flex h-9 flex-none items-center gap-3 border-b border-border bg-accent-soft px-3.5"
     >
-      <span className="text-[13px] text-text">
-        <span className="font-semibold">iLoathePDF {latest.version} is available.</span>{" "}
-        <span className="text-muted">You have {__APP_VERSION__}.</span>
-      </span>
-      <button
-        type="button"
-        onClick={() => void open()}
-        className="rounded text-[13px] font-semibold text-accent underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        View release
-      </button>
+      <span className="min-w-0 truncate text-[13px] text-text">{message}</span>
+      {actions}
       <div className="flex-1" />
-      <button
-        type="button"
-        onClick={() => dismissUpdate(latest.version)}
-        aria-label="Dismiss this notice"
-        className="grid size-6 place-items-center rounded text-muted outline-none hover:text-text focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1.2">
-          <path d="M1 1l8 8M9 1L1 9" />
-        </svg>
-      </button>
+      {status === "available" ? (
+        <button
+          type="button"
+          onClick={() => dismissUpdate(latest.version)}
+          aria-label="Dismiss this notice"
+          className="grid size-6 place-items-center rounded text-muted outline-none hover:text-text focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1.2">
+            <path d="M1 1l8 8M9 1L1 9" />
+          </svg>
+        </button>
+      ) : null}
+      {status === "downloading" ? (
+        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-border">
+          <div
+            className="h-full bg-accent transition-[width] duration-200"
+            style={{ width: pct === null ? "30%" : `${pct}%` }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -13,6 +13,9 @@ import { isTauri, ping, type PingResult } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
 import {
   checkForUpdate,
+  downloadUpdate,
+  installUpdate,
+  setAutoDownload,
   setUpdateCheckEnabled,
   useUpdateCheck,
 } from "@/lib/useUpdateCheck";
@@ -37,7 +40,7 @@ function Section({
 
 function UpdatesPanel() {
   const update = useUpdateCheck();
-  const { enabled, status, latest, checkedAt, error } = update;
+  const { enabled, autoDownload, status, latest, progress, checkedAt, error } = update;
 
   return (
     <div className="grid gap-4">
@@ -58,7 +61,7 @@ function UpdatesPanel() {
           </label>
           <p className="mt-0.5 text-[13px] text-muted">
             {enabled
-              ? "On. The app checks when it starts and shows a notice if there is a newer release. Switch this off at any time and it stops."
+              ? "On. The app checks when it starts and shows a notice if there is a newer release. You choose when to install it. Switch this off at any time and it stops."
               : "Off. The app makes no network requests."}
           </p>
         </div>
@@ -71,9 +74,9 @@ function UpdatesPanel() {
         <ul className="grid gap-1.5">
           <li>
             The app asks GitHub one question — “what is the latest release of iLoathePDF?” — by
-            fetching{" "}
+            fetching one small file,{" "}
             <span className="font-mono text-[12px] text-text">
-              api.github.com/repos/Nisarg6502/iLoathePDF/releases/latest
+              github.com/Nisarg6502/iLoathePDF/releases/latest/download/latest.json
             </span>
             .
           </li>
@@ -86,32 +89,85 @@ function UpdatesPanel() {
             address. We receive nothing and keep no record.
           </li>
           <li>
-            Nothing is downloaded or installed for you. If there is a newer version you get a link
-            to its release page, and you decide whether to use it.
+            Nothing is downloaded until you press <strong>Update now</strong> (or turn on automatic
+            download below). The download keeps running in the background while you work, and it
+            is checked against a signing key built into this app — a file that does not match is
+            thrown away. Installing only happens when you press <strong>Restart &amp; update</strong>.
           </li>
         </ul>
       </div>
 
       {enabled ? (
+        <div className="flex items-start gap-3">
+          <Switch
+            id="update-auto"
+            checked={autoDownload}
+            onCheckedChange={setAutoDownload}
+            aria-labelledby="update-auto-label"
+          />
+          <div className="min-w-0">
+            <label
+              id="update-auto-label"
+              htmlFor="update-auto"
+              className="text-[13.5px] font-semibold text-text"
+            >
+              Download new versions in the background
+            </label>
+            <p className="mt-0.5 text-[13px] text-muted">
+              {autoDownload
+                ? "On. A new version downloads by itself (the installer is large) and waits for you to restart. It is never installed without you."
+                : "Off. A new version only downloads when you press Update now."}
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {enabled ? (
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => void checkForUpdate()}
-            disabled={status === "checking"}
-          >
-            {status === "checking" ? "Checking…" : "Check now"}
-          </Button>
+          {status === "available" && latest ? (
+            <Button onClick={() => void downloadUpdate()}>
+              {error ? "Retry update" : "Update now"}
+            </Button>
+          ) : status === "downloading" ? (
+            <Button disabled>Downloading…</Button>
+          ) : status === "ready" ? (
+            <Button onClick={() => void installUpdate()}>
+              {error ? "Retry install" : "Restart & update"}
+            </Button>
+          ) : status === "installing" ? (
+            <Button disabled>Installing…</Button>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={() => void checkForUpdate()}
+              disabled={status === "checking"}
+            >
+              {status === "checking" ? "Checking…" : "Check now"}
+            </Button>
+          )}
           <span
-            className={`text-[13.5px] ${status === "error" ? "text-danger" : "text-muted"}`}
+            className={`text-[13.5px] ${status === "error" || error ? "text-danger" : "text-muted"}`}
             role="status"
           >
-            {status === "error"
-              ? (error ?? "The check failed.")
-              : status === "available" && latest
-                ? `Version ${latest.version} is available (you have ${__APP_VERSION__}).`
-                : status === "current"
-                  ? `You are up to date${checkedAt ? ` — checked ${formatChecked(checkedAt)}` : ""}.`
-                  : ""}
+            {error
+              ? error
+              : status === "error"
+                ? "The check failed."
+                : status === "downloading" && latest
+                  ? `Downloading ${latest.version}${
+                      progress?.total
+                        ? ` — ${Math.round((progress.downloaded / progress.total) * 100)}%`
+                        : ""
+                    }…`
+                  : status === "ready" && latest
+                    ? `Version ${latest.version} is downloaded and ready. Windows will ask for permission, then the app reopens.`
+                    : status === "installing"
+                      ? "Handing over to the installer…"
+                      : status === "available" && latest
+                        ? `Version ${latest.version} is available (you have ${__APP_VERSION__}).`
+                        : status === "current"
+                          ? `You are up to date${checkedAt ? ` — checked ${formatChecked(checkedAt)}` : ""}.`
+                          : ""}
           </span>
         </div>
       ) : null}
@@ -152,7 +208,7 @@ export default function Settings() {
 
         <Section
           title={`iLoathePDF ${__APP_VERSION__}`}
-          hint="To update, download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one. Or let the app tell you when there is one — see Updates below."
+          hint="To update, switch on the update check under Updates below and the app can download and install new versions itself. Or download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one."
         >
           <div className="mb-2 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
             WHAT’S NEW
@@ -228,7 +284,7 @@ export default function Settings() {
         >
           <ul className="grid gap-2">
             {[
-              "Your files never touch the network. The only network code is the optional update check above, and it is off unless you turn it on. The window itself blocks every remote origin.",
+              "Your files never touch the network. The only network code is the optional update check above (and the update download you start from it), and it is off unless you turn it on. The window itself blocks every remote origin.",
               "No analytics, no crash reporting, and nothing is ever downloaded or installed automatically.",
               "EXIF, including GPS, is stripped from converted images by default.",
               "Results are written atomically and never overwrite an existing file.",
