@@ -39,7 +39,7 @@ const FAQS: [string, React.ReactNode][] = [
 
 export function Faq() {
   return (
-    <div id="faq" className="mx-auto max-w-6xl px-8 pb-20">
+    <div id="faq" className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
       <h2 className="m-0 mb-1.5 text-[26px] font-semibold tracking-[-0.025em]">Questions</h2>
       <p className="m-0 max-w-[56ch] text-[15px] text-muted">
         The things people usually ask before they trust a PDF tool with a file they care about.

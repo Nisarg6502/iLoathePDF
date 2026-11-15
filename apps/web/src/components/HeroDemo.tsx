@@ -88,12 +88,12 @@ export function HeroDemo() {
         </div>
         <div className="mt-4.5 rounded-xl border border-border bg-surface-2 p-5">
           <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">RESULT</div>
-          <div className="mt-3 flex items-baseline gap-3 font-mono">
-            <span className="text-[22px] text-faint line-through">3.14 MB</span>
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="var(--faint)" strokeWidth="1.5">
+          <div className="mt-3 flex items-baseline gap-2 whitespace-nowrap font-mono sm:gap-3">
+            <span className="text-[16px] text-faint line-through sm:text-[22px]">3.14 MB</span>
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="var(--faint)" strokeWidth="1.5" className="flex-none">
               <path d="M3 8h10M9 4l4 4-4 4" />
             </svg>
-            <span className="text-[38px] font-bold tracking-[-0.03em]">{formatSize(sizeKb)}</span>
+            <span className="text-[28px] font-bold tracking-[-0.03em] sm:text-[38px]">{formatSize(sizeKb)}</span>
           </div>
           <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-surface-3">
             <span className="bg-ok" style={{ width: `${progress}%` }} />

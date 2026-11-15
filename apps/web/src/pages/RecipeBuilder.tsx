@@ -15,7 +15,7 @@ export function RecipeBuilder() {
 
   if (slug && !existing) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-14">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14">
         <h1 className="text-2xl font-semibold">Recipe not found</h1>
         <Link to="/recipes" className="mt-4 inline-block font-mono text-[12px] text-accent">← All recipes</Link>
       </div>
@@ -46,7 +46,7 @@ export function RecipeBuilder() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-8 py-13">
+    <div className="mx-auto max-w-3xl px-5 sm:px-8 py-13">
       <Link to="/recipes" className="font-mono text-[12px] text-accent">← All recipes</Link>
       <h1 className="mt-3 text-[28px] font-semibold tracking-[-0.028em]">
         {existing ? "Edit recipe" : "New recipe"}

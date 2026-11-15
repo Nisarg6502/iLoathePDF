@@ -10,7 +10,7 @@ export function ToolsIndex() {
   const documentTools = TOOLS.filter((t) => t.category === "document");
 
   return (
-    <div className="mx-auto max-w-6xl px-8 py-13">
+    <div className="mx-auto max-w-6xl px-5 sm:px-8 py-13">
       <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">All tools</h1>
       <p className="mt-2.5 max-w-[58ch] text-[15.5px] text-muted">
         Each one runs right here — pick a tool, drop a file, get a file.

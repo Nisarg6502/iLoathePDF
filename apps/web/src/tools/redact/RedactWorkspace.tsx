@@ -131,7 +131,7 @@ export function RedactWorkspace({ tool }: { tool: ToolConfig }) {
 
   if (!file) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-8">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
         <div className="mt-3.5 max-w-2xl">
           <FileDropZone accept={tool.accept} multiple={false} onFiles={(files) => files[0] && setFile(files[0])} />
         </div>
@@ -141,7 +141,7 @@ export function RedactWorkspace({ tool }: { tool: ToolConfig }) {
 
   if (result) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-8">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
         <div className="mt-3.5 max-w-2xl">
           <ResultCard result={result} onReset={reset} />
         </div>
@@ -150,7 +150,7 @@ export function RedactWorkspace({ tool }: { tool: ToolConfig }) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-8 py-8">
+    <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
       <div className="mt-3.5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_320px]">
         {/* Page preview */}
         <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-surface-2 p-5">

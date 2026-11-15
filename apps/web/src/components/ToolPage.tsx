@@ -80,7 +80,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-8 py-8">
+    <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
       <div className="mt-3.5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_344px]">
         <div>
           <AnimatePresence mode="wait">

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 
 const smallButton =
-  "flex-none rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-40";
+  "flex-none rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-40 max-sm:min-h-10 max-sm:min-w-10";
 
 /**
  * Ordered file list for multi-file PDF tools (Merge): the order is part of the
@@ -53,7 +53,10 @@ export function PdfInputList({
     <>
       <ul className="flex flex-col gap-2">
         {files.map((f, i) => (
-          <li key={keyOf(f)} className="flex items-center gap-3.5 rounded-xl border border-border bg-surface-2 p-3.5">
+          <li
+            key={keyOf(f)}
+            className="flex flex-wrap items-center gap-x-3.5 gap-y-2.5 rounded-xl border border-border bg-surface-2 p-3 sm:p-3.5"
+          >
             <span className="w-4 flex-none text-center font-mono text-[12px] text-faint tabular-nums">{i + 1}</span>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium" title={f.name}>
@@ -61,6 +64,8 @@ export function PdfInputList({
               </div>
               <div className="mt-0.5 font-mono text-[11.5px] text-muted">{(f.size / 1024).toFixed(0)} KB</div>
             </div>
+            {/* Below `sm` the controls drop onto their own line so the file name keeps its room. */}
+            <div className="flex flex-none items-center gap-2 max-sm:w-full max-sm:justify-end">
             {running && (
               <svg className="spinner size-4 flex-none text-accent" viewBox="0 0 20 20" fill="none">
                 <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
@@ -94,6 +99,7 @@ export function PdfInputList({
             >
               ✕
             </button>
+            </div>
           </li>
         ))}
       </ul>

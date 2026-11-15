@@ -262,7 +262,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
 
   if (!file) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-8">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
         <div className="mt-3.5 max-w-2xl">
           <FileDropZone accept={tool.accept} multiple={false} onFiles={(files) => files[0] && setFile(files[0])} />
         </div>
@@ -277,7 +277,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-110px)] max-w-6xl flex-col px-8 py-4">
+    <div className="mx-auto flex h-[calc(100vh-110px)] max-w-6xl flex-col px-5 sm:px-8 py-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span className="max-w-[28ch] truncate text-[13px] font-semibold" title={file.name}>
           {file.name}
@@ -312,7 +312,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
               Fit width
             </button>
             <form
-              className="ml-auto flex items-center gap-1.5"
+              className="flex items-center gap-1.5 max-sm:w-full sm:ml-auto"
               onSubmit={(e) => {
                 e.preventDefault();
                 void runSearch();
@@ -323,7 +323,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
                 placeholder="Find…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="h-8 w-40 rounded-lg border border-border bg-surface px-2.5 text-[13px]"
+                className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-surface px-2.5 text-[13px] sm:w-40 sm:flex-none"
               />
               <button type="button" aria-label="Previous match" className={btn} disabled={!matches.length} onClick={() => step(-1)}>
                 ↑
@@ -331,7 +331,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
               <button type="button" aria-label="Next match" className={btn} disabled={!matches.length} onClick={() => step(1)}>
                 ↓
               </button>
-              <span className="w-24 text-[12px] text-muted" aria-live="polite">
+              <span className="w-[4.5rem] flex-none text-[12px] text-muted sm:w-24" aria-live="polite">
                 {searching ? "Searching…" : matches.length ? `${matchIndex + 1} of ${matches.length}` : query.trim() ? "No matches" : ""}
               </span>
             </form>

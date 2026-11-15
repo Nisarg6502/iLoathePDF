@@ -11,7 +11,7 @@ export function ToolDetail() {
 
   if (!tool) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-14">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14">
         <h1 className="text-2xl font-semibold">Tool not found</h1>
       </div>
     );
@@ -20,7 +20,7 @@ export function ToolDetail() {
   if (tool.status === "desktop-only") {
     return (
       <div>
-        <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-8 pt-8">
+        <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-5 sm:px-8 pt-8">
           <span
             className="grid size-9.5 flex-none place-items-center rounded-[11px] border border-border"
             style={{ background: tintWash(tool.tint, 14) }}
@@ -35,7 +35,7 @@ export function ToolDetail() {
             <p className="mt-1 text-sm text-muted">{tool.description}</p>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-8 py-10">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10">
           <p className="max-w-[58ch] text-[14px] leading-relaxed text-muted">
             {tool.desktopOnlyNote ?? "This tool needs an engine that isn't available in a browser — it's desktop-only for now."}
           </p>
@@ -49,7 +49,7 @@ export function ToolDetail() {
 
   return (
     <div>
-      <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-8 pt-8">
+      <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-5 sm:px-8 pt-8">
         <span
           className="grid size-9.5 flex-none place-items-center rounded-[11px] border border-border"
           style={{ background: tintWash(tool.tint, 14) }}
