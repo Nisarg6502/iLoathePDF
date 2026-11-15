@@ -44,6 +44,71 @@ describe("ToolPage", () => {
     expect(screen.getByText("out.pdf")).toBeInTheDocument();
   });
 
+  describe("after a result", () => {
+    // An options panel with one field (the output name) and an engine that uses it.
+    const namedTool = () =>
+      makeTool({
+        defaultOptions: { name: "first" },
+        OptionsPanel: ({ options, onChange, disabled }) => (
+          <input
+            aria-label="Output name"
+            disabled={disabled}
+            value={String(options.name ?? "")}
+            onChange={(e) => onChange({ ...options, name: e.target.value })}
+          />
+        ),
+        engine: async ({ options }) => ({
+          files: [{ name: `${String(options.name)}.pdf`, blob: new Blob(["x"]) }],
+          summary: "Done",
+          isPreview: false,
+        }),
+      });
+
+    async function runOnce() {
+      render(<ToolPage tool={namedTool()} />);
+      const file = new File(["content"], "input.pdf", { type: "application/pdf" });
+      fireEvent.change(screen.getByTestId("file-input"), { target: { files: [file] } });
+      fireEvent.click(await screen.findByRole("button", { name: "Run" }));
+      await screen.findByText("first.pdf");
+    }
+
+    it("keeps the options editable, but only offers Run again once something changed", async () => {
+      await runOnce();
+
+      expect(screen.getByLabelText("Output name")).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Run again" })).toBeDisabled();
+      expect(screen.getByText(/change an option above to run again/i)).toBeInTheDocument();
+      expect(screen.queryByRole("status")).toBeNull();
+
+      fireEvent.change(screen.getByLabelText("Output name"), { target: { value: "second" } });
+
+      expect(screen.getByRole("button", { name: "Run again" })).toBeEnabled();
+      expect(screen.getByRole("status")).toHaveTextContent(/changed the options/i);
+    });
+
+    it("runs again with the new options and replaces the result", async () => {
+      await runOnce();
+
+      fireEvent.change(screen.getByLabelText("Output name"), { target: { value: "second" } });
+      fireEvent.click(screen.getByRole("button", { name: "Run again" }));
+
+      expect(await screen.findByText("second.pdf")).toBeInTheDocument();
+      expect(screen.queryByText("first.pdf")).toBeNull();
+      // The new result matches the options again, so there is nothing to re-run.
+      expect(screen.getByRole("button", { name: "Run again" })).toBeDisabled();
+      expect(screen.queryByRole("status")).toBeNull();
+    });
+
+    it("goes quiet again if the option is changed back", async () => {
+      await runOnce();
+
+      fireEvent.change(screen.getByLabelText("Output name"), { target: { value: "second" } });
+      fireEvent.change(screen.getByLabelText("Output name"), { target: { value: "first" } });
+
+      expect(screen.getByRole("button", { name: "Run again" })).toBeDisabled();
+    });
+  });
+
   it("shows an error state when the engine throws", async () => {
     const tool = makeTool({
       engine: async () => {
