@@ -12,7 +12,7 @@ export function Home() {
 
   return (
     <div>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-8 pb-16 pt-12 md:grid-cols-2 md:gap-16">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-5 sm:px-8 pb-16 pt-12 md:grid-cols-2 md:gap-16">
         <div>
           <div className="mb-4 flex items-center gap-2">
             <span className="size-1.5 rounded-sm bg-accent" />
@@ -28,10 +28,10 @@ export function Home() {
             on your own machine. There is no upload step, because there is
             nowhere to upload to.
           </p>
-          <div className="mt-8 flex gap-2.5">
+          <div className="mt-8 flex flex-wrap gap-2.5">
             <Link
               to="/tools/compress"
-              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97] active:bg-accent-deep"
+              className="inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:scale-[0.97] active:bg-accent-deep"
             >
               Open the tools
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -40,7 +40,7 @@ export function Home() {
             </Link>
             <Link
               to="/download"
-              className="inline-flex h-11 items-center rounded-[11px] border border-border-hi bg-surface px-4.5 text-[14.5px] font-medium text-text transition-transform duration-100 hover:bg-surface-2 active:scale-[0.97]"
+              className="inline-flex h-11 items-center whitespace-nowrap rounded-[11px] border border-border-hi bg-surface px-4.5 text-[14.5px] font-medium text-text transition-transform duration-100 hover:bg-surface-2 active:scale-[0.97]"
             >
               Get the desktop app
             </Link>
@@ -57,7 +57,7 @@ export function Home() {
       </div>
 
       <div className="border-t border-border">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-8 py-16 md:grid-cols-2 md:gap-16">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-5 sm:px-8 py-16 md:grid-cols-2 md:gap-16">
           <motion.div
             initial={reduce ? false : { opacity: 0, transform: "translateY(10px)" }}
             whileInView={{ opacity: 1, transform: "translateY(0px)" }}
@@ -98,10 +98,10 @@ export function Home() {
       </div>
 
       <div className="border-t border-border bg-surface">
-        <div className="mx-auto max-w-6xl px-8 py-14">
-          <div className="mb-6 flex items-baseline justify-between">
-            <h2 className="m-0 text-[26px] font-semibold tracking-[-0.025em]">Twenty-three tools, one page each</h2>
-            <Link to="/tools" className="text-[13.5px] text-accent">See all →</Link>
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14">
+          <div className="mb-6 flex items-baseline justify-between gap-4">
+            <h2 className="m-0 text-[22px] font-semibold tracking-[-0.025em] sm:text-[26px]">Twenty-three tools, one page each</h2>
+            <Link to="/tools" className="flex-none whitespace-nowrap text-[13.5px] text-accent">See all →</Link>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {["merge", "split", "organize", "sign"]
@@ -136,7 +136,7 @@ export function Home() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-8 py-16">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-16">
         <h2 className="m-0 mb-1.5 text-[26px] font-semibold tracking-[-0.025em]">Why nothing uploads</h2>
         <p className="m-0 max-w-[56ch] text-[15px] text-muted">
           Merge, split and the other tools run against the same file

@@ -49,7 +49,7 @@ export default function App() {
           <Route
             path="*"
             element={
-              <div className="mx-auto max-w-6xl px-8 py-24 text-center">
+              <div className="mx-auto max-w-6xl px-5 sm:px-8 py-24 text-center">
                 <p className="text-lg font-semibold">Page not found</p>
               </div>
             }

@@ -11,7 +11,7 @@ export function Privacy() {
   ];
 
   return (
-    <div className="mx-auto max-w-[820px] px-8 py-14">
+    <div className="mx-auto max-w-[820px] px-5 sm:px-8 py-14">
       <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">Privacy</h1>
       <p className="mt-3 text-base leading-relaxed text-muted">
         Short version: this site has no server-side processing, no accounts,

@@ -175,4 +175,44 @@ describe("SiteHeader", () => {
     fireEvent.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: /Merge PDF/ }));
     expect(screen.getByTestId("where")).toHaveTextContent("/tools/merge");
   });
+
+  describe("on a phone (menu button)", () => {
+    const menuButton = () => screen.getByRole("button", { name: /menu/i });
+
+    it("starts closed, then lists every page and the desktop app when opened", () => {
+      renderHeader();
+      expect(menuButton()).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByRole("navigation", { name: "Menu" })).not.toBeInTheDocument();
+
+      fireEvent.click(menuButton());
+
+      expect(menuButton()).toHaveAttribute("aria-expanded", "true");
+      const panel = screen.getByRole("navigation", { name: "Menu" });
+      for (const label of ["Home", "Tools", "Recipes", "How it works", "Privacy"]) {
+        expect(within(panel).getByRole("link", { name: label })).toBeInTheDocument();
+      }
+      expect(within(panel).getByRole("link", { name: /desktop app/i })).toHaveAttribute("href", "/download");
+    });
+
+    it("closes after following a link", () => {
+      renderHeader();
+      fireEvent.click(menuButton());
+      fireEvent.click(within(screen.getByRole("navigation", { name: "Menu" })).getByRole("link", { name: "Privacy" }));
+
+      expect(screen.getByTestId("where")).toHaveTextContent("/privacy");
+      expect(screen.queryByRole("navigation", { name: "Menu" })).not.toBeInTheDocument();
+      expect(menuButton()).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("closes on Escape and when the button is pressed again", () => {
+      renderHeader();
+      fireEvent.click(menuButton());
+      fireEvent.keyDown(document, { key: "Escape" });
+      expect(screen.queryByRole("navigation", { name: "Menu" })).not.toBeInTheDocument();
+
+      fireEvent.click(menuButton());
+      fireEvent.click(menuButton());
+      expect(screen.queryByRole("navigation", { name: "Menu" })).not.toBeInTheDocument();
+    });
+  });
 });

@@ -56,7 +56,7 @@ export function Download() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1100px] px-8 py-14">
+    <div className="mx-auto max-w-[1100px] px-5 sm:px-8 py-14">
       <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-[1fr_400px]">
         <div>
           <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-accent">WINDOWS</span>

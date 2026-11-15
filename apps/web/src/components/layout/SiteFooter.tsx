@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export function SiteFooter() {
   return (
     <div className="border-t border-border bg-surface">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-start gap-14 px-8 py-9">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-start gap-14 px-5 sm:px-8 py-9">
         <div className="min-w-[220px] flex-1">
           <div className="flex items-center gap-2">
             <span className="size-[18px] rounded-[5px] bg-accent" />

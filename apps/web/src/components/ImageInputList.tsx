@@ -25,7 +25,7 @@ function describeEdit(edit: ImageEdit | undefined): string | null {
 }
 
 const smallButton =
-  "flex-none rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-40";
+  "flex-none rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-40 max-sm:min-h-10 max-sm:min-w-10";
 
 export function ImageInputList({
   files,
@@ -95,7 +95,10 @@ export function ImageInputList({
         {files.map((f, i) => {
           const summary = describeEdit(edits[i]);
           return (
-            <li key={keyOf(f)} className="flex items-center gap-3.5 rounded-xl border border-border bg-surface-2 p-3.5">
+            <li
+              key={keyOf(f)}
+              className="flex flex-wrap items-center gap-x-3.5 gap-y-2.5 rounded-xl border border-border bg-surface-2 p-3 sm:p-3.5"
+            >
               {onFilesChange && (
                 <span className="w-4 flex-none text-center font-mono text-[12px] text-faint tabular-nums">{i + 1}</span>
               )}
@@ -108,6 +111,8 @@ export function ImageInputList({
                   {(f.size / 1024).toFixed(0)} KB{summary ? ` · ${summary}` : ""}
                 </div>
               </div>
+              {/* Below `sm` the controls drop onto their own line so the file name keeps its room. */}
+              <div className="flex flex-none items-center gap-2 max-sm:w-full max-sm:justify-end">
               {onFilesChange && (
                 <>
                   <button
@@ -134,7 +139,7 @@ export function ImageInputList({
                 type="button"
                 disabled={disabled}
                 onClick={() => setEditingIndex(i)}
-                className="flex-none rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-50"
+                className="flex-none rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-50 max-sm:min-h-10 max-sm:px-4"
               >
                 Edit
               </button>
@@ -149,6 +154,7 @@ export function ImageInputList({
                   ✕
                 </button>
               )}
+              </div>
             </li>
           );
         })}

@@ -38,7 +38,7 @@ export function RecipeDetail() {
 
   if (!recipe) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-14">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14">
         <h1 className="text-2xl font-semibold">Recipe not found</h1>
       </div>
     );
@@ -47,7 +47,7 @@ export function RecipeDetail() {
   if (recipe.status === "desktop-only") {
     return (
       <div>
-        <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-8 pt-8">
+        <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-5 sm:px-8 pt-8">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{recipe.title}</h1>
@@ -56,7 +56,7 @@ export function RecipeDetail() {
             <p className="mt-1 text-sm text-muted">{recipe.description}</p>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-8 py-10">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10">
           <p className="max-w-[58ch] text-[14px] leading-relaxed text-muted">
             This recipe needs a local table-extraction engine that isn't available in a browser yet — it's desktop-only for now.
           </p>
@@ -103,7 +103,7 @@ export function RecipeDetail() {
 
   return (
     <div>
-      <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-8 pt-8">
+      <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-5 sm:px-8 pt-8">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{recipe.title}</h1>
@@ -131,7 +131,7 @@ export function RecipeDetail() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-8 py-8">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
         <div className="mt-3.5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_344px]">
           <div>
             <AnimatePresence mode="wait">
