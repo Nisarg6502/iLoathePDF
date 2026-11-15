@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ToolConfig } from "@/tools/ToolConfig";
 import type { EngineResult } from "@/engines/types";
@@ -27,6 +27,22 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
   const [error, setError] = useState<string | null>(null);
   const [dismissedSizeWarning, setDismissedSizeWarning] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  // What the current result was made from, so changing an option afterwards can
+  // be told apart from nothing having changed (re-running that would be a no-op).
+  const [lastRun, setLastRun] = useState<string | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  const runKey = () => JSON.stringify([options, files.map((f) => [f.name, f.size])]);
+  const changedSinceRun = step === "done" && lastRun !== null && runKey() !== lastRun;
+
+  // On a phone the options sit below the result, so bring the result into view
+  // once it has appeared (it enters after the previous step has faded out, so
+  // this runs from the enter animation rather than when the step changes); on
+  // a wide screen both are already side by side.
+  function revealResult() {
+    if (typeof window.matchMedia !== "function" || !window.matchMedia("(max-width: 1023px)").matches) return;
+    resultRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+  }
 
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
   const showSizeWarning = totalBytes > LARGE_FILE_WARNING_BYTES && !dismissedSizeWarning;
@@ -43,6 +59,14 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
 
   // Same rule the desktop app enforces: joining one file to nothing is a mistake, not a merge.
   const mergeNeedsTwo = tool.slug === "merge" && files.length < 2;
+
+  // After a result, running again with nothing changed would only repeat it.
+  const runDisabled =
+    step === "empty" ||
+    step === "running" ||
+    protectInvalid ||
+    mergeNeedsTwo ||
+    (step === "done" && !changedSinceRun);
 
   function handleFiles(newFiles: File[]) {
     setFiles(newFiles);
@@ -62,6 +86,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
     setFiles([]);
     setResult(null);
     setError(null);
+    setLastRun(null);
     setOptions(tool.defaultOptions);
     setStep("empty");
   }
@@ -69,6 +94,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
   async function run() {
     setStep("running");
     setError(null);
+    setLastRun(runKey());
     try {
       const engineResult = await tool.engine({ files, options });
       setResult(engineResult);
@@ -178,8 +204,17 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             )}
 
             {step === "done" && result && (
-              <motion.div key="done" {...stepFade}>
-                <ResultCard result={result} onReset={reset} />
+              <motion.div
+                key="done"
+                ref={resultRef}
+                {...stepFade}
+                className="scroll-mt-20"
+                onAnimationStart={(target) => {
+                  // Only the enter animation (opacity up to 1), not the exit.
+                  if (typeof target === "object" && (target as { opacity?: number }).opacity === 1) revealResult();
+                }}
+              >
+                <ResultCard result={result} onReset={reset} outdated={changedSinceRun} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -195,7 +230,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             <tool.OptionsPanel
               options={options}
               onChange={setOptions}
-              disabled={step === "running" || step === "done"}
+              disabled={step === "running"}
               files={files}
             />
           </div>
@@ -203,8 +238,8 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             <button
               type="button"
               onClick={run}
-              disabled={step === "empty" || step === "running" || protectInvalid || mergeNeedsTwo}
-              style={step === "empty" || step === "running" || protectInvalid || mergeNeedsTwo ? undefined : { background: tintButtonBg(tool.tint) }}
+              disabled={runDisabled}
+              style={runDisabled ? undefined : { background: tintButtonBg(tool.tint) }}
               className="flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-accent text-sm font-semibold text-on-tint transition-transform duration-100 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint active:enabled:scale-[0.97]"
             >
               {step === "running" && (
@@ -217,6 +252,11 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             </button>
             {step === "ready" && mergeNeedsTwo && (
               <p className="mt-2 text-center text-[12.5px] text-muted">Merging needs at least two PDFs.</p>
+            )}
+            {step === "done" && !changedSinceRun && (
+              <p className="mt-2 text-center text-[12.5px] text-muted">
+                Your file is ready. Change an option above to run again.
+              </p>
             )}
           </div>
         </div>
