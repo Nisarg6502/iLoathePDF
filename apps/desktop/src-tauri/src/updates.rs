@@ -10,9 +10,10 @@
 //!   comparison with the installed version happens on this machine. GitHub
 //!   sees the connection itself (an IP address and the plugin's generic user
 //!   agent), as any website does; Settings says so.
-//! * `download_update` fetches the installer the JSON points at and verifies its
-//!   signature against the public key compiled into the app (`pubkey` in
-//!   tauri.conf.json). A download that does not verify is discarded.
+//! * `download_update` fetches the installer the JSON points at (resuming if the
+//!   connection drops, see `update_download`) and verifies its signature against
+//!   the public key compiled into the app (`pubkey` in tauri.conf.json). A
+//!   download that does not verify is discarded.
 //! * `install_update` hands the verified installer to Windows, which asks for
 //!   permission, replaces the app and reopens it. Before the app exits the
 //!   document engine is stopped, otherwise its files would be locked.
@@ -25,6 +26,7 @@ use tauri_plugin_updater::{Update, UpdaterExt};
 
 use crate::commands::AppState;
 use crate::sidecar::JobError;
+use crate::update_download;
 
 /// Anything we hand back as a link must live under here, whatever the
 /// downloaded JSON says, so a malformed or tampered file cannot make the app
@@ -134,6 +136,7 @@ pub async fn check_for_update(
 
 #[tauri::command]
 pub async fn download_update(
+    app: AppHandle,
     store: State<'_, UpdateStore>,
     on_event: Channel<DownloadEvent>,
 ) -> Result<(), JobError> {
@@ -142,20 +145,53 @@ pub async fn download_update(
             JobError::internal("There is no update to download. Check again first.")
         })?;
 
-    let mut downloaded: u64 = 0;
-    let bytes = update
-        .download(
-            |chunk, total| {
-                downloaded += chunk as u64;
-                let _ = on_event.send(DownloadEvent::Progress { downloaded, total });
-            },
-            || {},
-        )
-        .await
-        .map_err(|e| {
+    // Only ever fetch over https, whatever the announcement says.
+    if update.download_url.scheme() != "https" {
+        return Err(error(
+            "The update announcement was not what the app expected.",
+            format!(
+                "download link is not https: {}",
+                update.download_url.scheme()
+            ),
+        ));
+    }
+    let pubkey = app
+        .config()
+        .plugins
+        .0
+        .get("updater")
+        .and_then(|u| u.get("pubkey"))
+        .and_then(|k| k.as_str())
+        .map(str::to_owned)
+        .ok_or_else(|| {
             error(
-                "The update could not be downloaded, or did not pass the signature check.",
-                e,
+                "The app has no update key to check the download with.",
+                "no pubkey",
+            )
+        })?;
+
+    let bytes = update_download::fetch_installer(
+        update.download_url.as_str(),
+        |downloaded, total| {
+            let _ = on_event.send(DownloadEvent::Progress { downloaded, total });
+        },
+        std::time::Duration::from_secs(2),
+    )
+    .await
+    .map_err(|message| {
+        error(
+            format!("The update could not be downloaded. {message}"),
+            &message,
+        )
+    })?;
+
+    // The installer runs with the user's permission, so nothing that fails this
+    // check is kept.
+    update_download::verify_installer(&bytes, &update.signature, &pubkey, &update.version)
+        .map_err(|message| {
+            error(
+                format!("The update was downloaded but did not pass the signature check, so it was discarded. {message}"),
+                &message,
             )
         })?;
 

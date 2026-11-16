@@ -5,6 +5,15 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.2] - 2026-11-17
+
+### Fixed
+- Updates failing on slower or unreliable connections: the installer download
+  now resumes where it left off if the connection drops, instead of failing
+  and starting over.
+- Update errors now say what went wrong (the connection, or the file not
+  passing the signature check) rather than one vague message.
+
 ## [0.5.1] - 2026-11-15
 
 ### Security
