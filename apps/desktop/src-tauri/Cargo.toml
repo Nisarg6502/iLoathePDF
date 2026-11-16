@@ -1,6 +1,6 @@
 [package]
 name = "iloathepdf"
-version = "0.5.1"
+version = "0.5.2"
 description = "Offline PDF and image toolkit"
 authors = ["Nisarg6502"]
 license = "MIT"
@@ -26,3 +26,10 @@ tauri-plugin-log = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2"
+# The update download is done here (resumable, with real error messages) rather
+# than by the updater plugin; same feature set as the plugin so nothing extra is built.
+reqwest = { version = "0.13", default-features = false, features = ["stream", "rustls-no-provider", "system-proxy"] }
+futures-util = "0.3"
+minisign-verify = "0.2"
+base64 = "0.22"
+rustls = { version = "0.23", default-features = false, features = ["ring"] }

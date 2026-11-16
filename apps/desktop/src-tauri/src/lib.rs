@@ -1,5 +1,6 @@
 mod commands;
 mod sidecar;
+mod update_download;
 mod updates;
 
 use std::sync::Arc;

@@ -19,6 +19,14 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.5.2",
+    date: "2026-11-17",
+    highlights: [
+      "Fixed updates failing on slower or unreliable connections: the download now picks up where it left off if the connection drops, instead of failing and starting over.",
+      "Update errors now say what actually went wrong (the connection, or the file not passing the signature check) instead of one vague message.",
+    ],
+  },
+  {
     version: "0.5.1",
     date: "2026-11-15",
     highlights: [
