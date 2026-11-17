@@ -85,6 +85,14 @@ jobs:
           }
           Remove-Item gs-installer.exe
 
+      - name: Trim Ghostscript and bundle its runtime
+        working-directory: apps/desktop
+        shell: pwsh
+        # Drops ~50 MB the app never uses (manuals, examples, an unrun VC++
+        # installer), copies the MSVC runtime DLLs next to gsdll64.dll, and
+        # smoke-tests the result. See the script header.
+        run: ./scripts/prune-ghostscript.ps1
+
       - name: Check version consistency
         shell: pwsh
         env:

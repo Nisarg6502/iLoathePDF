@@ -77,6 +77,13 @@ silent-installed with `/S /D=`. `find_ghostscript()` looks there first and
 and `lib/` directories beside the executable, not just the two binaries.
 `ILOATHEPDF_GS` overrides the path for ad-hoc testing.
 
+After installing or extracting it, run `scripts/prune-ghostscript.ps1` (the
+release workflow does). It deletes the ~50 MB the app never uses (manuals,
+examples, the GUI console, and a VC++ redistributable installer that
+extraction never runs), copies the MSVC runtime DLLs that `gsdll64.dll` needs
+into `bin/` so Ghostscript works on PCs without the VC++ redistributable, and
+smoke-tests the result.
+
 `vendor/` is gitignored, so a fresh clone must reinstall it. See the AGPL note in
 SPECS.md before distributing anything.
 

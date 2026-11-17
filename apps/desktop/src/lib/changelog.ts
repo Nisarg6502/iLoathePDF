@@ -19,6 +19,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.5.3",
+    date: "2026-11-17",
+    highlights: [
+      "Much smaller download: the installer is about 60 MB instead of over 300 MB. It no longer carries Microsoft's WebView2 runtime, which Windows already has; a small helper fetches it only on a PC that lacks it.",
+      "Takes less space once installed: unused manuals, samples and libraries were left out. Output quality is unchanged.",
+      "Fixed Compress, PDF/A and OCR failing on PCs without the Visual C++ runtime installed.",
+    ],
+  },
+  {
     version: "0.5.2",
     date: "2026-11-17",
     highlights: [

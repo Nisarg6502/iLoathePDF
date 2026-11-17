@@ -5,6 +5,21 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.3] - 2026-11-17
+
+### Changed
+- Much smaller installer. It no longer bundles Microsoft's full WebView2 runtime
+  (~250 MB), which Windows 11 and updated Windows 10 already have. A 2 MB
+  bootstrapper fetches it only on a PC that lacks it.
+- Smaller install on disk: the bundled Ghostscript now ships without its
+  manuals, examples and an unused VC++ installer, and the document engine
+  leaves out the Tk GUI toolkit and the AVIF codec it never used. The app
+  binary is built with link-time optimisation. Output quality is unchanged.
+
+### Fixed
+- Compress, PDF/A and OCR could fail to start Ghostscript on a PC without the
+  Visual C++ runtime installed. The runtime DLLs now ship next to Ghostscript.
+
 ## [0.5.2] - 2026-11-17
 
 ### Fixed

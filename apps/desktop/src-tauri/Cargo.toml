@@ -1,6 +1,6 @@
 [package]
 name = "iloathepdf"
-version = "0.5.2"
+version = "0.5.3"
 description = "Offline PDF and image toolkit"
 authors = ["Nisarg6502"]
 license = "MIT"
@@ -33,3 +33,12 @@ futures-util = "0.3"
 minisign-verify = "0.2"
 base64 = "0.22"
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
+
+# Smaller app binary with the same speed: whole-program optimisation (lto,
+# one codegen unit) lets the compiler drop unused code across crates, and
+# strip leaves debug symbols out of the shipped exe. opt-level stays at the
+# default 3, and panics still unwind, so runtime behaviour is unchanged.
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
