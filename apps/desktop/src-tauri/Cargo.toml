@@ -25,7 +25,10 @@ tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
-tauri-plugin-updater = "2"
+# Default features minus `zip`: that feature only unpacks .zip update bundles,
+# and releases ship a plain signed setup .exe. Leaving it out drops the zip,
+# tar and flate2 crates (and the zip 4.x advisories RUSTSEC-2026-0545/0548).
+tauri-plugin-updater = { version = "2", default-features = false, features = ["rustls-tls", "system-proxy"] }
 # The update download is done here (resumable, with real error messages) rather
 # than by the updater plugin; same feature set as the plugin so nothing extra is built.
 reqwest = { version = "0.13", default-features = false, features = ["stream", "rustls-no-provider", "system-proxy"] }

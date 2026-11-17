@@ -20,6 +20,11 @@ app under Settings → About. Format follows
 - Compress, PDF/A and OCR could fail to start Ghostscript on a PC without the
   Visual C++ runtime installed. The runtime DLLs now ship next to Ghostscript.
 
+### Security
+- The in-app updater no longer includes the `zip` library
+  (RUSTSEC-2026-0545, RUSTSEC-2026-0548). It was only used for .zip update
+  bundles, and updates are a signed setup .exe.
+
 ## [0.5.2] - 2026-11-17
 
 ### Fixed
