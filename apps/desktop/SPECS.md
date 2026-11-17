@@ -141,8 +141,12 @@ Tauri's NSIS bundler, configured for `installMode: "perMachine"`
 (`C:\Program Files\iLoathePDF`, UAC prompt at install), a wizard with a
 directory-selection page, a Start-menu entry, a desktop shortcut, and an
 auto-generated uninstaller in Add/Remove Programs.
-`webviewInstallMode: offlineInstaller` embeds WebView2 (+~127 MB) so installing
-needs no internet, consistent with the privacy premise.
+`webviewInstallMode: embedBootstrapper` embeds Microsoft's ~2 MB WebView2
+bootstrapper rather than the full offline runtime (~250 MB, which was most of
+the installer's download size). Windows 11 and updated Windows 10 already have
+WebView2, so the bootstrapper does nothing there. Only on a PC that lacks
+WebView2 does it download the runtime from Microsoft, and that one case needs
+internet to install. The app itself still never goes online for your files.
 
 Two limits accepted rather than fought:
 

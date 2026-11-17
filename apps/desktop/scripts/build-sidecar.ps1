@@ -19,6 +19,11 @@ if (-not (Test-Path $python)) {
 
 Write-Host "Freezing the document engine..." -ForegroundColor Cyan
 
+# The --exclude-module lines keep out ~17 MB nothing in the engine uses:
+# Tcl/Tk (pulled in only because Pillow ships an optional ImageTk module) and
+# Pillow's AVIF codec (the app neither opens nor writes .avif). Pillow treats
+# a missing _avif as "AVIF unsupported", so nothing breaks at import.
+#
 # --collect-submodules ops expands to a `collect_submodules('ops')` call
 # baked into the generated .spec file, which runs `import ops` using the
 # *build process's own* sys.path -- `--paths` only reaches Analysis()'s
@@ -45,6 +50,10 @@ $env:PYTHONPATH = Join-Path $root "sidecar"
     --collect-all openpyxl `
     --hidden-import PIL.Image `
     --hidden-import PIL.ImageOps `
+    --exclude-module tkinter `
+    --exclude-module _tkinter `
+    --exclude-module PIL.ImageTk `
+    --exclude-module PIL._avif `
     (Join-Path $root "sidecar\main.py")
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed with exit code $LASTEXITCODE" }
