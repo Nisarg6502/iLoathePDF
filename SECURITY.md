@@ -29,7 +29,7 @@ Settings), so please update before reporting.
 
 - The desktop app (Tauri shell, the Python document engine, the bundled
   Ghostscript and Tesseract) and its signed update mechanism.
-- The web app at <https://nisarg6502.github.io/iLoathePDF/>.
+- The web app at <https://iloathepdf.com/>.
 - Anything that would make a file leave the user's machine, or run code
   because of a crafted PDF, image, ZIP or HTML input.
 - The release pipeline (workflows that build and sign the installer).

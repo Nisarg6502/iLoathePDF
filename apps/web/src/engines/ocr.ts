@@ -10,9 +10,9 @@ const OCR_SCALE = 300 / 72; // pdf.js viewport scale equivalent to 300 DPI
 const OCR_JPEG_QUALITY = 0.85;
 
 export function assetUrl(path: string): string {
-  // import.meta.env.BASE_URL respects Vite's configured base path (this app
-  // is served from a /iLoathePDF/ subpath on GitHub Pages, not the origin
-  // root) -- a hardcoded "/tesseract/..." would 404 there.
+  // import.meta.env.BASE_URL respects Vite's configured base path, so this
+  // keeps working if the app is ever served from a subpath again instead of
+  // the root of iloathepdf.com.
   return `${import.meta.env.BASE_URL}tesseract/${path}`;
 }
 
