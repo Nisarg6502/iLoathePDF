@@ -156,9 +156,11 @@ Web:
   is a long-lived Python process (pikepdf, Pillow, pillow-heif, img2pdf,
   Ghostscript) speaking newline-delimited JSON, frozen with PyInstaller.
 - **Web** — React 19, TypeScript, Tailwind v4, React Router, deployed to
-  GitHub Pages. Every tool page follows the same shell: drop a file, set
-  options, run, get a result — and a live request counter proves the site
-  makes no network calls after the page loads.
+  GitHub Pages at [iloathepdf.com](https://iloathepdf.com/) (custom domain,
+  served from the root; `apps/web/public/CNAME` holds the domain). Every tool
+  page follows the same shell: drop a file, set options, run, get a result —
+  and a live request counter proves the site makes no network calls after the
+  page loads.
 
 Design decisions and the reasoning behind them live in each app's own
 `SPECS.md`; the write-up of how the web app itself was designed and built is
