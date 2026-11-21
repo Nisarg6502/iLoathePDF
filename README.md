@@ -11,11 +11,11 @@
   <a href="https://github.com/Nisarg6502/iLoathePDF/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Nisarg6502/iLoathePDF"></a>
   <a href="https://github.com/Nisarg6502/iLoathePDF/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Nisarg6502/iLoathePDF/total"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <a href="https://nisarg6502.github.io/iLoathePDF/"><img alt="Web app" src="https://img.shields.io/badge/web%20app-live-brightgreen"></a>
+  <a href="https://iloathepdf.com/"><img alt="Web app" src="https://img.shields.io/badge/web%20app-live-brightgreen"></a>
 </p>
 
 <p align="center">
-  <a href="https://nisarg6502.github.io/iLoathePDF/"><b>Try the web app</b></a> ·
+  <a href="https://iloathepdf.com/"><b>Try the web app</b></a> ·
   <a href="https://github.com/Nisarg6502/iLoathePDF/releases/latest"><b>Download for Windows</b></a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="SECURITY.md">Security</a>
@@ -61,7 +61,7 @@ run it. The installer isn't code-signed yet, so Windows SmartScreen may say
 built by [GitHub Actions](.github/workflows/release-desktop.yml) from the tagged
 source, and the app only installs updates signed with the project's key.
 
-**Web:** nothing to install. Open <https://nisarg6502.github.io/iLoathePDF/>.
+**Web:** nothing to install. Open <https://iloathepdf.com/>.
 
 ## Two ways to run it
 

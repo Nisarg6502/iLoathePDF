@@ -11,7 +11,7 @@
       history.replaceState before React Router reads the URL (see apps/web/index.html).
     -->
     <script>
-      var pathSegmentsToKeep = 1; // keep "/iLoathePDF" (the GitHub Pages base path)
+      var pathSegmentsToKeep = 0; // served from the root of iloathepdf.com, no base path to keep
       var l = window.location;
       l.replace(
         l.protocol +
