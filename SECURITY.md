@@ -21,9 +21,9 @@ rather stay anonymous.
 
 ## Supported versions
 
-Only the **latest release** of the desktop app and the **current web app** on
-GitHub Pages receive fixes. The desktop app can update itself (opt-in, in
-Settings), so please update before reporting.
+Only the **latest release** of the desktop app and the **current web app** at
+<https://iloathepdf.com/> receive fixes. The desktop app can update itself
+(opt-in, in Settings), so please update before reporting.
 
 ## What is in scope
 
