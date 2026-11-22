@@ -5,7 +5,7 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.6.0] - 2026-11-22
 
 ### Added
 - Recipes rebuilt. Every step has its own settings, set once when you build
@@ -121,6 +121,9 @@ app under Settings → About. Format follows
 
 First release.
 
+[0.6.0]: https://github.com/Nisarg6502/iLoathePDF/releases/tag/v0.6.0
+[0.5.3]: https://github.com/Nisarg6502/iLoathePDF/releases/tag/v0.5.3
+[0.5.2]: https://github.com/Nisarg6502/iLoathePDF/releases/tag/v0.5.2
 [0.5.1]: https://github.com/Nisarg6502/iLoathePDF/releases/tag/v0.5.1
 [0.5.0]: https://github.com/Nisarg6502/iLoathePDF/releases/tag/v0.5.0
 [0.4.0]: https://github.com/Nisarg6502/iLoathePDF/releases/tag/v0.4.0
