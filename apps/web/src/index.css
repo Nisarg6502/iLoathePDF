@@ -337,3 +337,40 @@ input[type="range"].ihp-slider:focus-visible::-webkit-slider-thumb {
     animation: none;
   }
 }
+
+/* The plain-HTML page summary written at build time (src/seo/prerender.ts).
+   Crawlers and no-JavaScript visitors read it; everyone else sees it for a
+   moment before the app replaces it, so it should look calm, not broken. */
+.prerendered {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 28px 32px 56px;
+  color: var(--text);
+}
+.prerendered header a {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.prerendered h1 {
+  margin: 56px 0 0;
+  font-size: 40px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.prerendered p {
+  margin-top: 12px;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 15.5px;
+}
+.prerendered ul {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.prerendered li a {
+  color: var(--accent-deep);
+}

@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Home } from "@/pages/Home";
 import { ToolsIndex } from "@/pages/ToolsIndex";
+import { useSeo } from "@/seo/useSeo";
 
 // Everything below the landing pages loads on demand, so the first visit only
 // downloads what the home page and tool list need.
@@ -18,6 +19,7 @@ const Download = lazy(() => import("@/pages/Download").then((m) => ({ default: m
 
 function Layout() {
   const { pathname } = useLocation();
+  useSeo();
   return (
     <div className="min-h-screen bg-bg text-text">
       <SiteHeader />
