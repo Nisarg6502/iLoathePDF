@@ -277,6 +277,15 @@ function Rail() {
         </svg>
       </RailItem>
 
+      <RailItem to="/recipes" label="Recipes" showLabel={expanded}>
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="2" y="2.5" width="5" height="4" rx="1" />
+          <rect x="11" y="7" width="5" height="4" rx="1" />
+          <rect x="2" y="11.5" width="5" height="4" rx="1" />
+          <path d="M7 4.5h2.2a1 1 0 0 1 1 1V9H11M7 13.5h2.2a1 1 0 0 0 1-1V9" />
+        </svg>
+      </RailItem>
+
       <RailHeading show={expanded}>PDF</RailHeading>
       {pdfTools.map((tool) => (
         <RailItem key={tool.id} to={tool.path} label={tool.title} showLabel={expanded}>

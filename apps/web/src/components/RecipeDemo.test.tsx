@@ -1,24 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
-import { RecipeDemo } from "./RecipeDemo";
-
-// Stage lengths in RecipeDemo.tsx. Each stage's timer is scheduled by an
-// effect after the previous one fires, so the test must advance one stage per act().
-const STAGE_MS = [1100, 1000, 1000, 1000, 1200, 1000, 1300, 1300, 3600];
-const TAP_DELAY_MS = 380;
+import { RecipeDemo, STAGES } from "./RecipeDemo";
 
 describe("RecipeDemo", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
   const text = () => document.body.textContent ?? "";
-  /** Move to the start of stage `n` from the start of stage `n - 1`. */
   let stage = 0;
+  // Each stage's timer is scheduled by an effect after the previous one fires, so advance one stage per act().
   const toStage = (n: number) => {
-    while (stage < n) advance(STAGE_MS[stage++]);
+    while (stage < n) act(() => vi.advanceTimersByTime(STAGES[stage++].ms));
   };
-
   beforeEach(() => {
     stage = 0;
   });
@@ -28,45 +21,35 @@ describe("RecipeDemo", () => {
     expect(screen.getByRole("img", { name: /building a recipe/ })).toBeInTheDocument();
   });
 
-  it("starts in an empty builder, then chains tools one by one", () => {
+  it("drags tools into the chain, greying out tools that no longer fit", () => {
     render(<RecipeDemo />);
-    expect(text()).toContain("New recipe");
     expect(text()).toContain("No steps yet");
-    expect(text()).toContain("START WITH");
-
-    toStage(1);
-    advance(TAP_DELAY_MS);
-    expect(text()).toContain("1 STEP");
-    expect(text()).toContain("THEN");
+    expect(text()).toContain("Drag a tool here");
 
     toStage(2);
-    advance(TAP_DELAY_MS);
-    expect(text()).toContain("2 STEPS");
-
+    expect(text()).toContain("Drop to add Images to PDF");
     toStage(3);
-    advance(TAP_DELAY_MS);
-    expect(text()).toContain("3 STEPS");
-    expect(text()).toContain("OCR");
+    expect(text()).toContain("Ready · 1 step");
+    expect(text()).toContain("Greyed tools can't follow the last step.");
   });
 
-  it("saves the recipe, runs the chain, shrinks the file, then loops", () => {
+  it("trips the OCR-then-Compress rule, fixes it, then runs", () => {
     render(<RecipeDemo />);
-    toStage(4);
-    expect(text()).toContain("SAVED");
-    expect(text()).toContain("Scan to Searchable PDF");
+    toStage(9);
+    expect(text()).toContain("1 thing to check");
+    expect(text()).toContain("Move OCR to the end");
 
-    toStage(5);
-    expect(text()).toContain("Your recipes");
+    toStage(11);
+    expect(text()).toContain("Ready · 3 steps");
+
+    toStage(15);
     expect(text()).toContain("working…");
 
-    toStage(7);
+    toStage(18);
+    expect(text()).toContain("DONE · ON THIS DEVICE");
     expect(text()).toContain("1.1 MB");
 
-    toStage(8);
-    expect(text()).toContain("DONE · ON THIS MACHINE");
-    expect(text()).toContain("searchable");
-
-    advance(STAGE_MS[8]); // loops back to the empty builder
+    act(() => vi.advanceTimersByTime(STAGES[18].ms)); // loops back
     expect(text()).toContain("No steps yet");
   });
 });

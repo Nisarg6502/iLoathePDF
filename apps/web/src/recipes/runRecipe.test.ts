@@ -34,12 +34,13 @@ describe("runRecipe", () => {
   it("runs Images to PDF steps with the recipe's A4 override, not the tool's standalone 'fit' default", async () => {
     const recipe = getRecipe("scan-to-searchable-pdf");
     if (!recipe) throw new Error("Expected scan-to-searchable-pdf recipe to exist.");
-    expect(recipe.stepOptions?.["images-to-pdf"]).toMatchObject({ page_size: "a4" });
+    const step = recipe.steps.find((s) => s.tool === "images-to-pdf");
+    expect(step?.options).toMatchObject({ page_size: "a4" });
 
     const { imagesToPdfEngine } = await import("@/engines/imagesToPdf");
     const direct = await imagesToPdfEngine({
       files: [await makeTestScanImage()],
-      options: { ...recipe.stepOptions!["images-to-pdf"] },
+      options: { ...step!.options },
     });
     const doc = await PDFDocument.load(await direct.files[0].blob.arrayBuffer());
     const { width, height } = doc.getPage(0).getSize();
@@ -81,6 +82,60 @@ describe("runRecipe", () => {
     // If runRecipe only forwarded the first output of PDF to Images (one
     // page's worth of images) instead of all of them, this would be 1, not 4.
     expect(outDoc.getPageCount()).toBe(4);
+  });
+
+  it("runs a single-file tool once per input file, so a recipe can process a batch", async () => {
+    const recipe = {
+      slug: "batch",
+      title: "Batch",
+      description: "",
+      status: "live" as const,
+      steps: [{ tool: "split", options: { mode: "everyN", n: 1 } }, { tool: "merge" }],
+    };
+    const files = [
+      new File([(await makeTestPdf(2)) as BlobPart], "a.pdf", { type: "application/pdf" }),
+      new File([(await makeTestPdf(3)) as BlobPart], "b.pdf", { type: "application/pdf" }),
+    ];
+    const events: string[] = [];
+    const result = await runRecipe(recipe, files, {
+      onStep: (e) => events.push(`${e.index}:${e.status}:${e.filesIn}->${e.filesOut ?? "?"}`),
+    });
+    // 2 + 3 single pages, all merged back together.
+    const out = await PDFDocument.load(new Uint8Array(await result.files[0].blob.arrayBuffer()));
+    expect(out.getPageCount()).toBe(5);
+    expect(events).toEqual(["0:running:2->?", "0:done:2->5", "1:running:5->?", "1:done:5->1"]);
+  });
+
+  it("gives colliding output names a suffix", async () => {
+    const recipe = {
+      slug: "names",
+      title: "Names",
+      description: "",
+      status: "live" as const,
+      steps: [{ tool: "split", options: { mode: "extract", ranges: "1" } }],
+    };
+    const pdf = await makeTestPdf(2);
+    const files = [
+      new File([pdf as BlobPart], "same.pdf", { type: "application/pdf" }),
+      new File([pdf as BlobPart], "same.pdf", { type: "application/pdf" }),
+    ];
+    const result = await runRecipe(recipe, files);
+    const names = result.files.map((f) => f.name);
+    expect(new Set(names).size).toBe(2);
+  });
+
+  it("applies per-run overrides on top of the recipe's settings", async () => {
+    const recipe = {
+      slug: "split-override",
+      title: "x",
+      description: "",
+      status: "live" as const,
+      steps: [{ tool: "split", options: { mode: "extract", ranges: "1" } }],
+    };
+    const file = new File([(await makeTestPdf(4)) as BlobPart], "s.pdf", { type: "application/pdf" });
+    const result = await runRecipe(recipe, [file], { overrides: { 0: { mode: "extract", ranges: "1-3" } } });
+    const out = await PDFDocument.load(new Uint8Array(await result.files[0].blob.arrayBuffer()));
+    expect(out.getPageCount()).toBe(3);
   });
 
   it("reports which step failed, with that step's own error message", async () => {

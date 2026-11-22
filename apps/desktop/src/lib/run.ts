@@ -65,9 +65,11 @@ export async function execute(
   signal: AbortSignal,
   signElements: SignElement[] = [],
   redactBoxes: RedactBox[] = [],
+  /** Write here instead of the usual destination (a recipe's in-between steps use this). */
+  dirOverride?: string,
 ): Promise<JobResult> {
   const first = files[0];
-  const dir = outputDirFor(first.path);
+  const dir = dirOverride ?? outputDirFor(first.path);
   const base = stripExt(first.name);
   // A drive root already ends in a separator ("G:\"); do not double it.
   const join = (name: string) => `${dir.endsWith("\\") ? dir : dir + "\\"}${name}`;
