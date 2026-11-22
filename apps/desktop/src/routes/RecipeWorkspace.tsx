@@ -1,17 +1,17 @@
 /**
  * The screen a Recipe runs in: same shell as ToolWorkspace (header, canvas,
  * sidebar with a destination and Run button), but driving `runRecipe()`
- * across a fixed chain of tools instead of `execute()` for one tool.
+ * across a chain of tools instead of `execute()` for one tool.
  *
- * A recipe has no `Tool` entry of its own -- no options, no per-tool canvas
- * -- so wherever ToolWorkspace would read `tool.accepts`/`tool.multiple`/
- * etc. directly, this reads them from `toolById(recipe.steps[0])`: the
- * recipe's accepted-file constraints are always the first step's. There is
- * no OptionsPanel; recipes are zero-input by design, so the sidebar shows
- * the fixed step list instead.
+ * The recipe's accepted files are the first step's (`toolById(steps[0])`),
+ * but it always takes several: a one-file tool simply runs once per file.
+ * The sidebar lists the steps; each opens its tool's own options form, so a
+ * setting can be changed for this run (and saved back), and a step that needs
+ * something typed in, like a password, is opened for you and blocks Run until
+ * it's filled. While running, the canvas shows each step light up in turn.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowRight, FolderOpen, Loader2, Pencil, Play, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Copy, FolderOpen, Loader2, Pencil, Play, Plus, RotateCcw, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
@@ -20,15 +20,24 @@ import { JobOutcome } from "@/components/ResultCard";
 import { useFilePicker, type PickedFile } from "@/components/FileDropZone";
 import { Button } from "@/components/ui/button";
 import { JobError, isTauri, type Progress } from "@/lib/jobs";
-import { deleteCustomRecipe } from "@/lib/customRecipes";
-import { runRecipe } from "@/lib/recipeRun";
+import { deleteCustomRecipe, encodeShare, saveCustomRecipe } from "@/lib/customRecipes";
+import { runRecipe, STEPS_FOLDER, type StepEvent } from "@/lib/recipeRun";
+import { analyzeChain, describeOutput, diffOptions, sanitizeOptions } from "@/lib/chain";
+import { ToolOptions } from "@/components/OptionsPanel";
+import { ChainStrip, StepIcon } from "@/components/recipes/ChainStrip";
+import { IssueIcon, IssueList } from "@/components/recipes/IssueList";
+import { stepSummary } from "@/components/recipes/stepSummary";
 import type { JobResult } from "@/lib/run";
 import { takePendingFiles } from "@/lib/handoff";
 import { useOutputDir } from "@/lib/settings";
-import { panelVariants } from "@/lib/motion";
-import { toolById } from "@/lib/tools";
+import { EASE_OUT, panelVariants } from "@/lib/motion";
+import { toolById, type OptionValues } from "@/lib/tools";
 import { cn, formatBytes } from "@/lib/utils";
 import type { Recipe } from "@/lib/recipes";
+
+type StepState = { status: "waiting" | "running" | "done" | "failed"; event?: StepEvent };
+const label = (id: string) => toolById(id)?.title ?? id;
+const defaultsOf = (id: string) => (toolById(id)?.defaults ?? {}) as Record<string, unknown>;
 
 type RunState =
   | { phase: "idle" }
@@ -37,7 +46,8 @@ type RunState =
   | { phase: "error"; error: JobError };
 
 export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
-  const firstTool = toolById(recipe.steps[0]);
+  const firstTool = toolById(recipe.steps[0]?.tool);
+  const navigate = useNavigate();
 
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [state, setState] = useState<RunState>({ phase: "idle" });
@@ -46,12 +56,26 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
   // from outside runRecipe(), which step a CANCELLED (or any other) error
   // interrupted. 0 means no step had started yet.
   const [currentStep, setCurrentStep] = useState(0);
+  const [stepStates, setStepStates] = useState<StepState[]>(() => recipe.steps.map(() => ({ status: "waiting" })));
+  const [runOpts, setRunOpts] = useState<OptionValues[]>(() =>
+    recipe.steps.map((s) => ({ ...toolById(s.tool)?.defaults, ...(s.options as OptionValues | undefined) })),
+  );
+  const effectiveSteps = recipe.steps.map((s, i) => ({ tool: s.tool, options: runOpts[i] as Record<string, unknown> }));
+  const analysis = analyzeChain(effectiveSteps, label, defaultsOf, true);
+  const firstNeed = analysis.steps.findIndex((s) => s.needs);
+  const [openStep, setOpenStep] = useState<number | null>(firstNeed >= 0 ? firstNeed : null);
+  const changed = recipe.steps.some((s, i) => {
+    const now = sanitizeOptions(s.tool, diffOptions(runOpts[i], defaultsOf(s.tool)));
+    const stored = sanitizeOptions(s.tool, diffOptions({ ...defaultsOf(s.tool), ...s.options }, defaultsOf(s.tool)));
+    return JSON.stringify(now ?? {}) !== JSON.stringify(stored ?? {});
+  });
   const abort = useRef<AbortController | null>(null);
   const { outputDir } = useOutputDir();
 
   const { browse, dragging, rejected, picking } = useFilePicker({
     accept: firstTool?.accepts ?? [],
-    multiple: firstTool?.multiple ?? false,
+    // A one-file tool runs once per file, so a recipe always takes several.
+    multiple: true,
     files,
     onChange: (next) => {
       setFiles(next);
@@ -66,18 +90,20 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     const handed = takePendingFiles().filter((f) =>
       firstTool.accepts.includes((f.name.split(".").pop() ?? "").toLowerCase()),
     );
-    setFiles(firstTool.multiple ? handed : handed.slice(0, 1));
+    setFiles(handed);
     setState({ phase: "idle" });
   }, [recipe, firstTool]);
 
   const blocker = useMemo(() => {
     if (!firstTool) return "This recipe is misconfigured.";
     if (files.length === 0) return `Add ${firstTool.acceptsLabel} to continue.`;
-    if (recipe.steps[0] === "merge" && files.length < 2) {
+    if (analysis.errors > 0) return "Fix the problem in the steps first.";
+    if (firstNeed >= 0) return `Step ${firstNeed + 1}: ${analysis.steps[firstNeed].needs}.`;
+    if (analysis.needsTwoFiles && files.length < 2) {
       return "Merging needs at least two PDFs.";
     }
     return null;
-  }, [files.length, firstTool, recipe]);
+  }, [files.length, firstTool, analysis, firstNeed]);
 
   const running = state.phase === "running";
 
@@ -87,6 +113,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     abort.current = controller;
     setStartedAt(Date.now());
     setCurrentStep(0);
+    setStepStates(recipe.steps.map(() => ({ status: "waiting" })));
     setState({ phase: "running", pct: 0, note: "Starting…" });
 
     const onProgress = (p: Progress) =>
@@ -95,11 +122,18 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
       );
 
     try {
-      const result = await runRecipe(recipe, files, onProgress, controller.signal, (step) =>
-        setCurrentStep(step),
-      );
+      const result = await runRecipe(recipe, files, {
+        onProgress,
+        signal: controller.signal,
+        overrides: Object.fromEntries(runOpts.map((o, i) => [i, o])),
+        onStep: (ev) => {
+          if (ev.status === "running") setCurrentStep(ev.index + 1);
+          setStepStates((list) => list.map((x, i) => (i === ev.index ? { status: ev.status, event: ev } : x)));
+        },
+      });
       setState({ phase: "done", result });
     } catch (err) {
+      setStepStates((list) => list.map((x) => (x.status === "running" ? { ...x, status: "failed" } : x)));
       setState({
         phase: "error",
         error: err instanceof JobError ? err : new JobError("INTERNAL", String(err)),
@@ -107,7 +141,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     } finally {
       abort.current = null;
     }
-  }, [blocker, running, recipe, files]);
+  }, [blocker, running, recipe, files, runOpts]);
 
   // Ctrl+Enter runs, matching the hint on the button.
   useEffect(() => {
@@ -141,9 +175,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     <div className="flex min-h-0 flex-1 flex-col">
       {/* ── header ─────────────────────────────────────────────────────── */}
       <header className="flex h-[54px] flex-none items-center gap-3 border-b border-border bg-surface px-5">
-        <span className="grid size-7 flex-none place-items-center rounded-[9px] bg-surface-2">
-          <firstTool.icon className="size-4" style={{ color: `var(--tint-${firstTool.tint})` }} strokeWidth={1.5} />
-        </span>
+        <ChainStrip steps={recipe.steps} size={24} />
         <div className="min-w-0">
           <div className="text-[15px] font-semibold tracking-[-0.005em] text-text">{recipe.title}</div>
           <div className="truncate text-[12.5px] text-muted">{recipe.description}</div>
@@ -151,7 +183,15 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
 
         <div className="flex-1" />
 
-        {recipe.custom ? <CustomRecipeActions recipe={recipe} disabled={running} /> : null}
+        <ShareCode recipe={recipe} />
+        {recipe.custom ? (
+          <CustomRecipeActions recipe={recipe} disabled={running} />
+        ) : (
+          <Button variant="secondary" size="sm" className="mr-2" disabled={running} onClick={() => navigate(`/r/new?from=${recipe.id}`)}>
+            <SlidersHorizontal />
+            Customize
+          </Button>
+        )}
 
         {files.length > 0 ? (
           <div className="flex items-center gap-2">
@@ -195,6 +235,9 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                     startedAt={startedAt}
                     onCancel={() => abort.current?.abort()}
                   />
+                  <div className="mt-4 rounded-[var(--radius-card)] border border-border bg-surface p-4">
+                    <RunTimeline recipe={recipe} states={stepStates} />
+                  </div>
                 </div>
               </motion.div>
             ) : state.phase === "done" ? (
@@ -214,6 +257,15 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                     onAgain={() => setState({ phase: "idle" })}
                     againLabel="Back to start"
                   />
+                  <div className="mt-4 rounded-[var(--radius-card)] border border-border bg-surface p-4">
+                    <div className="mb-3 font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">HOW IT WENT</div>
+                    <RunTimeline recipe={recipe} states={stepStates} />
+                    {recipe.steps.length > 1 ? (
+                      <p className="mt-3 text-[12.5px] text-muted">
+                        In-between files from the earlier steps are in the “{STEPS_FOLDER}” folder next to the result. You can delete it.
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               </motion.div>
             ) : state.phase === "error" ? (
@@ -235,11 +287,30 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                       onAgain={() => setState({ phase: "idle" })}
                     />
                   ) : (
-                    <JobOutcome
-                      error={state.error}
-                      onRetry={() => void run()}
-                      onAgain={() => setState({ phase: "idle" })}
-                    />
+                    <>
+                      <JobOutcome
+                        error={state.error}
+                        onRetry={() => void run()}
+                        onAgain={() => setState({ phase: "idle" })}
+                      />
+                      <div className="mt-4 rounded-[var(--radius-card)] border border-border bg-surface p-4">
+                        <RunTimeline recipe={recipe} states={stepStates} />
+                        {currentStep > 0 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="mt-3"
+                            onClick={() => {
+                              setOpenStep(currentStep - 1);
+                              setState({ phase: "idle" });
+                            }}
+                          >
+                            <SlidersHorizontal />
+                            Adjust step {currentStep} and retry
+                          </Button>
+                        ) : null}
+                      </div>
+                    </>
                   )}
                 </div>
               </motion.div>
@@ -286,6 +357,14 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                 <span className="font-mono text-[11.5px] tracking-[0.13em] text-faint uppercase">
                   {firstTool.accepts.slice(0, 6).join(" · ")}
                 </span>
+                <span className="max-w-[46ch] text-center text-[13px] text-muted">
+                  {analysis.needsTwoFiles
+                    ? "Two or more files, joined in the order you add them."
+                    : firstTool.multiple
+                      ? "One or more files."
+                      : "One file, or several to run the recipe on each."}{" "}
+                  You get: {describeOutput(analysis.output).replace(/^\w/, (c) => c.toLowerCase())}.
+                </span>
                 {rejected > 0 ? (
                   <span className="text-[13px] text-danger">
                     {rejected} file{rejected === 1 ? "" : "s"} skipped — wrong format for this recipe.
@@ -310,10 +389,49 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         {/* ── steps ────────────────────────────────────────────────────── */}
         <aside className="flex w-[344px] flex-none flex-col border-l border-border bg-surface">
           <div className="min-h-0 flex-1 overflow-auto p-4">
-            <div className="mb-2.5 font-mono text-[12px] font-bold tracking-[0.13em] text-faint">
-              STEPS
+            <div className="mb-2.5 flex items-baseline justify-between">
+              <span className="font-mono text-[12px] font-bold tracking-[0.13em] text-faint">STEPS</span>
+              <span className="text-[12px] text-muted">Click a step to adjust it</span>
             </div>
-            <StepList recipe={recipe} />
+            <StepsPanel
+              recipe={recipe}
+              runOpts={runOpts}
+              analysis={analysis}
+              states={stepStates}
+              open={openStep}
+              onOpen={setOpenStep}
+              disabled={running}
+              onChange={(i, v) => setRunOpts((list) => list.map((x, j) => (j === i ? v : x)))}
+            />
+            <AnimatePresence initial={false}>
+              {changed ? (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-[12.5px]">
+                    <span className="text-muted">Changed settings apply to this run.</span>
+                    <button
+                      type="button"
+                      className="flex-none font-semibold text-accent hover:underline"
+                      onClick={() => {
+                        const steps = recipe.steps.map((s, i) => ({ tool: s.tool, options: diffOptions(runOpts[i], defaultsOf(s.tool)) }));
+                        if (recipe.custom) {
+                          saveCustomRecipe({ id: recipe.id, title: recipe.title, description: recipe.description, steps });
+                        } else {
+                          const saved = saveCustomRecipe({ title: `${recipe.title} (my version)`, description: recipe.description, steps });
+                          navigate(`/r/${saved.id}`);
+                        }
+                      }}
+                    >
+                      {recipe.custom ? "Save to recipe" : "Save as my recipe"}
+                    </button>
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </div>
 
           <RunFooter
@@ -392,12 +510,12 @@ function RecipeCancelledCard({
   onAgain: () => void;
 }) {
   const total = recipe.steps.length;
-  const dirLabel = outputDir ?? "the same folder as each input file";
+  const dirLabel = outputDir ?? "the folder of the first input file";
   const body =
     completedSteps > 0
       ? `Stopped after step ${completedSteps} of ${total}. Files written by the completed step${
           completedSteps === 1 ? "" : "s"
-        } are still in ${dirLabel} — nothing was deleted.`
+        } are in the “${STEPS_FOLDER}” folder inside ${dirLabel} — nothing was deleted.`
       : `Stopped before any step finished. No recipe output was written.`;
 
   return (
@@ -434,36 +552,197 @@ function RecipeCancelledCard({
 
 // ---------------------------------------------------------------------------
 
-function StepList({ recipe }: { recipe: Recipe }) {
+function StepsPanel({
+  recipe,
+  runOpts,
+  analysis,
+  states,
+  open,
+  onOpen,
+  disabled,
+  onChange,
+}: {
+  recipe: Recipe;
+  runOpts: OptionValues[];
+  analysis: ReturnType<typeof analyzeChain>;
+  states: StepState[];
+  open: number | null;
+  onOpen: (i: number | null) => void;
+  disabled: boolean;
+  onChange: (i: number, v: OptionValues) => void;
+}) {
   return (
     <ol className="grid gap-1.5">
-      {recipe.steps.map((toolId, i) => {
-        const tool = toolById(toolId);
+      {recipe.steps.map((step, i) => {
+        const tool = toolById(step.tool);
+        const a = analysis.steps[i];
+        const isOpen = open === i;
+        if (!tool) {
+          return (
+            <li key={i} className="rounded-lg border border-danger/40 px-3 py-2.5 text-[13.5px] text-danger">
+              Unknown tool “{step.tool}”
+            </li>
+          );
+        }
         return (
           <li
-            key={`${toolId}-${i}`}
-            className="flex items-center gap-2.5 rounded-lg border border-border bg-surface-2/60 px-3 py-2.5"
-          >
-            <span className="grid size-6 flex-none place-items-center rounded-full bg-surface font-mono text-[11px] font-bold text-muted">
-              {i + 1}
-            </span>
-            {tool ? (
-              <>
-                <tool.icon className="size-4 flex-none" style={{ color: `var(--tint-${tool.tint})` }} strokeWidth={1.5} />
-                <span className="min-w-0 flex-1 truncate text-[13.5px] text-text">{tool.title}</span>
-              </>
-            ) : (
-              <span className="min-w-0 flex-1 truncate text-[13.5px] text-danger">
-                Unknown tool “{toolId}”
-              </span>
+            key={i}
+            className={cn(
+              "overflow-hidden rounded-lg border bg-surface-2/60 transition-colors duration-200",
+              a.needs ? "border-info/50" : a.issues.length ? "border-danger/50" : isOpen ? "border-accent" : "border-border",
             )}
-            {i < recipe.steps.length - 1 ? (
-              <ArrowRight className="size-3.5 flex-none text-faint" aria-hidden />
+          >
+            <button
+              type="button"
+              onClick={() => onOpen(isOpen ? null : i)}
+              aria-expanded={isOpen}
+              aria-label={`Step ${i + 1}: ${tool.title}`}
+              className="flex w-full items-center gap-2.5 px-2.5 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <StepBadge index={i} state={states[i]?.status ?? "waiting"} />
+              <StepIcon tool={step.tool} size={26} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13.5px] text-text">{tool.title}</span>
+                <span className={cn("block truncate text-[12px]", a.needs ? "text-info" : "text-muted")}>
+                  {a.needs ?? stepSummary({ tool: step.tool, options: runOpts[i] }, {})}
+                </span>
+              </span>
+              {a.needs ? (
+                <span className="text-info">
+                  <IssueIcon level="info" />
+                </span>
+              ) : null}
+              <ChevronDown className={cn("size-4 flex-none text-faint transition-transform duration-200", isOpen && "rotate-180")} />
+            </button>
+            {a.issues.length > 0 ? (
+              <div className="px-2.5 pb-2.5">
+                <IssueList issues={a.issues} />
+              </div>
             ) : null}
+            <AnimatePresence initial={false}>
+              {isOpen ? (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.22, ease: EASE_OUT }}
+                  className="overflow-hidden"
+                >
+                  <fieldset disabled={disabled} className="border-t border-border bg-surface px-3 py-3">
+                    {step.tool === "protect" ? (
+                      <p className="mb-3 text-[12px] text-muted">Passwords are never saved with a recipe.</p>
+                    ) : null}
+                    <ToolOptions tool={tool} values={runOpts[i]} onChange={(v) => onChange(i, v)} />
+                  </fieldset>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </li>
         );
       })}
     </ol>
+  );
+}
+
+function StepBadge({ index, state }: { index: number; state: StepState["status"] }) {
+  return (
+    <span className="relative grid size-6 flex-none place-items-center">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {state === "done" ? (
+          <motion.span
+            key="done"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 600, damping: 28 }}
+            className="grid size-6 place-items-center rounded-full bg-ok text-surface"
+          >
+            <Check className="size-3.5" strokeWidth={3} />
+          </motion.span>
+        ) : state === "failed" ? (
+          <motion.span key="failed" initial={{ scale: 0.6 }} animate={{ scale: 1 }} className="grid size-6 place-items-center rounded-full bg-danger text-[12px] font-bold text-surface">
+            !
+          </motion.span>
+        ) : state === "running" ? (
+          <motion.span key="running" initial={{ scale: 0.7 }} animate={{ scale: 1 }} className="grid size-6 place-items-center text-accent">
+            <Loader2 className="size-5 animate-spin" />
+          </motion.span>
+        ) : (
+          <motion.span key="wait" className="grid size-6 place-items-center rounded-full bg-surface font-mono text-[11px] font-bold text-muted">
+            {index + 1}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/** The recipe's steps lighting up one after another, with what each one did. */
+function RunTimeline({ recipe, states }: { recipe: Recipe; states: StepState[] }) {
+  return (
+    <ol className="grid">
+      {recipe.steps.map((step, i) => {
+        const st = states[i] ?? { status: "waiting" };
+        const ev = st.event;
+        return (
+          <li key={i} className="relative flex gap-3 pb-3 last:pb-0">
+            {i < recipe.steps.length - 1 ? (
+              <span className="absolute left-[11.5px] top-7 h-[calc(100%-22px)] w-px overflow-hidden bg-border" aria-hidden>
+                <motion.span
+                  className="block w-px bg-ok"
+                  initial={false}
+                  animate={{ height: st.status === "done" ? "100%" : "0%" }}
+                  transition={{ duration: 0.35, ease: EASE_OUT }}
+                />
+              </span>
+            ) : null}
+            <StepBadge index={i} state={st.status} />
+            <motion.div
+              className="min-w-0 flex-1"
+              animate={{ opacity: st.status === "waiting" ? 0.5 : 1, x: st.status === "running" ? 2 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-center gap-2 text-[13.5px] text-text">
+                <StepIcon tool={step.tool} size={20} />
+                <span className="font-medium">{label(step.tool)}</span>
+                {st.status === "running" ? <span className="font-mono text-[11.5px] text-accent">working…</span> : null}
+              </div>
+              {ev && st.status === "done" ? (
+                <motion.div initial={{ opacity: 0, y: -2 }} animate={{ opacity: 1, y: 0 }} className="mt-0.5 font-mono text-[11.5px] text-muted">
+                  {ev.filesIn} → {ev.filesOut} file{ev.filesOut === 1 ? "" : "s"} · {formatBytes(ev.bytesOut ?? 0)}
+                  {ev.ms !== undefined ? ` · ${ev.ms < 1000 ? `${Math.round(ev.ms)} ms` : `${(ev.ms / 1000).toFixed(1)} s`}` : ""}
+                </motion.div>
+              ) : null}
+            </motion.div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** Copies a recipe code another copy of the app can paste into "New recipe". */
+function ShareCode({ recipe }: { recipe: Recipe }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="mr-1"
+      title="Copy a code that recreates this recipe on another computer"
+      onClick={() => {
+        void navigator.clipboard
+          .writeText(encodeShare(recipe))
+          .then(() => {
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 1600);
+          })
+          .catch(() => undefined);
+      }}
+    >
+      {copied ? <Check /> : <Copy />}
+      {copied ? "Code copied" : "Copy code"}
+    </Button>
   );
 }
 
@@ -513,8 +792,8 @@ function RunFooter({
 
       <p className="mt-1.5 text-[12px] text-muted">
         {fileCount > 0
-          ? `Writes new files at every step. Your ${fileCount} input file${fileCount === 1 ? " is" : "s are"} untouched.`
-          : "Inputs are never modified — every step writes new files."}
+          ? `Your ${fileCount} input file${fileCount === 1 ? " is" : "s are"} untouched. Only the final result lands here.`
+          : "Inputs are never modified. Only the final result lands here."}
       </p>
 
       <Button
@@ -524,7 +803,7 @@ function RunFooter({
         className="mt-2.5 h-[38px] w-full text-[14.5px] font-semibold"
       >
         {running ? <Loader2 className="animate-spin" /> : <Play />}
-        <span>{running ? "Working…" : `Run ${recipe.steps.length} steps`}</span>
+        <span>{running ? "Working…" : recipe.steps.length === 1 ? "Run" : `Run ${recipe.steps.length} steps`}</span>
         <span className="font-mono text-[12px] font-normal opacity-70">Ctrl+Enter</span>
       </Button>
 

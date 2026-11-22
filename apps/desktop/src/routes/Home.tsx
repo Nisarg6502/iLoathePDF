@@ -11,6 +11,7 @@ import {
 } from "../lib/tools";
 import { RECIPES, type Recipe } from "../lib/recipes";
 import { useCustomRecipes } from "../lib/useCustomRecipes";
+import { ChainStrip } from "../components/recipes/ChainStrip";
 import { AnimatePresence, motion } from "motion/react";
 import { useWindowFileDrop, type PickedFile } from "../components/FileDropZone";
 import { scrimVariants, sheetVariants } from "../lib/motion";
@@ -110,13 +111,16 @@ export default function Home() {
         <section className="mt-6.5">
           <div className="flex items-center gap-2.5">
             <span className="font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
-              RECIPES
+              RECIPES · SEVERAL TOOLS IN ONE GO
             </span>
             <span className="h-px flex-1 bg-border" />
+            <Link to="/recipes" className="text-[13px] text-muted hover:text-text">
+              All {RECIPES.length + customRecipes.length} recipes →
+            </Link>
           </div>
 
           <div className="mt-3 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
-            {[...RECIPES, ...customRecipes].map((recipe) => (
+            {[...customRecipes, ...RECIPES.filter((r) => r.popular)].map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} index={cardIndex++} />
             ))}
             <NewRecipeCard index={cardIndex++} />
@@ -228,14 +232,11 @@ function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
         "active:translate-y-0 active:scale-[0.99]",
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "inline-flex w-fit items-center rounded-full bg-accent-soft px-2 py-0.5",
-          "font-mono text-[11px] font-bold tracking-[0.06em] text-accent",
-        )}
-      >
-        {recipe.steps.length} STEPS
+      <span className="flex items-center justify-between gap-2">
+        <ChainStrip steps={recipe.steps} size={26} />
+        {recipe.custom ? (
+          <span className="rounded-full bg-accent-soft px-2 py-0.5 font-mono text-[10.5px] font-bold tracking-[0.06em] text-on-accent">YOURS</span>
+        ) : null}
       </span>
 
       <span className="flex-1">

@@ -5,6 +5,30 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Recipes rebuilt. Every step has its own settings, set once when you build
+  the recipe or changed for a single run. 18 tools can be chained (was 7),
+  including Split, Crop, Watermark/Page numbers/Stamp, Flatten, Protect and
+  Unlock, PDF/A, PDF Scanner and the document converters.
+- A visual recipe builder: drag tools into the chain or between steps, drag to
+  reorder, and see what flows between steps. Steps that can't work turn red and
+  say why, with a one-click fix; risky orders are flagged in amber.
+- 24 ready-made recipes for everyday counter jobs: documents for a form upload,
+  passport photo under 50 KB, signature under 20 KB, unlock an e-Aadhaar and
+  shrink it, merge with page numbers, mark as COPY, scan to archive and more.
+  A new Recipes screen lists them by category, with search.
+- Recipes work on a batch: drop several files on a recipe whose first tool
+  takes one file, and each goes through on its own.
+- The run screen lights each step up as it runs and shows what it did.
+  Passwords are asked for each time and never saved.
+- Recipe codes: copy a recipe as a code and paste it on another computer.
+
+### Changed
+- Only a recipe's final result is written to the output folder. Files from the
+  steps before it go into an "iLoathePDF recipe steps" folder next to it.
+
 ## [0.5.3] - 2026-11-17
 
 ### Changed

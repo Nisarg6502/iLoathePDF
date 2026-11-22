@@ -1,66 +1,52 @@
 /**
- * Standalone guard script for the feature's core safety constraint: a
- * recipe step must never be Sign, Redact, Organize, Watermark, or
- * Protect & Unlock -- each needs live canvas interaction or a required
- * field with no useful zero-input default (see the design spec's "Scope
- * boundary: which tools can be a recipe step" section). This has held only
- * by inspection until now, with no test or runtime guard.
- *
- * apps/desktop/src has no configured frontend test runner (confirmed: the
- * "test" script in package.json runs the Python sidecar's pytest suite, and
- * no vitest/jest config exists for apps/desktop/src) -- this is a
- * standalone Node script rather than a real test, run directly via Node's
- * built-in TypeScript support so no new dependency is needed:
+ * Standalone guard for the built-in recipes (apps/desktop has no frontend
+ * test runner, so this runs under Node's own TypeScript support):
  *
  *   node --experimental-strip-types scripts/check-recipe-steps.ts
  *
  * or: npm run check:recipe-steps
  *
- * Imports RECIPES directly from recipes.ts (not through tools.ts) since
- * tools.ts pulls in lucide-react icon components, which a plain Node
- * script has no reason to load -- the tool ids checked against here are
- * copied from tools.ts's own entries (see that file for the source of
- * truth) rather than imported, to keep this script's own dependency
- * surface minimal.
+ * Checks that every built-in recipe is a valid chain under the same rules
+ * the builder enforces (src/lib/chain.ts): no errors, no warnings, no step
+ * that needs hand placement, every tool id real, unique ids, a category.
+ *
+ * Tool ids are read from tools.ts as text rather than imported, because
+ * tools.ts pulls in lucide-react icons a plain Node script has no reason to load.
  */
+import { readFileSync } from "node:fs";
 import { RECIPES } from "../src/lib/recipes.ts";
+import { analyzeChain, RECIPE_TOOLS, UNAVAILABLE_TOOLS } from "../src/lib/chain.ts";
 
-// Mirrors the ids of Sign, Redact, Organize, Watermark and Protect & Unlock
-// in apps/desktop/src/lib/tools.ts. If a tool's id there ever changes, this
-// list must be updated to match -- there is deliberately no import of
-// tools.ts here (see the file header), so this check is intentionally
-// duplicated rather than derived.
-const NEVER_A_RECIPE_STEP = new Set(["sign", "redact", "organize", "watermark", "protect"]);
+const toolsSource = readFileSync(new URL("../src/lib/tools.ts", import.meta.url), "utf8");
+const TOOL_IDS = new Set([...toolsSource.matchAll(/^\s+id: "([a-z-]+)",$/gm)].map((m) => m[1]));
+const label = (id: string) => id;
 
 let failed = false;
+const fail = (msg: string) => {
+  failed = true;
+  console.error(`FAIL: ${msg}`);
+};
+
+for (const id of Object.keys(RECIPE_TOOLS)) if (!TOOL_IDS.has(id)) fail(`chain.ts knows "${id}", which isn't a tool in tools.ts.`);
+for (const id of Object.keys(UNAVAILABLE_TOOLS)) if (!TOOL_IDS.has(id)) fail(`chain.ts lists "${id}" as unavailable, but there is no such tool.`);
+for (const id of TOOL_IDS) {
+  if (!(id in RECIPE_TOOLS) && !(id in UNAVAILABLE_TOOLS)) fail(`tool "${id}" is neither a recipe tool nor listed as unavailable in chain.ts.`);
+}
+
+const ids = new Set<string>();
 for (const recipe of RECIPES) {
-  for (const stepId of recipe.steps) {
-    if (NEVER_A_RECIPE_STEP.has(stepId)) {
-      failed = true;
-      console.error(`FAIL: recipe "${recipe.id}" has forbidden step "${stepId}".`);
-    }
+  if (ids.has(recipe.id)) fail(`duplicate recipe id "${recipe.id}".`);
+  ids.add(recipe.id);
+  if (!recipe.category) fail(`recipe "${recipe.id}" has no category.`);
+  for (const step of recipe.steps) {
+    if (step.tool in UNAVAILABLE_TOOLS) fail(`recipe "${recipe.id}" uses "${step.tool}", which can't be a recipe step.`);
+    if (!TOOL_IDS.has(step.tool)) fail(`recipe "${recipe.id}" uses unknown tool "${step.tool}".`);
+  }
+  const a = analyzeChain(recipe.steps, label);
+  for (const [i, s] of a.steps.entries()) {
+    for (const issue of s.issues) fail(`recipe "${recipe.id}" step ${i + 1} (${recipe.steps[i].tool}): ${issue.level}: ${issue.message}`);
   }
 }
 
-// Parity with web's registry: any recipe containing Images to PDF must
-// override its standalone "fit" default with A4 pages, and every stepOptions
-// key must name a step the recipe actually has.
-for (const recipe of RECIPES) {
-  for (const key of Object.keys(recipe.stepOptions ?? {})) {
-    if (!recipe.steps.includes(key)) {
-      failed = true;
-      console.error(`FAIL: recipe "${recipe.id}" has stepOptions for "${key}", which is not one of its steps.`);
-    }
-  }
-  if (recipe.steps.includes("image-to-pdf") && recipe.stepOptions?.["image-to-pdf"]?.page_size !== "a4") {
-    failed = true;
-    console.error(`FAIL: recipe "${recipe.id}" must override image-to-pdf with page_size "a4" (matches web).`);
-  }
-}
-
-if (failed) {
-  console.error("FAIL: one or more recipes reference a tool that can never be a recipe step.");
-  process.exit(1);
-} else {
-  console.log(`OK: ${RECIPES.length} recipe(s) checked, no forbidden step found.`);
-}
+if (failed) process.exit(1);
+console.log(`OK: ${RECIPES.length} recipe(s) checked against the chaining rules.`);
