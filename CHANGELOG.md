@@ -25,6 +25,10 @@ app under Settings → About. Format follows
   Passwords are asked for each time and never saved.
 - Recipe codes: copy a recipe as a code and paste it on another computer.
 
+### Security
+- Updated the `url` library to 2.5.9 (RUSTSEC-2026-0592: a stack overflow on
+  nested `blob:` URLs).
+
 ### Changed
 - Only a recipe's final result is written to the output folder. Files from the
   steps before it go into an "iLoathePDF recipe steps" folder next to it.

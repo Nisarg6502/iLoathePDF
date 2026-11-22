@@ -28,6 +28,7 @@ export const CHANGELOG: Release[] = [
       "While a recipe runs, each step lights up and shows what it did. Passwords are asked for each time and never saved.",
       "Copy a recipe as a code and paste it on another computer to set up the same recipe there.",
       "Only a recipe's final result goes to your output folder; files from the steps before it go in an \"iLoathePDF recipe steps\" folder next to it.",
+      "Security: updated the URL-parsing library to fix a crash it could hit on unusual nested addresses (RUSTSEC-2026-0592).",
     ],
   },
   {
