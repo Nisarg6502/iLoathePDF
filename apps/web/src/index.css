@@ -68,6 +68,10 @@
   --ok-soft: oklch(0.958 0.032 162);
   --danger: oklch(0.545 0.175 26);
   --danger-soft: oklch(0.958 0.030 26);
+  --warn: oklch(0.56 0.13 62);
+  --warn-soft: oklch(0.962 0.04 78);
+  --info: oklch(0.52 0.12 245);
+  --info-soft: oklch(0.955 0.025 245);
   --paper: #ffffff;
   --paper-line: oklch(0.902 0.006 76);
   --shadow-card: 0 1px 3px oklch(0.25 0.02 70 / 0.10), 0 8px 20px -6px oklch(0.25 0.02 70 / 0.16);
@@ -143,6 +147,10 @@
   --ok-soft: oklch(0.278 0.045 162);
   --danger: oklch(0.7 0.155 26);
   --danger-soft: oklch(0.295 0.06 26);
+  --warn: oklch(0.82 0.13 78);
+  --warn-soft: oklch(0.29 0.055 70);
+  --info: oklch(0.78 0.1 245);
+  --info-soft: oklch(0.28 0.045 250);
   --paper: oklch(0.958 0.004 80);
   --paper-line: oklch(0.858 0.006 78);
   --shadow-card: 0 0 0 1px oklch(0 0 0 / 0.22), 0 1px 2px oklch(0 0 0 / 0.42), 0 10px 24px -8px oklch(0 0 0 / 0.55);
@@ -215,6 +223,10 @@
   --color-ok-soft: var(--ok-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
   --color-paper: var(--paper);
   --color-paper-line: var(--paper-line);
 }
@@ -307,5 +319,21 @@ input[type="range"].ihp-slider:focus-visible::-webkit-slider-thumb {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Recipe builder: data flowing down a connector between steps. */
+@keyframes recipe-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.recipe-flow {
+  stroke-dasharray: 3 7;
+  animation: recipe-flow 0.9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .recipe-flow {
+    animation: none;
   }
 }

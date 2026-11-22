@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { TOOLS } from "@/tools/registry";
 import { tintColor, tintWash } from "@/tools/tint";
-import { allowedNext } from "@/recipes/customRecipes";
+import { allowedNext } from "@/recipes/chain";
 
 /**
  * A looping, illustrative walk through the recipe feature, start to finish:
@@ -20,6 +20,9 @@ const SAVED = 4;
 const FINAL_STAGE = STAGE_MS.length - 1;
 const TAP_DELAY_MS = 380;
 const RECIPE_NAME = "Scan to Searchable PDF";
+
+/** The handful of tools the demo's picker shows (the real builder has them all). */
+const DEMO_PALETTE = ["merge", "images-to-pdf", "pdf-to-images", "compress", "ocr", "watermark", "split", "convert-images"];
 
 const NOTES = ["3 photos → 1 PDF", "8.4 MB → 1.1 MB", "text layer added"];
 
@@ -57,7 +60,7 @@ export function RecipeDemo() {
   const run = Math.max(0, stage - SAVED); // 0 = not started, 1..3 = that step running, 4 = done
   const done = stage === FINAL_STAGE;
   const out = outputLabel(run);
-  const options = stage < SAVED ? allowedNext(chain) : [];
+  const options = stage < SAVED ? allowedNext(chain).filter((slug) => DEMO_PALETTE.includes(slug)) : [];
 
   return (
     <div

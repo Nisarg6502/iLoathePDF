@@ -1,55 +1,84 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { RecipeBuilder } from "./RecipeBuilder";
-import { RecipesIndex } from "./RecipesIndex";
-import { loadCustomRecipes } from "@/recipes/customRecipes";
+import { loadCustomRecipes, encodeShare } from "@/recipes/customRecipes";
 
-function renderBuilder() {
+function renderBuilder(entry = "/recipes/new") {
   render(
-    <MemoryRouter initialEntries={["/recipes/new"]}>
+    <MemoryRouter initialEntries={[entry]}>
       <Routes>
         <Route path="/recipes/new" element={<RecipeBuilder />} />
+        <Route path="/recipes/:slug/edit" element={<RecipeBuilder />} />
         <Route path="/recipes/:slug" element={<div>detail page</div>} />
-        <Route path="/recipes" element={<RecipesIndex />} />
       </Routes>
     </MemoryRouter>,
   );
 }
 
-const add = (name: string) => fireEvent.click(screen.getByRole("button", { name: `+ ${name}` }));
+const add = (name: string) => fireEvent.click(screen.getByRole("button", { name: `Add ${name}` }));
+const stepNames = () => screen.queryAllByRole("button", { name: /^Settings for / }).map((b) => b.getAttribute("aria-label")!.replace("Settings for ", ""));
 
 describe("RecipeBuilder", () => {
   beforeEach(() => localStorage.clear());
 
-  it("only offers tools that fit the previous step, and keeps Save disabled until the chain is valid", () => {
+  it("adds tools from the palette and refuses ones that don't fit, saying why", async () => {
     renderBuilder();
     const save = screen.getByRole("button", { name: "Save recipe" });
     expect(save).toBeDisabled();
 
     add("PDF to images");
-    expect(screen.queryByRole("button", { name: "+ Compress PDF" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "+ Merge PDF" })).toBeNull();
-    expect(save).toBeDisabled();
+    expect(stepNames()).toEqual(["PDF to images"]);
+    expect(save).toBeEnabled();
+
+    // Compress needs a PDF, and only images come out of the last step.
+    expect(screen.getByRole("button", { name: "Add Compress PDF" })).toHaveTextContent("Needs a PDF");
+    add("Compress PDF");
+    expect(stepNames()).toEqual(["PDF to images"]);
+    expect(await screen.findByText(/hands over images, but Compress PDF needs a PDF/)).toBeInTheDocument();
 
     add("Images to PDF");
-    expect(save).toBeEnabled();
+    expect(stepNames()).toEqual(["PDF to images", "Images to PDF"]);
   });
 
-  it("saves the recipe under the typed name and navigates to it", () => {
+  it("marks a broken order in red and fixes it in one click", async () => {
+    renderBuilder();
+    add("Compress PDF");
+    add("PDF to images");
+    fireEvent.click(screen.getByRole("button", { name: "Move PDF to images up" }));
+    expect(stepNames()).toEqual(["PDF to images", "Compress PDF"]);
+    expect(screen.getByRole("button", { name: "Save recipe" })).toBeDisabled();
+    expect(screen.getByText("1 problem to fix")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Insert Images to PDF between them" }));
+    await waitFor(() => expect(stepNames()).toEqual(["PDF to images", "Images to PDF", "Compress PDF"]));
+    expect(screen.getByRole("button", { name: "Save recipe" })).toBeEnabled();
+  });
+
+  it("explains why OCR can't follow a text-adding step", async () => {
+    renderBuilder();
+    add("TXT to PDF");
+    expect(screen.getByRole("button", { name: "Add OCR → Searchable PDF" })).toHaveAttribute("aria-description", expect.stringMatching(/already has text/));
+  });
+
+  it("saves the recipe with each step's settings and navigates to it", async () => {
     renderBuilder();
     add("Merge PDF");
     add("Compress PDF");
+    fireEvent.click(screen.getByRole("button", { name: "Settings for Compress PDF" }));
+    fireEvent.change(await screen.findByLabelText("Image DPI"), { target: { value: "72" } });
+    expect(screen.getByText(/72 DPI · smallest file/)).toBeInTheDocument();
+
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Email pack" } });
     fireEvent.click(screen.getByRole("button", { name: "Save recipe" }));
 
     expect(screen.getByText("detail page")).toBeInTheDocument();
     const [saved] = loadCustomRecipes();
     expect(saved.title).toBe("Email pack");
-    expect(saved.steps).toEqual(["merge", "compress"]);
+    expect(saved.steps).toEqual([{ tool: "merge" }, { tool: "compress", options: { dpi: 72 } }]);
   });
 
-  it("falls back to the step names when no name is typed, and lists the recipe on the index", () => {
+  it("falls back to the step names when no name is typed", () => {
     renderBuilder();
     add("Compress PDF");
     add("OCR → Searchable PDF");
@@ -57,21 +86,41 @@ describe("RecipeBuilder", () => {
     expect(loadCustomRecipes()[0].title).toBe("Compress PDF → OCR → Searchable PDF");
   });
 
-  it("warns when Compress follows OCR", () => {
+  it("warns when Compress follows OCR, and can move OCR to the end", async () => {
     renderBuilder();
     add("OCR → Searchable PDF");
     add("Compress PDF");
-    expect(screen.getByText(/removes OCR's text layer/)).toBeInTheDocument();
+    expect(screen.getByText(/wipes out the text layer OCR added/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Move OCR to the end" }));
+    await waitFor(() => expect(stepNames()).toEqual(["Compress PDF", "OCR → Searchable PDF"]));
   });
 
-  it("removes and reorders steps", () => {
+  it("removes steps", async () => {
     renderBuilder();
     add("Compress PDF");
     add("OCR → Searchable PDF");
-    fireEvent.click(screen.getByRole("button", { name: "Move OCR → Searchable PDF up" }));
-    const items = screen.getAllByRole("listitem").map((li) => li.textContent);
-    expect(items[0]).toContain("OCR");
     fireEvent.click(screen.getByRole("button", { name: "Remove OCR → Searchable PDF" }));
-    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    await waitFor(() => expect(stepNames()).toEqual(["Compress PDF"]));
+  });
+
+  it("starts from a ready-made recipe to customize", () => {
+    renderBuilder("/recipes/new?from=passport-photo-small");
+    expect(screen.getByRole("heading", { name: "Customize recipe" })).toBeInTheDocument();
+    expect(stepNames()).toEqual(["Convert images", "Compress images"]);
+    expect(screen.getByLabelText("Name")).toHaveValue("Passport photo under 50 KB (my version)");
+  });
+
+  it("opens a shared link", () => {
+    const code = encodeShare({ title: "Shop stamp", description: "", steps: [{ tool: "merge" }, { tool: "compress" }] });
+    renderBuilder(`/recipes/new#r=${code}`);
+    expect(screen.getByRole("heading", { name: "Shared recipe" })).toBeInTheDocument();
+    expect(stepNames()).toEqual(["Merge PDF", "Compress PDF"]);
+  });
+
+  it("offers templates when empty", () => {
+    renderBuilder();
+    fireEvent.click(screen.getByRole("button", { name: /Unlock and shrink/ }));
+    expect(stepNames()).toEqual(["Protect & Unlock PDF", "Compress PDF"]);
+    expect(screen.getByText(/Asks for the PDF's password when you run it/)).toBeInTheDocument();
   });
 });
