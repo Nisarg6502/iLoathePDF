@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iLoathePDF — PDF tools that never upload your files</title>
     <meta name="description" content="Merge, split, compress, organize and convert PDFs and images, entirely in your browser tab. No upload, no server, no account." />
+    <meta name="robots" content="index, follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="canonical" href="https://iloathepdf.com/" />
+    <link rel="preload" href="/fonts/general-sans-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/general-sans-600.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <!-- Link previews (WhatsApp, Slack, iMessage, X, LinkedIn, ...). Crawlers need absolute URLs. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="iLoathePDF" />
@@ -24,24 +29,11 @@
     <meta name="twitter:image" content="https://iloathepdf.com/og-image.png" />
     <meta name="theme-color" content="#e0a83c" />
     <!--
-      Counterpart to public/404.html's SPA redirect shim: decode the real path
-      back out of the "?/actualpath" query string and restore it with
-      history.replaceState before React Router mounts and reads location.
+      Counterpart to public/404.html's SPA redirect: restores the real path from
+      the "?/actualpath" query string before React Router reads the URL. A file,
+      not an inline script, so the Content Security Policy can forbid inline code.
     -->
-    <script>
-      (function (l) {
-        if (l.search[1] === "/") {
-          var decoded = l.search
-            .slice(1)
-            .split("&")
-            .map(function (s) {
-              return s.replace(/~and~/g, "&");
-            })
-            .join("?");
-          window.history.replaceState(null, "", l.pathname.slice(0, -1) + decoded + l.hash);
-        }
-      })(window.location);
-    </script>
+    <script src="/spa-restore.js"></script>
   </head>
   <body>
     <div id="root"></div>

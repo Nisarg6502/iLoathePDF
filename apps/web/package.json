@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/seo/prerender.ts --outDir dist-ssr --emptyOutDir && node dist-ssr/prerender.js",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

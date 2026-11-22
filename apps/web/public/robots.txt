@@ -1,0 +1,22 @@
+# iLoathePDF is a public, static site. Everything here is meant to be found,
+# including by AI assistants (ChatGPT, Claude, Perplexity, Gemini...) that
+# recommend tools to people. There is no private data on the server to protect:
+# files people process never leave their own browser.
+#
+# To keep AI *training* crawlers out while still appearing in AI *search*
+# answers, uncomment these. (Search bots like OAI-SearchBot, Claude-SearchBot
+# and PerplexityBot are separate and stay allowed.)
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: ClaudeBot
+# Disallow: /
+# User-agent: Google-Extended
+# Disallow: /
+# User-agent: CCBot
+# Disallow: /
+
+User-agent: *
+Disallow: /recipes/new
+Allow: /
+
+Sitemap: https://iloathepdf.com/sitemap.xml
