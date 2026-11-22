@@ -19,6 +19,19 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.6.0",
+    date: "2026-11-22",
+    highlights: [
+      "Recipes, rebuilt: give every step its own settings, chain 18 tools (was 7), and run a recipe on several files at once.",
+      "A visual recipe builder: drag tools into the chain, reorder them, and see what passes between steps. A step that can't work turns red and says why, with a one-click fix.",
+      "24 ready-made recipes for everyday jobs: documents for a form upload, passport photo under 50 KB, unlock an e-Aadhaar and shrink it, merge with page numbers, mark as COPY, scan to archive and more. Find them all on the new Recipes screen.",
+      "While a recipe runs, each step lights up and shows what it did. Passwords are asked for each time and never saved.",
+      "Copy a recipe as a code and paste it on another computer to set up the same recipe there.",
+      "Only a recipe's final result goes to your output folder; files from the steps before it go in an \"iLoathePDF recipe steps\" folder next to it.",
+      "Security: updated the URL-parsing library to fix a crash it could hit on unusual nested addresses (RUSTSEC-2026-0592).",
+    ],
+  },
+  {
     version: "0.5.3",
     date: "2026-11-17",
     highlights: [
