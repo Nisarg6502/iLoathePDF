@@ -5,6 +5,25 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-11-23
+
+### Added
+- Interface translations: Spanish, French, Hindi, Marathi and Kannada. Choose
+  a language at the top of Settings. On first launch the app uses the
+  installer's choice, then the Windows language. Anything not yet translated
+  shows in English.
+- The installer has a language screen (English, Spanish, French, Hindi) and
+  remembers the choice, so it doesn't ask again on updates.
+- Bundled Noto Sans Devanagari and Kannada fonts for Indian scripts, loaded
+  only when that script is shown.
+
+### Changed
+- New app icon: the iLoathePDF mark, a page with one line redacted, the same
+  logo as the website.
+
+### Security
+- Updated `cookie` to 0.18.3 (RUSTSEC-2026-0594).
+
 ## [0.6.0] - 2026-11-22
 
 ### Added

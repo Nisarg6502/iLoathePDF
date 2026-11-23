@@ -19,6 +19,17 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.7.0",
+    date: "2026-11-23",
+    highlights: [
+      "The app now speaks Spanish, French, Hindi, Marathi and Kannada. Pick a language at the top of Settings; on first launch it follows the language you chose in the installer, then your Windows language.",
+      "The installer asks which language you'd like (English, Spanish, French or Hindi) and remembers it, so the question doesn't come back on updates.",
+      "Hindi, Marathi and Kannada text uses fonts that ship with the app. Nothing is downloaded from another server.",
+      "A new app icon: a page with one line blacked out, the same logo as iloathepdf.com.",
+      "Security: updated the cookie-handling library (RUSTSEC-2026-0594).",
+    ],
+  },
+  {
     version: "0.6.0",
     date: "2026-11-22",
     highlights: [
