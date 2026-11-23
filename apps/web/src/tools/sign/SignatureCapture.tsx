@@ -24,7 +24,6 @@ export function SignatureCapture({
   const [hasInk, setHasInk] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
-  const label = kind === "signature" ? "signature" : "initials";
   const size = CANVAS_SIZE[kind];
 
   useEffect(() => {
@@ -116,7 +115,7 @@ export function SignatureCapture({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="m-0 text-[16px] font-semibold capitalize">{t("Add {{label}}", { label })}</h2>
+          <h2 className="m-0 text-[16px] font-semibold capitalize">{kind === "signature" ? t("Add signature") : t("Add initials")}</h2>
           <button type="button" onClick={onClose} className="text-muted hover:text-text" aria-label={t("Close")}>
             ✕
           </button>
@@ -124,7 +123,7 @@ export function SignatureCapture({
 
         {saved.length > 0 && (
           <div className="mt-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{t("Saved {{label}}s", { label })}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{kind === "signature" ? t("Saved signatures") : t("Saved initials")}</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {saved.map((m) => (
                 <div key={m.id} className="group relative rounded-lg border border-border bg-white p-1.5">
@@ -209,7 +208,7 @@ export function SignatureCapture({
             disabled={!canConfirm}
             className="rounded-[10px] bg-accent px-3.5 py-2 text-[13px] font-semibold text-on-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {t("Use this {{label}}", { label })}
+            {kind === "signature" ? t("Use this signature") : t("Use these initials")}
           </button>
         </div>
       </div>
