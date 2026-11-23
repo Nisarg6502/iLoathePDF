@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
 import { estimateCompressedPdfSize } from "@/engines/compress";
 import { formatBytes, percentSmaller } from "@/lib/formatBytes";
+import { useTranslation } from "@iloathepdf/i18n";
 
 const ESTIMATE_DEBOUNCE_MS = 400;
 
@@ -12,6 +13,7 @@ type EstimateState =
   | { status: "error"; message: string };
 
 export function CompressOptions({ options, onChange, disabled, files }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const dpi = (options.dpi as number) ?? 96;
   const [estimate, setEstimate] = useState<EstimateState>({ status: "idle" });
 
@@ -42,7 +44,7 @@ export function CompressOptions({ options, onChange, disabled, files }: OptionsP
     <div className="flex flex-col gap-3">
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[12.5px] font-semibold">Image DPI</span>
+          <span className="text-[12.5px] font-semibold">{t("Image DPI")}</span>
           <span className="font-mono text-[11.5px] text-muted">{dpi}</span>
         </div>
         <input
@@ -52,7 +54,7 @@ export function CompressOptions({ options, onChange, disabled, files }: OptionsP
           disabled={disabled}
           value={dpi}
           onChange={(e) => onChange({ ...options, dpi: Number(e.target.value) })}
-          aria-label="Image DPI"
+          aria-label={t("Image DPI")}
           className="ihp-slider"
         />
       </div>
@@ -62,29 +64,26 @@ export function CompressOptions({ options, onChange, disabled, files }: OptionsP
         aria-live="polite"
         data-testid="size-estimate"
       >
-        {estimate.status === "idle" && <>Add a PDF to see the estimated size.</>}
-        {estimate.status === "working" && <>Estimating size…</>}
-        {estimate.status === "error" && <>Can't estimate: {estimate.message}</>}
+        {estimate.status === "idle" && <>{t("Add a PDF to see the estimated size.")}</>}
+        {estimate.status === "working" && <>{t("Estimating size…")}</>}
+        {estimate.status === "error" && <>{t("Can't estimate: {{message}}", { message: estimate.message })}</>}
         {estimate.status === "ready" && (
           <>
             <strong>≈ {formatBytes(estimate.estimatedBytes)}</strong>
             {percentSmaller(estimate.originalBytes, estimate.estimatedBytes) > 0 ? (
-              <>, about {percentSmaller(estimate.originalBytes, estimate.estimatedBytes)}% smaller than {formatBytes(estimate.originalBytes)}</>
+              <>{t(", about {{percent}}% smaller than {{bytes}}", { percent: percentSmaller(estimate.originalBytes, estimate.estimatedBytes), bytes: formatBytes(estimate.originalBytes) })}</>
             ) : (
-              <>, not smaller than the {formatBytes(estimate.originalBytes)} you have — try a lower DPI</>
+              <>{t(", not smaller than the {{bytes}} you have — try a lower DPI", { bytes: formatBytes(estimate.originalBytes) })}</>
             )}
             <div className="mt-1 text-[11.5px] opacity-80">
-              Estimate, from rendering {estimate.sampledPages} of {estimate.pageCount} page{estimate.pageCount === 1 ? "" : "s"} at {dpi} DPI.
-              The real size can differ.
+              {t("Estimate, from rendering {{sampled}} of {{pages}} at {{dpi}} DPI. The real size can differ.", { sampled: estimate.sampledPages, pages: t("{{count}} pages", { count: estimate.pageCount }), dpi })}
             </div>
           </>
         )}
       </div>
 
       <div className="rounded-lg bg-accent-soft p-3 text-[11.5px] leading-relaxed text-on-accent">
-        Preview engine: pages are rasterized, so this trades away selectable
-        text for now. The desktop app's Ghostscript engine keeps text
-        selectable — see the Download page.
+        {t("Preview engine: pages are rasterized, so this trades away selectable text for now. The desktop app's Ghostscript engine keeps text selectable — see the Download page.")}
       </div>
     </div>
   );

@@ -1,15 +1,16 @@
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export const pdfToImagesEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to render.");
+  if (!file) throw new Error(tr("Add a PDF to render."));
 
   const dpi = Number(options.dpi ?? 144);
-  if (dpi < 72 || dpi > 300) throw new Error("DPI must be between 72 and 300.");
+  if (dpi < 72 || dpi > 300) throw new Error(tr("DPI must be between 72 and 300."));
   const format = (options.format as string) === "jpg" ? "jpg" : "png";
   const mimeType = format === "jpg" ? "image/jpeg" : "image/png";
 
@@ -42,7 +43,7 @@ export const pdfToImagesEngine: Engine = async ({ files, options }) => {
 
     return {
       files: outputs,
-      summary: `${doc.numPages} pages rendered at ${dpi} DPI`,
+      summary: tr("{{pages}} rendered at {{dpi}} DPI", { pages: tr("{{count}} pages", { count: doc.numPages }), dpi }),
       isPreview: false,
     };
   } finally {

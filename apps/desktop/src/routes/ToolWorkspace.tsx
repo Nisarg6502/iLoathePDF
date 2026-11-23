@@ -34,6 +34,7 @@ import { cn, formatBytes } from "@/lib/utils";
 import type { SavedSignKind } from "@/lib/signatureStore";
 import { SIGN_BOX_COLORS, SIGN_HIGHLIGHT_COLORS, type SignElement } from "@/lib/signTypes";
 import type { RedactBox, RedactMode } from "@/lib/redactTypes";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 const OrganizeCanvas = lazy(() =>
   import("@/components/OrganizeCanvas").then((m) => ({ default: m.OrganizeCanvas })),
@@ -67,6 +68,7 @@ type RunState =
   | { phase: "error"; error: JobError };
 
 export default function ToolWorkspace({ tool }: { tool: Tool }) {
+  const { t } = useTranslation();
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [values, setValues] = useState<OptionValues>(tool.defaults);
   const [pages, setPages] = useState<PdfPageItem[]>([]);
@@ -113,26 +115,26 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
   }, [tool]);
 
   const blocker = useMemo(() => {
-    if (files.length === 0) return `Add ${tool.acceptsLabel} to continue.`;
-    if (tool.id === "merge" && files.length < 2) return "Merging needs at least two PDFs.";
+    if (files.length === 0) return tr("Add {{tr}} to continue.", { tr: tr(tool.acceptsLabel) });
+    if (tool.id === "merge" && files.length < 2) return tr("Merging needs at least two PDFs.");
     if (tool.id === "sign" && signElements.length === 0) {
-      return "Add a signature, text, date, initials, highlight or box to continue.";
+      return tr("Add a signature, text, date, initials, highlight or box to continue.");
     }
     if (tool.id === "redact" && redactBoxes.length === 0) {
-      return "Add at least one box to continue.";
+      return tr("Add at least one box to continue.");
     }
     if (tool.id === "crop") {
       const m = ["top", "right", "bottom", "left"].map((k) => Number(values[k] ?? 0));
-      if (m.some((n) => !Number.isFinite(n) || n < 0 || n >= 100)) return "Margins must be between 0 and 99%.";
-      if (m.every((n) => n === 0)) return "Set at least one margin above 0.";
-      if (m[0] + m[2] >= 100 || m[1] + m[3] >= 100) return "Those margins would crop away the whole page.";
+      if (m.some((n) => !Number.isFinite(n) || n < 0 || n >= 100)) return tr("Margins must be between 0 and 99%.");
+      if (m.every((n) => n === 0)) return tr("Set at least one margin above 0.");
+      if (m[0] + m[2] >= 100 || m[1] + m[3] >= 100) return tr("Those margins would crop away the whole page.");
     }
     if (tool.id === "protect") {
       const password = String(values.password ?? "");
       const mode = String(values.mode ?? "protect");
-      if (password.length < 4) return "Enter a password of at least 4 characters.";
+      if (password.length < 4) return tr("Enter a password of at least 4 characters.");
       if (mode === "protect" && password !== String(values.confirmPassword ?? "")) {
-        return "Passwords do not match.";
+        return tr("Passwords do not match.");
       }
     }
     return null;
@@ -145,7 +147,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
     const controller = new AbortController();
     abort.current = controller;
     setStartedAt(Date.now());
-    setState({ phase: "running", pct: 0, note: "Starting…" });
+    setState({ phase: "running", pct: 0, note: tr("Starting…") });
 
     const onProgress = (p: Progress) => setState({ phase: "running", pct: p.pct, note: p.note });
 
@@ -256,9 +258,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
   const inputSummary =
     files.length === 0
       ? null
-      : `${files.length} file${files.length === 1 ? "" : "s"}${
-          totalBytes ? ` · ${formatBytes(totalBytes)}` : ""
-        }`;
+      : `${tr("{{count}} files", { count: files.length })}${totalBytes ? ` · ${formatBytes(totalBytes)}` : ""}`;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -268,8 +268,8 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
           <tool.icon className="size-4" style={{ color: `var(--tint-${tool.tint})` }} strokeWidth={1.5} />
         </span>
         <div className="min-w-0">
-          <div className="text-[15px] font-semibold tracking-[-0.005em] text-text">{tool.title}</div>
-          <div className="truncate text-[12.5px] text-muted">{tool.description}</div>
+          <div className="text-[15px] font-semibold tracking-[-0.005em] text-text">{tr(tool.title)}</div>
+          <div className="truncate text-[12.5px] text-muted">{tr(tool.description)}</div>
         </div>
 
         <div className="flex-1" />
@@ -279,7 +279,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
             <span className="text-[13px] text-muted">{inputSummary}</span>
             <Button variant="secondary" size="sm" onClick={browse} disabled={!isTauri()}>
               <Plus />
-              Add files
+              {t("Add files")}
             </Button>
             <Button
               variant="danger"
@@ -290,7 +290,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 setState({ phase: "idle" });
               }}
             >
-              Clear
+              {t("Clear")}
             </Button>
           </div>
         ) : null}
@@ -311,7 +311,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
               >
                 <div className="w-full max-w-[560px]">
                   <JobProgress
-                    title={tool.action}
+                    title={tr(tool.action)}
                     progress={{ id: "current", pct: state.pct, note: state.note }}
                     phase="running"
                     startedAt={startedAt}
@@ -334,7 +334,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                     title={state.result.summary}
                     compression={state.result.compression}
                     onAgain={() => setState({ phase: "idle" })}
-                    againLabel="Back to options"
+                    againLabel={tr("Back to options")}
                   />
                 </div>
               </motion.div>
@@ -387,12 +387,12 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 </span>
                 <span className="text-center">
                   <span className="block text-[17px] font-semibold text-text">
-                    {picking ? "Opening the file picker…" : `Drop ${tool.acceptsLabel} here`}
+                    {picking ? t("Opening the file picker…") : t("Drop {{acceptsLabel}} here", { acceptsLabel: tool.acceptsLabel })}
                   </span>
                   <span className="mt-1 block text-[13.5px] text-muted">
                     {picking
-                      ? "Windows can take a moment the first time."
-                      : "or click anywhere in this box to browse"}
+                      ? t("Windows can take a moment the first time.")
+                      : t("or click anywhere in this box to browse")}
                   </span>
                 </span>
                 <span className="font-mono text-[11.5px] tracking-[0.13em] text-faint uppercase">
@@ -400,7 +400,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 </span>
                 {rejected > 0 ? (
                   <span className="text-[13px] text-danger">
-                    {rejected} file{rejected === 1 ? "" : "s"} skipped — wrong format for this tool.
+                    {t("{{count}} files skipped: wrong format for this tool.", { count: rejected })}
                   </span>
                 ) : null}
               </motion.button>
@@ -414,7 +414,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 className="flex min-h-0 flex-1 flex-col"
               >
                 <Suspense
-                  fallback={<div className="grid h-full place-items-center text-[14px] text-muted">Loading the reader…</div>}
+                  fallback={<div className="grid h-full place-items-center text-[14px] text-muted">{t("Loading the reader…")}</div>}
                 >
                   <PdfReader file={files[0]} onClose={() => setFiles([])} />
                 </Suspense>
@@ -431,7 +431,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 <Suspense
                   fallback={
                     <div className="grid h-full place-items-center text-[14px] text-muted">
-                      Loading the page canvas…
+                      {t("Loading the page canvas…")}
                     </div>
                   }
                 >
@@ -450,7 +450,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 <Suspense
                   fallback={
                     <div className="grid h-full place-items-center text-[14px] text-muted">
-                      Loading the page canvas…
+                      {t("Loading the page canvas…")}
                     </div>
                   }
                 >
@@ -478,7 +478,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                 <Suspense
                   fallback={
                     <div className="grid h-full place-items-center text-[14px] text-muted">
-                      Loading the page canvas…
+                      {t("Loading the page canvas…")}
                     </div>
                   }
                 >
@@ -513,7 +513,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
         <aside className={cn("flex w-[344px] flex-none flex-col border-l border-border bg-surface", tool.id === "reader" && "hidden")}>
           <div className="min-h-0 flex-1 overflow-auto p-4">
             <div className="mb-2.5 font-mono text-[12px] font-bold tracking-[0.13em] text-faint">
-              OPTIONS
+              {t("OPTIONS")}
             </div>
             {tool.id === "sign" ? (
               <SignOptionsPanel
@@ -582,19 +582,20 @@ function RunFooter({
   onRun: () => void;
   fileCount: number;
 }) {
+  const { t } = useTranslation();
   const { outputDir, choose } = useOutputDir();
 
   return (
     <div className="flex-none border-t border-border bg-surface-2 px-4 pt-3 pb-3.5">
       <div className="mb-1.5 font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
-        SAVE TO
+        {t("SAVE TO")}
       </div>
       <div className="flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => void choose()}
           disabled={!isTauri()}
-          title={outputDir ?? "Beside each input file"}
+          title={outputDir ?? t("Beside each input file")}
           className={cn(
             "flex h-[30px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-hi bg-surface px-2.5",
             "outline-none transition-colors duration-150 hover:border-accent",
@@ -603,18 +604,18 @@ function RunFooter({
         >
           <FolderOpen className="size-3.5 flex-none" style={{ color: "var(--tint-e)" }} />
           <span className="min-w-0 flex-1 truncate text-left font-mono text-[12px] text-text">
-            {outputDir ?? "Beside each input file"}
+            {outputDir ?? t("Beside each input file")}
           </span>
         </button>
         <Button variant="secondary" size="sm" onClick={() => void choose()} disabled={!isTauri()}>
-          Change
+          {t("Change")}
         </Button>
       </div>
 
       <p className="mt-1.5 text-[12px] text-muted">
         {fileCount > 0
-          ? `Writes new files. Your ${fileCount} input file${fileCount === 1 ? " is" : "s are"} untouched.`
-          : "Inputs are never modified — every tool writes new files."}
+          ? t("Writes new files. Your {{count}} input files are untouched.", { count: fileCount })
+          : t("Inputs are never modified — every tool writes new files.")}
       </p>
 
       <Button
@@ -624,8 +625,8 @@ function RunFooter({
         className="mt-2.5 h-[38px] w-full text-[14.5px] font-semibold"
       >
         {running ? <Loader2 className="animate-spin" /> : <Play />}
-        <span>{running ? "Working…" : tool.action}</span>
-        <span className="font-mono text-[12px] font-normal opacity-70">Ctrl+Enter</span>
+        <span>{running ? t("Working…") : tool.action}</span>
+        <span className="font-mono text-[12px] font-normal opacity-70">{t("Ctrl+Enter")}</span>
       </Button>
 
       {blocker ? <p className="mt-2 text-center text-[13px] text-muted">{blocker}</p> : null}
@@ -644,6 +645,7 @@ function FileList({
   onChange: (files: PickedFile[]) => void;
   ordered: boolean;
 }) {
+  const { t } = useTranslation();
   // Order is part of the result for these tools (page order in the PDF), so
   // it must be changeable, not just displayed.
   const move = (from: number, to: number) => {
@@ -682,7 +684,7 @@ function FileList({
               <Button
                 variant="ghost"
                 size="iconSm"
-                aria-label={`Move ${file.name} up`}
+                aria-label={t("Move {{name}} up", { name: file.name })}
                 disabled={i === 0}
                 onClick={() => move(i, i - 1)}
               >
@@ -691,7 +693,7 @@ function FileList({
               <Button
                 variant="ghost"
                 size="iconSm"
-                aria-label={`Move ${file.name} down`}
+                aria-label={t("Move {{name}} down", { name: file.name })}
                 disabled={i === files.length - 1}
                 onClick={() => move(i, i + 1)}
               >
@@ -702,7 +704,7 @@ function FileList({
           <Button
             variant="danger"
             size="iconSm"
-            aria-label={`Remove ${file.name}`}
+            aria-label={t("Remove {{name}}", { name: file.name })}
             onClick={() => onChange(files.filter((f) => f.id !== file.id))}
           >
             <X />

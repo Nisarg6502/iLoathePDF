@@ -1,21 +1,23 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { msg, tr, useTranslation } from "@iloathepdf/i18n";
 
 const fieldClass = "rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm";
 
 const MODES = [
-  { value: "enhanced", label: "Enhanced", hint: "Stronger contrast: paper reads white, ink reads dark." },
-  { value: "bw", label: "Black & white", hint: "Crisp ink on white. Ignores shadows and uneven light." },
-  { value: "color", label: "Original colour", hint: "The photo as it is." },
+  { value: "enhanced", label: msg("Enhanced"), hint: msg("Stronger contrast: paper reads white, ink reads dark.") },
+  { value: "bw", label: msg("Black & white"), hint: msg("Crisp ink on white. Ignores shadows and uneven light.") },
+  { value: "color", label: msg("Original colour"), hint: msg("The photo as it is.") },
 ];
 
 export function ScanOptions({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const mode = (options.mode as string) ?? "enhanced";
   const set = (patch: Record<string, unknown>) => onChange({ ...options, ...patch });
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <span className="text-[12.5px] font-semibold">Cleanup</span>
+        <span className="text-[12.5px] font-semibold">{t("Cleanup")}</span>
         {MODES.map((m) => (
           <label
             key={m.value}
@@ -29,13 +31,13 @@ export function ScanOptions({ options, onChange, disabled }: OptionsPanelProps) 
               disabled={disabled}
               onChange={() => set({ mode: m.value })}
             />
-            <div className="text-[12.5px] font-semibold">{m.label}</div>
-            <div className="text-[11.5px] text-muted">{m.hint}</div>
+            <div className="text-[12.5px] font-semibold">{tr(m.label)}</div>
+            <div className="text-[11.5px] text-muted">{tr(m.hint)}</div>
           </label>
         ))}
       </div>
       <label className="flex flex-col gap-1.5">
-        <span className="text-[12.5px] font-semibold">Page size</span>
+        <span className="text-[12.5px] font-semibold">{t("Page size")}</span>
         <select
           disabled={disabled}
           value={(options.page_size as string) ?? "a4"}
@@ -43,12 +45,12 @@ export function ScanOptions({ options, onChange, disabled }: OptionsPanelProps) 
           className={fieldClass}
         >
           <option value="a4">A4</option>
-          <option value="letter">US Letter</option>
-          <option value="fit">Fit each photo</option>
+          <option value="letter">{t("US Letter")}</option>
+          <option value="fit">{t("Fit each photo")}</option>
         </select>
       </label>
       <label className="flex flex-col gap-1.5">
-        <span className="text-[12.5px] font-semibold">Output file name</span>
+        <span className="text-[12.5px] font-semibold">{t("Output file name")}</span>
         <div className="flex items-center gap-2">
           <input
             type="text"

@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import type { SignElement } from "@/lib/signTypes";
 import { isImageSignElement, isShapeSignElement } from "@/lib/signTypes";
+import { useTranslation } from "@iloathepdf/i18n";
 
 /** One placed element: draggable by its body, resizable from the bottom-right handle. */
 export function SignElementBox({
@@ -21,6 +22,7 @@ export function SignElementBox({
   onDelete: () => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const { t } = useTranslation();
   const drag = useRef<{ mode: "move" | "resize"; startX: number; startY: number; el: SignElement } | null>(null);
 
   function onPointerDown(e: React.PointerEvent, mode: "move" | "resize") {
@@ -100,7 +102,7 @@ export function SignElementBox({
               onDelete();
             }}
             className="absolute -right-2.5 -top-2.5 grid size-5 place-items-center rounded-full bg-danger text-[10px] text-white shadow"
-            aria-label="Delete element"
+            aria-label={t("Delete element")}
           >
             ✕
           </button>

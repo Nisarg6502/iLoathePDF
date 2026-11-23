@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { PageThumbnailGrid, type PdfPageItem } from "./PageThumbnailGrid";
 import { PdfPreviewDocument, isCancellation } from "@/lib/pdfPreview";
 import { JobError, readFileBytes } from "@/lib/jobs";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 export interface OrganizeCanvasProps {
   /** The picked file: a path under Tauri, plus a Blob in the browser. */
@@ -27,6 +28,7 @@ type LoadState =
   | { phase: "error"; message: string };
 
 export function OrganizeCanvas({ file, pages, onChange, className }: OrganizeCanvasProps) {
+  const { t } = useTranslation();
   const [state, setState] = useState<LoadState>({ phase: "loading" });
   const [selected, setSelected] = useState<string[]>([]);
   // onChange identity changes every render in the parent; keep it out of the
@@ -73,7 +75,7 @@ export function OrganizeCanvas({ file, pages, onChange, className }: OrganizeCan
         const message =
           err instanceof JobError
             ? err.message
-            : "That PDF could not be opened for preview. You can still run the tool.";
+            : tr("That PDF could not be opened for preview. You can still run the tool.");
         setState({ phase: "error", message });
         emit.current([]);
       }
@@ -97,7 +99,7 @@ export function OrganizeCanvas({ file, pages, onChange, className }: OrganizeCan
       <div className={className}>
         <div className="flex items-center justify-center gap-2 rounded-card border border-border bg-surface px-5 py-10 text-[14px] text-muted">
           <Loader2 className="size-4 animate-spin" />
-          Reading pages…
+          {t("Reading pages…")}
         </div>
       </div>
     );
@@ -107,7 +109,7 @@ export function OrganizeCanvas({ file, pages, onChange, className }: OrganizeCan
     return (
       <div className={className}>
         <div className="rounded-card border border-danger/40 bg-surface px-5 py-6 text-center">
-          <p className="text-[14px] font-medium text-text">Preview unavailable</p>
+          <p className="text-[14px] font-medium text-text">{t("Preview unavailable")}</p>
           <p className="mt-1 text-[14px] text-muted">{state.message}</p>
         </div>
       </div>

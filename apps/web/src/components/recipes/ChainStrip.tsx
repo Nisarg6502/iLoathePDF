@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { getTool } from "@/tools/registry";
 import { tintWash } from "@/tools/tint";
 import type { RecipeStep } from "@/recipes/chain";
+import { tr } from "@iloathepdf/i18n";
 
 /** A tool's icon in its tinted tile. */
 export function StepIcon({ tool, size = 30 }: { tool: string; size?: number }) {
@@ -22,7 +23,7 @@ export function StepIcon({ tool, size = 30 }: { tool: string; size?: number }) {
 /** The recipe at a glance: step icons joined by arrows. */
 export function ChainStrip({ steps, size = 26 }: { steps: RecipeStep[]; size?: number }) {
   return (
-    <div className="flex flex-wrap items-center gap-1" aria-label={steps.map((s) => getTool(s.tool)?.name ?? s.tool).join(", then ")}>
+    <div className="flex flex-wrap items-center gap-1" aria-label={steps.map((s) => getTool(s.tool)?.name ?? s.tool).join(tr(", then "))}>
       {steps.map((s, i) => (
         <Fragment key={i}>
           {i > 0 && (

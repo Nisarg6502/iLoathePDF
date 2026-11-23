@@ -1,17 +1,18 @@
 import { encryptPDF } from "@pdfsmaller/pdf-encrypt";
 import { decryptPDF, isEncrypted } from "@pdfsmaller/pdf-decrypt";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 const MIN_PASSWORD_LENGTH = 4;
 
 export const protectEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to protect or unlock.");
+  if (!file) throw new Error(tr("Add a PDF to protect or unlock."));
 
   const mode = (options.mode as string) ?? "protect";
   const password = (options.password as string) ?? "";
   if (password.length < MIN_PASSWORD_LENGTH) {
-    throw new Error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+    throw new Error(tr("Password must be at least {{MIN_PASSWORD_LENGTH}} characters.", { MIN_PASSWORD_LENGTH }));
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
@@ -19,7 +20,7 @@ export const protectEngine: Engine = async ({ files, options }) => {
   if (mode === "protect") {
     const info = await isEncrypted(bytes);
     if (info.encrypted) {
-      throw new Error("This PDF already has a password — unlock it first.");
+      throw new Error(tr("This PDF already has a password — unlock it first."));
     }
     const encrypted = await encryptPDF(bytes, password);
     return {
@@ -29,7 +30,7 @@ export const protectEngine: Engine = async ({ files, options }) => {
           blob: new Blob([encrypted as BlobPart], { type: "application/pdf" }),
         },
       ],
-      summary: "Password protection added.",
+      summary: tr("Password protection added."),
       isPreview: false,
     };
   }
@@ -42,12 +43,12 @@ export const protectEngine: Engine = async ({ files, options }) => {
       const message = err instanceof Error ? err.message : String(err);
       const lower = message.toLowerCase();
       if (lower.includes("not encrypted")) {
-        throw new Error("This PDF isn't password protected.");
+        throw new Error(tr("This PDF isn't password protected."));
       }
       if (lower.includes("unsupported encryption")) {
-        throw new Error("This PDF uses an encryption type the browser version can't open — try the desktop app.");
+        throw new Error(tr("This PDF uses an encryption type the browser version can't open — try the desktop app."));
       }
-      throw new Error("Incorrect password.");
+      throw new Error(tr("Incorrect password."));
     }
     return {
       files: [
@@ -56,7 +57,7 @@ export const protectEngine: Engine = async ({ files, options }) => {
           blob: new Blob([decrypted as BlobPart], { type: "application/pdf" }),
         },
       ],
-      summary: "Password protection removed.",
+      summary: tr("Password protection removed."),
       isPreview: false,
     };
   }

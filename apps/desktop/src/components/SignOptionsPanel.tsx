@@ -7,6 +7,7 @@ import {
   isShapeSignElement,
   type SignElement,
 } from "@/lib/signTypes";
+import { useTranslation } from "@iloathepdf/i18n";
 
 export function SignOptionsPanel({
   elements,
@@ -29,39 +30,40 @@ export function SignOptionsPanel({
   onUpdate: (id: string, patch: Partial<SignElement>) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const selected = elements.find((e) => e.id === selectedId) ?? null;
 
   return (
     <div className="flex flex-col gap-4">
       <div>
         <div className="mb-2 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
-          ADD TO PAGE {activePageIndex + 1}
+          {t("ADD TO PAGE {{page}}", { page: activePageIndex + 1 })}
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="secondary" size="sm" onClick={() => onAddCapture("signature")}>
-            Signature
+            {t("Signature")}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => onAddCapture("initials")}>
-            Initials
+            {t("Initials")}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => onAddText("text")}>
-            Text
+            {t("Text")}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => onAddText("date")}>
-            Date
+            {t("Date")}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => onAddShape("highlight")}>
-            Highlight
+            {t("Highlight")}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => onAddShape("box")}>
-            Box
+            {t("Box")}
           </Button>
         </div>
       </div>
 
       {selected && isShapeSignElement(selected) && (
         <div className="rounded-lg border border-border bg-surface-2 p-3">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{t("Edit {{kind}}", { kind: selected.kind })}</div>
           <div className="mt-2 flex items-center gap-1.5">
             {(selected.kind === "highlight" ? SIGN_HIGHLIGHT_COLORS : SIGN_BOX_COLORS).map((c) => (
               <button
@@ -70,7 +72,7 @@ export function SignOptionsPanel({
                 onClick={() => onUpdate(selected.id, { color: c })}
                 className={`size-5.5 rounded-full border-2 ${selected.color === c ? "border-accent" : "border-transparent"}`}
                 style={{ backgroundColor: c }}
-                aria-label={`Color ${c}`}
+                aria-label={t("Color {{c}}", { c })}
               />
             ))}
           </div>
@@ -79,7 +81,7 @@ export function SignOptionsPanel({
 
       {selected && !isImageSignElement(selected) && !isShapeSignElement(selected) && (
         <div className="rounded-lg border border-border bg-surface-2 p-3">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{t("Edit {{kind}}", { kind: selected.kind })}</div>
           <input
             type="text"
             value={selected.text}
@@ -87,7 +89,7 @@ export function SignOptionsPanel({
             className="mt-2 w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[13px] text-text"
           />
           <div className="mt-2 flex items-center gap-2">
-            <label className="text-[12px] text-muted">Size</label>
+            <label className="text-[12px] text-muted">{t("Size")}</label>
             <input
               type="range"
               min={8}
@@ -105,7 +107,7 @@ export function SignOptionsPanel({
                 onClick={() => onUpdate(selected.id, { color: c })}
                 className={`size-5.5 rounded-full border-2 ${selected.color === c ? "border-accent" : "border-transparent"}`}
                 style={{ backgroundColor: c }}
-                aria-label={`Color ${c}`}
+                aria-label={t("Color {{c}}", { c })}
               />
             ))}
           </div>
@@ -114,7 +116,7 @@ export function SignOptionsPanel({
 
       <div>
         <div className="mb-2 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
-          ELEMENTS ({elements.length})
+          {t("ELEMENTS ({{count}})", { count: elements.length })}
         </div>
         <ul className="flex flex-col gap-1.5">
           {elements.map((el) => (
@@ -140,7 +142,7 @@ export function SignOptionsPanel({
               </button>
             </li>
           ))}
-          {elements.length === 0 && <li className="text-[12.5px] text-muted">Nothing placed yet.</li>}
+          {elements.length === 0 && <li className="text-[12.5px] text-muted">{t("Nothing placed yet.")}</li>}
         </ul>
       </div>
     </div>

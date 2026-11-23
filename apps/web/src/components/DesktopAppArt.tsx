@@ -1,4 +1,5 @@
 import { MergeIcon, SplitIcon, OrganizeIcon, CompressIcon, SignIcon } from "@/tools/icons";
+import { useTranslation } from "@iloathepdf/i18n";
 
 const SIDEBAR_TOOLS = [
   { Icon: MergeIcon, active: false },
@@ -16,6 +17,7 @@ const QUEUE = [
 ];
 
 export function DesktopAppArt() {
+  const { t } = useTranslation();
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]">
       {/* native Windows-style title bar */}
@@ -47,15 +49,15 @@ export function DesktopAppArt() {
         {/* main panel: batch queue */}
         <div className="flex-1 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-[12.5px] font-semibold">Compress · batch</span>
-            <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-faint">4 FILES</span>
+            <span className="text-[12.5px] font-semibold">{t("Compress · batch")}</span>
+            <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-faint">{t("4 FILES")}</span>
           </div>
           <div className="mt-3 flex flex-col gap-2">
             {QUEUE.map((f) => (
               <div key={f.name} className="rounded-[9px] border border-border bg-surface px-3 py-2">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[11px]">{f.name}</span>
-                  <span className="font-mono text-[10px] text-muted">{f.pct === 100 ? "done" : f.pct === 0 ? "queued" : `${f.pct}%`}</span>
+                  <span className="font-mono text-[10px] text-muted">{f.pct === 100 ? "done" : f.pct === 0 ? t("queued") : `${f.pct}%`}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-3">
                   <span
@@ -68,7 +70,7 @@ export function DesktopAppArt() {
           </div>
           <div className="mt-3 flex items-center gap-2 rounded-[9px] border border-dashed border-border-hi px-3 py-2.5 text-[11px] text-faint">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 3v7M4.5 6.5L8 3l3.5 3.5M3 12.5h10" /></svg>
-            Drop a whole folder to queue it
+            {t("Drop a whole folder to queue it")}
           </div>
         </div>
       </div>

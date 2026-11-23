@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import type { Progress } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 export type JobPhase = "running" | "cancelling" | "done" | "error";
 
@@ -35,12 +36,13 @@ export function JobProgress({
   onCancel,
   className,
 }: JobProgressProps) {
+  const { t } = useTranslation();
   const elapsed = useElapsed(startedAt, phase === "running" || phase === "cancelling");
 
   const pct = progress ? clamp(progress.pct, 0, 100) : null;
   const determinate = pct !== null && pct > 0;
   const cancelling = phase === "cancelling";
-  const note = cancelling ? "Stopping…" : (progress?.note ?? "Starting…");
+  const note = cancelling ? tr("Stopping…") : (progress?.note ?? tr("Starting…"));
 
   return (
     <section
@@ -77,7 +79,7 @@ export function JobProgress({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={determinate ? Math.round(pct) : undefined}
-            aria-valuetext={determinate ? `${Math.round(pct)}%` : "Working"}
+            aria-valuetext={determinate ? `${Math.round(pct)}%` : tr("Working")}
           >
             {determinate ? (
               <div
@@ -108,7 +110,7 @@ export function JobProgress({
             )}
           >
             <X className="h-3.5 w-3.5" />
-            {cancelling ? "Cancelling" : "Cancel"}
+            {cancelling ? t("Cancelling") : t("Cancel")}
           </button>
         )}
       </div>

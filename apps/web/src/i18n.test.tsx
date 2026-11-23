@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { i18n, languageFromWindowsLcid, matchLanguage, setLanguage } from "@iloathepdf/i18n";
+import { i18n, languageFromWindowsLcid, matchLanguage, setLanguage, Trans } from "@iloathepdf/i18n";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { FileDropZone } from "@/components/FileDropZone";
 
@@ -61,6 +61,16 @@ describe("switching language", () => {
 
     await setLanguage("hi");
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("2 फ़ाइलें छोड़ दी गईं। स्वीकार्य: .pdf"));
+  });
+
+  it("renders a sentence with markup from its English key when there is no translation", () => {
+    const { container } = render(
+      <p>
+        <Trans i18nKey="Press <b>Run again</b> to update it." components={{ b: <strong /> }} />
+      </p>,
+    );
+    expect(container.querySelector("p")).toHaveTextContent("Press Run again to update it.");
+    expect(container.querySelector("strong")).toHaveTextContent("Run again");
   });
 
   it("falls back to the English text for a string with no translation", async () => {

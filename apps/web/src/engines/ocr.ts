@@ -3,6 +3,7 @@ import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { PDFDocument, TextRenderingMode, setTextRenderingMode, pushGraphicsState, popGraphicsState, rgb } from "pdf-lib";
 import { createWorker } from "tesseract.js";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -209,7 +210,7 @@ function bytesToBase64(bytes: Uint8Array): string {
 
 export const ocrEngine: Engine = async ({ files }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a scanned PDF to OCR.");
+  if (!file) throw new Error(tr("Add a scanned PDF to OCR."));
 
   const bytes = await file.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({ data: bytes, CanvasFactory: DomCanvasFactory });
@@ -226,7 +227,7 @@ export const ocrEngine: Engine = async ({ files }) => {
     for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
       const page = await doc.getPage(pageNum);
       if (await pageHasText(page)) {
-        throw new Error("This PDF already has selectable text — OCR is for scanned/image-only PDFs.");
+        throw new Error(tr("This PDF already has selectable text — OCR is for scanned/image-only PDFs."));
       }
       page.cleanup();
     }
@@ -325,7 +326,7 @@ export const ocrEngine: Engine = async ({ files }) => {
             blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
           },
         ],
-        summary: `${doc.numPages} page(s) made searchable.`,
+        summary: tr("{{count}} pages made searchable.", { count: doc.numPages }),
         isPreview: false,
       };
     } finally {

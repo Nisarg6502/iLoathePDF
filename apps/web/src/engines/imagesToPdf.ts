@@ -3,6 +3,7 @@ import type { Engine } from "./types";
 import { renderRotatedCropped, isNoopEdit, DEFAULT_IMAGE_EDIT, type ImageEdit, type ImageEdits } from "@/tools/imageEdit";
 import { outputFileName } from "@/lib/outputName";
 import { readJpegOrientation } from "@/lib/jpegOrientation";
+import { tr } from "@iloathepdf/i18n";
 
 // Same page sizes the desktop engine uses, in points.
 const PAGE_SIZES = {
@@ -78,13 +79,13 @@ function pageFor(
 }
 
 export const imagesToPdfEngine: Engine = async ({ files, options }) => {
-  if (files.length === 0) throw new Error("Add at least one image.");
+  if (files.length === 0) throw new Error(tr("Add at least one image."));
 
   const pageSize = oneOf<PageSize>(options.page_size, ["fit", "a4", "letter"], "fit");
   const orientation = oneOf<Orientation>(options.orientation, ["auto", "portrait", "landscape"], "auto");
   const marginMm = Number(options.margin_mm ?? 0);
-  if (!Number.isFinite(marginMm)) throw new Error("Margin must be a number.");
-  if (marginMm < 0) throw new Error("Margin cannot be negative.");
+  if (!Number.isFinite(marginMm)) throw new Error(tr("Margin must be a number."));
+  if (marginMm < 0) throw new Error(tr("Margin cannot be negative."));
   // A fit page is the image itself; a margin only means something on a fixed sheet.
   const margin = pageSize === "fit" ? 0 : marginMm * MM_TO_PT;
 
@@ -103,7 +104,7 @@ export const imagesToPdfEngine: Engine = async ({ files, options }) => {
     const [pageW, pageH] = pageFor(image.width, image.height, pageSize, orientation);
     const maxW = pageW - margin * 2;
     const maxH = pageH - margin * 2;
-    if (maxW <= 0 || maxH <= 0) throw new Error("Margin is too large for this page size.");
+    if (maxW <= 0 || maxH <= 0) throw new Error(tr("Margin is too large for this page size."));
 
     const page = doc.addPage([pageW, pageH]);
     // Fit the image inside the margins, scaling small images up like the
@@ -128,7 +129,7 @@ export const imagesToPdfEngine: Engine = async ({ files, options }) => {
         blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `${files.length} images → 1 PDF, ${files.length} pages`,
+    summary: tr("{{images}} → 1 PDF, {{pages}}", { images: tr("{{count}} images", { count: files.length }), pages: tr("{{count}} pages", { count: files.length }) }),
     isPreview: false,
   };
 };

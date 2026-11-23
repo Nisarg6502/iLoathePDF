@@ -1,6 +1,7 @@
 import { PDFDocument } from "pdf-lib";
 import { parseRanges } from "@/lib/ranges";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 const SIDES = ["top", "right", "bottom", "left"] as const;
 type Side = (typeof SIDES)[number];
@@ -11,14 +12,14 @@ export function readMargins(options: Record<string, unknown>): CropMargins {
   for (const side of SIDES) {
     const value = Number(options[side] ?? 0);
     if (!Number.isFinite(value) || value < 0 || value >= 100) {
-      throw new Error(`The ${side} margin must be a percentage from 0 to under 100.`);
+      throw new Error(tr("The {{side}} margin must be a percentage from 0 to under 100.", { side }));
     }
     out[side] = value;
   }
   if (out.top + out.bottom >= 100 || out.left + out.right >= 100) {
-    throw new Error("Those margins would crop away the whole page.");
+    throw new Error(tr("Those margins would crop away the whole page."));
   }
-  if (SIDES.every((s) => out[s] === 0)) throw new Error("Set at least one margin above 0.");
+  if (SIDES.every((s) => out[s] === 0)) throw new Error(tr("Set at least one margin above 0."));
   return out;
 }
 
@@ -52,7 +53,7 @@ export function trimmedBox(
 
 export const cropEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to crop.");
+  if (!file) throw new Error(tr("Add a PDF to crop."));
   const margins = readMargins(options);
 
   const doc = await PDFDocument.load(await file.arrayBuffer());
@@ -61,7 +62,7 @@ export const cropEngine: Engine = async ({ files, options }) => {
   try {
     targets = [...new Set(parseRanges(String(options.pages ?? ""), pages.length))];
   } catch (err) {
-    throw new Error(err instanceof RangeError ? err.message : "Check the page selection.");
+    throw new Error(err instanceof RangeError ? err.message : tr("Check the page selection."));
   }
 
   for (const index of targets) {
@@ -79,7 +80,7 @@ export const cropEngine: Engine = async ({ files, options }) => {
         blob: new Blob([bytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `${targets.length} of ${pages.length} page${pages.length === 1 ? "" : "s"} cropped`,
+    summary: tr("{{done}} of {{pages}} cropped", { done: targets.length, pages: tr("{{count}} pages", { count: pages.length }) }),
     isPreview: false,
   };
 };

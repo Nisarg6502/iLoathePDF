@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { useTranslation } from "@iloathepdf/i18n";
 
 const START_KB = 3140; // matches the displayed "3.14 MB"
 const END_KB = 812;
@@ -10,6 +11,7 @@ function formatSize(kb: number): string {
 }
 
 export function HeroDemo() {
+  const { t } = useTranslation();
   const [played, setPlayed] = useState(false);
   const [progress, setProgress] = useState(0);
   const [sizeKb, setSizeKb] = useState(START_KB);
@@ -65,7 +67,7 @@ export function HeroDemo() {
               <path d="M5.5 5.5L8 8M8 8V5.6M8 8H5.6M12.5 12.5L10 10M10 10v2.4M10 10h2.4" />
             </svg>
           </span>
-          <span className="text-[13.5px] font-semibold">Compress PDF</span>
+          <span className="text-[13.5px] font-semibold">{t("Compress PDF")}</span>
           <span className="flex-1" />
           <span className="flex items-center gap-1.5">
             {done && (
@@ -87,7 +89,7 @@ export function HeroDemo() {
           </span>
         </div>
         <div className="mt-4.5 rounded-xl border border-border bg-surface-2 p-5">
-          <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">RESULT</div>
+          <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">{t("RESULT")}</div>
           <div className="mt-3 flex items-baseline gap-2 whitespace-nowrap font-mono sm:gap-3">
             <span className="text-[16px] text-faint line-through sm:text-[22px]">3.14 MB</span>
             <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="var(--faint)" strokeWidth="1.5" className="flex-none">
@@ -99,8 +101,8 @@ export function HeroDemo() {
             <span className="bg-ok" style={{ width: `${progress}%` }} />
           </div>
           <div className="mt-2 flex justify-between font-mono text-[11px] text-muted">
-            <span>{done ? "−75% smaller" : played ? "compressing…" : "waiting to start"}</span>
-            <span>quality: balanced</span>
+            <span>{done ? t("−75% smaller") : played ? t("compressing…") : t("waiting to start")}</span>
+            <span>{t("quality: balanced")}</span>
           </div>
         </div>
       </div>

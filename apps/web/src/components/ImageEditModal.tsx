@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { isFullFrameCrop, renderRotatedCropped, type ImageEdit, type Rect } from "@/tools/imageEdit";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 const MIN_SIZE = 0.06;
 const FULL_RECT: Rect = { x: 0, y: 0, w: 1, h: 1 };
@@ -28,6 +29,7 @@ export function ImageEditModal({
   onApply: (edit: ImageEdit) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [rotate, setRotate] = useState(edit.rotate);
   const [crop, setCrop] = useState<Rect | null>(edit.crop);
   const [bitmap, setBitmap] = useState<ImageBitmap | null>(null);
@@ -49,7 +51,7 @@ export function ImageEditModal({
         setBitmap(b);
       })
       .catch(() => {
-        if (!cancelled) setError("Couldn't open this image. It may be corrupted or in an unsupported format.");
+        if (!cancelled) setError(tr("Couldn't open this image. It may be corrupted or in an unsupported format."));
       });
     return () => {
       cancelled = true;
@@ -130,8 +132,8 @@ export function ImageEditModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">Edit {file.name}</span>
-          <button type="button" onClick={onClose} className="text-muted hover:text-text" aria-label="Close">
+          <span className="text-sm font-semibold">{t("Edit {{name}}", { name: file.name })}</span>
+          <button type="button" onClick={onClose} className="text-muted hover:text-text" aria-label={t("Close")}>
             ×
           </button>
         </div>
@@ -181,10 +183,10 @@ export function ImageEditModal({
           {!error && (
             <>
               <button type="button" onClick={() => rotateBy(-90)} className="rounded-lg border border-border px-3 py-1.5 text-[12.5px]">
-                Rotate left
+                {t("Rotate left")}
               </button>
               <button type="button" onClick={() => rotateBy(90)} className="rounded-lg border border-border px-3 py-1.5 text-[12.5px]">
-                Rotate right
+                {t("Rotate right")}
               </button>
               <button
                 type="button"
@@ -194,13 +196,13 @@ export function ImageEditModal({
                 }}
                 className="rounded-lg border border-border px-3 py-1.5 text-[12.5px] text-muted"
               >
-                Reset
+                {t("Reset")}
               </button>
             </>
           )}
           <span className="flex-1" />
           <button type="button" onClick={onClose} className="rounded-lg border border-border px-3.5 py-1.5 text-[12.5px]">
-            Cancel
+            {t("Cancel")}
           </button>
           {!error && (
             <button
@@ -208,7 +210,7 @@ export function ImageEditModal({
               onClick={() => onApply({ rotate, crop: crop && !isFullFrameCrop(crop) ? crop : null })}
               className="rounded-lg bg-accent px-3.5 py-1.5 text-[12.5px] font-semibold text-on-accent"
             >
-              Apply
+              {t("Apply")}
             </button>
           )}
         </div>

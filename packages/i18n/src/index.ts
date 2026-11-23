@@ -122,6 +122,15 @@ async function applyLanguage(code: LanguageCode): Promise<void> {
   applyToDocument(code);
 }
 
+/**
+ * Translates outside a component (helpers, data modules). Call it while
+ * rendering, not at module load, so it follows language changes; inside a
+ * component, prefer `t` from useTranslation(), which also re-renders.
+ */
+export function tr(text: string, vars?: Record<string, string | number>): string {
+  return i18n.t(text, vars ?? {}) as string;
+}
+
 /** Switches every mounted component to `code` and remembers the choice. */
 export async function setLanguage(code: LanguageCode): Promise<void> {
   await applyLanguage(code);

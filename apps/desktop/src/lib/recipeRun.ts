@@ -24,6 +24,7 @@ import { toolById, type OptionValues } from "./tools";
 import { JobError, type Progress } from "./jobs";
 import type { PickedFile } from "@/components/FileDropZone";
 import type { Recipe } from "./recipes";
+import { tr } from "@iloathepdf/i18n";
 
 export const STEPS_FOLDER = "iLoathePDF recipe steps";
 
@@ -57,7 +58,7 @@ function outputsToPickedFiles(outputs: { path: string; bytes: number }[]): Picke
 export async function runRecipe(recipe: Recipe, files: PickedFile[], opts: RecipeRunOptions): Promise<JobResult> {
   const total = recipe.steps.length;
   if (total === 0) throw new JobError("INTERNAL", `Recipe "${recipe.id}" has no steps.`);
-  if (files.length === 0) throw new JobError("BAD_PARAMS", "Add files to run the recipe on.");
+  if (files.length === 0) throw new JobError("BAD_PARAMS", tr("Add files to run the recipe on."));
 
   const finalDir = outputDirFor(files[0].path);
   const stepsDir = `${finalDir.endsWith("\\") ? finalDir : finalDir + "\\"}${STEPS_FOLDER}`;
@@ -93,8 +94,9 @@ export async function runRecipe(recipe: Recipe, files: PickedFile[], opts: Recip
         compression = result.compression;
       }
     } catch (err) {
-      const where = batches.length > 1 ? ` on ${batches[b]?.[0]?.name ?? "a file"}` : "";
-      const stepLabel = `Step ${i + 1} of ${total} (${tool.title}) failed${where}`;
+      const vars = { step: i + 1, total, tool: tr(tool.title), file: batches[b]?.[0]?.name ?? tr("a file") };
+      const stepLabel =
+        batches.length > 1 ? tr("Step {{step}} of {{total}} ({{tool}}) failed on {{file}}", vars) : tr("Step {{step}} of {{total}} ({{tool}}) failed", vars);
       if (err instanceof JobError) {
         if (err.code === "CANCELLED") throw err;
         throw new JobError(err.code, `${stepLabel}: ${err.message}`);
@@ -104,7 +106,7 @@ export async function runRecipe(recipe: Recipe, files: PickedFile[], opts: Recip
 
     lastResult = {
       outputs,
-      summary: batches.length === 1 ? summaries[0] : `${batches.length} files in, ${outputs.length} out.`,
+      summary: batches.length === 1 ? summaries[0] : tr("{{count}} files in, {{out}} out.", { count: batches.length, out: outputs.length }),
       // A before/after size only makes sense for a single compressed file.
       compression: batches.length === 1 ? compression : undefined,
     };
