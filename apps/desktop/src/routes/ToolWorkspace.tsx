@@ -115,7 +115,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
   }, [tool]);
 
   const blocker = useMemo(() => {
-    if (files.length === 0) return tr("Add {{tr}} to continue.", { tr: tr(tool.acceptsLabel) });
+    if (files.length === 0) return tr("Add {{files}} to continue.", { files: tr(tool.acceptsLabel) });
     if (tool.id === "merge" && files.length < 2) return tr("Merging needs at least two PDFs.");
     if (tool.id === "sign" && signElements.length === 0) {
       return tr("Add a signature, text, date, initials, highlight or box to continue.");

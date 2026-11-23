@@ -219,7 +219,7 @@ function RecipeRunner({ recipe }: { recipe: RecipeConfig }) {
                 type="button"
                 disabled={busy}
                 onClick={() => {
-                  if (window.confirm(tr("Delete \"{{tr}}\"? This can't be undone.", { tr: tr(recipe.title) }))) {
+                  if (window.confirm(tr("Delete \"{{title}}\"? This can't be undone.", { title: tr(recipe.title) }))) {
                     deleteCustomRecipe(recipe.slug);
                     navigate("/recipes");
                   }
