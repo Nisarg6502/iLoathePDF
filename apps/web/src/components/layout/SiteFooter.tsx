@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "@iloathepdf/i18n";
+import { LogoMark, Wordmark } from "./BrandLogo";
 
 export function SiteFooter() {
   const { t } = useTranslation();
@@ -8,8 +9,8 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-start gap-14 px-5 sm:px-8 py-9">
         <div className="min-w-[220px] flex-1">
           <div className="flex items-center gap-2">
-            <span className="size-[18px] rounded-[5px] bg-accent" />
-            <span className="text-sm font-semibold tracking-tight">iLoathePDF</span>
+            <LogoMark size={20} />
+            <Wordmark className="text-[15px]" />
           </div>
           <p className="mt-2.5 max-w-[34ch] text-[12.5px] leading-snug text-muted">
             {t("Twenty-three PDF and image tools that run on your machine. Twenty-one run in your browser; the desktop app has all but Compress images, for now.")}
