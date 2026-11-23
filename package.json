@@ -4,7 +4,8 @@
   "license": "MIT",
   "workspaces": [
     "apps/desktop",
-    "apps/web"
+    "apps/web",
+    "packages/i18n"
   ],
   "scripts": {
     "dev:desktop": "npm run tauri dev --workspace=apps/desktop",

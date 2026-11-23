@@ -1,4 +1,5 @@
 import { useRef, useState, type DragEvent } from "react";
+import { useTranslation } from "@iloathepdf/i18n";
 
 export function FileDropZone({
   accept,
@@ -9,6 +10,7 @@ export function FileDropZone({
   multiple: boolean;
   onFiles: (files: File[]) => void;
 }) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
   const [skipped, setSkipped] = useState(0);
@@ -61,11 +63,11 @@ export function FileDropZone({
         </svg>
       </span>
       <div className="text-center">
-        <div className="text-lg font-semibold">{isDragActive ? "Drop it" : "Drop a file here"}</div>
-        <div className="mt-1 text-[13.5px] text-muted">or click anywhere in this box to browse</div>
+        <div className="text-lg font-semibold">{isDragActive ? t("Drop it") : t("Drop a file here")}</div>
+        <div className="mt-1 text-[13.5px] text-muted">{t("or click anywhere in this box to browse")}</div>
         {skipped > 0 && (
           <div role="status" className="mt-3 text-[13px] text-danger">
-            {skipped} file{skipped === 1 ? " was" : "s were"} skipped. Accepted: {accept.join(", ")}
+            {t("{{count}} files were skipped. Accepted: {{types}}", { count: skipped, types: accept.join(", ") })}
           </div>
         )}
       </div>

@@ -6,7 +6,10 @@
 import { useEffect, useState } from "react";
 import { FolderOpen, RotateCcw, ShieldCheck } from "lucide-react";
 
+import { LANGUAGES, isLanguageCode, useLanguage, useTranslation } from "@iloathepdf/i18n";
+
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CHANGELOG } from "@/lib/changelog";
 import { isTauri, ping, type PingResult } from "@/lib/jobs";
@@ -181,7 +184,30 @@ function formatChecked(at: number): string {
   return new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+function LanguagePanel() {
+  const { t } = useTranslation();
+  const { language, setLanguage } = useLanguage();
+  return (
+    <div className="max-w-[280px]">
+      <Select
+        aria-label={t("Interface language")}
+        value={language}
+        onChange={(e) => {
+          if (isLanguageCode(e.target.value)) void setLanguage(e.target.value);
+        }}
+      >
+        {LANGUAGES.map((l) => (
+          <option key={l.code} value={l.code} lang={l.code}>
+            {l.code === "en" ? l.nativeName : `${l.nativeName} (${l.englishName})`}
+          </option>
+        ))}
+      </Select>
+    </div>
+  );
+}
+
 export default function Settings() {
+  const { t } = useTranslation();
   const { outputDir, choose, clear } = useOutputDir();
   const [engine, setEngine] = useState<PingResult | null>(null);
   const [engineError, setEngineError] = useState<string | null>(null);
@@ -202,16 +228,25 @@ export default function Settings() {
         <div className="mb-6 flex items-center gap-2.5">
           <span className="size-1.5 rounded-[2px] bg-accent" />
           <span className="font-mono text-[11px] font-bold tracking-[0.16em] text-muted">
-            SETTINGS
+            {t("SETTINGS")}
           </span>
         </div>
 
         <Section
+          title={t("Language")}
+          hint={t("Changes the app's own text. Your files and their contents are never translated or changed.")}
+        >
+          <LanguagePanel />
+        </Section>
+
+        <Section
           title={`iLoathePDF ${__APP_VERSION__}`}
-          hint="To update, switch on the update check under Updates below and the app can download and install new versions itself. Or download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one."
+          hint={t(
+            "To update, switch on the update check under Updates below and the app can download and install new versions itself. Or download the newest installer from the Download page on the website (or the GitHub Releases page) and run it over this one.",
+          )}
         >
           <div className="mb-2 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
-            WHAT’S NEW
+            {t("WHAT’S NEW")}
           </div>
           <div className="grid gap-4">
             {CHANGELOG.map((release) => (
@@ -221,7 +256,7 @@ export default function Settings() {
                   <span className="font-mono text-[11.5px] text-faint">{release.date}</span>
                   {release.version === __APP_VERSION__ ? (
                     <span className="rounded bg-accent-soft px-1.5 py-px font-mono text-[10.5px] font-bold tracking-[0.06em] text-accent">
-                      INSTALLED
+                      {t("INSTALLED")}
                     </span>
                   ) : null}
                 </div>
@@ -239,15 +274,19 @@ export default function Settings() {
         </Section>
 
         <Section
-          title="Updates"
-          hint="Off by default. iLoathePDF is otherwise fully offline; this is the one thing that can change that, and only if you switch it on."
+          title={t("Updates")}
+          hint={t(
+            "Off by default. iLoathePDF is otherwise fully offline; this is the one thing that can change that, and only if you switch it on.",
+          )}
         >
           <UpdatesPanel />
         </Section>
 
         <Section
-          title="Where results are saved"
-          hint="By default a result is written next to the file it came from. Pick a folder to send every result to the same place instead."
+          title={t("Where results are saved")}
+          hint={t(
+            "By default a result is written next to the file it came from. Pick a folder to send every result to the same place instead.",
+          )}
         >
           <div className="flex items-center gap-2">
             <div className="flex h-9 min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-border-hi bg-surface px-3">
@@ -257,37 +296,38 @@ export default function Settings() {
                 className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-text"
                 title={outputDir ?? undefined}
               >
-                {outputDir ?? "Next to each input file"}
+                {outputDir ?? t("Next to each input file")}
               </span>
             </div>
             <Button variant="secondary" onClick={() => void choose()} disabled={!isTauri()}>
-              Change
+              {t("Change")}
             </Button>
             {outputDir ? (
-              <Button variant="ghost" onClick={clear} aria-label="Use the default location">
+              <Button variant="ghost" onClick={clear} aria-label={t("Use the default location")}>
                 <RotateCcw />
-                Reset
+                {t("Reset")}
               </Button>
             ) : null}
           </div>
           {!isTauri() ? (
             <p className="mt-2 text-[13px] text-faint">
-              Choosing a folder needs the desktop app; the browser preview cannot open a native
-              folder picker.
+              {t(
+                "Choosing a folder needs the desktop app; the browser preview cannot open a native folder picker.",
+              )}
             </p>
           ) : null}
         </Section>
 
         <Section
-          title="Privacy"
-          hint="Everything below is true of the build whether or not you turn on the update check."
+          title={t("Privacy")}
+          hint={t("Everything below is true of the build whether or not you turn on the update check.")}
         >
           <ul className="grid gap-2">
             {[
-              "Your files never touch the network. The only network code is the optional update check above (and the update download you start from it), and it is off unless you turn it on. The window itself blocks every remote origin.",
-              "No analytics, no crash reporting, and nothing is ever downloaded or installed automatically.",
-              "EXIF, including GPS, is stripped from converted images by default.",
-              "Results are written atomically and never overwrite an existing file.",
+              t("Your files never touch the network. The only network code is the optional update check above (and the update download you start from it), and it is off unless you turn it on. The window itself blocks every remote origin."),
+              t("No analytics, no crash reporting, and nothing is ever downloaded or installed automatically."),
+              t("EXIF, including GPS, is stripped from converted images by default."),
+              t("Results are written atomically and never overwrite an existing file."),
             ].map((line) => (
               <li key={line} className="flex items-start gap-2.5 text-[13.5px] text-text">
                 <ShieldCheck className="mt-px size-4 flex-none text-ok" />
@@ -297,12 +337,12 @@ export default function Settings() {
           </ul>
         </Section>
 
-        <Section title="Document engine" hint="The local process that does the actual work.">
+        <Section title={t("Document engine")} hint={t("The local process that does the actual work.")}>
           {engine ? (
             <dl className="grid grid-cols-[10rem_1fr] gap-y-1.5 text-[13.5px]">
-              <dt className="text-muted">Status</dt>
-              <dd className="text-ok">Running</dd>
-              <dt className="text-muted">Engine version</dt>
+              <dt className="text-muted">{t("Status")}</dt>
+              <dd className="text-ok">{t("Running")}</dd>
+              <dt className="text-muted">{t("Engine version")}</dt>
               <dd className="font-mono text-[12.5px] text-text">{engine.version}</dd>
               <dt className="text-muted">Python</dt>
               <dd className="font-mono text-[12.5px] text-text">{engine.python}</dd>
@@ -310,7 +350,7 @@ export default function Settings() {
           ) : engineError ? (
             <p className="text-[13.5px] text-danger">{engineError}</p>
           ) : (
-            <p className="text-[13.5px] text-muted">Checking…</p>
+            <p className="text-[13.5px] text-muted">{t("Checking…")}</p>
           )}
         </Section>
       </div>

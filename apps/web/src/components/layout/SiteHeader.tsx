@@ -1,14 +1,16 @@
 import { useEffect, useId, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
+import { msg, useTranslation } from "@iloathepdf/i18n";
+import { LanguagePicker } from "./LanguagePicker";
 import { ThemeToggle } from "./ThemeToggle";
 import { ToolsMenu } from "./ToolsMenu";
 
 const NAV_LINKS = [
-  { to: "/", label: "Home", end: true },
-  { to: "/tools", label: "Tools", menu: true },
-  { to: "/recipes", label: "Recipes" },
-  { to: "/how-it-works", label: "How it works" },
-  { to: "/privacy", label: "Privacy" },
+  { to: "/", label: msg("Home"), end: true },
+  { to: "/tools", label: msg("Tools"), menu: true },
+  { to: "/recipes", label: msg("Recipes") },
+  { to: "/how-it-works", label: msg("How it works") },
+  { to: "/privacy", label: msg("Privacy") },
 ];
 
 /**
@@ -17,6 +19,7 @@ const NAV_LINKS = [
  * phone screen, and mobile browsers zoomed out to fit it.
  */
 export function SiteHeader() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const location = useLocation();
@@ -48,7 +51,7 @@ export function SiteHeader() {
           <span className="text-[15px] font-semibold tracking-tight">iLoathePDF</span>
         </Link>
 
-        <nav aria-label="Primary" className="flex items-center gap-0.5 max-lg:hidden">
+        <nav aria-label={t("Primary")} className="flex items-center gap-0.5 max-lg:hidden">
           {NAV_LINKS.map((link) =>
             link.menu ? (
               <ToolsMenu key={link.to} />
@@ -61,7 +64,7 @@ export function SiteHeader() {
                   `rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors duration-150 hover:bg-surface-2 ${isActive ? "text-text" : "text-muted"}`
                 }
               >
-                {link.label}
+                {t(link.label)}
               </NavLink>
             ),
           )}
@@ -69,17 +72,18 @@ export function SiteHeader() {
 
         <div className="flex-1" />
 
+        <LanguagePicker />
         <ThemeToggle />
         <Link
           to="/download"
           className="flex h-8 flex-none items-center gap-1.5 rounded-[9px] border border-border-hi bg-surface-2 px-3.5 text-[13px] font-semibold text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96] max-lg:hidden"
         >
-          Desktop app
+          {t("Desktop app")}
         </Link>
 
         <button
           type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
+          aria-label={open ? t("Close menu") : t("Open menu")}
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
           onClick={() => setOpen((o) => !o)}
@@ -94,7 +98,7 @@ export function SiteHeader() {
       {open && (
         <nav
           id={panelId}
-          aria-label="Menu"
+          aria-label={t("Menu")}
           className="absolute inset-x-0 top-full max-h-[calc(100dvh-62px)] overflow-y-auto border-b border-border bg-bg px-5 pb-4 pt-2 shadow-[var(--shadow-card)] sm:px-8 lg:hidden"
         >
           <ul className="mx-auto flex max-w-6xl flex-col">
@@ -107,7 +111,7 @@ export function SiteHeader() {
                     `flex min-h-12 items-center text-[16px] ${isActive ? "font-semibold text-text" : "text-muted"}`
                   }
                 >
-                  {link.label}
+                  {t(link.label)}
                 </NavLink>
               </li>
             ))}
@@ -116,7 +120,7 @@ export function SiteHeader() {
             to="/download"
             className="mx-auto mt-3 flex h-11 max-w-6xl items-center justify-center rounded-[10px] border border-border-hi bg-surface-2 text-[14px] font-semibold text-text hover:bg-surface-3"
           >
-            Get the desktop app
+            {t("Get the desktop app")}
           </Link>
         </nav>
       )}

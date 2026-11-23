@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "@iloathepdf/i18n";
 import { getInitialTheme, applyTheme, persistTheme, type Theme } from "@/lib/theme";
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
 
   useEffect(() => {
@@ -16,7 +18,7 @@ export function ThemeToggle() {
       type="button"
       role="switch"
       aria-checked={isDark}
-      aria-label="Toggle color theme"
+      aria-label={t("Toggle color theme")}
       onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       className="relative flex h-7 w-13 flex-none items-center rounded-full border border-border-hi p-0.5 transition-[background] duration-300"
       style={{ background: isDark ? "var(--toggle-track-dark)" : "var(--toggle-track-light)" }}

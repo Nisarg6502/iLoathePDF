@@ -31,6 +31,7 @@ import {
   Stamp,
   Table,
 } from "lucide-react";
+import { msg } from "@iloathepdf/i18n/msg";
 import type { OpName } from "./jobs";
 
 export type ToolGroup = "pdf" | "image" | "document";
@@ -454,9 +455,9 @@ export const TOOLS: Tool[] = [
 ];
 
 export const GROUP_LABEL: Record<ToolGroup, string> = {
-  pdf: "PDF tools",
-  image: "Image tools",
-  document: "Documents to PDF",
+  pdf: msg("PDF tools"),
+  image: msg("Image tools"),
+  document: msg("Documents to PDF"),
 };
 
 export const GROUP_BLURB: Record<ToolGroup, string> = {

@@ -51,8 +51,8 @@
 }
 
 @theme {
-  --font-sans: "General Sans", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, Consolas, monospace;
+  --font-sans: "General Sans", "Noto Sans Devanagari", "Noto Sans Kannada", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Space Mono", "Noto Sans Devanagari", "Noto Sans Kannada", ui-monospace, Consolas, monospace;
   --radius-card: 12px;
 }
 

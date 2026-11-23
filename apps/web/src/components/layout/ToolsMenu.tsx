@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { msg, useTranslation } from "@iloathepdf/i18n";
 import { TOOLS } from "@/tools/registry";
 import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
 import { tintWash } from "@/tools/tint";
@@ -9,9 +10,9 @@ import { tintWash } from "@/tools/tint";
 const CLOSE_DELAY_MS = 140;
 
 const GROUPS = [
-  { label: "PDF TOOLS", category: "pdf" },
-  { label: "IMAGE TOOLS", category: "image" },
-  { label: "TO PDF", category: "document" },
+  { label: msg("PDF TOOLS"), category: "pdf" },
+  { label: msg("IMAGE TOOLS"), category: "image" },
+  { label: msg("TO PDF"), category: "document" },
 ] as const;
 
 function isKeyboardFocus(el: HTMLElement): boolean {
@@ -29,6 +30,7 @@ function isKeyboardFocus(el: HTMLElement): boolean {
  * the menu and the second tap follows the link.
  */
 export function ToolsMenu() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLAnchorElement>(null);
@@ -175,7 +177,7 @@ export function ToolsMenu() {
           `inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors duration-150 hover:bg-surface-2 ${isActive || open ? "text-text" : "text-muted"}`
         }
       >
-        Tools
+        {t("Tools")}
         <svg
           width="9"
           height="9"
@@ -197,7 +199,7 @@ export function ToolsMenu() {
           <div
             id={menuId}
             role="menu"
-            aria-label="Tools"
+            aria-label={t("Tools")}
             onKeyDown={onMenuKeyDown}
             className="menu-in max-h-[calc(100vh-90px)] w-[min(580px,calc(100vw-2rem))] overflow-y-auto rounded-[14px] border border-border bg-surface p-3 shadow-[var(--shadow-card)] max-sm:w-auto"
           >
@@ -205,10 +207,10 @@ export function ToolsMenu() {
               const tools = TOOLS.filter((t) => t.category === group.category);
               if (tools.length === 0) return null;
               return (
-                <div key={group.category} role="group" aria-label={group.label} className="not-first:mt-2.5">
+                <div key={group.category} role="group" aria-label={t(group.label)} className="not-first:mt-2.5">
                   <div className="flex items-center gap-3 px-2 pb-1.5 pt-1">
                     <span aria-hidden="true" className="font-mono text-[10px] font-bold tracking-[0.14em] text-faint">
-                      {group.label}
+                      {t(group.label)}
                     </span>
                     <span aria-hidden="true" className="h-px flex-1 bg-border" />
                   </div>
@@ -223,7 +225,7 @@ export function ToolsMenu() {
                         style={{ ["--wash" as string]: tintWash(tool.tint, 12) }}
                       >
                         <tool.Icon className="size-[18px] flex-none" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate">{tool.name}</span>
+                        <span className="min-w-0 flex-1 truncate">{t(tool.name)}</span>
                         {tool.status === "desktop-only" && <DesktopOnlyBadge />}
                       </Link>
                     ))}
@@ -238,7 +240,7 @@ export function ToolsMenu() {
                 to="/tools"
                 className="flex items-center justify-between rounded-lg px-2 py-1.5 text-[13px] text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
               >
-                Browse all tools
+                {t("Browse all tools")}
                 <span aria-hidden="true">→</span>
               </Link>
             </div>

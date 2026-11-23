@@ -22,6 +22,7 @@ is authoritative.
 | [openpyxl](https://openpyxl.readthedocs.io/) | 3.1.5 | MIT | Excel output |
 | [PyInstaller](https://pyinstaller.org/) | 6.22.2 | GPL-2.0-or-later with a bootloader exception | Freezes the engine into an executable |
 | React, React Router, Motion, dnd-kit, Lucide, Tailwind CSS | see `package.json` | MIT / ISC / Apache-2.0 | Interface |
+| [i18next](https://www.i18next.com/), [react-i18next](https://react.i18next.com/) | see `packages/i18n/package.json` | MIT | Interface translations |
 | [pdf.js](https://mozilla.github.io/pdf.js/) | 6.3.x | Apache-2.0 | Page thumbnails and the reader |
 
 ### Where to get the source of the copyleft components
@@ -43,7 +44,7 @@ is authoritative.
 (Apache-2.0), [fflate](https://github.com/101arrowz/fflate) (MIT),
 [tesseract.js](https://github.com/naptha/tesseract.js) and its core (Apache-2.0),
 `@pdfsmaller/pdf-encrypt` and `@pdfsmaller/pdf-decrypt` (MIT), React, React
-Router and Motion (MIT). The English Tesseract language data is distributed
+Router, Motion, i18next and react-i18next (MIT). The English Tesseract language data is distributed
 under Apache-2.0.
 
 ## Fonts (both apps, self-hosted, never fetched from a CDN)
@@ -53,6 +54,11 @@ under Apache-2.0.
   (free for personal and commercial use, including embedding in apps).
 - **Space Mono**, Colophon Foundry, under the
   [SIL Open Font License 1.1](https://openfontlicense.org/).
+- **Noto Sans Devanagari** and **Noto Sans Kannada**, The Noto Project
+  Authors, under the [SIL Open Font License 1.1](https://openfontlicense.org/),
+  packaged by [Fontsource](https://fontsource.org/). Used for Hindi, Marathi
+  and Kannada text; the web app only downloads one when a page shows that
+  script.
 
 ## Keeping this current
 

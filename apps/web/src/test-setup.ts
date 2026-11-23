@@ -1,4 +1,8 @@
 import "@testing-library/jest-dom/vitest";
+import { initI18n } from "@iloathepdf/i18n";
+
+// Components render through t(); the suite runs in English, the source language.
+await initI18n({ language: "en" });
 
 // pdfjs-dist's message handler uses the ES2024 Promise.try, which the Node
 // version running this test suite does not implement natively.
