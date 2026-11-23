@@ -39,8 +39,14 @@ const TRANS_KEY = new RegExp(String.raw`\bi18nKey=` + STRING, "g");
 function unquote(literal: string): string {
   const body = literal.slice(1, -1);
   if (literal[0] === '"') return JSON.parse(literal) as string;
-  // Single-quoted and template literals: undo the escapes JSON understands.
-  return JSON.parse(`"${body.replace(/\\(['\x60])/g, "$1").replace(/"/g, '\\"')}"`) as string;
+  // Single-quoted and template literals: rewrite as a JSON string in one pass,
+  // so an escape sequence is never split. \' and \` become plain quotes (JSON
+  // has no such escapes), a bare " gets escaped, and every other escape
+  // (\\, \n, \", \u00e9, ...) passes through for JSON.parse to read.
+  const json = body.replace(/\\([\s\S])|"/g, (match, escaped: string | undefined) =>
+    escaped === undefined ? '\\"' : escaped === "'" || escaped === "\x60" ? escaped : match,
+  );
+  return JSON.parse(`"${json}"`) as string;
 }
 
 function walk(dir: string, out: string[] = []): string[] {
