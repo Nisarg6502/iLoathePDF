@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { msg, useTranslation } from "@iloathepdf/i18n";
+import { LogoMark, Wordmark } from "./BrandLogo";
 import { LanguagePicker } from "./LanguagePicker";
 import { ThemeToggle } from "./ThemeToggle";
 import { ToolsMenu } from "./ToolsMenu";
@@ -42,13 +43,8 @@ export function SiteHeader() {
     <div className="sticky top-0 z-20 border-b border-border bg-bg">
       <div className="mx-auto flex h-[62px] max-w-6xl items-center gap-3 px-5 sm:px-8 lg:gap-8">
         <Link to="/" className="flex flex-none items-center gap-2">
-          <span className="grid size-[22px] place-items-center rounded-md bg-accent">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--on-accent)" strokeWidth="1.7">
-              <rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4" />
-              <path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7" />
-            </svg>
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight">iLoathePDF</span>
+          <LogoMark size={26} />
+          <Wordmark className="text-[17px]" />
         </Link>
 
         <nav aria-label={t("Primary")} className="flex items-center gap-0.5 max-lg:hidden">
