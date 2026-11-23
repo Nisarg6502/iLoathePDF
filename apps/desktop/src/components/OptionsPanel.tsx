@@ -142,7 +142,7 @@ export function ToolOptions({
                 id={id}
                 value={str("outputName")}
                 onChange={(e) => set({ outputName: e.currentTarget.value })}
-                placeholder={t("merged")}
+                placeholder="merged"
               />
             )}
           </Field>
