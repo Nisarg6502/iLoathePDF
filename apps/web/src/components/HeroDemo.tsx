@@ -42,7 +42,7 @@ export function HeroDemo() {
   }, [played, prefersReducedMotion]);
 
   const done = played && progress >= 100;
-  const label = !played ? "READY" : done ? "DONE" : "PROCESSING";
+  const label = !played ? t("READY") : done ? t("DONE") : t("PROCESSING");
 
   return (
     <motion.div

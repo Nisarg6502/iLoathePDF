@@ -444,11 +444,11 @@ function UpdateBanner() {
         <span className="font-semibold">{t("Downloading iLoathePDF {{version}}…", { version: latest.version })}</span>{" "}
         <span className="text-muted">
           {pct !== null && progress?.total
-            ? `${pct}% of ${formatMb(progress.total)}`
+            ? t("{{percent}}% of {{size}}", { percent: pct, size: formatMb(progress.total) })
             : progress
               ? formatMb(progress.downloaded)
               : ""}
-          {" "}{t("— keep working, it runs in the background.")}
+          {" — "}{t("keep working, it runs in the background.")}
         </span>
       </>
     );

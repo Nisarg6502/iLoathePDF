@@ -195,7 +195,7 @@ function RecipeRunner({ recipe }: { recipe: RecipeConfig }) {
               {recipeHasPreviewStep(recipe) && <PreviewBadge />}
             </div>
             <p className="mt-1 max-w-[64ch] text-sm text-muted">{tr(recipe.description)}</p>
-            {recipe.goodFor && <p className="mt-1 text-[12.5px] text-faint">{t("Good for: {{goodFor}}", { goodFor: recipe.goodFor })}</p>}
+            {recipe.goodFor && <p className="mt-1 text-[12.5px] text-faint">{t("Good for: {{goodFor}}", { goodFor: t(recipe.goodFor) })}</p>}
             <div className="mt-3">
               <ChainStrip steps={recipe.steps} size={28} />
             </div>
@@ -434,7 +434,7 @@ function RecipeRunner({ recipe }: { recipe: RecipeConfig }) {
                     <path d="M18 10a8 8 0 0 0-8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 )}
-                {busy ? t("Working… {{Math}}%", { Math: Math.round(progress * 100) }) : phase === "done" ? t("Run again") : t("Run")}
+                {busy ? t("Working… {{percent}}%", { percent: Math.round(progress * 100) }) : phase === "done" ? t("Run again") : t("Run")}
               </motion.button>
               {phase !== "empty" && blocker && !busy && <p className="mt-2 text-center text-[12.5px] text-muted">{blocker}</p>}
               {phase === "empty" && <p className="mt-2 text-center text-[12px] text-faint">{t("Add files to start. Nothing leaves this device.")}</p>}

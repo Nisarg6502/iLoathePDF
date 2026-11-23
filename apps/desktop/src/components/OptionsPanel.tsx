@@ -9,7 +9,9 @@ import { Select } from "./ui/select";
 import { Slider } from "./ui/slider";
 import { Switch } from "./ui/switch";
 import { Tooltip } from "./ui/tooltip";
-import { tr, useTranslation } from "@iloathepdf/i18n";
+import { msg, tr, useTranslation } from "@iloathepdf/i18n";
+
+const CROP_SIDE_LABEL = { top: msg("Top (%)"), right: msg("Right (%)"), bottom: msg("Bottom (%)"), left: msg("Left (%)") };
 
 // ---------------------------------------------------------------------------
 // Panel + labelled control primitives
@@ -944,7 +946,7 @@ export function ToolOptions({
         >
           <div className="grid grid-cols-2 gap-3">
             {(["top", "right", "bottom", "left"] as const).map((side) => (
-              <Field key={side} label={`${side[0].toUpperCase()}${side.slice(1)} (%)`}>
+              <Field key={side} label={t(CROP_SIDE_LABEL[side])}>
                 {(id) => (
                   <Input
                     id={id}

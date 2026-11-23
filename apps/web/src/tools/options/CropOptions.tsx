@@ -1,7 +1,8 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
-import { useTranslation } from "@iloathepdf/i18n";
+import { msg, useTranslation } from "@iloathepdf/i18n";
 
 const SIDES = ["top", "right", "bottom", "left"] as const;
+const SIDE_LABEL = { top: msg("Top (%)"), right: msg("Right (%)"), bottom: msg("Bottom (%)"), left: msg("Left (%)") };
 
 export function CropOptions({ options, onChange, disabled }: OptionsPanelProps) {
   const { t } = useTranslation();
@@ -10,7 +11,7 @@ export function CropOptions({ options, onChange, disabled }: OptionsPanelProps) 
       <div className="grid grid-cols-2 gap-3">
         {SIDES.map((side) => (
           <label key={side} className="flex flex-col gap-1.5">
-            <span className="text-[12.5px] font-semibold capitalize">{side} (%)</span>
+            <span className="text-[12.5px] font-semibold">{t(SIDE_LABEL[side])}</span>
             <input
               type="number"
               min={0}

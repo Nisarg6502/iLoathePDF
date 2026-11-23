@@ -26,7 +26,7 @@ export function ProtectOptions({ options, onChange, disabled }: OptionsPanelProp
               disabled={disabled}
               onChange={() => onChange({ ...options, mode: m, password: "", confirmPassword: "" })}
             />
-            <div className="text-[12.5px] font-semibold capitalize">{m}</div>
+            <div className="text-[12.5px] font-semibold">{m === "protect" ? t("Protect") : t("Unlock")}</div>
           </label>
         ))}
       </div>

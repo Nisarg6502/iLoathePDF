@@ -43,7 +43,7 @@ function RecipeCard({ recipe, index }: { recipe: RecipeConfig; index: number }) 
         </div>
         <div className="mt-3.5 text-[15px] font-semibold">{tr(recipe.title)}</div>
         <div className="mt-1 flex-1 text-[13px] leading-relaxed text-muted">{tr(recipe.description)}</div>
-        {recipe.goodFor && <div className="mt-2 text-[12px] text-faint">{t("Good for: {{goodFor}}", { goodFor: recipe.goodFor })}</div>}
+        {recipe.goodFor && <div className="mt-2 text-[12px] text-faint">{t("Good for: {{goodFor}}", { goodFor: t(recipe.goodFor) })}</div>}
         <div className="mt-3 flex items-center justify-between font-mono text-[11px]">
           <span className="text-faint">
             {t("{{count}} steps", { count: recipe.steps.length })}
@@ -67,7 +67,7 @@ export function RecipesIndex() {
   const tabs: { id: Filter; label: string; count: number }[] = [
     { id: "all", label: tr("All"), count: RECIPES.length + custom.length },
     { id: "popular", label: tr("Most used"), count: RECIPES.filter((r) => r.popular).length },
-    ...CATEGORIES.map((c) => ({ id: c.id as Filter, label: c.label, count: RECIPES.filter((r) => r.category === c.id).length })),
+    ...CATEGORIES.map((c) => ({ id: c.id as Filter, label: tr(c.label), count: RECIPES.filter((r) => r.category === c.id).length })),
     ...(custom.length > 0 ? [{ id: "mine" as Filter, label: tr("Your recipes"), count: custom.length }] : []),
   ];
 
