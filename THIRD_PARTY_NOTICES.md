@@ -54,10 +54,11 @@ under Apache-2.0.
   (free for personal and commercial use, including embedding in apps).
 - **Space Mono**, Colophon Foundry, under the
   [SIL Open Font License 1.1](https://openfontlicense.org/).
-- **Noto Sans Devanagari**, The Noto Project Authors, under the
-  [SIL Open Font License 1.1](https://openfontlicense.org/), packaged by
-  [Fontsource](https://fontsource.org/). Used for Hindi text; the web app
-  only downloads it when a page shows Devanagari.
+- **Noto Sans Devanagari** and **Noto Sans Kannada**, The Noto Project
+  Authors, under the [SIL Open Font License 1.1](https://openfontlicense.org/),
+  packaged by [Fontsource](https://fontsource.org/). Used for Hindi, Marathi
+  and Kannada text; the web app only downloads one when a page shows that
+  script.
 
 ## Keeping this current
 

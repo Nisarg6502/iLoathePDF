@@ -23,7 +23,11 @@ export interface Language {
 
 export const LANGUAGES = [
   { code: "en", englishName: "English", nativeName: "English", dir: "ltr", windowsLangId: 0x09 },
+  { code: "es", englishName: "Spanish", nativeName: "Español", dir: "ltr", windowsLangId: 0x0a },
+  { code: "fr", englishName: "French", nativeName: "Français", dir: "ltr", windowsLangId: 0x0c },
   { code: "hi", englishName: "Hindi", nativeName: "हिन्दी", dir: "ltr", windowsLangId: 0x39 },
+  { code: "mr", englishName: "Marathi", nativeName: "मराठी", dir: "ltr", windowsLangId: 0x4e },
+  { code: "kn", englishName: "Kannada", nativeName: "ಕನ್ನಡ", dir: "ltr", windowsLangId: 0x4b },
 ] as const satisfies readonly Language[];
 
 export type LanguageCode = (typeof LANGUAGES)[number]["code"];

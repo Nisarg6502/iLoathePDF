@@ -7,16 +7,21 @@ import { FileDropZone } from "@/components/FileDropZone";
 
 describe("language matching", () => {
   it("picks the first candidate we have a catalog for, by base language", () => {
-    expect(matchLanguage(["fr-FR", "hi-IN", "en"])).toBe("hi");
-    expect(matchLanguage([null, "", "en_GB"])).toBe("en");
-    expect(matchLanguage(["fr", "de"])).toBeNull();
+    expect(matchLanguage(["de-DE", "mr-IN", "en"])).toBe("mr");
+    expect(matchLanguage([null, "", "es_MX"])).toBe("es");
+    expect(matchLanguage(["fr-CA"])).toBe("fr");
+    expect(matchLanguage(["de", "ta"])).toBeNull();
   });
 
   it("maps the installer's Windows language id to one of ours", () => {
     expect(languageFromWindowsLcid(1081)).toBe("hi"); // hi-IN
     expect(languageFromWindowsLcid(1033)).toBe("en"); // en-US
     expect(languageFromWindowsLcid(2057)).toBe("en"); // en-GB
-    expect(languageFromWindowsLcid(1036)).toBeNull(); // fr-FR: not offered yet
+    expect(languageFromWindowsLcid(1036)).toBe("fr"); // fr-FR
+    expect(languageFromWindowsLcid(3082)).toBe("es"); // es-ES
+    expect(languageFromWindowsLcid(1102)).toBe("mr"); // mr-IN
+    expect(languageFromWindowsLcid(1099)).toBe("kn"); // kn-IN
+    expect(languageFromWindowsLcid(1031)).toBeNull(); // de-DE: not offered
     expect(languageFromWindowsLcid(null)).toBeNull();
   });
 });

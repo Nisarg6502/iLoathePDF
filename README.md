@@ -161,10 +161,12 @@ Web:
   page follows the same shell: drop a file, set options, run, get a result —
   and a live request counter proves the site makes no network calls after the
   page loads.
-- **Languages**: English and Hindi, in both apps, from one shared set of
-  translation files in [`packages/i18n`](packages/i18n/README.md). Pick a
-  language in the website's header or in the desktop app's Settings; the
-  desktop installer also asks on its first screen. Only the chosen language is
+- **Languages**: English, Spanish, French, Hindi, Marathi and Kannada, in
+  both apps, from one shared set of translation files in
+  [`packages/i18n`](packages/i18n/README.md). Pick a language in the website's
+  header or in the desktop app's Settings; the desktop installer also asks on
+  its first screen (English, Spanish, French or Hindi, the ones Windows'
+  installer system supports). Only the chosen language is
   loaded, and translations never come from another server.
 
 Design decisions and the reasoning behind them live in each app's own

@@ -71,6 +71,8 @@
         "displayLanguageSelector": true,
         "languages": [
           "English",
+          "Spanish",
+          "French",
           "Hindi"
         ],
         "customLanguageFiles": {
