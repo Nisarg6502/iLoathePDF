@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { msg, useTranslation } from "@iloathepdf/i18n";
 import { getTool } from "@/tools/registry";
 import { ToolPage } from "@/components/ToolPage";
 import { PreviewBadge } from "@/components/PreviewBadge";
@@ -6,13 +7,14 @@ import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
 import { tintColor, tintWash } from "@/tools/tint";
 
 export function ToolDetail() {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const tool = slug ? getTool(slug) : undefined;
 
   if (!tool) {
     return (
       <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14">
-        <h1 className="text-2xl font-semibold">Tool not found</h1>
+        <h1 className="text-2xl font-semibold">{t("Tool not found")}</h1>
       </div>
     );
   }
@@ -29,18 +31,18 @@ export function ToolDetail() {
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{tool.name}</h1>
+              <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{t(tool.name)}</h1>
               <DesktopOnlyBadge />
             </div>
-            <p className="mt-1 text-sm text-muted">{tool.description}</p>
+            <p className="mt-1 text-sm text-muted">{t(tool.description)}</p>
           </div>
         </div>
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10">
           <p className="max-w-[58ch] text-[14px] leading-relaxed text-muted">
-            {tool.desktopOnlyNote ?? "This tool needs an engine that isn't available in a browser — it's desktop-only for now."}
+            {t(tool.desktopOnlyNote ?? msg("This tool needs an engine that isn't available in a browser — it's desktop-only for now."))}
           </p>
           <Link to="/download" className="mt-4 inline-block font-mono text-[12px]" style={{ color: tintColor(tool.tint) }}>
-            Get the desktop app →
+            {t("Get the desktop app →")}
           </Link>
         </div>
       </div>
@@ -58,10 +60,10 @@ export function ToolDetail() {
         </span>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{tool.name}</h1>
+            <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{t(tool.name)}</h1>
             {tool.status === "preview" && <PreviewBadge />}
           </div>
-          <p className="mt-1 text-sm text-muted">{tool.description}</p>
+          <p className="mt-1 text-sm text-muted">{t(tool.description)}</p>
         </div>
       </div>
       {tool.Workspace ? <tool.Workspace tool={tool} /> : <ToolPage tool={tool} />}

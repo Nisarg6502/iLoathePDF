@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
+import { useTranslation } from "@iloathepdf/i18n";
+
 import { TOOLS, type Tool } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 import { isTauri } from "@/lib/jobs";
@@ -97,12 +99,13 @@ function WindowButton({
 }
 
 function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
+  const { t } = useTranslation();
   const { enabled: updateCheckOn } = useUpdateCheck();
   return (
     <div className="flex h-9 flex-none items-center gap-2.5 border-b border-border bg-surface pl-3 select-none">
       <Link
         to="/"
-        aria-label="All tools"
+        aria-label={t("All tools")}
         className="flex items-center gap-2 rounded outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <span className="grid size-[19px] place-items-center rounded-md bg-accent">
@@ -115,7 +118,7 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
       </Link>
 
       <span data-tauri-drag-region className="font-mono text-[11px] tracking-[0.12em] text-faint">
-        LOCAL ONLY
+        {t("LOCAL ONLY")}
       </span>
 
       {/* The only draggable area, so no control can ever be inside it. */}
@@ -127,24 +130,24 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
       {updateCheckOn ? (
         <div
           className="flex items-center gap-1.5 rounded-[7px] bg-surface-2 px-2.5 py-[3px]"
-          title="The update check is on: the app asks GitHub for the latest release number and sends nothing else. Nothing is downloaded unless you ask for it. Turn it off in Settings."
+          title={t("The update check is on: the app asks GitHub for the latest release number and sends nothing else. Nothing is downloaded unless you ask for it. Turn it off in Settings.")}
         >
           <span className="size-[5px] rounded-full bg-accent" />
           <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-muted">
-            UPDATE CHECK ON
+            {t("UPDATE CHECK ON")}
           </span>
         </div>
       ) : (
         <div className="flex items-center gap-1.5 rounded-[7px] bg-ok-soft px-2.5 py-[3px]">
           <span className="size-[5px] rounded-full bg-ok" />
-          <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-ok">OFFLINE</span>
+          <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-ok">{t("OFFLINE")}</span>
         </div>
       )}
 
       <button
         type="button"
         onClick={onToggleTheme}
-        aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+        aria-label={theme === "dark" ? t("Switch to light theme") : t("Switch to dark theme")}
         className={cn(
           "flex h-6 items-center gap-1.5 rounded-[7px] border border-border bg-surface-2 px-2.5",
           "text-[12px] text-muted outline-none transition-colors duration-150",
@@ -156,7 +159,7 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
           <circle cx="8" cy="8" r="3.2" />
           <path d="M8 1.4v1.6M8 13v1.6M1.4 8h1.6M13 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M12.6 3.4l-1.1 1.1M4.5 11.5l-1.1 1.1" />
         </svg>
-        <span>{theme === "dark" ? "Light" : "Dark"}</span>
+        <span>{theme === "dark" ? t("Light") : t("Dark")}</span>
       </button>
 
       {isTauri() ? (
@@ -259,16 +262,17 @@ function Rail() {
     }
   }, [expanded]);
 
-  const pdfTools = TOOLS.filter((t) => t.group === "pdf");
-  const imageTools = TOOLS.filter((t) => t.group === "image");
-  const documentTools = TOOLS.filter((t) => t.group === "document");
+  const { t } = useTranslation();
+  const pdfTools = TOOLS.filter((tool) => tool.group === "pdf");
+  const imageTools = TOOLS.filter((tool) => tool.group === "image");
+  const documentTools = TOOLS.filter((tool) => tool.group === "document");
 
   return (
     <nav
       style={{ width: expanded ? 184 : 52 }}
       className="flex flex-none flex-col overflow-hidden border-r border-border bg-surface py-2.5 transition-[width] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
     >
-      <RailItem to="/" label="All tools" showLabel={expanded} end>
+      <RailItem to="/" label={t("All tools")} showLabel={expanded} end>
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="2" y="2" width="5.5" height="5.5" rx="1.2" />
           <rect x="10.5" y="2" width="5.5" height="5.5" rx="1.2" />
@@ -277,7 +281,7 @@ function Rail() {
         </svg>
       </RailItem>
 
-      <RailItem to="/recipes" label="Recipes" showLabel={expanded}>
+      <RailItem to="/recipes" label={t("Recipes")} showLabel={expanded}>
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="2" y="2.5" width="5" height="4" rx="1" />
           <rect x="11" y="7" width="5" height="4" rx="1" />
@@ -286,30 +290,30 @@ function Rail() {
         </svg>
       </RailItem>
 
-      <RailHeading show={expanded}>PDF</RailHeading>
+      <RailHeading show={expanded}>{t("PDF")}</RailHeading>
       {pdfTools.map((tool) => (
-        <RailItem key={tool.id} to={tool.path} label={tool.title} showLabel={expanded}>
+        <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
           <ToolIcon tool={tool} />
         </RailItem>
       ))}
 
-      <RailHeading show={expanded}>IMAGES</RailHeading>
+      <RailHeading show={expanded}>{t("IMAGES")}</RailHeading>
       {imageTools.map((tool) => (
-        <RailItem key={tool.id} to={tool.path} label={tool.title} showLabel={expanded}>
+        <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
           <ToolIcon tool={tool} />
         </RailItem>
       ))}
 
-      <RailHeading show={expanded}>TO PDF</RailHeading>
+      <RailHeading show={expanded}>{t("TO PDF")}</RailHeading>
       {documentTools.map((tool) => (
-        <RailItem key={tool.id} to={tool.path} label={tool.title} showLabel={expanded}>
+        <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
           <ToolIcon tool={tool} />
         </RailItem>
       ))}
 
       <div className="flex-1" />
 
-      <RailItem to="/settings" label="Settings" showLabel={expanded}>
+      <RailItem to="/settings" label={t("Settings")} showLabel={expanded}>
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.8">
           <circle cx="9" cy="9" r="2.4" />
           <path d="M9 1.8v1.9M9 14.3v1.9M1.8 9h1.9M14.3 9h1.9M3.9 3.9l1.35 1.35M12.75 12.75l1.35 1.35M14.1 3.9l-1.35 1.35M5.25 12.75L3.9 14.1" />
@@ -319,7 +323,7 @@ function Rail() {
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        aria-label={expanded ? "Collapse the sidebar" : "Expand the sidebar"}
+        aria-label={expanded ? t("Collapse the sidebar") : t("Expand the sidebar")}
         className={cn(
           "mx-1.5 mt-1 flex h-7 items-center gap-2.5 rounded-[7px] px-2 text-faint outline-none",
           "transition-colors duration-150 hover:bg-surface-2 hover:text-text",
@@ -340,7 +344,7 @@ function Rail() {
           <path d="M11 5.5L7.5 9l3.5 3.5" />
           <path d="M3.5 3v12" />
         </svg>
-        {expanded ? <span className="text-[12.5px]">Collapse</span> : null}
+        {expanded ? <span className="text-[12.5px]">{t("Collapse")}</span> : null}
       </button>
     </nav>
   );
@@ -351,6 +355,7 @@ function Rail() {
 // ---------------------------------------------------------------------------
 
 function StatusBar() {
+  const { t } = useTranslation();
   const { outputDir, label, choose } = useOutputDir();
   const { enabled: updateCheckOn } = useUpdateCheck();
 
@@ -360,18 +365,18 @@ function StatusBar() {
         <rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4" />
         <path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7" />
       </svg>
-      <span className="text-[12.5px] text-text">Files never leave this computer.</span>
+      <span className="text-[12.5px] text-text">{t("Files never leave this computer.")}</span>
       <span className="hidden text-[12.5px] text-faint lg:inline">
-        {updateCheckOn ? "Only the update check goes online" : "Nothing goes online"}
+        {updateCheckOn ? t("Only the update check goes online") : t("Nothing goes online")}
       </span>
 
       <div className="flex-1" />
 
-      <span className="text-[12.5px] text-faint">Output</span>
+      <span className="text-[12.5px] text-faint">{t("Output")}</span>
       <button
         type="button"
         onClick={choose}
-        title={outputDir ?? "Results are written next to your input files"}
+        title={outputDir ?? t("Results are written next to your input files")}
         className={cn(
           "flex h-[22px] items-center gap-1.5 rounded-[7px] px-2 text-muted outline-none",
           "transition-colors duration-150 hover:bg-surface-2 hover:text-text",
@@ -381,7 +386,7 @@ function StatusBar() {
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--tint-e)" strokeWidth="1.4" className="flex-none">
           <path d="M1.6 4.4a1 1 0 0 1 1-1h3.1l1.2 1.6h5.5a1 1 0 0 1 1 1v6.6a1 1 0 0 1-1 1H2.6a1 1 0 0 1-1-1z" />
         </svg>
-        <span className="max-w-[240px] truncate font-mono text-[12px]">{label}</span>
+        <span className="max-w-[240px] truncate font-mono text-[12px]">{outputDir ? label : t(label)}</span>
         <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.3">
           <path d="M1.5 3.5L5 7l3.5-3.5" />
         </svg>

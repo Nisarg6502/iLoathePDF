@@ -1,4 +1,4 @@
-//! The Rust <-> UI surface. Deliberately tiny: three commands, no document logic.
+//! The Rust <-> UI surface. Deliberately tiny: a few commands, no document logic.
 
 use std::sync::Arc;
 

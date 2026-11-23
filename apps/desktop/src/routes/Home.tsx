@@ -17,8 +17,10 @@ import { useWindowFileDrop, type PickedFile } from "../components/FileDropZone";
 import { scrimVariants, sheetVariants } from "../lib/motion";
 import { setPendingFiles } from "../lib/handoff";
 import { Button } from "../components/ui/button";
+import { useTranslation } from "@iloathepdf/i18n";
 
 export default function Home() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const customRecipes = useCustomRecipes();
   const [dropped, setDropped] = useState<PickedFile[] | null>(null);
@@ -45,17 +47,18 @@ export default function Home() {
         <div className="mb-3.5 flex items-center gap-2.5">
           <span className="size-1.5 rounded-[2px] bg-accent" />
           <span className="font-mono text-[11px] font-bold tracking-[0.16em] text-muted">
-            TWENTY-TWO TOOLS · ZERO UPLOADS
+            {t("TWENTY-TWO TOOLS · ZERO UPLOADS")}
           </span>
         </div>
 
         <h1 className="m-0 max-w-[16ch] text-[34px] leading-[1.08] font-semibold tracking-[-0.032em] text-text">
-          What are we doing to your files today?
+          {t("What are we doing to your files today?")}
         </h1>
 
         <p className="mt-2 max-w-[640px] text-[14.5px] text-muted">
-          Everything runs on this machine. There is no upload step, because there is nowhere to
-          upload to — Aadhaar, PAN, contracts and anything else stay exactly where they are.
+          {t(
+            "Everything runs on this machine. There is no upload step, because there is nowhere to upload to — Aadhaar, PAN, contracts and anything else stay exactly where they are.",
+          )}
         </p>
 
         {/* The primary way in: the window itself is the drop target. */}
@@ -73,10 +76,10 @@ export default function Home() {
           </svg>
           <span className="flex-1">
             <span className="block text-[14.5px] font-semibold text-text">
-              Drop files anywhere in this window
+              {t("Drop files anywhere in this window")}
             </span>
             <span className="block text-[13px] text-muted">
-              PDFs, JPG, PNG, WebP, HEIC — the right tools light up for what you drop.
+              {t("PDFs, JPG, PNG, WebP, HEIC — the right tools light up for what you drop.")}
             </span>
           </span>
           <span className="flex flex-none gap-1.5">
@@ -95,7 +98,7 @@ export default function Home() {
           <section key={group} className="mt-6.5">
             <div className="flex items-center gap-2.5">
               <span className="font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
-                {GROUP_LABEL[group].toUpperCase()}
+                {t(GROUP_LABEL[group]).toUpperCase()}
               </span>
               <span className="h-px flex-1 bg-border" />
             </div>
@@ -111,11 +114,11 @@ export default function Home() {
         <section className="mt-6.5">
           <div className="flex items-center gap-2.5">
             <span className="font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
-              RECIPES · SEVERAL TOOLS IN ONE GO
+              {t("RECIPES · SEVERAL TOOLS IN ONE GO")}
             </span>
             <span className="h-px flex-1 bg-border" />
             <Link to="/recipes" className="text-[13px] text-muted hover:text-text">
-              All {RECIPES.length + customRecipes.length} recipes →
+              {t("All {{count}} recipes →", { count: RECIPES.length + customRecipes.length })}
             </Link>
           </div>
 
@@ -151,6 +154,7 @@ export default function Home() {
 // ---------------------------------------------------------------------------
 
 function ToolCard({ tool, index }: { tool: Tool; index: number }) {
+  const { t } = useTranslation();
   const Icon = tool.icon;
   return (
     <Link
@@ -182,10 +186,10 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 
       <span className="flex-1">
         <span className="block text-[16px] font-semibold tracking-[-0.01em] text-text">
-          {tool.title}
+          {t(tool.title)}
         </span>
         <span className="mt-1 block text-[14px] leading-relaxed text-muted">
-          {tool.description}
+          {t(tool.description)}
         </span>
       </span>
 
@@ -200,6 +204,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 // ---------------------------------------------------------------------------
 
 function NewRecipeCard({ index }: { index: number }) {
+  const { t } = useTranslation();
   return (
     <Link
       to="/r/new"
@@ -213,7 +218,7 @@ function NewRecipeCard({ index }: { index: number }) {
       )}
     >
       <Plus aria-hidden className="size-5" />
-      <span className="text-[14px] font-medium">New recipe</span>
+      <span className="text-[14px] font-medium">{t("New recipe")}</span>
     </Link>
   );
 }
@@ -259,12 +264,13 @@ function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
 // ---------------------------------------------------------------------------
 
 function DragVeil() {
+  const { t } = useTranslation();
   return (
     <div className="ihp-fade pointer-events-none fixed inset-0 z-40 grid place-items-center bg-bg/70 backdrop-blur-[2px]">
       <div className="rounded-card border-2 border-dashed border-accent bg-surface px-8 py-6 text-center shadow-[var(--shadow-card)]">
-        <p className="text-[17px] font-semibold text-text">Drop anywhere</p>
+        <p className="text-[17px] font-semibold text-text">{t("Drop anywhere")}</p>
         <p className="mt-1 text-[14px] text-muted">
-          We&rsquo;ll work out which tools fit these files.
+          {t("We’ll work out which tools fit these files.")}
         </p>
       </div>
     </div>
@@ -280,13 +286,14 @@ function SuggestionSheet({
   onPick: (tool: Tool) => void;
   onDismiss: () => void;
 }) {
+  const { t } = useTranslation();
   const matches = suggestTools(names);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <motion.button
         type="button"
-        aria-label="Dismiss"
+        aria-label={t("Dismiss")}
         onClick={onDismiss}
         variants={scrimVariants}
         initial="initial"
@@ -297,7 +304,7 @@ function SuggestionSheet({
       <motion.div
         role="dialog"
         aria-modal="true"
-        aria-label="Choose a tool for the dropped files"
+        aria-label={t("Choose a tool for the dropped files")}
         variants={sheetVariants}
         initial="initial"
         animate="animate"
@@ -310,11 +317,11 @@ function SuggestionSheet({
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="text-[16px] font-semibold text-text">
-              {names.length} file{names.length === 1 ? "" : "s"} ready
+              {t("{{count}} files ready", { count: names.length })}
             </h2>
             <p className="mt-0.5 truncate text-[14px] text-muted">{names.join(", ")}</p>
           </div>
-          <Button variant="ghost" size="iconSm" onClick={onDismiss} aria-label="Dismiss">
+          <Button variant="ghost" size="iconSm" onClick={onDismiss} aria-label={t("Dismiss")}>
             <X />
           </Button>
         </div>
@@ -322,7 +329,7 @@ function SuggestionSheet({
         {matches.length ? (
           <>
             <p className="mt-4 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-              Tools that fit
+              {t("Tools that fit")}
             </p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {matches.map((tool) => (
@@ -342,23 +349,23 @@ function SuggestionSheet({
                     <tool.icon className="size-4" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-[14px] font-medium text-text">{tool.title}</span>
+                    <span className="block text-[14px] font-medium text-text">{t(tool.title)}</span>
                     <span className="block truncate text-xs text-muted">
-                      {tool.description}
+                      {t(tool.description)}
                     </span>
                   </span>
                 </button>
               ))}
             </div>
             <p className="mt-4 text-xs text-muted">
-              Your files come with you. Press Escape to stay here.
+              {t("Your files come with you. Press Escape to stay here.")}
             </p>
           </>
         ) : (
           <div className="mt-4 rounded-lg border border-border bg-surface-2 p-4">
-            <p className="text-[14px] font-medium text-text">No tool matches that mix of files.</p>
+            <p className="text-[14px] font-medium text-text">{t("No tool matches that mix of files.")}</p>
             <p className="mt-1 text-[14px] leading-relaxed text-muted">
-              Each tool takes one kind of input — PDFs, or images. Try dropping them separately.
+              {t("Each tool takes one kind of input — PDFs, or images. Try dropping them separately.")}
             </p>
           </div>
         )}

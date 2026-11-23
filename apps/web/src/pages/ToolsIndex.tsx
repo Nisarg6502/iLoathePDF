@@ -1,28 +1,29 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "@iloathepdf/i18n";
 import { TOOLS } from "@/tools/registry";
 import { PreviewBadge } from "@/components/PreviewBadge";
 import { DesktopOnlyBadge } from "@/components/DesktopOnlyBadge";
 import { tintColor, tintWash } from "@/tools/tint";
 
 export function ToolsIndex() {
+  const { t } = useTranslation();
   const pdfTools = TOOLS.filter((t) => t.category === "pdf");
   const imageTools = TOOLS.filter((t) => t.category === "image");
   const documentTools = TOOLS.filter((t) => t.category === "document");
 
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-13">
-      <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">All tools</h1>
+      <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">{t("All tools")}</h1>
       <p className="mt-2.5 max-w-[58ch] text-[15.5px] text-muted">
-        Each one runs right here — pick a tool, drop a file, get a file.
-        Twenty of the desktop app's twenty-two tools work in the browser, plus
-        Compress images, which is browser-only for now; PDF to Excel and
-        PDF to PDF/A need the desktop build.
+        {t(
+          "Each one runs right here — pick a tool, drop a file, get a file. Twenty of the desktop app's twenty-two tools work in the browser, plus Compress images, which is browser-only for now; PDF to Excel and PDF to PDF/A need the desktop build.",
+        )}
       </p>
 
       {[
-        { label: "PDF TOOLS", tools: pdfTools },
-        { label: "IMAGE TOOLS", tools: imageTools },
-        { label: "TO PDF", tools: documentTools },
+        { label: t("PDF TOOLS"), tools: pdfTools },
+        { label: t("IMAGE TOOLS"), tools: imageTools },
+        { label: t("TO PDF"), tools: documentTools },
       ].map((group) => (
         <div key={group.label}>
           <div className="mt-9 flex items-center gap-3">
@@ -48,10 +49,10 @@ export function ToolsIndex() {
                   {tool.status === "preview" && <PreviewBadge />}
                   {tool.status === "desktop-only" && <DesktopOnlyBadge />}
                 </div>
-                <div className="mt-3 text-[15px] font-semibold">{tool.name}</div>
-                <div className="mt-1 text-[13px] leading-relaxed text-muted">{tool.description}</div>
+                <div className="mt-3 text-[15px] font-semibold">{t(tool.name)}</div>
+                <div className="mt-1 text-[13px] leading-relaxed text-muted">{t(tool.description)}</div>
                 <div className="mt-3 font-mono text-[11px]" style={{ color: tintColor(tool.tint) }}>
-                  {tool.status === "desktop-only" ? "Desktop only →" : "Open →"}
+                  {tool.status === "desktop-only" ? t("Desktop only →") : t("Open →")}
                 </div>
               </Link>
             ))}

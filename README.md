@@ -161,6 +161,11 @@ Web:
   page follows the same shell: drop a file, set options, run, get a result —
   and a live request counter proves the site makes no network calls after the
   page loads.
+- **Languages**: English and Hindi, in both apps, from one shared set of
+  translation files in [`packages/i18n`](packages/i18n/README.md). Pick a
+  language in the website's header or in the desktop app's Settings; the
+  desktop installer also asks on its first screen. Only the chosen language is
+  loaded, and translations never come from another server.
 
 Design decisions and the reasoning behind them live in each app's own
 `SPECS.md`; the write-up of how the web app itself was designed and built is
@@ -174,6 +179,8 @@ iLoathePDF/
 ├── apps/
 │   ├── desktop/   the Windows app — see apps/desktop/README.md
 │   └── web/       the website — see apps/web
+├── packages/
+│   └── i18n/      interface translations shared by both apps
 ├── docs/          images, plus archived design specs and plans
 └── .github/       CI, security scanning, release automation, templates
 ```

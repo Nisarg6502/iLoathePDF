@@ -1,4 +1,5 @@
 mod commands;
+mod locale;
 mod sidecar;
 mod update_download;
 mod updates;
@@ -49,6 +50,7 @@ pub fn run() {
             commands::cancel_job,
             commands::sidecar_health,
             commands::read_file_bytes,
+            locale::installer_language,
             updates::check_for_update,
             updates::download_update,
             updates::install_update,

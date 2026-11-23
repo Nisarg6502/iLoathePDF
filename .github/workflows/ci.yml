@@ -35,6 +35,8 @@ jobs:
         run: npm run check:paths --workspace=apps/desktop
       - name: Update-check version guard
         run: npm run check:updates --workspace=apps/desktop
+      - name: Translation catalogs
+        run: npm run check --workspace=packages/i18n
       - name: Build
         run: npm run build --workspace=apps/desktop
 

@@ -1,0 +1,6 @@
+{
+  "{{count}} files ready_one": "{{count}} file ready",
+  "{{count}} files ready_other": "{{count}} files ready",
+  "{{count}} files were skipped. Accepted: {{types}}_one": "{{count}} file was skipped. Accepted: {{types}}",
+  "{{count}} files were skipped. Accepted: {{types}}_other": "{{count}} files were skipped. Accepted: {{types}}"
+}

@@ -1,0 +1,55 @@
+/*
+ * Devanagari (Hindi) glyphs and spacing for the interface. The apps' own
+ * fonts, General Sans and Space Mono, only cover Latin, so "Noto Sans
+ * Devanagari" sits next in each app's font stack and the browser uses it for
+ * Devanagari characters only. unicode-range means a file is fetched (from the
+ * app's own origin) only when a page actually shows Devanagari text, so
+ * English visitors download nothing extra. Weights match the ones the apps
+ * use: 400, 500, 600 and 700.
+ *
+ * Noto Sans Devanagari: SIL Open Font License 1.1, see THIRD_PARTY_NOTICES.md.
+ */
+@font-face {
+  font-family: "Noto Sans Devanagari";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-400-normal.woff2") format("woff2");
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+@font-face {
+  font-family: "Noto Sans Devanagari";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-500-normal.woff2") format("woff2");
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+@font-face {
+  font-family: "Noto Sans Devanagari";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-600-normal.woff2") format("woff2");
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+@font-face {
+  font-family: "Noto Sans Devanagari";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-700-normal.woff2") format("woff2");
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+
+/*
+ * Devanagari letters join along the line drawn across their tops, so any
+ * letter-spacing pulls words apart into separate letters. The apps space out
+ * their small uppercase labels and tighten their headings; while the
+ * interface is in a Devanagari language, both go back to normal spacing.
+ * Unlayered, so it wins over Tailwind's tracking-* utilities. Add any new
+ * Devanagari language (Marathi, Nepali, ...) to the selector.
+ */
+:root:lang(hi) * {
+  letter-spacing: normal;
+}

@@ -1,7 +1,7 @@
 # Contributing to iLoathePDF
 
 Thanks for wanting to help. Bug reports, tool ideas, translations of the
-docs and code are all welcome.
+apps and docs, and code are all welcome.
 
 The one rule that shapes everything: **a user's files must never leave their
 machine.** A change that adds a network call, analytics, a remote font or a CDN
@@ -13,6 +13,9 @@ script won't be merged, however useful. If you're unsure, open an issue first.
   Include the app version, Windows version (desktop) or browser (web), and
   steps to reproduce. Don't attach real personal documents.
 - **Report a security problem privately**, see [SECURITY.md](SECURITY.md).
+- **Translate the apps.** Both apps share one translation file per language.
+  See [packages/i18n/README.md](packages/i18n/README.md) for how to fill in a
+  missing string or start a new language.
 - **Send a pull request.** For anything bigger than a small fix, please open an
   issue first so we agree on the approach before you spend the time.
 
@@ -41,6 +44,7 @@ npm run typecheck --workspace=apps/desktop
 npm run check:version --workspace=apps/desktop
 npm run typecheck --workspace=apps/web
 npm run test --workspace=apps/web
+npm run check --workspace=packages/i18n
 
 # document engine
 cd apps/desktop && python -m pytest
@@ -67,6 +71,9 @@ Then:
 
 - TypeScript and Python are formatted the way the surrounding code is; the
   linters (`oxlint`, `cargo fmt`, `clippy`) are the arbiter.
+- Text the user sees goes through `t("...")` (or `msg("...")` outside a
+  component), written in plain English. See
+  [packages/i18n/README.md](packages/i18n/README.md).
 - Comments explain *why*, not what. Prefer plain, specific error messages a
   non-technical person can act on.
 - New dependencies need a reason. Check the license is compatible (MIT, Apache,

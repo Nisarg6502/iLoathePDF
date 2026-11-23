@@ -9,6 +9,8 @@
  */
 import { useCallback, useEffect, useState } from "react";
 
+import { msg } from "@iloathepdf/i18n/msg";
+
 import { isTauri } from "./jobs";
 import { baseName, dirName } from "./utils";
 
@@ -68,8 +70,8 @@ export function useOutputDir() {
 
   return {
     outputDir,
-    /** Short form for the status bar: the last two path segments. */
-    label: outputDir ? shortenPath(outputDir) : "Next to input",
+    /** Short form for the status bar: the last two path segments. Pass it through t() when `outputDir` is null. */
+    label: outputDir ? shortenPath(outputDir) : msg("Next to input"),
     set,
     choose,
     clear: useCallback(() => set(null), [set]),

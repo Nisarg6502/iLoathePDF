@@ -1,0 +1,26 @@
+{
+  "name": "@iloathepdf/i18n",
+  "private": true,
+  "license": "MIT",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Interface translations shared by the web and desktop apps",
+  "exports": {
+    ".": "./src/index.ts",
+    "./languages": "./src/languages.ts",
+    "./msg": "./src/msg.ts",
+    "./fonts.css": "./src/fonts.css"
+  },
+  "scripts": {
+    "check": "node --experimental-strip-types scripts/check.ts",
+    "missing": "node --experimental-strip-types scripts/check.ts --missing"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans-devanagari": "^5.3.0",
+    "i18next": "^26.7.2",
+    "react-i18next": "^17.1.13"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  }
+}

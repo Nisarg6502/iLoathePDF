@@ -68,10 +68,15 @@
       "nsis": {
         "installMode": "perMachine",
         "startMenuFolder": "iLoathePDF",
-        "displayLanguageSelector": false,
+        "displayLanguageSelector": true,
         "languages": [
-          "English"
+          "English",
+          "Hindi"
         ],
+        "customLanguageFiles": {
+          "Hindi": "windows/Hindi.nsh"
+        },
+        "installerHooks": "windows/installer-hooks.nsh",
         "installerIcon": "icons/icon.ico"
       }
     },
