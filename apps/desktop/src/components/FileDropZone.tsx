@@ -30,6 +30,7 @@ import { isTauri } from "../lib/jobs";
 import { baseName, cn, formatBytes } from "../lib/utils";
 import { extOf } from "../lib/tools";
 import { Button } from "./ui/button";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 // ---------------------------------------------------------------------------
 // Model
@@ -288,6 +289,7 @@ export function FileDropZone({
   onChange,
   className,
 }: FileDropZoneProps) {
+  const { t } = useTranslation();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
@@ -422,10 +424,10 @@ export function FileDropZone({
           </span>
           <span className="text-center">
             <span className="block text-[17px] font-semibold tracking-[-0.01em] text-text">
-              {over ? `Drop to add ${acceptLabel}` : `Drop ${acceptLabel} here`}
+              {over ? t("Drop to add {{acceptLabel}}", { acceptLabel }) : t("Drop {{acceptLabel}} here", { acceptLabel })}
             </span>
             <span className="mt-1 block text-[14px] text-muted">
-              or click anywhere in this box to browse your computer
+              {t("or click anywhere in this box to browse your computer")}
             </span>
           </span>
           <span
@@ -436,7 +438,7 @@ export function FileDropZone({
             )}
           >
             <Plus className="size-4" />
-            Select {multiple ? "files" : "a file"}
+            {t("Select")}{" "}{multiple ? t("files") : t("a file")}
           </span>
           <span className="text-[12px] uppercase tracking-wider text-muted/80">
             {accept.slice(0, 6).join(" · ")}
@@ -445,8 +447,7 @@ export function FileDropZone({
         </button>
         {rejected > 0 ? (
           <p className="ihp-fade mt-2 text-center text-[14px] text-danger">
-            {rejected} file{rejected === 1 ? " was" : "s were"} skipped — this tool only takes{" "}
-            {acceptLabel}.
+            {t("{{count}} files skipped: this tool only takes {{accepts}}.", { count: rejected, accepts: tr(acceptLabel) })}
           </p>
         ) : null}
       </div>
@@ -467,7 +468,7 @@ export function FileDropZone({
       {hiddenInput}
       <div className="flex items-center gap-3 border-b border-border px-4 py-2.5">
         <h3 className="text-[14px] font-semibold text-text">
-          {files.length} file{files.length === 1 ? "" : "s"}
+          {t("{{count}} files", { count: files.length })}
         </h3>
         {anySize ? (
           <span className="text-[14px] text-muted tabular-nums">
@@ -477,18 +478,18 @@ export function FileDropZone({
         <div className="ml-auto flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={browse}>
             <Plus />
-            {multiple ? "Add more" : "Replace"}
+            {multiple ? t("Add more") : t("Replace")}
           </Button>
           <Button variant="danger" size="sm" onClick={() => onChange([])}>
             <Trash2 />
-            Clear
+            {t("Clear")}
           </Button>
         </div>
       </div>
 
       {ordered && files.length > 1 ? (
         <p className="border-b border-border bg-surface-2/60 px-4 py-1.5 text-xs text-muted">
-          Drag to reorder — this is the order they will appear in the result.
+          {t("Drag to reorder — this is the order they will appear in the result.")}
         </p>
       ) : null}
 
@@ -515,12 +516,12 @@ export function FileDropZone({
 
       {over ? (
         <p className="ihp-fade border-t border-accent/40 px-4 py-2 text-center text-[14px] font-medium text-accent">
-          Drop to add to the list
+          {t("Drop to add to the list")}
         </p>
       ) : null}
       {rejected > 0 ? (
         <p className="ihp-fade border-t border-border px-4 py-2 text-[14px] text-danger">
-          {rejected} file{rejected === 1 ? " was" : "s were"} skipped — not {acceptLabel}.
+          {t("{{count}} files skipped: not {{accepts}}.", { count: rejected, accepts: tr(acceptLabel) })}
         </p>
       ) : null}
     </div>
@@ -542,6 +543,7 @@ function FileRow({
   ordered: boolean;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id: file.id });
 
@@ -569,7 +571,7 @@ function FileRow({
         <button
           ref={setActivatorNodeRef}
           type="button"
-          aria-label={`Reorder ${file.name}`}
+          aria-label={t("Reorder {{name}}", { name: file.name })}
           className={cn(
             "grid size-7 shrink-0 cursor-grab place-items-center rounded-md text-muted",
             "outline-none transition-colors duration-150 hover:bg-border/60 hover:text-text",
@@ -597,14 +599,14 @@ function FileRow({
           {file.name}
         </span>
         <span className="block text-xs text-muted tabular-nums">
-          {file.size != null ? formatBytes(file.size) : "on disk"}
+          {file.size != null ? formatBytes(file.size) : t("on disk")}
         </span>
       </span>
 
       <button
         type="button"
         onClick={onRemove}
-        aria-label={`Remove ${file.name}`}
+        aria-label={t("Remove {{name}}", { name: file.name })}
         className={cn(
           "grid size-7 shrink-0 place-items-center rounded-md text-muted outline-none",
           "opacity-0 transition-[opacity,background-color,color] duration-150",

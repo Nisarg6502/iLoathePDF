@@ -41,6 +41,7 @@ import {
 } from "@dnd-kit/sortable";
 import { FileText, ImageOff, RotateCw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@iloathepdf/i18n";
 
 // ---------------------------------------------------------------------------
 // Model
@@ -111,6 +112,7 @@ export function PageThumbnailGrid({
   emptyState,
   className,
 }: PageThumbnailGridProps) {
+  const { t } = useTranslation();
   const [internalSelection, setInternalSelection] = useState<string[]>([]);
   const selection = selectedIds ?? internalSelection;
   const setSelection = useCallback(
@@ -218,9 +220,9 @@ export function PageThumbnailGrid({
         {emptyState ?? (
           <div className="max-w-xs space-y-1.5">
             <FileText className="mx-auto h-7 w-7 text-muted/60" strokeWidth={1.5} />
-            <p className="text-sm font-medium text-text">No pages yet</p>
+            <p className="text-sm font-medium text-text">{t("No pages yet")}</p>
             <p className="text-xs text-muted">
-              Add a PDF and its pages will show up here, ready to reorder.
+              {t("Add a PDF and its pages will show up here, ready to reorder.")}
             </p>
           </div>
         )}
@@ -314,34 +316,35 @@ function SelectionBar({
   onSelectAll: () => void;
   onClear: () => void;
 }) {
+  const { t } = useTranslation();
   const n = selection.length;
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
       <span className="tabular-nums">
-        {total} {total === 1 ? "page" : "pages"}
+        {t("{{count}} pages", { count: total })}
       </span>
       <span aria-hidden className="text-border">
         •
       </span>
       {n > 0 ? (
-        <span className="font-medium tabular-nums text-text">{n} selected</span>
+        <span className="font-medium tabular-nums text-text">{t("{{n}} selected", { n })}</span>
       ) : (
-        <span className="hidden sm:inline">Drag to reorder — Space then arrows with a keyboard</span>
+        <span className="hidden sm:inline">{t("Drag to reorder — Space then arrows with a keyboard")}</span>
       )}
 
       <div className="ml-auto flex items-center gap-1.5">
         {n > 0 && !readOnly && (
           <>
             <BarButton onClick={onRotate}>
-              <RotateCw className="h-3.5 w-3.5" /> Rotate
+              <RotateCw className="h-3.5 w-3.5" />{" "}{t("Rotate")}
             </BarButton>
             <BarButton onClick={onDelete} danger>
-              <Trash2 className="h-3.5 w-3.5" /> Delete
+              <Trash2 className="h-3.5 w-3.5" />{" "}{t("Delete")}
             </BarButton>
           </>
         )}
         <BarButton onClick={n === total ? onClear : onSelectAll}>
-          {n === total ? "Clear" : "Select all"}
+          {n === total ? t("Clear") : t("Select all")}
         </BarButton>
       </div>
     </div>
@@ -404,6 +407,7 @@ const PageTile = memo(function PageTile({
   onRotate,
   onDelete,
 }: PageTileProps) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: page.id,
   });
@@ -474,13 +478,13 @@ const PageTile = memo(function PageTile({
             )}
           >
             <TileButton
-              label={`Rotate page ${page.pageNumber}`}
+              label={t("Rotate page {{pageNumber}}", { pageNumber: page.pageNumber })}
               onClick={() => onRotate(page.id)}
             >
               <RotateCw className="h-3.5 w-3.5" />
             </TileButton>
             <TileButton
-              label={`Remove page ${page.pageNumber}`}
+              label={t("Remove page {{pageNumber}}", { pageNumber: page.pageNumber })}
               danger
               onClick={() => onDelete(page.id)}
             >
@@ -557,6 +561,7 @@ function PageCanvas({
   renderThumbnail?: ThumbnailRenderer;
   eager?: boolean;
 }) {
+  const { t } = useTranslation();
   const holder = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(eager);
   const [url, setUrl] = useState<string | null>(null);
@@ -610,7 +615,7 @@ function PageCanvas({
       {url ? (
         <img
           src={url}
-          alt={`Page ${page.pageNumber}`}
+          alt={t("Page {{pageNumber}}", { pageNumber: page.pageNumber })}
           draggable={false}
           className="absolute inset-0 h-full w-full object-contain"
         />

@@ -164,17 +164,17 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
 
       {isTauri() ? (
         <div className="ml-2 flex">
-          <WindowButton label="Minimise" onClick={() => void windowAction("minimize")}>
+          <WindowButton label={t("Minimise")} onClick={() => void windowAction("minimize")}>
             <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1">
               <path d="M0 5h10" />
             </svg>
           </WindowButton>
-          <WindowButton label="Maximise" onClick={() => void windowAction("toggleMaximize")}>
+          <WindowButton label={t("Maximise")} onClick={() => void windowAction("toggleMaximize")}>
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
               <rect x="0.5" y="0.5" width="9" height="9" />
             </svg>
           </WindowButton>
-          <WindowButton label="Close" danger onClick={() => void windowAction("close")}>
+          <WindowButton label={t("Close")} danger onClick={() => void windowAction("close")}>
             <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1">
               <path d="M0 0l10 10M10 0L0 10" />
             </svg>
@@ -409,6 +409,7 @@ const bannerButton =
   "h-6 rounded-md bg-accent px-2.5 text-[12.5px] font-semibold text-white outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 disabled:opacity-60";
 
 function UpdateBanner() {
+  const { t } = useTranslation();
   const { status, latest, dismissed, progress, error } = useUpdateCheck();
   // "Later" on a downloaded update hides the banner until the next launch; the
   // update stays ready in Settings.
@@ -440,59 +441,59 @@ function UpdateBanner() {
   if (status === "downloading") {
     message = (
       <>
-        <span className="font-semibold">Downloading iLoathePDF {latest.version}…</span>{" "}
+        <span className="font-semibold">{t("Downloading iLoathePDF {{version}}…", { version: latest.version })}</span>{" "}
         <span className="text-muted">
           {pct !== null && progress?.total
-            ? `${pct}% of ${formatMb(progress.total)}`
+            ? t("{{percent}}% of {{size}}", { percent: pct, size: formatMb(progress.total) })
             : progress
               ? formatMb(progress.downloaded)
               : ""}
-          {" — "}keep working, it runs in the background.
+          {" — "}{t("keep working, it runs in the background.")}
         </span>
       </>
     );
   } else if (status === "installing") {
     message = (
       <>
-        <span className="font-semibold">Installing iLoathePDF {latest.version}…</span>{" "}
-        <span className="text-muted">The app closes, updates and reopens by itself.</span>
+        <span className="font-semibold">{t("Installing iLoathePDF {{version}}…", { version: latest.version })}</span>{" "}
+        <span className="text-muted">{t("The app closes, updates and reopens by itself.")}</span>
       </>
     );
   } else if (status === "ready") {
     message = (
       <>
-        <span className="font-semibold">iLoathePDF {latest.version} is ready to install.</span>{" "}
+        <span className="font-semibold">{t("iLoathePDF {{version}} is ready to install.", { version: latest.version })}</span>{" "}
         <span className="text-muted">
-          {error ?? "Windows will ask for permission, then the app reopens."}
+          {error ?? t("Windows will ask for permission, then the app reopens.")}
         </span>
       </>
     );
     actions = (
       <>
         <button type="button" onClick={() => void installUpdate()} className={bannerButton}>
-          {error ? "Retry" : "Restart & update"}
+          {error ? t("Retry") : t("Restart & update")}
         </button>
         <button type="button" onClick={() => setReadyHidden(true)} className={bannerLink}>
-          Later
+          {t("Later")}
         </button>
       </>
     );
   } else {
     message = (
       <>
-        <span className="font-semibold">iLoathePDF {latest.version} is available.</span>{" "}
+        <span className="font-semibold">{t("iLoathePDF {{version}} is available.", { version: latest.version })}</span>{" "}
         <span className={error ? "text-danger" : "text-muted"}>
-          {error ?? `You have ${__APP_VERSION__}.`}
+          {error ?? t("You have {{appVersion}}.", { appVersion: __APP_VERSION__ })}
         </span>
       </>
     );
     actions = (
       <>
         <button type="button" onClick={() => void downloadUpdate()} className={bannerButton}>
-          {error ? "Retry" : "Update now"}
+          {error ? t("Retry") : t("Update now")}
         </button>
         <button type="button" onClick={() => void openRelease()} className={bannerLink}>
-          What’s new
+          {t("What’s new")}
         </button>
       </>
     );
@@ -510,7 +511,7 @@ function UpdateBanner() {
         <button
           type="button"
           onClick={() => dismissUpdate(latest.version)}
-          aria-label="Dismiss this notice"
+          aria-label={t("Dismiss this notice")}
           className="grid size-6 place-items-center rounded text-muted outline-none hover:text-text focus-visible:ring-2 focus-visible:ring-accent"
         >
           <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1.2">

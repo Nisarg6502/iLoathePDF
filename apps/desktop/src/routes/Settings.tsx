@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { FolderOpen, RotateCcw, ShieldCheck } from "lucide-react";
 
-import { LANGUAGES, isLanguageCode, useLanguage, useTranslation } from "@iloathepdf/i18n";
+import { i18n, isLanguageCode, LANGUAGES, tr, Trans, useLanguage, useTranslation } from "@iloathepdf/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -42,6 +42,7 @@ function Section({
 }
 
 function UpdatesPanel() {
+  const { t } = useTranslation();
   const update = useUpdateCheck();
   const { enabled, autoDownload, status, latest, progress, checkedAt, error } = update;
 
@@ -60,42 +61,38 @@ function UpdatesPanel() {
             htmlFor="update-check"
             className="text-[13.5px] font-semibold text-text"
           >
-            Tell me when a new version is available
+            {t("Tell me when a new version is available")}
           </label>
           <p className="mt-0.5 text-[13px] text-muted">
             {enabled
-              ? "On. The app checks when it starts and shows a notice if there is a newer release. You choose when to install it. Switch this off at any time and it stops."
-              : "Off. The app makes no network requests."}
+              ? t("On. The app checks when it starts and shows a notice if there is a newer release. You choose when to install it. Switch this off at any time and it stops.")
+              : t("Off. The app makes no network requests.")}
           </p>
         </div>
       </div>
 
       <div className="max-w-[62ch] rounded-lg border border-border bg-surface px-3.5 py-3 text-[13px] text-muted">
         <div className="mb-1.5 font-mono text-[11px] font-bold tracking-[0.13em] text-faint">
-          WHAT HAPPENS WHEN THIS IS ON
+          {t("WHAT HAPPENS WHEN THIS IS ON")}
         </div>
         <ul className="grid gap-1.5">
           <li>
-            The app asks GitHub one question — “what is the latest release of iLoathePDF?” — by
-            fetching one small file,{" "}
+            {t("The app asks GitHub one question, “what is the latest release of iLoathePDF?”, by fetching one small file:")}{" "}
             <span className="font-mono text-[12px] text-text">
               github.com/Nisarg6502/iLoathePDF/releases/latest/download/latest.json
             </span>
-            .
           </li>
           <li>
-            Nothing about you goes out: no files, no file names, no settings, no installed version,
-            no ID, no cookies. The comparison with your version happens on this computer.
+            {t("Nothing about you goes out: no files, no file names, no settings, no installed version, no ID, no cookies. The comparison with your version happens on this computer.")}
           </li>
           <li>
-            Like any website you visit, GitHub can see that a connection came from your internet
-            address. We receive nothing and keep no record.
+            {t("Like any website you visit, GitHub can see that a connection came from your internet address. We receive nothing and keep no record.")}
           </li>
           <li>
-            Nothing is downloaded until you press <strong>Update now</strong> (or turn on automatic
-            download below). The download keeps running in the background while you work, and it
-            is checked against a signing key built into this app — a file that does not match is
-            thrown away. Installing only happens when you press <strong>Restart &amp; update</strong>.
+            <Trans
+              i18nKey="Nothing is downloaded until you press <b>Update now</b> (or turn on automatic download below). The download keeps running in the background while you work, and it is checked against a signing key built into this app; a file that does not match is thrown away. Installing only happens when you press <b>Restart & update</b>."
+              components={{ b: <strong /> }}
+            />
           </li>
         </ul>
       </div>
@@ -114,12 +111,12 @@ function UpdatesPanel() {
               htmlFor="update-auto"
               className="text-[13.5px] font-semibold text-text"
             >
-              Download new versions in the background
+              {t("Download new versions in the background")}
             </label>
             <p className="mt-0.5 text-[13px] text-muted">
               {autoDownload
-                ? "On. A new version downloads by itself (the installer is large) and waits for you to restart. It is never installed without you."
-                : "Off. A new version only downloads when you press Update now."}
+                ? t("On. A new version downloads by itself (the installer is large) and waits for you to restart. It is never installed without you.")
+                : t("Off. A new version only downloads when you press Update now.")}
             </p>
           </div>
         </div>
@@ -129,23 +126,23 @@ function UpdatesPanel() {
         <div className="flex flex-wrap items-center gap-3">
           {status === "available" && latest ? (
             <Button onClick={() => void downloadUpdate()}>
-              {error ? "Retry update" : "Update now"}
+              {error ? t("Retry update") : t("Update now")}
             </Button>
           ) : status === "downloading" ? (
-            <Button disabled>Downloading…</Button>
+            <Button disabled>{t("Downloading…")}</Button>
           ) : status === "ready" ? (
             <Button onClick={() => void installUpdate()}>
-              {error ? "Retry install" : "Restart & update"}
+              {error ? t("Retry install") : t("Restart & update")}
             </Button>
           ) : status === "installing" ? (
-            <Button disabled>Installing…</Button>
+            <Button disabled>{t("Installing…")}</Button>
           ) : (
             <Button
               variant="secondary"
               onClick={() => void checkForUpdate()}
               disabled={status === "checking"}
             >
-              {status === "checking" ? "Checking…" : "Check now"}
+              {status === "checking" ? t("Checking…") : t("Check now")}
             </Button>
           )}
           <span
@@ -155,21 +152,24 @@ function UpdatesPanel() {
             {error
               ? error
               : status === "error"
-                ? "The check failed."
+                ? t("The check failed.")
                 : status === "downloading" && latest
-                  ? `Downloading ${latest.version}${
-                      progress?.total
-                        ? ` — ${Math.round((progress.downloaded / progress.total) * 100)}%`
-                        : ""
-                    }…`
+                  ? progress?.total
+                    ? t("Downloading {{version}}: {{percent}}%…", {
+                        version: latest.version,
+                        percent: Math.round((progress.downloaded / progress.total) * 100),
+                      })
+                    : t("Downloading {{version}}…", { version: latest.version })
                   : status === "ready" && latest
-                    ? `Version ${latest.version} is downloaded and ready. Windows will ask for permission, then the app reopens.`
+                    ? t("Version {{version}} is downloaded and ready. Windows will ask for permission, then the app reopens.", { version: latest.version })
                     : status === "installing"
-                      ? "Handing over to the installer…"
+                      ? t("Handing over to the installer…")
                       : status === "available" && latest
-                        ? `Version ${latest.version} is available (you have ${__APP_VERSION__}).`
+                        ? t("Version {{version}} is available (you have {{appVersion}}).", { version: latest.version, appVersion: __APP_VERSION__ })
                         : status === "current"
-                          ? `You are up to date${checkedAt ? ` — checked ${formatChecked(checkedAt)}` : ""}.`
+                          ? checkedAt
+                            ? t("You are up to date (checked {{when}}).", { when: formatChecked(checkedAt) })
+                            : t("You are up to date.")
                           : ""}
           </span>
         </div>
@@ -180,8 +180,9 @@ function UpdatesPanel() {
 
 function formatChecked(at: number): string {
   const seconds = Math.round((Date.now() - at) / 1000);
-  if (seconds < 60) return "just now";
-  return new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  if (seconds < 60) return tr("just now");
+  // The interface language, not the OS locale, so the time reads the same way as the text around it.
+  return new Date(at).toLocaleTimeString(i18n.resolvedLanguage, { hour: "numeric", minute: "2-digit" });
 }
 
 function LanguagePanel() {

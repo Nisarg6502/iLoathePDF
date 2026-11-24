@@ -13,6 +13,7 @@ import type { EngineResult } from "@/engines/types";
 import { SignElementBox } from "./SignElementBox";
 import { SignatureCapture } from "./SignatureCapture";
 import { BOX_COLORS, HIGHLIGHT_COLORS, TEXT_COLORS, isImageElement, isShapeElement, type SignElement } from "./types";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -34,6 +35,7 @@ function todayFormatted(): string {
 }
 
 export function SignWorkspace({ tool }: { tool: ToolConfig }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [pages, setPages] = useState<PageInfo[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -79,7 +81,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
         }
         if (!cancelled) setPages(out);
       } catch {
-        if (!cancelled) setLoadError("That PDF couldn't be opened for preview.");
+        if (!cancelled) setLoadError(tr("That PDF couldn't be opened for preview."));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -210,7 +212,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
       <div className="mt-3.5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_320px]">
         {/* Page preview */}
         <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-surface-2 p-5">
-          {loading && <p className="text-center text-[13px] text-muted">Reading pages…</p>}
+          {loading && <p className="text-center text-[13px] text-muted">{t("Reading pages…")}</p>}
           {loadError && <p className="text-center text-[13px] text-danger">{loadError}</p>}
           {pages.map((page) => (
             <div
@@ -229,13 +231,13 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
             >
               <img
                 src={page.dataUrl}
-                alt={`Page ${page.index + 1}`}
+                alt={t("Page {{page}}", { page: page.index + 1 })}
                 className="block w-full select-none"
                 draggable={false}
                 onLoad={(e) => measure(page.index, e.currentTarget)}
               />
               <div className="pointer-events-none absolute left-2 top-2 rounded bg-black/55 px-1.5 py-0.5 text-[10px] text-white">
-                Page {page.index + 1}
+                {t("Page {{page}}", { page: page.index + 1 })}
               </div>
               <div className="pointer-events-auto absolute inset-0">
                 {elements
@@ -263,32 +265,32 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
         {/* Sidebar */}
         <div className="sticky top-[82px] flex flex-col gap-4 overflow-hidden rounded-2xl border border-border bg-surface p-4">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Add to page {activePage + 1}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{t("Add to page {{page}}", { page: activePage + 1 })}</div>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setCapture("signature")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
-                Signature
+                {t("Signature")}
               </button>
               <button type="button" onClick={() => setCapture("initials")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
-                Initials
+                {t("Initials")}
               </button>
               <button type="button" onClick={() => addTextElement("text")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
-                Text
+                {t("Text")}
               </button>
               <button type="button" onClick={() => addTextElement("date")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
-                Date
+                {t("Date")}
               </button>
               <button type="button" onClick={() => addShapeElement("highlight")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
-                Highlight
+                {t("Highlight")}
               </button>
               <button type="button" onClick={() => addShapeElement("box")} className="rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-medium hover:bg-surface-3">
-                Box
+                {t("Box")}
               </button>
             </div>
           </div>
 
           {selected && isShapeElement(selected) && (
             <div className="rounded-[10px] border border-border bg-surface-2 p-3">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{t("Edit {{kind}}", { kind: selected.kind })}</div>
               <div className="mt-2 flex items-center gap-1.5">
                 {(selected.kind === "highlight" ? HIGHLIGHT_COLORS : BOX_COLORS).map((c) => (
                   <button
@@ -297,7 +299,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
                     onClick={() => updateElement(selected.id, { color: c })}
                     className={`size-5.5 rounded-full border-2 ${selected.color === c ? "border-accent" : "border-transparent"}`}
                     style={{ backgroundColor: c }}
-                    aria-label={`Color ${c}`}
+                    aria-label={t("Color {{c}}", { c })}
                   />
                 ))}
               </div>
@@ -306,7 +308,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
 
           {selected && !isImageElement(selected) && !isShapeElement(selected) && (
             <div className="rounded-[10px] border border-border bg-surface-2 p-3">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Edit {selected.kind}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{t("Edit {{kind}}", { kind: selected.kind })}</div>
               <input
                 type="text"
                 value={selected.text}
@@ -314,7 +316,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
                 className="mt-2 w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[13px]"
               />
               <div className="mt-2 flex items-center gap-2">
-                <label className="text-[12px] text-muted">Size</label>
+                <label className="text-[12px] text-muted">{t("Size")}</label>
                 <input
                   type="range"
                   min={8}
@@ -332,7 +334,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
                     onClick={() => updateElement(selected.id, { color: c })}
                     className={`size-5.5 rounded-full border-2 ${selected.color === c ? "border-accent" : "border-transparent"}`}
                     style={{ backgroundColor: c }}
-                    aria-label={`Color ${c}`}
+                    aria-label={t("Color {{c}}", { c })}
                   />
                 ))}
               </div>
@@ -341,7 +343,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
 
           <div className="flex-1 overflow-y-auto">
             <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Elements ({elementCount})
+              {t("Elements ({{elementCount}})", { elementCount })}
             </div>
             <ul className="mt-2 flex flex-col gap-1.5">
               {elements.map((e) => (
@@ -370,7 +372,7 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
                   </button>
                 </li>
               ))}
-              {elements.length === 0 && <li className="text-[12.5px] text-muted">Nothing placed yet.</li>}
+              {elements.length === 0 && <li className="text-[12.5px] text-muted">{t("Nothing placed yet.")}</li>}
             </ul>
           </div>
 
@@ -382,10 +384,10 @@ export function SignWorkspace({ tool }: { tool: ToolConfig }) {
             disabled={running || elementCount === 0}
             className="flex h-10 w-full items-center justify-center rounded-[11px] bg-accent text-sm font-semibold text-on-accent disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint"
           >
-            {running ? "Working…" : "Export signed PDF"}
+            {running ? t("Working…") : t("Export signed PDF")}
           </button>
           <button type="button" onClick={reset} className="text-[12.5px] text-muted hover:text-text">
-            Start over
+            {t("Start over")}
           </button>
         </div>
       </div>

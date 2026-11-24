@@ -5,7 +5,7 @@
  *   npm run missing --workspace=packages/i18n -- hi  (prints what is left to translate)
  *
  * A string counts as "used" when the source passes it to t("...") or
- * msg("..."), or when it is a user-facing field of a tool registry (listed in
+ * tr("...") or msg("..."), or when it is a user-facing field of a tool registry (listed in
  * REGISTRY_FIELDS; those tables are plain data, so wrapping every entry in
  * msg() would be noise).
  *
@@ -28,12 +28,14 @@ const SOURCE_DIRS = ["apps/web/src", "apps/desktop/src"];
 
 const REGISTRY_FIELDS: Record<string, string[]> = {
   "apps/web/src/tools/registry.tsx": ["name", "description", "desktopOnlyNote"],
-  "apps/desktop/src/lib/tools.ts": ["title", "description"],
+  "apps/desktop/src/lib/tools.ts": ["title", "description", "action", "acceptsLabel"],
+  "apps/web/src/recipes/registry.tsx": ["title", "description", "goodFor", "label", "blurb"],
+  "apps/desktop/src/lib/recipes.ts": ["title", "description", "goodFor", "label", "blurb"],
 };
 
 const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
 const STRING = String.raw`("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\x60(?:[^\x60\\$]|\\.)*\x60)`;
-const CALL = new RegExp(String.raw`(?<![\w.$])(?:t|i18n\.t|msg)\(\s*` + STRING, "g");
+const CALL = new RegExp(String.raw`(?<![\w.$])(?:t|tr|i18n\.t|msg)\(\s*` + STRING, "g");
 const TRANS_KEY = new RegExp(String.raw`\bi18nKey=` + STRING, "g");
 
 function unquote(literal: string): string {

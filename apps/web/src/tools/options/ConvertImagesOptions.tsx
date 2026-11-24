@@ -1,12 +1,14 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { useTranslation } from "@iloathepdf/i18n";
 
 export function ConvertImagesOptions({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const to = (options.to as string) ?? "png";
   const quality = (options.quality as number) ?? 92;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[12.5px] font-semibold">Convert to</span>
+      <span className="text-[12.5px] font-semibold">{t("Convert to")}</span>
       <div className="flex gap-1.5">
         {["png", "jpg", "webp"].map((f) => (
           <button
@@ -23,7 +25,7 @@ export function ConvertImagesOptions({ options, onChange, disabled }: OptionsPan
       {to !== "png" && (
         <label className="mt-3 flex flex-col gap-1.5">
           <span className="flex items-baseline justify-between text-[12.5px] font-semibold">
-            Quality
+            {t("Quality")}
             <span className="font-mono text-[11.5px] font-normal text-muted">{quality}</span>
           </span>
           <input
@@ -39,8 +41,7 @@ export function ConvertImagesOptions({ options, onChange, disabled }: OptionsPan
         </label>
       )}
       <p className="mt-1.5 text-[11.5px] text-muted">
-        HEIC input is accepted but shows a preview result until a decoder
-        ships — see the tool card badge.
+        {t("HEIC input is accepted but shows a preview result until a decoder ships — see the tool card badge.")}
       </p>
     </div>
   );

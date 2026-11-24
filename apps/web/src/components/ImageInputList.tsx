@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ImageEditModal } from "./ImageEditModal";
 import { DEFAULT_IMAGE_EDIT, removeEdit, reorderEdits, type ImageEdit, type ImageEdits } from "@/tools/imageEdit";
+import { useTranslation } from "@iloathepdf/i18n";
 
 function Thumbnail({ file }: { file: File }) {
   const [url, setUrl] = useState("");
@@ -44,6 +45,7 @@ export function ImageInputList({
   /** Extensions (".png") the "Add more" picker offers and accepts. */
   accept?: string[];
 }) {
+  const { t } = useTranslation();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const addInput = useRef<HTMLInputElement>(null);
   // Stable React keys: names repeat and positions change when reordering.
@@ -117,7 +119,7 @@ export function ImageInputList({
                 <>
                   <button
                     type="button"
-                    aria-label={`Move ${f.name} up`}
+                    aria-label={t("Move {{name}} up", { name: f.name })}
                     disabled={disabled || i === 0}
                     onClick={() => move(i, i - 1)}
                     className={smallButton}
@@ -126,7 +128,7 @@ export function ImageInputList({
                   </button>
                   <button
                     type="button"
-                    aria-label={`Move ${f.name} down`}
+                    aria-label={t("Move {{name}} down", { name: f.name })}
                     disabled={disabled || i === files.length - 1}
                     onClick={() => move(i, i + 1)}
                     className={smallButton}
@@ -141,12 +143,12 @@ export function ImageInputList({
                 onClick={() => setEditingIndex(i)}
                 className="flex-none rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-50 max-sm:min-h-10 max-sm:px-4"
               >
-                Edit
+                {t("Edit")}
               </button>
               {onFilesChange && (
                 <button
                   type="button"
-                  aria-label={`Remove ${f.name}`}
+                  aria-label={t("Remove {{name}}", { name: f.name })}
                   disabled={disabled}
                   onClick={() => remove(i)}
                   className={`${smallButton} hover:text-danger`}
@@ -179,7 +181,7 @@ export function ImageInputList({
             onClick={() => addInput.current?.click()}
             className="mt-3 flex h-10 w-full items-center justify-center rounded-[11px] border border-dashed border-border text-sm font-medium text-muted hover:border-accent hover:text-text disabled:pointer-events-none disabled:opacity-50"
           >
-            + Add more images
+            {t("+ Add more images")}
           </button>
         </>
       )}

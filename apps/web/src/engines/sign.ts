@@ -3,6 +3,7 @@ import { embedImageBytes } from "@/lib/embedImage";
 import type { Engine } from "./types";
 import type { SignElement } from "@/tools/sign/types";
 import { isImageElement, isShapeElement } from "@/tools/sign/types";
+import { tr } from "@iloathepdf/i18n";
 
 function hexToRgb(hex: string) {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex.trim());
@@ -20,10 +21,10 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
 
 export const signEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to sign.");
+  if (!file) throw new Error(tr("Add a PDF to sign."));
 
   const elements = (options.elements as SignElement[] | undefined) ?? [];
-  if (elements.length === 0) throw new Error("Add at least one signature, text, date, initials, highlight or box before exporting.");
+  if (elements.length === 0) throw new Error(tr("Add at least one signature, text, date, initials, highlight or box before exporting."));
 
   const bytes = await file.arrayBuffer();
   const doc = await PDFDocument.load(bytes);
@@ -37,7 +38,7 @@ export const signEngine: Engine = async ({ files, options }) => {
 
   for (const el of elements) {
     if (el.pageIndex < 0 || el.pageIndex >= pages.length) {
-      throw new Error(`Element targets page ${el.pageIndex + 1}, but the PDF only has ${pages.length} pages.`);
+      throw new Error(tr("Element targets page {{page}}, but the PDF only has {{count}} pages.", { page: el.pageIndex + 1, count: pages.length }));
     }
     const page = pages[el.pageIndex];
     const { width: pageWidthPt, height: pageHeightPt } = page.getSize();
@@ -83,7 +84,7 @@ export const signEngine: Engine = async ({ files, options }) => {
         blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `${elements.length} element${elements.length === 1 ? "" : "s"} added across ${pages.length} page${pages.length === 1 ? "" : "s"}`,
+    summary: tr("{{elements}} added across {{pages}}", { elements: tr("{{count}} elements", { count: elements.length }), pages: tr("{{count}} pages", { count: pages.length }) }),
     isPreview: false,
   };
 };

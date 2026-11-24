@@ -18,6 +18,17 @@
 /** What flows between steps. */
 export type Kind = "pdf" | "image" | "text" | "csv" | "html" | "zip";
 
+/**
+ * Translates one user-facing sentence. The apps pass i18next's `t`, so every
+ * message below reads in the user's language; scripts and tests use the
+ * default, `english`, which just fills in the {{placeholders}}.
+ */
+export type Tr = (text: string, vars?: Record<string, string | number>) => string;
+export const english: Tr = (text, vars) =>
+  vars ? text.replace(/\{\{(\w+)\}\}/g, (_, key: string) => String(vars[key] ?? "")) : text;
+/** Marks text that is translated where it is shown (see packages/i18n). Returns it unchanged. */
+const msg = <T extends string>(text: T): T => text;
+
 /** How many files flow between steps: exactly one, one per input file, or several per input file. */
 export type Count = "one" | "batch" | "many";
 
@@ -56,78 +67,118 @@ const watermarkAddsText = (o: Options) => {
 };
 
 export const RECIPE_TOOLS: Record<string, ToolSpec> = {
-  merge: { in: "pdf", out: "pdf", count: () => "one", text: keeps, blurb: "Join every PDF into one", group: "pdf" },
+  merge: { in: "pdf", out: "pdf", count: () => "one", text: keeps, blurb: msg("Join every PDF into one"), group: "pdf" },
   split: {
     in: "pdf",
     out: "pdf",
     count: (o) => (o.mode === "extract" || o.mode === "delete" ? "same" : "more"),
     text: keeps,
-    blurb: "Cut into parts, keep or drop pages",
+    blurb: msg("Cut into parts, keep or drop pages"),
     group: "pdf",
   },
-  compress: { in: "pdf", out: "pdf", count: same, text: () => "removes", rasterizes: true, blurb: "Shrink file size", group: "pdf" },
-  crop: { in: "pdf", out: "pdf", count: same, text: keeps, blurb: "Trim page margins", group: "pdf" },
+  compress: { in: "pdf", out: "pdf", count: same, text: () => "removes", rasterizes: true, blurb: msg("Shrink file size"), group: "pdf" },
+  crop: { in: "pdf", out: "pdf", count: same, text: keeps, blurb: msg("Trim page margins"), group: "pdf" },
   watermark: {
     in: "pdf",
     out: "pdf",
     count: same,
     text: (o) => (watermarkAddsText(o) ? "adds" : "keeps"),
-    blurb: "Watermark, page numbers or stamp",
+    blurb: msg("Watermark, page numbers or stamp"),
     group: "pdf",
   },
-  flatten: { in: "pdf", out: "pdf", count: same, text: keeps, blurb: "Bake in form fields and notes", group: "pdf" },
-  ocr: { in: "pdf", out: "pdf", count: same, text: () => "adds", blurb: "Make scans searchable", group: "pdf" },
-  protect: { in: "pdf", out: "pdf", count: same, text: keeps, blurb: "Add or remove a password", group: "security" },
-  "pdf-to-images": { in: "pdf", out: "image", count: () => "more", text: keeps, blurb: "Every page as a picture", group: "convert" },
-  "images-to-pdf": { in: "image", out: "pdf", count: () => "one", text: () => "removes", rasterizes: true, blurb: "Pictures into one PDF", group: "convert" },
-  scan: { in: "image", out: "pdf", count: () => "one", text: () => "removes", rasterizes: true, blurb: "Clean up photos of paper into a PDF", group: "convert" },
-  "convert-images": { in: "image", out: "image", count: same, text: keeps, blurb: "PNG, JPG, WebP or HEIC", group: "image" },
-  "compress-images": { in: "image", out: "image", count: same, text: keeps, blurb: "Smaller pictures, resize", group: "image" },
-  "txt-to-pdf": { in: "text", out: "pdf", count: same, text: () => "adds", blurb: "Text files into PDFs", group: "convert" },
-  "csv-to-pdf": { in: "csv", out: "pdf", count: same, text: () => "adds", blurb: "Tables into PDFs", group: "convert" },
-  "html-to-pdf": { in: "html", out: "pdf", count: same, text: () => "adds", blurb: "Web pages into PDFs", group: "convert" },
-  "zip-to-pdf": { in: "zip", out: "pdf", count: same, text: () => "unknown", blurb: "Everything in a ZIP into one PDF", group: "convert" },
+  flatten: { in: "pdf", out: "pdf", count: same, text: keeps, blurb: msg("Bake in form fields and notes"), group: "pdf" },
+  ocr: { in: "pdf", out: "pdf", count: same, text: () => "adds", blurb: msg("Make scans searchable"), group: "pdf" },
+  protect: { in: "pdf", out: "pdf", count: same, text: keeps, blurb: msg("Add or remove a password"), group: "security" },
+  "pdf-to-images": { in: "pdf", out: "image", count: () => "more", text: keeps, blurb: msg("Every page as a picture"), group: "convert" },
+  "images-to-pdf": { in: "image", out: "pdf", count: () => "one", text: () => "removes", rasterizes: true, blurb: msg("Pictures into one PDF"), group: "convert" },
+  scan: { in: "image", out: "pdf", count: () => "one", text: () => "removes", rasterizes: true, blurb: msg("Clean up photos of paper into a PDF"), group: "convert" },
+  "convert-images": { in: "image", out: "image", count: same, text: keeps, blurb: msg("PNG, JPG, WebP or HEIC"), group: "image" },
+  "compress-images": { in: "image", out: "image", count: same, text: keeps, blurb: msg("Smaller pictures, resize"), group: "image" },
+  "txt-to-pdf": { in: "text", out: "pdf", count: same, text: () => "adds", blurb: msg("Text files into PDFs"), group: "convert" },
+  "csv-to-pdf": { in: "csv", out: "pdf", count: same, text: () => "adds", blurb: msg("Tables into PDFs"), group: "convert" },
+  "html-to-pdf": { in: "html", out: "pdf", count: same, text: () => "adds", blurb: msg("Web pages into PDFs"), group: "convert" },
+  "zip-to-pdf": { in: "zip", out: "pdf", count: same, text: () => "unknown", blurb: msg("Everything in a ZIP into one PDF"), group: "convert" },
 };
 
 /** Tools that exist but can't be a recipe step, and why. Shown greyed out in the palette. */
 export const UNAVAILABLE_TOOLS: Record<string, string> = {
-  sign: "Needs you to place a signature on the page by hand.",
-  redact: "Needs you to draw boxes over what to hide, page by page.",
-  organize: "Needs you to drag pages around by hand.",
-  reader: "Only shows a PDF; it doesn't make a new file.",
-  "pdf-to-excel": "Desktop app only for now.",
-  pdfa: "Desktop app only for now.",
+  sign: msg("Needs you to place a signature on the page by hand."),
+  redact: msg("Needs you to draw boxes over what to hide, page by page."),
+  organize: msg("Needs you to drag pages around by hand."),
+  reader: msg("Only shows a PDF; it doesn't make a new file."),
+  "pdf-to-excel": msg("Desktop app only for now."),
+  pdfa: msg("Desktop app only for now."),
 };
 
 export const MAX_STEPS = 10;
 export const MIN_STEPS = 1;
 
 export const GROUP_LABEL: Record<ToolSpec["group"], string> = {
-  pdf: "Edit PDFs",
-  convert: "Convert",
-  image: "Images",
-  security: "Security",
+  pdf: msg("Edit PDFs"),
+  convert: msg("Convert"),
+  image: msg("Images"),
+  security: msg("Security"),
 };
 
-const KIND_LABEL: Record<Kind, string> = {
-  pdf: "PDF",
-  image: "image",
-  text: "text file",
-  csv: "CSV",
-  html: "HTML page",
-  zip: "ZIP",
+/** One of each kind, as a noun. */
+const KIND_ONE: Record<Kind, string> = {
+  pdf: msg("PDF"),
+  image: msg("image"),
+  text: msg("text file"),
+  csv: msg("CSV"),
+  html: msg("HTML page"),
+  zip: msg("ZIP"),
 };
 
-export function kindLabel(kind: Kind, plural = false): string {
-  const base = KIND_LABEL[kind];
-  return plural ? `${base}s` : base;
+/** Several of each kind. Whole phrases, so each language can inflect them its own way. */
+const KIND_MANY: Record<Kind, string> = {
+  pdf: msg("PDFs"),
+  image: msg("images"),
+  text: msg("text files"),
+  csv: msg("CSVs"),
+  html: msg("HTML pages"),
+  zip: msg("ZIPs"),
+};
+
+/** What a chain hands back: a single file. */
+const OUTPUT_ONE: Record<Kind, string> = {
+  pdf: msg("One PDF"),
+  image: msg("One image"),
+  text: msg("One text file"),
+  csv: msg("One CSV"),
+  html: msg("One HTML page"),
+  zip: msg("One ZIP"),
+};
+
+/** What a chain hands back: one result per input file. */
+const OUTPUT_BATCH: Record<Kind, string> = {
+  pdf: msg("A PDF for each file you add"),
+  image: msg("One image for each file you add"),
+  text: msg("One text file for each file you add"),
+  csv: msg("One CSV for each file you add"),
+  html: msg("One HTML page for each file you add"),
+  zip: msg("One ZIP for each file you add"),
+};
+
+/** What a chain hands back: several files from one input. */
+const OUTPUT_SEVERAL: Record<Kind, string> = {
+  pdf: msg("Several PDFs"),
+  image: msg("Several images"),
+  text: msg("Several text files"),
+  csv: msg("Several CSVs"),
+  html: msg("Several HTML pages"),
+  zip: msg("Several ZIPs"),
+};
+
+export function kindLabel(kind: Kind, plural = false, tr: Tr = english): string {
+  return tr((plural ? KIND_MANY : KIND_ONE)[kind]);
 }
 
 /** A short label for what flows over a connector, e.g. "PDF", "PDF per file", "images". */
-export function flowLabel(kind: Kind, count: Count): string {
-  if (count === "one") return `1 ${kindLabel(kind)}`;
-  if (count === "batch") return `${kindLabel(kind, true)}`;
-  return `${kindLabel(kind, true)} ×N`;
+export function flowLabel(kind: Kind, count: Count, tr: Tr = english): string {
+  if (count === "one") return `1 ${kindLabel(kind, false, tr)}`;
+  if (count === "batch") return kindLabel(kind, true, tr);
+  return `${kindLabel(kind, true, tr)} ×N`;
 }
 
 export function isRecipeTool(slug: string): boolean {
@@ -181,31 +232,31 @@ const MIN_PASSWORD = 4;
  * `forRun` is false in the builder, where a missing password is expected (it
  * is asked for each time, never saved).
  */
-export function stepNeeds(step: RecipeStep, defaults: Options, forRun: boolean): string | null {
+export function stepNeeds(step: RecipeStep, defaults: Options, forRun: boolean, tr: Tr = english): string | null {
   const o = { ...defaults, ...step.options };
   switch (step.tool) {
     case "protect": {
       const pw = String(o.password ?? "");
-      if (!forRun) return o.mode === "unlock" ? "Asks for the PDF's password when you run it" : "Asks for a new password when you run it";
-      if (pw.length < MIN_PASSWORD) return o.mode === "unlock" ? "Enter the PDF's current password" : `Set a password (at least ${MIN_PASSWORD} characters)`;
-      if (o.mode !== "unlock" && pw !== String(o.confirmPassword ?? "")) return "The two passwords don't match";
+      if (!forRun) return o.mode === "unlock" ? tr("Asks for the PDF's password when you run it") : tr("Asks for a new password when you run it");
+      if (pw.length < MIN_PASSWORD) return o.mode === "unlock" ? tr("Enter the PDF's current password") : tr("Set a password (at least {{min}} characters)", { min: MIN_PASSWORD });
+      if (o.mode !== "unlock" && pw !== String(o.confirmPassword ?? "")) return tr("The two passwords don't match");
       return null;
     }
     case "split": {
-      if (o.mode === "everyN") return Number(o.n) >= 1 ? null : "Set how many pages go in each file";
+      if (o.mode === "everyN") return Number(o.n) >= 1 ? null : tr("Set how many pages go in each file");
       const ranges = String(o.ranges ?? "").trim();
       if (ranges) return null;
-      return o.mode === "extract" ? "Enter the pages to keep" : o.mode === "delete" ? "Enter the pages to remove" : "Enter page ranges, like 1-3,4-6";
+      return o.mode === "extract" ? tr("Enter the pages to keep") : o.mode === "delete" ? tr("Enter the pages to remove") : tr("Enter page ranges, like 1-3,4-6");
     }
     case "watermark": {
       if (o.mode === "page_numbers") return null;
       const spec = (o.mode === "stamp" ? o.stamp : o.watermark) as { content?: string; text?: string; imageDataUrl?: string } | undefined;
-      if (spec?.content === "image") return spec.imageDataUrl ? null : "Choose an image";
-      return String(spec?.text ?? "").trim() ? null : o.mode === "stamp" ? "Type the stamp text" : "Type the watermark text";
+      if (spec?.content === "image") return spec.imageDataUrl ? null : tr("Choose an image");
+      return String(spec?.text ?? "").trim() ? null : o.mode === "stamp" ? tr("Type the stamp text") : tr("Type the watermark text");
     }
     case "crop": {
       const any = ["top", "right", "bottom", "left"].some((s) => Number(o[s] ?? 0) > 0);
-      return any ? null : "Set at least one margin above 0%";
+      return any ? null : tr("Set at least one margin above 0%");
     }
     default:
       return null;
@@ -265,6 +316,7 @@ export function analyzeChain(
   label: (slug: string) => string,
   defaultsOf: (slug: string) => Options = () => ({}),
   forRun = false,
+  tr: Tr = english,
 ): ChainAnalysis {
   const out: StepAnalysis[] = [];
   let kind: Kind | undefined;
@@ -282,8 +334,10 @@ export function analyzeChain(
     if (!spec) {
       issues.push({
         level: "error",
-        message: UNAVAILABLE_TOOLS[step.tool] ? `${name} can't be part of a recipe. ${UNAVAILABLE_TOOLS[step.tool]}` : `${name} can't be part of a recipe.`,
-        fix: { type: "remove", at: i, label: "Remove it" },
+        message: UNAVAILABLE_TOOLS[step.tool]
+          ? `${tr("{{name}} can't be part of a recipe.", { name })} ${tr(UNAVAILABLE_TOOLS[step.tool])}`
+          : tr("{{name}} can't be part of a recipe.", { name }),
+        fix: { type: "remove", at: i, label: tr("Remove it") },
       });
       out.push({ inKind: kind, inCount: count, outKind: kind ?? "pdf", outCount: count, issues, needs: null });
       return;
@@ -296,8 +350,13 @@ export function analyzeChain(
       const bridge = BRIDGES[kind]?.[spec.in];
       issues.push({
         level: "error",
-        message: `${prevName} hands over ${kindLabel(kind, true)}, but ${name} needs ${spec.in === "pdf" ? "a PDF" : kindLabel(spec.in, true)}.`,
-        fix: bridge ? { type: "insert", at: i, tool: bridge, label: `Insert ${label(bridge)} between them` } : { type: "remove", at: i, label: "Remove this step" },
+        message: tr("{{prev}} hands over {{kind}}, but {{name}} needs {{need}}.", {
+          prev: prevName,
+          kind: kindLabel(kind, true, tr),
+          name,
+          need: spec.in === "pdf" ? tr("a PDF") : kindLabel(spec.in, true, tr),
+        }),
+        fix: bridge ? { type: "insert", at: i, tool: bridge, label: tr("Insert {{tool}} between them", { tool: label(bridge) }) } : { type: "remove", at: i, label: tr("Remove this step") },
       });
     }
 
@@ -305,8 +364,8 @@ export function analyzeChain(
     if (step.tool === "merge" && i > 0 && count === "one") {
       issues.push({
         level: "error",
-        message: `Only one PDF reaches Merge here: ${prevName} always makes a single file, so there's nothing to combine.`,
-        fix: { type: "remove", at: i, label: "Remove Merge" },
+        message: tr("Only one PDF reaches Merge here: {{prev}} always makes a single file, so there's nothing to combine.", { prev: prevName }),
+        fix: { type: "remove", at: i, label: tr("Remove Merge") },
       });
     }
 
@@ -314,28 +373,28 @@ export function analyzeChain(
     if (isLockStep({ tool: step.tool, options: o }) && i < steps.length - 1) {
       issues.push({
         level: "error",
-        message: "Once the PDF is locked, the steps after it can't open it. Locking has to be the last step.",
-        fix: { type: "move", from: i, to: steps.length - 1, label: "Move it to the end" },
+        message: tr("Once the PDF is locked, the steps after it can't open it. Locking has to be the last step."),
+        fix: { type: "move", from: i, to: steps.length - 1, label: tr("Move it to the end") },
       });
     }
     if (isUnlockStep({ tool: step.tool, options: o }) && i > 0) {
       issues.push({
         level: "error",
-        message: "Unlock has to be the first step: the steps before it can't open a locked PDF.",
-        fix: { type: "move", from: i, to: 0, label: "Move it to the start" },
+        message: tr("Unlock has to be the first step: the steps before it can't open a locked PDF."),
+        fix: { type: "move", from: i, to: 0, label: tr("Move it to the start") },
       });
     }
 
     // 4. OCR reads image-only pages and refuses a PDF that already has text.
     if (step.tool === "ocr" && text === "yes") {
-      const src = textSource >= 0 ? label(steps[textSource].tool) : "an earlier step";
+      const src = textSource >= 0 ? label(steps[textSource].tool) : tr("an earlier step");
       const canMoveBefore = textSource >= 0 && RECIPE_TOOLS[steps[textSource].tool]?.in === "pdf";
       issues.push({
         level: "error",
-        message: `OCR only works on scanned, image-only pages, and after ${src} the PDF already has text.`,
+        message: tr("OCR only works on scanned, image-only pages, and after {{src}} the PDF already has text.", { src }),
         fix: canMoveBefore
-          ? { type: "move", from: i, to: textSource, label: `Move OCR before ${src}` }
-          : { type: "remove", at: i, label: "Remove OCR" },
+          ? { type: "move", from: i, to: textSource, label: tr("Move OCR before {{src}}", { src }) }
+          : { type: "remove", at: i, label: tr("Remove OCR") },
       });
     }
 
@@ -344,28 +403,28 @@ export function analyzeChain(
     if (spec.rasterizes && spec.in === "pdf" && text === "yes" && textSource >= 0 && steps[textSource].tool !== "watermark") {
       const src = steps[textSource].tool;
       const ocrToEnd: Fix | undefined =
-        src === "ocr" ? { type: "move", from: textSource, to: steps.length - 1, label: "Move OCR to the end" } : undefined;
+        src === "ocr" ? { type: "move", from: textSource, to: steps.length - 1, label: tr("Move OCR to the end") } : undefined;
       issues.push({
         level: "warning",
         message:
           src === "ocr"
-            ? `${name} turns pages into pictures, which wipes out the text layer OCR added in step ${textSource + 1}. Put OCR last to keep the result searchable.`
-            : `${name} turns pages into pictures, so the text from step ${textSource + 1} won't be selectable or searchable any more.`,
+            ? tr("{{name}} turns pages into pictures, which wipes out the text layer OCR added in step {{step}}. Put OCR last to keep the result searchable.", { name, step: textSource + 1 })
+            : tr("{{name}} turns pages into pictures, so the text from step {{step}} won't be selectable or searchable any more.", { name, step: textSource + 1 }),
         fix: ocrToEnd,
       });
     }
     if (step.tool === "pdf-to-images" && text === "yes" && textSource >= 0 && steps[textSource].tool === "ocr") {
       issues.push({
         level: "warning",
-        message: `Pictures can't hold OCR's text layer from step ${textSource + 1}, so that work is lost.`,
-        fix: { type: "remove", at: textSource, label: "Remove the OCR step" },
+        message: tr("Pictures can't hold OCR's text layer from step {{step}}, so that work is lost.", { step: textSource + 1 }),
+        fix: { type: "remove", at: textSource, label: tr("Remove the OCR step") },
       });
     }
     if (step.tool === "flatten" && rasterAt >= 0) {
       issues.push({
         level: "warning",
-        message: `Nothing is left to flatten: ${label(steps[rasterAt].tool)} in step ${rasterAt + 1} already turned every page into a picture.`,
-        fix: { type: "remove", at: i, label: "Remove Flatten" },
+        message: tr("Nothing is left to flatten: {{tool}} in step {{step}} already turned every page into a picture.", { tool: label(steps[rasterAt].tool), step: rasterAt + 1 }),
+        fix: { type: "remove", at: i, label: tr("Remove Flatten") },
       });
     }
     if (i > 0 && steps[i - 1].tool === step.tool && step.tool !== "watermark" && step.tool !== "split" && !issues.some((x) => x.level === "error")) {
@@ -373,13 +432,13 @@ export function analyzeChain(
         level: "warning",
         message:
           step.tool === "compress"
-            ? "Compressing twice lowers the quality again and rarely saves much more space. Lower the DPI on one step instead."
-            : `${name} runs twice in a row; the second pass won't change much.`,
-        fix: { type: "remove", at: i, label: "Remove the repeat" },
+            ? tr("Compressing twice lowers the quality again and rarely saves much more space. Lower the DPI on one step instead.")
+            : tr("{{name}} runs twice in a row; the second pass won't change much.", { name }),
+        fix: { type: "remove", at: i, label: tr("Remove the repeat") },
       });
     }
     if (step.tool === "merge" && i > 0 && steps[i - 1].tool === "split" && RECIPE_TOOLS.split.count({ ...defaultsOf("split"), ...steps[i - 1].options }) === "more") {
-      issues.push({ level: "warning", message: "Merge right after Split puts the pieces straight back together." });
+      issues.push({ level: "warning", message: tr("Merge right after Split puts the pieces straight back together.") });
     }
 
     // Advance the model.
@@ -408,7 +467,7 @@ export function analyzeChain(
       outKind: spec.out,
       outCount,
       issues,
-      needs: stepNeeds(step, defaultsOf(step.tool), forRun),
+      needs: stepNeeds(step, defaultsOf(step.tool), forRun, tr),
     });
     kind = spec.out;
     count = outCount;
@@ -435,19 +494,20 @@ export function canInsert(
   tool: string,
   label: (slug: string) => string,
   defaultsOf?: (slug: string) => Options,
+  tr: Tr = english,
 ): { ok: true } | { ok: false; reason: string } {
-  if (!isRecipeTool(tool)) return { ok: false, reason: UNAVAILABLE_TOOLS[tool] ?? "Can't be part of a recipe." };
-  if (steps.length >= MAX_STEPS) return { ok: false, reason: `A recipe can have up to ${MAX_STEPS} steps.` };
-  const before = analyzeChain(steps, label, defaultsOf);
+  if (!isRecipeTool(tool)) return { ok: false, reason: tr(UNAVAILABLE_TOOLS[tool] ?? "Can't be part of a recipe.") };
+  if (steps.length >= MAX_STEPS) return { ok: false, reason: tr("A recipe can have up to {{max}} steps.", { max: MAX_STEPS }) };
+  const before = analyzeChain(steps, label, defaultsOf, false, tr);
   const next = [...steps];
   next.splice(at, 0, { tool });
-  const after = analyzeChain(next, label, defaultsOf);
+  const after = analyzeChain(next, label, defaultsOf, false, tr);
   const own = after.steps[at].issues.find((x) => x.level === "error");
   if (own) return { ok: false, reason: own.message };
   if (after.errors > before.errors) {
     const had = new Set(before.steps.flatMap((s) => s.issues.map((x) => x.message)));
     const fresh = after.steps.flatMap((s) => s.issues).find((x) => x.level === "error" && !had.has(x.message));
-    return { ok: false, reason: fresh?.message ?? "That would break the chain." };
+    return { ok: false, reason: fresh?.message ?? tr("That would break the chain.") };
   }
   return { ok: true };
 }
@@ -464,12 +524,10 @@ export function defaultTitle(steps: RecipeStep[], label: (slug: string) => strin
 }
 
 /** Plain-words summary of what the chain hands back. */
-export function describeOutput(output: { kind: Kind; count: Count } | undefined): string {
+export function describeOutput(output: { kind: Kind; count: Count } | undefined, tr: Tr = english): string {
   if (!output) return "";
-  const k = output.kind;
-  if (output.count === "one") return k === "pdf" ? "One PDF" : `One ${kindLabel(k)}`;
-  if (output.count === "batch") return k === "pdf" ? "A PDF for each file you add" : `One ${kindLabel(k)} for each file you add`;
-  return `Several ${kindLabel(k, true)}`;
+  const table = output.count === "one" ? OUTPUT_ONE : output.count === "batch" ? OUTPUT_BATCH : OUTPUT_SEVERAL;
+  return tr(table[output.kind]);
 }
 
 /** Only the settings that differ from the tool's defaults, so a saved recipe follows future default changes. */

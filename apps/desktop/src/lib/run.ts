@@ -22,6 +22,7 @@ import type { SignElement } from "./signTypes";
 import { isImageSignElement, isShapeSignElement } from "./signTypes";
 import type { RedactBoxParams } from "./jobs";
 import type { RedactBox } from "./redactTypes";
+import { tr } from "@iloathepdf/i18n";
 
 export interface JobResult {
   outputs: { path: string; bytes: number }[];
@@ -50,7 +51,7 @@ export function outputDirFor(inputPath: string): string {
   if (!dir || !isAbsoluteWindowsPath(dir)) {
     throw new JobError(
       "FILE_NOT_FOUND",
-      "That file's location on disk is unknown, so there is nowhere to save the result. Add it again by dragging it in or using Select files.",
+      tr("That file's location on disk is unknown, so there is nowhere to save the result. Add it again by dragging it in or using Select files."),
     );
   }
   return dir;
@@ -89,7 +90,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${files.length} PDFs joined into ${r.pages} pages.`,
+        summary: tr("{{files}} joined into {{pages}}.", { files: tr("{{count}} PDFs", { count: files.length }), pages: tr("{{count}} pages", { count: r.pages }) }),
       };
     }
 
@@ -108,7 +109,7 @@ export async function execute(
         },
         opts,
       );
-      return { outputs: r.outputs, summary: `${r.count} files written.` };
+      return { outputs: r.outputs, summary: tr("{{count}} files written.", { count: r.count }) };
     }
 
     case "pdf.organize": {
@@ -138,7 +139,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.pages} pages saved.`,
+        summary: tr("{{count}} pages saved.", { count: r.pages }),
       };
     }
 
@@ -164,7 +165,7 @@ export async function execute(
 
     case "pdf.sign": {
       if (signElements.length === 0) {
-        throw new JobError("BAD_PARAMS", "Add at least one signature, text, date, initials, highlight or box before exporting.");
+        throw new JobError("BAD_PARAMS", tr("Add at least one signature, text, date, initials, highlight or box before exporting."));
       }
       const elements: SignElementParams[] = signElements.map((el) => ({
         page: el.pageIndex,
@@ -186,13 +187,13 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.elements} element${r.elements === 1 ? "" : "s"} added across ${r.pages} page${r.pages === 1 ? "" : "s"}.`,
+        summary: tr("{{elements}} added across {{pages}}.", { elements: tr("{{count}} elements", { count: r.elements }), pages: tr("{{count}} pages", { count: r.pages }) }),
       };
     }
 
     case "pdf.redact": {
       if (redactBoxes.length === 0) {
-        throw new JobError("BAD_PARAMS", "Add at least one box before exporting.");
+        throw new JobError("BAD_PARAMS", tr("Add at least one box before exporting."));
       }
       const boxes: RedactBoxParams[] = redactBoxes.map((b) => ({
         page: b.pageIndex,
@@ -208,7 +209,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.boxes} box${r.boxes === 1 ? "" : "es"} redacted (${r.mode === "true" ? "true redact" : "visual cover-up"}).`,
+        summary: tr(r.mode === "true" ? "{{count}} boxes redacted (true redact)." : "{{count}} boxes redacted (visual cover-up).", { count: r.boxes }),
       };
     }
 
@@ -227,7 +228,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: mode === "protect" ? "Password protection added." : "Password protection removed.",
+        summary: mode === "protect" ? tr("Password protection added.") : tr("Password protection removed."),
       };
     }
 
@@ -242,7 +243,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.pages} page(s) made searchable.`,
+        summary: tr("{{count}} pages made searchable.", { count: r.pages }),
       };
     }
 
@@ -257,7 +258,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.sheets} sheet(s) extracted.`,
+        summary: tr("{{count}} sheets extracted.", { count: r.sheets }),
       };
     }
 
@@ -276,7 +277,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.pages_cropped} of ${r.pages} page${r.pages === 1 ? "" : "s"} cropped.`,
+        summary: tr("{{done}} of {{pages}} cropped.", { done: r.pages_cropped, pages: tr("{{count}} pages", { count: r.pages }) }),
       };
     }
 
@@ -290,8 +291,8 @@ export async function execute(
         outputs: [{ path: r.output, bytes: r.bytes }],
         summary:
           r.flattened === 0
-            ? "Nothing to flatten — this PDF had no form fields or annotations."
-            : `${r.flattened} form field${r.flattened === 1 ? "" : "s"} / annotation${r.flattened === 1 ? "" : "s"} flattened.`,
+            ? tr("Nothing to flatten — this PDF had no form fields or annotations.")
+            : tr("{{count}} form fields / annotations flattened.", { count: r.flattened }),
       };
     }
 
@@ -307,14 +308,14 @@ export async function execute(
         },
         opts,
       );
-      return { outputs: [{ path: r.output, bytes: r.bytes }], summary: `${r.pages} page PDF created.` };
+      return { outputs: [{ path: r.output, bytes: r.bytes }], summary: tr("{{count}} page PDF created.", { count: r.pages }) };
     }
 
     case "pdf.pdfa": {
       const r = await runJob("pdf.pdfa", { input: first.path, output: join(`${base}-pdfa.pdf`) }, opts);
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.pages} page${r.pages === 1 ? "" : "s"} converted to PDF/A-${r.part}${r.conformance.toLowerCase()}.`,
+        summary: tr("{{pages}} converted to PDF/A-{{level}}.", { pages: tr("{{count}} pages", { count: r.pages }), level: `${r.part}${r.conformance.toLowerCase()}` }),
       };
     }
 
@@ -331,7 +332,7 @@ export async function execute(
       if (op !== "csv.to_pdf") params.font_size = num("font_size", 11);
       if (op === "txt.to_pdf") params.font = str("font", "sans") as "sans" | "mono";
       const r = await runJob(op, params, opts);
-      return { outputs: r.outputs, summary: `${r.count} PDF${r.count === 1 ? "" : "s"} created.` };
+      return { outputs: r.outputs, summary: tr("{{count}} PDFs created.", { count: r.count }) };
     }
 
     case "zip.to_pdf": {
@@ -347,9 +348,11 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.files} file${r.files === 1 ? "" : "s"} joined into ${r.pages} page${r.pages === 1 ? "" : "s"}${
-          r.skipped ? ` (${r.skipped} unsupported skipped)` : ""
-        }.`,
+        summary: tr(r.skipped ? "{{files}} joined into {{pages}} ({{skipped}} unsupported skipped)." : "{{files}} joined into {{pages}}.", {
+          files: tr("{{count}} files", { count: r.files }),
+          pages: tr("{{count}} pages", { count: r.pages }),
+          skipped: r.skipped,
+        }),
       };
     }
 
@@ -367,7 +370,7 @@ export async function execute(
         },
         opts,
       );
-      return { outputs: r.outputs, summary: `${r.count} images written.` };
+      return { outputs: r.outputs, summary: tr("{{count}} images written.", { count: r.count }) };
     }
 
     case "img.to_pdf": {
@@ -388,7 +391,7 @@ export async function execute(
       );
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.pages} page PDF created.`,
+        summary: tr("{{count}} page PDF created.", { count: r.pages }),
       };
     }
 
@@ -410,7 +413,7 @@ export async function execute(
         },
         opts,
       );
-      return { outputs: r.outputs, summary: `${r.count} images converted.` };
+      return { outputs: r.outputs, summary: tr("{{count}} images converted.", { count: r.count }) };
     }
 
     case "pdf.watermark": {
@@ -455,7 +458,7 @@ export async function execute(
       const r = await runJob("pdf.watermark", params, opts);
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
-        summary: `${r.pages_affected} of ${r.pages} page${r.pages === 1 ? "" : "s"} updated.`,
+        summary: tr("{{done}} of {{pages}} updated.", { done: r.pages_affected, pages: tr("{{count}} pages", { count: r.pages }) }),
       };
     }
 

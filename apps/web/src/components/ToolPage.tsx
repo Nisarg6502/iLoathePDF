@@ -9,6 +9,7 @@ import { ImageInputList } from "./ImageInputList";
 import { PdfInputList } from "./PdfInputList";
 import { CameraCapture } from "./CameraCapture";
 import { LargeFileWarning, LARGE_FILE_WARNING_BYTES } from "./LargeFileWarning";
+import { useTranslation } from "@iloathepdf/i18n";
 
 type Step = "empty" | "ready" | "running" | "done" | "error";
 
@@ -20,6 +21,7 @@ const stepFade = {
 };
 
 export function ToolPage({ tool }: { tool: ToolConfig }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("empty");
   const [files, setFiles] = useState<File[]>([]);
   const [options, setOptions] = useState<Record<string, unknown>>(tool.defaultOptions);
@@ -117,7 +119,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
                   <>
                     <div className="mt-3 flex items-center gap-2">
                       <span className="h-px flex-1 bg-border" />
-                      <span className="text-[12px] text-faint">or</span>
+                      <span className="text-[12px] text-faint">{t("or")}</span>
                       <span className="h-px flex-1 bg-border" />
                     </div>
                     <button
@@ -129,7 +131,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
                         <path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h1l.8-1.2A1 1 0 0 1 6.6 2.4h2.8a1 1 0 0 1 .8.4L11 4h1a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5v-6z" />
                         <circle cx="8" cy="8.2" r="2.4" />
                       </svg>
-                      Scan with camera
+                      {t("Scan with camera")}
                     </button>
                   </>
                 )}
@@ -139,14 +141,14 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
             {(step === "ready" || step === "running") && (
               <motion.div key="files" {...stepFade} className="min-h-[400px] rounded-2xl border border-border bg-surface p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">INPUT</span>
+                  <span className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">{t("INPUT")}</span>
                   <button
                     type="button"
                     onClick={reset}
                     disabled={step === "running"}
                     className="text-[12.5px] text-muted hover:text-danger disabled:pointer-events-none disabled:opacity-50"
                   >
-                    Remove
+                    {t("Remove")}
                   </button>
                 </div>
                 {tool.category === "image" ? (
@@ -191,14 +193,14 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
 
             {step === "error" && (
               <motion.div key="error" {...stepFade} className="min-h-[400px] rounded-2xl border border-danger bg-danger-soft p-8">
-                <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-danger">ERROR</div>
+                <div className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-danger">{t("ERROR")}</div>
                 <p className="mt-3 text-sm text-text">{error}</p>
                 <button
                   type="button"
                   onClick={reset}
                   className="mt-5 rounded-[11px] border border-border px-4 py-2 text-sm text-muted transition-transform duration-100 hover:bg-surface-2 active:scale-[0.97]"
                 >
-                  Start over
+                  {t("Start over")}
                 </button>
               </motion.div>
             )}
@@ -225,7 +227,7 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
         </div>
 
         <div className="sticky top-[82px] overflow-hidden rounded-2xl border border-border bg-surface">
-          <div className="border-b border-border px-4 py-3.5 text-[12.5px] font-semibold">Options</div>
+          <div className="border-b border-border px-4 py-3.5 text-[12.5px] font-semibold">{t("Options")}</div>
           <div className="p-4">
             <tool.OptionsPanel
               options={options}
@@ -248,14 +250,14 @@ export function ToolPage({ tool }: { tool: ToolConfig }) {
                   <path d="M18 10a8 8 0 0 0-8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               )}
-              {step === "running" ? "Working…" : step === "done" ? "Run again" : "Run"}
+              {step === "running" ? t("Working…") : step === "done" ? t("Run again") : t("Run")}
             </button>
             {step === "ready" && mergeNeedsTwo && (
-              <p className="mt-2 text-center text-[12.5px] text-muted">Merging needs at least two PDFs.</p>
+              <p className="mt-2 text-center text-[12.5px] text-muted">{t("Merging needs at least two PDFs.")}</p>
             )}
             {step === "done" && !changedSinceRun && (
               <p className="mt-2 text-center text-[12.5px] text-muted">
-                Your file is ready. Change an option above to run again.
+                {t("Your file is ready. Change an option above to run again.")}
               </p>
             )}
           </div>

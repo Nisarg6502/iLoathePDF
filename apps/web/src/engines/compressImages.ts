@@ -1,6 +1,7 @@
 import type { Engine, EngineOutputFile } from "./types";
 import { renderRotatedCropped, DEFAULT_IMAGE_EDIT, type ImageEdit, type ImageEdits } from "@/tools/imageEdit";
 import { formatBytes, percentSmaller } from "@/lib/formatBytes";
+import { tr } from "@iloathepdf/i18n";
 
 export type CompressFormat = "keep" | "jpg" | "webp";
 type OutFormat = "png" | "jpg" | "webp";
@@ -29,14 +30,14 @@ function inputFormat(file: File): OutFormat {
 export function readSettings(options: Record<string, unknown>): CompressImageSettings {
   const quality = Number(options.quality ?? 75);
   if (!Number.isFinite(quality) || quality < 1 || quality > 100) {
-    throw new Error("Quality must be between 1 and 100.");
+    throw new Error(tr("Quality must be between 1 and 100."));
   }
   const rawMax = options.maxDimension;
   let maxDimension: number | null = null;
   if (rawMax !== undefined && rawMax !== null && rawMax !== "" && Number(rawMax) !== 0) {
     const n = Number(rawMax);
     if (!Number.isFinite(n) || n < 16) {
-      throw new Error("Max dimension must be at least 16 px (or left empty to keep the original size).");
+      throw new Error(tr("Max dimension must be at least 16 px (or left empty to keep the original size)."));
     }
     maxDimension = Math.round(n);
   }
@@ -92,14 +93,14 @@ export async function compressImage(
   edit: ImageEdit = DEFAULT_IMAGE_EDIT,
 ): Promise<CompressedImage> {
   if (!isSupportedImage(file)) {
-    throw new Error(`"${file.name}" is not a supported image. Use PNG, JPG or WebP.`);
+    throw new Error(tr("\"{{name}}\" is not a supported image. Use PNG, JPG or WebP.", { name: file.name }));
   }
   const srcFormat = inputFormat(file);
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file);
   } catch {
-    throw new Error(`"${file.name}" could not be read as an image — it may be corrupt or not really a ${srcFormat.toUpperCase()}.`);
+    throw new Error(tr("\"{{name}}\" could not be read as an image — it may be corrupt or not really a {{srcFormat}}.", { name: file.name, srcFormat: srcFormat.toUpperCase() }));
   }
   const format: OutFormat = settings.format === "keep" ? srcFormat : settings.format;
 
@@ -145,7 +146,7 @@ export async function estimateCompressedSize(
   settings: CompressImageSettings,
   edits: ImageEdits = {},
 ): Promise<SizeEstimate> {
-  if (files.length === 0) throw new Error("Add at least one image.");
+  if (files.length === 0) throw new Error(tr("Add at least one image."));
   const sample = files[0];
   const result = await compressImage(sample, settings, edits[0] ?? DEFAULT_IMAGE_EDIT);
   const originalBytes = files.reduce((sum, f) => sum + f.size, 0);
@@ -163,7 +164,7 @@ function outputName(file: File, format: OutFormat, taken: Set<string>): string {
 }
 
 export const compressImagesEngine: Engine = async ({ files, options, onProgress }) => {
-  if (files.length === 0) throw new Error("Add at least one image.");
+  if (files.length === 0) throw new Error(tr("Add at least one image."));
   const settings = readSettings(options);
   const edits = (options.edits as ImageEdits | undefined) ?? {};
 
@@ -180,16 +181,16 @@ export const compressImagesEngine: Engine = async ({ files, options, onProgress 
     out.push({
       name: outputName(file, result.format, taken),
       blob: result.blob,
-      detail: `${formatBytes(file.size)} → ${formatBytes(result.blob.size)}${filePct > 0 ? ` · ${filePct}% smaller` : result.keptOriginal ? " · already optimal, kept as is" : ""}`,
+      detail: `${formatBytes(file.size)} → ${formatBytes(result.blob.size)}${filePct > 0 ? ` · ${tr("{{percent}}% smaller", { percent: filePct })}` : result.keptOriginal ? ` · ${tr("already optimal, kept as is")}` : ""}`,
     });
     onProgress?.((i + 1) / files.length);
   }
 
-  const noun = `${out.length} image${out.length === 1 ? "" : "s"}`;
+  const noun = tr("{{count}} images", { count: out.length });
   const pct = percentSmaller(before, after);
   const summary =
     pct > 0
-      ? `${formatBytes(before)} → ${formatBytes(after)} · ${pct}% smaller (${noun})`
-      : `${formatBytes(before)} → ${formatBytes(after)} · no savings at these settings (${noun})`;
+      ? tr("{{before}} → {{after}} · {{percent}}% smaller ({{images}})", { before: formatBytes(before), after: formatBytes(after), percent: pct, images: noun })
+      : tr("{{before}} → {{after}} · no savings at these settings ({{images}})", { before: formatBytes(before), after: formatBytes(after), images: noun });
   return { files: out, summary, isPreview: false };
 };

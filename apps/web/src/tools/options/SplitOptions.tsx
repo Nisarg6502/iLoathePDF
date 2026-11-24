@@ -1,13 +1,15 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { msg, tr, useTranslation } from "@iloathepdf/i18n";
 
 const MODES = [
-  { value: "ranges", label: "By ranges", hint: "e.g. 1-3,4-6 → two files" },
-  { value: "everyN", label: "Every N pages", hint: "chop into fixed-size chunks" },
-  { value: "extract", label: "Extract a selection", hint: "one file with just those pages" },
-  { value: "delete", label: "Delete a selection", hint: "one file with those pages removed" },
+  { value: "ranges", label: msg("By ranges"), hint: msg("e.g. 1-3,4-6 → two files") },
+  { value: "everyN", label: msg("Every N pages"), hint: msg("chop into fixed-size chunks") },
+  { value: "extract", label: msg("Extract a selection"), hint: msg("one file with just those pages") },
+  { value: "delete", label: msg("Delete a selection"), hint: msg("one file with those pages removed") },
 ];
 
 export function SplitOptions({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const mode = (options.mode as string) ?? "ranges";
 
   return (
@@ -26,15 +28,15 @@ export function SplitOptions({ options, onChange, disabled }: OptionsPanelProps)
               disabled={disabled}
               onChange={() => onChange({ ...options, mode: m.value })}
             />
-            <div className="text-[12.5px] font-semibold">{m.label}</div>
-            <div className="text-[11.5px] text-muted">{m.hint}</div>
+            <div className="text-[12.5px] font-semibold">{tr(m.label)}</div>
+            <div className="text-[11.5px] text-muted">{tr(m.hint)}</div>
           </label>
         ))}
       </div>
 
       {mode === "everyN" ? (
         <label className="flex flex-col gap-1.5">
-          <span className="text-[12.5px] font-semibold">Pages per file</span>
+          <span className="text-[12.5px] font-semibold">{t("Pages per file")}</span>
           <input
             type="number"
             min={1}
@@ -47,7 +49,7 @@ export function SplitOptions({ options, onChange, disabled }: OptionsPanelProps)
       ) : (
         <label className="flex flex-col gap-1.5">
           <span className="text-[12.5px] font-semibold">
-            {mode === "extract" ? "Pages to keep" : mode === "delete" ? "Pages to remove" : "Page ranges"}
+            {mode === "extract" ? t("Pages to keep") : mode === "delete" ? t("Pages to remove") : t("Page ranges")}
           </span>
           <input
             type="text"

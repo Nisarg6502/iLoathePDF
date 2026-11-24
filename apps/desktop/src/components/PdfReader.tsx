@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfPreviewDocument, isCancellation, type PageDimensions } from "@/lib/pdfPreview";
 import { readFileBytes } from "@/lib/jobs";
 import type { PickedFile } from "@/components/FileDropZone";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 type Zoom = "fit" | number;
 const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
@@ -30,6 +31,7 @@ function ReaderPage({
   onDimensions: (n: number, d: PageDimensions) => void;
   register: (n: number, el: HTMLDivElement | null) => void;
 }) {
+  const { t } = useTranslation();
   const holder = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
@@ -82,12 +84,13 @@ function ReaderPage({
       className="relative mx-auto mb-4 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.25)]"
       style={{ width, height }}
     >
-      {url ? <img src={url} alt={`Page ${pageNumber}`} width={width} height={height} className="block" draggable={false} /> : null}
+      {url ? <img src={url} alt={t("Page {{pageNumber}}", { pageNumber })} width={width} height={height} className="block" draggable={false} /> : null}
     </div>
   );
 }
 
 export function PdfReader({ file, onClose }: { file: PickedFile; onClose: () => void }) {
+  const { t } = useTranslation();
   const [doc, setDoc] = useState<PdfPreviewDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState<Zoom>("fit");
@@ -128,8 +131,8 @@ export function PdfReader({ file, onClose }: { file: PickedFile; onClose: () => 
         const locked = e instanceof Error && e.name === "PasswordException";
         setError(
           locked
-            ? "This PDF is password protected. Remove the password with Protect & Unlock first, then open it here."
-            : "That PDF couldn't be opened.",
+            ? tr("This PDF is password protected. Remove the password with Protect & Unlock first, then open it here.")
+            : tr("That PDF couldn't be opened."),
         );
       }
     })();
@@ -233,22 +236,22 @@ export function PdfReader({ file, onClose }: { file: PickedFile; onClose: () => 
               }}
             >
               <input
-                aria-label="Page number"
+                aria-label={t("Page number")}
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 className="h-8 w-12 rounded-lg border border-border bg-surface px-2 text-center text-[13px] text-text"
               />
-              <span className="text-[13px] text-muted">of {doc.pageCount}</span>
+              <span className="text-[13px] text-muted">{t("of {{total}}", { total: doc.pageCount })}</span>
             </form>
-            <button type="button" aria-label="Zoom out" className={btn} onClick={() => zoomBy(-1)}>
+            <button type="button" aria-label={t("Zoom out")} className={btn} onClick={() => zoomBy(-1)}>
               −
             </button>
             <span className="w-12 text-center font-mono text-[12px] text-muted">{Math.round(scale * 100)}%</span>
-            <button type="button" aria-label="Zoom in" className={btn} onClick={() => zoomBy(1)}>
+            <button type="button" aria-label={t("Zoom in")} className={btn} onClick={() => zoomBy(1)}>
               +
             </button>
             <button type="button" className={btn} onClick={() => setZoom("fit")} aria-pressed={zoom === "fit"}>
-              Fit width
+              {t("Fit width")}
             </button>
             <form
               className="ml-auto flex items-center gap-1.5"
@@ -258,26 +261,26 @@ export function PdfReader({ file, onClose }: { file: PickedFile; onClose: () => 
               }}
             >
               <input
-                aria-label="Find in document"
-                placeholder="Find…"
+                aria-label={t("Find in document")}
+                placeholder={t("Find…")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-8 w-40 rounded-lg border border-border bg-surface px-2.5 text-[13px] text-text"
               />
-              <button type="button" aria-label="Previous match" className={btn} disabled={!matches.length} onClick={() => step(-1)}>
+              <button type="button" aria-label={t("Previous match")} className={btn} disabled={!matches.length} onClick={() => step(-1)}>
                 ↑
               </button>
-              <button type="button" aria-label="Next match" className={btn} disabled={!matches.length} onClick={() => step(1)}>
+              <button type="button" aria-label={t("Next match")} className={btn} disabled={!matches.length} onClick={() => step(1)}>
                 ↓
               </button>
               <span className="w-24 text-[12px] text-muted" aria-live="polite">
-                {searching ? "Searching…" : matches.length ? `${matchIndex + 1} of ${matches.length}` : query.trim() ? "No matches" : ""}
+                {searching ? t("Searching…") : matches.length ? `${matchIndex + 1} of ${matches.length}` : query.trim() ? t("No matches") : ""}
               </span>
             </form>
           </>
         )}
         <button type="button" className={btn} onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
       </div>
 
@@ -288,7 +291,7 @@ export function PdfReader({ file, onClose }: { file: PickedFile; onClose: () => 
           ref={scroller}
           onScroll={onScroll}
           className="min-h-0 flex-1 overflow-auto rounded-2xl border border-border bg-surface-2 p-4"
-          aria-label={`Pages of ${file.name}, page ${current}`}
+          aria-label={t("Pages of {{name}}, page {{current}}", { name: file.name, current })}
         >
           {doc ? (
             numbers.map((n) => (
@@ -303,7 +306,7 @@ export function PdfReader({ file, onClose }: { file: PickedFile; onClose: () => 
               />
             ))
           ) : (
-            <div className="grid h-full place-items-center text-sm text-muted">Opening…</div>
+            <div className="grid h-full place-items-center text-sm text-muted">{t("Opening…")}</div>
           )}
         </div>
       )}

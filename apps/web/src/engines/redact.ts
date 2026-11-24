@@ -3,6 +3,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { Engine } from "./types";
 import type { RedactBox } from "@/tools/redact/types";
+import { msg, tr } from "@iloathepdf/i18n";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -13,7 +14,7 @@ const REDACT_DPI = 200;
 const PCT_TOLERANCE = 1.0001;
 
 const ROTATED_OR_CROPPED_MESSAGE =
-  "This page is rotated/cropped — True Redact isn't supported for it yet. Try Visual Cover-up, or rotate the PDF to its default orientation first.";
+  msg("This page is rotated/cropped — True Redact isn't supported for it yet. Try Visual Cover-up, or rotate the PDF to its default orientation first.");
 
 function boxRectPt(box: RedactBox, widthPt: number, heightPt: number) {
   const x = box.xPct * widthPt;
@@ -223,10 +224,10 @@ function copyDocumentMetadata(source: PDFDocument, target: PDFDocument) {
 
 export const redactEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to redact.");
+  if (!file) throw new Error(tr("Add a PDF to redact."));
 
   const boxes = (options.boxes as RedactBox[] | undefined) ?? [];
-  if (boxes.length === 0) throw new Error("Add at least one box before exporting.");
+  if (boxes.length === 0) throw new Error(tr("Add at least one box before exporting."));
   const mode = validateMode(options.mode);
 
   for (const box of boxes) {
@@ -248,7 +249,7 @@ export const redactEngine: Engine = async ({ files, options }) => {
   const pageCount = doc.getPageCount();
   for (const pageIndex of byPage.keys()) {
     if (pageIndex < 0 || pageIndex >= pageCount) {
-      throw new Error(`Box targets page ${pageIndex + 1}, but the PDF only has ${pageCount} pages.`);
+      throw new Error(tr("Box targets page {{page}}, but the PDF only has {{pageCount}} pages.", { page: pageIndex + 1, pageCount }));
     }
   }
 
@@ -371,7 +372,6 @@ export const redactEngine: Engine = async ({ files, options }) => {
     outBytes = await outDoc.save();
   }
 
-  const pageWord = byPage.size === 1 ? "page" : "pages";
   return {
     files: [
       {
@@ -379,7 +379,10 @@ export const redactEngine: Engine = async ({ files, options }) => {
         blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `${boxes.length} box${boxes.length === 1 ? "" : "es"} redacted across ${byPage.size} ${pageWord} (${mode === "true" ? "true redact" : "visual cover-up"}).`,
+    summary: tr(mode === "true" ? "{{boxes}} redacted across {{pages}} (true redact)." : "{{boxes}} redacted across {{pages}} (visual cover-up).", {
+      boxes: tr("{{count}} boxes", { count: boxes.length }),
+      pages: tr("{{count}} pages", { count: byPage.size }),
+    }),
     isPreview: false,
   };
 };

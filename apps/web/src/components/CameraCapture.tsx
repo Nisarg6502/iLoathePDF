@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 interface Shot {
   file: File;
@@ -12,6 +13,7 @@ export function CameraCapture({
   onDone: (files: File[]) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const shotCount = useRef(0);
@@ -35,13 +37,13 @@ export function CameraCapture({
           stream = await navigator.mediaDevices.getUserMedia({ video: true });
         } catch {
           if (!cancelled) {
-            setError("Couldn't access the camera. Check your browser's camera permission and try again.");
+            setError(tr("Couldn't access the camera. Check your browser's camera permission and try again."));
           }
           return;
         }
       }
       if (cancelled) {
-        stream.getTracks().forEach((t) => t.stop());
+        stream.getTracks().forEach((track) => track.stop());
         return;
       }
       streamRef.current = stream;
@@ -56,7 +58,7 @@ export function CameraCapture({
   }, []);
 
   function stopStream() {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
   }
 
@@ -108,8 +110,8 @@ export function CameraCapture({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
       <div className="flex w-full max-w-[520px] flex-col gap-4 rounded-2xl border border-border bg-surface p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">Scan with camera</span>
-          <button type="button" onClick={stopAndClose} className="text-muted hover:text-text" aria-label="Close">
+          <span className="text-sm font-semibold">{t("Scan with camera")}</span>
+          <button type="button" onClick={stopAndClose} className="text-muted hover:text-text" aria-label={t("Close")}>
             ×
           </button>
         </div>
@@ -127,7 +129,7 @@ export function CameraCapture({
               onClick={capture}
               className="h-10 rounded-[11px] bg-accent text-sm font-semibold text-on-accent transition-transform duration-100 active:scale-[0.97]"
             >
-              Capture
+              {t("Capture")}
             </button>
           </>
         )}
@@ -141,7 +143,7 @@ export function CameraCapture({
                   type="button"
                   onClick={() => removeShot(i)}
                   className="absolute -right-1.5 -top-1.5 grid size-5 place-items-center rounded-full border border-border bg-surface text-[11px]"
-                  aria-label={`Remove shot ${i + 1}`}
+                  aria-label={t("Remove shot {{number}}", { number: i + 1 })}
                 >
                   ×
                 </button>
@@ -152,7 +154,7 @@ export function CameraCapture({
 
         <div className="flex justify-end gap-2">
           <button type="button" onClick={stopAndClose} className="rounded-lg border border-border px-3.5 py-1.5 text-[12.5px]">
-            Cancel
+            {t("Cancel")}
           </button>
           <button
             type="button"
@@ -160,7 +162,7 @@ export function CameraCapture({
             disabled={shots.length === 0}
             className="rounded-lg bg-accent px-3.5 py-1.5 text-[12.5px] font-semibold text-on-accent disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-faint"
           >
-            Use {shots.length} photo{shots.length === 1 ? "" : "s"}
+            {t("Use {{count}} photos", { count: shots.length })}
           </button>
         </div>
       </div>

@@ -3,6 +3,7 @@ import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { PDFDocument } from "pdf-lib";
 import type { Engine } from "./types";
 import { DomCanvasFactory } from "./ocr";
+import { tr } from "@iloathepdf/i18n";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -39,7 +40,7 @@ export interface PdfSizeEstimate {
  * whole document. Only an estimate: page content varies.
  */
 export async function estimateCompressedPdfSize(file: File, dpi: number, maxSamplePages = 3): Promise<PdfSizeEstimate> {
-  if (dpi < 72 || dpi > 300) throw new Error("DPI must be between 72 and 300.");
+  if (dpi < 72 || dpi > 300) throw new Error(tr("DPI must be between 72 and 300."));
   const data = await file.arrayBuffer();
   const originalBytes = data.byteLength; // pdf.js detaches the buffer it is given
   const loadingTask = pdfjsLib.getDocument({ data, CanvasFactory: DomCanvasFactory });
@@ -66,10 +67,10 @@ export async function estimateCompressedPdfSize(file: File, dpi: number, maxSamp
 
 export const compressEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to compress.");
+  if (!file) throw new Error(tr("Add a PDF to compress."));
 
   const dpi = Number(options.dpi ?? 96);
-  if (dpi < 72 || dpi > 300) throw new Error("DPI must be between 72 and 300.");
+  if (dpi < 72 || dpi > 300) throw new Error(tr("DPI must be between 72 and 300."));
 
   const originalBytes = await file.arrayBuffer();
   // Same DomCanvasFactory workaround ocr.ts already established: pdf.js
@@ -109,7 +110,7 @@ export const compressEngine: Engine = async ({ files, options }) => {
         blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `Preview engine: ${pct >= 0 ? "−" : "+"}${Math.abs(pct)}% size, text is not preserved as selectable yet`,
+    summary: tr("Preview engine: {{change}} size, text is not preserved as selectable yet", { change: `${pct >= 0 ? "−" : "+"}${Math.abs(pct)}%` }),
     isPreview: true,
   };
 };

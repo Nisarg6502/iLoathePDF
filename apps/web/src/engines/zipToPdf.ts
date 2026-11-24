@@ -4,6 +4,7 @@ import { layoutDocument, mmToPt } from "@/lib/docLayout";
 import { textToBlocks } from "@/lib/docParse";
 import { imagesToPdfEngine } from "./imagesToPdf";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 const IMAGE_TYPES: Record<string, string> = {
   jpg: "image/jpeg",
@@ -33,7 +34,7 @@ function isSupported(name: string): boolean {
 
 export const zipToPdfEngine: Engine = async ({ files, options, onProgress }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a ZIP file.");
+  if (!file) throw new Error(tr("Add a ZIP file."));
 
   // Nothing is written anywhere by archive path, and the filter keeps unsupported
   // entries from being inflated at all, so a zip bomb has to hide among the entries we use.
@@ -51,18 +52,18 @@ export const zipToPdfEngine: Engine = async ({ files, options, onProgress }) => 
           return false;
         }
         total += info.originalSize;
-        if (total > MAX_TOTAL_BYTES) throw new Error("That ZIP expands to more than 500 MB.");
-        if (seen > MAX_ENTRIES) throw new Error(`That ZIP holds more than ${MAX_ENTRIES} files.`);
+        if (total > MAX_TOTAL_BYTES) throw new Error(tr("That ZIP expands to more than 500 MB."));
+        if (seen > MAX_ENTRIES) throw new Error(tr("That ZIP holds more than {{MAX_ENTRIES}} files.", { MAX_ENTRIES }));
         return true;
       },
     });
   } catch (err) {
     if (err instanceof Error && /500 MB|more than/.test(err.message)) throw err;
-    throw new Error(`${file.name} isn't a readable ZIP file (it may be damaged or password-protected).`);
+    throw new Error(tr("{{name}} isn't a readable ZIP file (it may be damaged or password-protected).", { name: file.name }));
   }
 
   const names = Object.keys(entries).sort((a, b) => collator.compare(a, b));
-  if (names.length === 0) throw new Error("No images, PDFs or text files were found in that ZIP.");
+  if (names.length === 0) throw new Error(tr("No images, PDFs or text files were found in that ZIP."));
 
   const pageSize = ["fit", "a4", "letter"].includes(String(options.page_size)) ? String(options.page_size) : "fit";
   const orientation = ["auto", "portrait", "landscape"].includes(String(options.orientation)) ? String(options.orientation) : "auto";
@@ -99,7 +100,7 @@ export const zipToPdfEngine: Engine = async ({ files, options, onProgress }) => 
     try {
       source = await PDFDocument.load(part);
     } catch {
-      throw new Error(`${name} couldn't be read (it may be damaged or password-protected).`);
+      throw new Error(tr("{{name}} couldn't be read (it may be damaged or password-protected).", { name }));
     }
     const copied = await merged.copyPages(source, source.getPageIndices());
     copied.forEach((p) => merged.addPage(p));
@@ -114,10 +115,14 @@ export const zipToPdfEngine: Engine = async ({ files, options, onProgress }) => 
       {
         name: file.name.replace(/\.zip$/i, "") + ".pdf",
         blob: new Blob([bytes as BlobPart], { type: "application/pdf" }),
-        detail: `${pages} page${pages === 1 ? "" : "s"}`,
+        detail: tr("{{count}} pages", { count: pages }),
       },
     ],
-    summary: `${converted} file${converted === 1 ? "" : "s"} joined into ${pages} page${pages === 1 ? "" : "s"}${skipped ? ` · ${skipped} unsupported skipped` : ""}`,
+    summary: tr(skipped ? "{{files}} joined into {{pages}} · {{skipped}} unsupported skipped" : "{{files}} joined into {{pages}}", {
+      files: tr("{{count}} files", { count: converted }),
+      pages: tr("{{count}} pages", { count: pages }),
+      skipped,
+    }),
     isPreview: false,
   };
 };

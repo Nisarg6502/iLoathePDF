@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { isTauri, type JobError, type OutputFile } from "@/lib/jobs";
 import { baseName, cn, formatBytes } from "@/lib/utils";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 /**
  * `baseName()` in lib/utils only splits on "/", so Windows paths come back
@@ -49,13 +50,14 @@ export function ResultCard({
   title,
   compression,
   onAgain,
-  againLabel = "Do another",
+  againLabel,
   className,
 }: ResultCardProps) {
+  const { t } = useTranslation();
   const primary = files[0];
   const many = files.length > 1;
   const heading =
-    title ?? (many ? `${files.length} files ready` : primary ? "Your file is ready" : "Done");
+    title ?? (many ? t("{{count}} files ready", { count: files.length }) : primary ? t("Your file is ready") : t("Done"));
 
   return (
     <section
@@ -72,8 +74,8 @@ export function ResultCard({
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-text">{heading}</h3>
           <p className="truncate text-xs text-muted">
-            {primary ? fileName(primary.path) : "No output"}
-            {many && ` and ${files.length - 1} more`}
+            {primary ? fileName(primary.path) : t("No output")}
+            {many && t("and {{count}} more", { count: files.length - 1 })}
             {primary && ` · ${formatBytes(files.reduce((sum, f) => sum + f.bytes, 0))}${many ? " total" : ""}`}
           </p>
         </div>
@@ -96,7 +98,7 @@ export function ResultCard({
               </p>
               <p className="text-xs tabular-nums text-muted">
                 {formatBytes(f.bytes)}
-                {f.pages !== undefined && ` · ${f.pages} ${f.pages === 1 ? "page" : "pages"}`}
+                {f.pages !== undefined && ` · ${t("{{count}} pages", { count: f.pages })}`}
                 {f.width !== undefined && f.height !== undefined && ` · ${f.width}×${f.height}`}
               </p>
             </div>
@@ -123,7 +125,7 @@ export function ResultCard({
             )}
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            {againLabel}
+            {againLabel ?? t("Do another")}
           </button>
         )}
       </footer>
@@ -136,6 +138,7 @@ export function ResultCard({
 // ---------------------------------------------------------------------------
 
 function SavingsStrip({ originalBytes, bytes, engine }: CompressionSummary) {
+  const { t } = useTranslation();
   const saved = Math.max(0, originalBytes - bytes);
   const pct = originalBytes > 0 ? Math.round((saved / originalBytes) * 100) : 0;
   const remaining = originalBytes > 0 ? Math.max(2, 100 - pct) : 100;
@@ -144,19 +147,19 @@ function SavingsStrip({ originalBytes, bytes, engine }: CompressionSummary) {
     <div className="border-b border-border bg-accent-soft/50 px-4 py-4">
       <div className="flex items-end gap-3">
         <div>
-          <p className="text-[12px] uppercase tracking-wide text-muted">Before</p>
+          <p className="text-[12px] uppercase tracking-wide text-muted">{t("Before")}</p>
           <p className="text-lg font-semibold tabular-nums text-muted line-through decoration-text-muted/40">
             {formatBytes(originalBytes)}
           </p>
         </div>
         <ArrowRight className="mb-2 h-4 w-4 shrink-0 text-muted" />
         <div>
-          <p className="text-[12px] uppercase tracking-wide text-muted">After</p>
+          <p className="text-[12px] uppercase tracking-wide text-muted">{t("After")}</p>
           <p className="text-lg font-semibold tabular-nums text-text">{formatBytes(bytes)}</p>
         </div>
         <div className="ml-auto text-right">
           <p className="text-2xl font-bold leading-none tabular-nums text-success">−{pct}%</p>
-          <p className="text-[12px] text-muted">{formatBytes(saved)} saved</p>
+          <p className="text-[12px] text-muted">{t("{{bytes}} saved", { bytes: formatBytes(saved) })}</p>
         </div>
       </div>
 
@@ -167,7 +170,7 @@ function SavingsStrip({ originalBytes, bytes, engine }: CompressionSummary) {
         />
       </div>
       {engine && (
-        <p className="mt-1.5 text-[12px] text-muted">Compressed with {engine}</p>
+        <p className="mt-1.5 text-[12px] text-muted">{t("Compressed with {{engine}}", { engine })}</p>
       )}
     </div>
   );
@@ -188,9 +191,10 @@ function OpenButton({
   primary?: boolean;
   compact?: boolean;
 }) {
+  const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
   const available = isTauri();
-  const label = kind === "file" ? "Open file" : "Open folder";
+  const label = kind === "file" ? t("Open file") : t("Open folder");
 
   const open = async () => {
     if (!available) return;
@@ -214,9 +218,9 @@ function OpenButton({
       title={
         available
           ? failed
-            ? `Could not open ${path}`
+            ? t("Could not open {{path}}", { path })
             : path
-          : "Opening files needs the desktop app — this is the browser preview"
+          : t("Opening files needs the desktop app — this is the browser preview")
       }
       className={cn(
         "inline-flex items-center gap-1.5 rounded-lg border text-sm font-medium transition-colors",
@@ -230,7 +234,7 @@ function OpenButton({
       )}
     >
       <Icon className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-      {compact ? "Open" : label}
+      {compact ? t("Open") : label}
     </button>
   );
 }
@@ -251,65 +255,57 @@ export function describeJobError(error: JobError): ErrorCopy {
   switch (error.code) {
     case "ENCRYPTED_PDF":
       return {
-        title: "This PDF is password protected",
-        body:
-          "It is locked, so its pages cannot be read or changed. Open it in your PDF reader, " +
-          "enter the password and save an unlocked copy, then try again with that copy.",
+        title: tr("This PDF is password protected"),
+        body: tr("It is locked, so its pages cannot be read or changed. Open it in your PDF reader, enter the password and save an unlocked copy, then try again with that copy."),
         tone: "danger",
       };
     case "CORRUPT_PDF":
       return {
-        title: "This PDF could not be read",
-        body:
-          "The file looks damaged or is not really a PDF. If it was downloaded or emailed, " +
-          "try getting a fresh copy.",
+        title: tr("This PDF could not be read"),
+        body: tr("The file looks damaged or is not really a PDF. If it was downloaded or emailed, try getting a fresh copy."),
         tone: "danger",
       };
     case "FILE_NOT_FOUND":
       return {
-        title: "That file has gone missing",
-        body: "It was moved, renamed or deleted since you picked it. Choose it again.",
+        title: tr("That file has gone missing"),
+        body: tr("It was moved, renamed or deleted since you picked it. Choose it again."),
         tone: "danger",
       };
     case "UNSUPPORTED_FORMAT":
       return {
-        title: "That format isn't supported",
-        body: "Convert the file to PDF, JPG, PNG or WebP first, then bring it back here.",
+        title: tr("That format isn't supported"),
+        body: tr("Convert the file to PDF, JPG, PNG or WebP first, then bring it back here."),
         tone: "danger",
       };
     case "GHOSTSCRIPT_MISSING":
       return {
-        title: "Strong compression isn't available",
-        body:
-          "The stronger levels need Ghostscript, which isn't installed on this machine. " +
-          "Lossless compression still works and never touches image quality.",
-        hint: "Try again with the Lossless level.",
+        title: tr("Strong compression isn't available"),
+        body: tr("The stronger levels need Ghostscript, which isn't installed on this machine. Lossless compression still works and never touches image quality."),
+        hint: tr("Try again with the Lossless level."),
         tone: "danger",
       };
     case "OUTPUT_WRITE_FAILED":
       return {
-        title: "Couldn't save the result",
-        body:
-          "The destination folder may be read-only, full, or the file may be open in another " +
-          "program. Close it or pick a different folder.",
+        title: tr("Couldn't save the result"),
+        body: tr("The destination folder may be read-only, full, or the file may be open in another program. Close it or pick a different folder."),
         tone: "danger",
       };
     case "CANCELLED":
       return {
-        title: "Cancelled",
-        body: "Nothing was written. Your original files are untouched.",
+        title: tr("Cancelled"),
+        body: tr("Nothing was written. Your original files are untouched."),
         tone: "muted",
       };
     case "BAD_PARAMS":
       return {
-        title: "Those settings don't work",
-        body: error.message || "Check the page ranges and options, then try again.",
+        title: tr("Those settings don't work"),
+        body: error.message ? tr(error.message) : tr("Check the page ranges and options, then try again."),
         tone: "danger",
       };
     default:
       return {
-        title: "Something went wrong",
-        body: error.message || "The operation failed unexpectedly. Nothing was overwritten.",
+        title: tr("Something went wrong"),
+        body: error.message ? tr(error.message) : tr("The operation failed unexpectedly. Nothing was overwritten."),
         tone: "danger",
       };
   }
@@ -323,6 +319,7 @@ export interface ErrorCardProps {
 }
 
 export function ErrorCard({ error, onRetry, onAgain, className }: ErrorCardProps) {
+  const { t } = useTranslation();
   const [showDetail, setShowDetail] = useState(false);
   const copy = describeJobError(error);
   const danger = copy.tone === "danger";
@@ -361,7 +358,7 @@ export function ErrorCard({ error, onRetry, onAgain, className }: ErrorCardProps
                 onClick={() => setShowDetail((v) => !v)}
                 className="text-xs font-medium text-muted underline-offset-2 hover:text-text hover:underline"
               >
-                {showDetail ? "Hide technical details" : "Technical details"}
+                {showDetail ? t("Hide technical details") : t("Technical details")}
               </button>
               {showDetail && (
                 <pre
@@ -385,7 +382,7 @@ export function ErrorCard({ error, onRetry, onAgain, className }: ErrorCardProps
               className="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Try again
+              {t("Try again")}
             </button>
           )}
           {onAgain && (
@@ -394,7 +391,7 @@ export function ErrorCard({ error, onRetry, onAgain, className }: ErrorCardProps
               onClick={onAgain}
               className="ml-auto rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
-              Start over
+              {t("Start over")}
             </button>
           )}
         </footer>

@@ -10,6 +10,7 @@ import { RedactBoxElement } from "./RedactBoxElement";
 import { PdfPreviewDocument, isCancellation } from "@/lib/pdfPreview";
 import { JobError, readFileBytes } from "@/lib/jobs";
 import type { RedactBox } from "@/lib/redactTypes";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 export interface RedactCanvasProps {
   file: { id: string; path: string; name: string; blob?: File };
@@ -41,6 +42,7 @@ export function RedactCanvas({
   onDelete,
   className,
 }: RedactCanvasProps) {
+  const { t } = useTranslation();
   const [state, setState] = useState<LoadState>({ phase: "loading" });
   const [urls, setUrls] = useState<Record<number, string>>({});
   const pageRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -72,7 +74,7 @@ export function RedactCanvas({
       } catch (err) {
         if (cancelled || isCancellation(err)) return;
         const message =
-          err instanceof JobError ? err.message : "That PDF could not be opened for preview.";
+          err instanceof JobError ? err.message : tr("That PDF could not be opened for preview.");
         setState({ phase: "error", message });
       }
     })();
@@ -88,7 +90,7 @@ export function RedactCanvas({
       <div className={className}>
         <div className="flex items-center justify-center gap-2 rounded-card border border-border bg-surface px-5 py-10 text-[14px] text-muted">
           <Loader2 className="size-4 animate-spin" />
-          Reading pages…
+          {t("Reading pages…")}
         </div>
       </div>
     );
@@ -98,7 +100,7 @@ export function RedactCanvas({
     return (
       <div className={className}>
         <div className="rounded-card border border-danger/40 bg-surface px-5 py-6 text-center">
-          <p className="text-[14px] font-medium text-text">Preview unavailable</p>
+          <p className="text-[14px] font-medium text-text">{t("Preview unavailable")}</p>
           <p className="mt-1 text-[14px] text-muted">{state.message}</p>
         </div>
       </div>
@@ -127,17 +129,17 @@ export function RedactCanvas({
             {urls[pageIndex] ? (
               <img
                 src={urls[pageIndex]}
-                alt={`Page ${pageIndex + 1}`}
+                alt={t("Page {{page}}", { page: pageIndex + 1 })}
                 className="block w-full select-none"
                 draggable={false}
               />
             ) : (
               <div className="flex h-[300px] items-center justify-center text-[13px] text-muted">
-                Rendering page {pageIndex + 1}…
+                {t("Rendering page {{page}}…", { page: pageIndex + 1 })}
               </div>
             )}
             <div className="pointer-events-none absolute left-2 top-2 rounded bg-black/55 px-1.5 py-0.5 text-[10px] text-white">
-              Page {pageIndex + 1}
+              {t("Page {{page}}", { page: pageIndex + 1 })}
             </div>
             <div className="pointer-events-auto absolute inset-0">
               {boxes

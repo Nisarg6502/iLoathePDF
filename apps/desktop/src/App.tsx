@@ -12,6 +12,7 @@ import { useCustomRecipes } from "./lib/useCustomRecipes";
 import { TOOLS } from "./lib/tools";
 import { RECIPES } from "./lib/recipes";
 import { MotionConfig } from "motion/react";
+import { useTranslation } from "@iloathepdf/i18n";
 
 const PreviewLab = lazy(() => import("./routes/PreviewLab"));
 
@@ -59,18 +60,19 @@ function RecipeRoute() {
 }
 
 function UnknownTool() {
+  const { t } = useTranslation();
   const { id } = useParams();
   return (
     <div className="mx-auto max-w-md px-8 py-24 text-center">
-      <h1 className="text-lg font-semibold text-text">Nothing here called “{id}”</h1>
+      <h1 className="text-lg font-semibold text-text">{t("Nothing here called “{{id}}”", { id })}</h1>
       <p className="mt-2 text-[14px] text-muted">
-        It may have been renamed. Everything the app can do is on the home screen.
+        {t("It may have been renamed. Everything the app can do is on the home screen.")}
       </p>
       <Link
         to="/"
         className="mt-5 inline-flex h-9 items-center rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg"
       >
-        Back to home
+        {t("Back to home")}
       </Link>
     </div>
   );

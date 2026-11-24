@@ -1,6 +1,7 @@
 import { layoutDocument, mmToPt, type Block } from "@/lib/docLayout";
 import { csvToBlocks, htmlToBlocks, parseCsv, readText, textToBlocks } from "@/lib/docParse";
 import type { Engine, EngineOutputFile } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 const PAGE_SIZES = ["a4", "letter"] as const;
 type Kind = "txt" | "csv" | "html";
@@ -24,17 +25,17 @@ export function uniqueName(name: string, used: Set<string>): string {
 
 function number(value: unknown, fallback: number, min: number, max: number, label: string): number {
   const n = value === undefined || value === "" ? fallback : Number(value);
-  if (!Number.isFinite(n) || n < min || n > max) throw new Error(`${label} must be between ${min} and ${max}.`);
+  if (!Number.isFinite(n) || n < min || n > max) throw new Error(tr("{{label}} must be between {{min}} and {{max}}.", { label, min, max }));
   return n;
 }
 
 function makeEngine(kind: Kind): Engine {
   return async ({ files, options, onProgress }) => {
-    if (files.length === 0) throw new Error("Add a file to convert.");
+    if (files.length === 0) throw new Error(tr("Add a file to convert."));
     const pageSize = PAGE_SIZES.includes(options.page_size as "a4") ? (options.page_size as "a4" | "letter") : "a4";
     const orientation = String(options.orientation ?? (kind === "csv" ? "auto" : "portrait"));
-    const margin = number(options.margin_mm, kind === "csv" ? 15 : 20, 0, 60, "The margin");
-    const fontSize = number(options.font_size, 11, 6, 36, "The text size");
+    const margin = number(options.margin_mm, kind === "csv" ? 15 : 20, 0, 60, tr("The margin"));
+    const fontSize = number(options.font_size, 11, 6, 36, tr("The text size"));
     const mono = kind === "txt" && options.font === "mono";
 
     const used = new Set<string>();
@@ -53,9 +54,9 @@ function makeEngine(kind: Kind): Engine {
       } else if (kind === "html") {
         blocks = htmlToBlocks(text);
       } else {
-        if (text.trim() === "") throw new Error(`${file.name} is empty.`);
+        if (text.trim() === "") throw new Error(tr("{{name}} is empty.", { name: file.name }));
         const rows = parseCsv(text);
-        if (rows.length === 0) throw new Error(`${file.name} has no rows.`);
+        if (rows.length === 0) throw new Error(tr("{{name}} has no rows.", { name: file.name }));
         blocks = csvToBlocks(rows);
         const columns = rows[0]?.length ?? 0;
         landscape = orientation === "landscape" || (orientation === "auto" && columns > 6);
@@ -77,15 +78,15 @@ function makeEngine(kind: Kind): Engine {
       out.push({
         name: uniqueName(`${stem}.pdf`, used),
         blob: new Blob([result.bytes as BlobPart], { type: "application/pdf" }),
-        detail: `${result.pages} page${result.pages === 1 ? "" : "s"}`,
+        detail: tr("{{count}} pages", { count: result.pages }),
       });
     }
 
     onProgress?.(1);
-    const note = replaced > 0 ? ` · ${replaced} character${replaced === 1 ? "" : "s"} the PDF fonts can't draw became "?"` : "";
+    const note = replaced > 0 ? ` · ${tr("{{count}} characters the PDF fonts can't draw became \"?\"", { count: replaced })}` : "";
     return {
       files: out,
-      summary: `${out.length} PDF${out.length === 1 ? "" : "s"}, ${pages} page${pages === 1 ? "" : "s"}${note}`,
+      summary: `${tr("{{count}} PDFs", { count: out.length })}, ${tr("{{count}} pages", { count: pages })}${note}`,
       isPreview: false,
     };
   };

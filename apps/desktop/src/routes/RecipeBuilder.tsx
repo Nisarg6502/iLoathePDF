@@ -39,8 +39,9 @@ import {
 import { StepIcon, ChainStrip } from "@/components/recipes/ChainStrip";
 import { IssueIcon, IssueList } from "@/components/recipes/IssueList";
 import { stepSummary } from "@/components/recipes/stepSummary";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
-const label = (id: string) => toolById(id)?.title ?? id;
+const label = (id: string) => tr(toolById(id)?.title ?? id);
 const defaultsOf = (id: string) => (toolById(id)?.defaults ?? {}) as Record<string, unknown>;
 
 interface Draft extends RecipeStep {
@@ -81,6 +82,7 @@ function useInitial() {
 }
 
 export default function RecipeBuilder() {
+  const { t } = useTranslation();
   const initial = useInitial();
   const navigate = useNavigate();
 
@@ -93,21 +95,21 @@ export default function RecipeBuilder() {
   const [flash, setFlash] = useState<{ tool: string; reason: string } | null>(null);
 
   const chain = plain(steps);
-  const analysis = analyzeChain(chain, label, defaultsOf);
+  const analysis = analyzeChain(chain, label, defaultsOf, false, tr);
   const canSave = steps.length > 0 && analysis.errors === 0;
 
   if (!initial) {
     return (
       <div className="mx-auto max-w-md px-8 py-24 text-center">
-        <h1 className="text-lg font-semibold text-text">That recipe isn’t here</h1>
-        <p className="mt-2 text-[14px] text-muted">It may have been deleted.</p>
-        <Link to="/recipes" className="mt-4 inline-block text-[13.5px] text-accent">All recipes</Link>
+        <h1 className="text-lg font-semibold text-text">{t("That recipe isn’t here")}</h1>
+        <p className="mt-2 text-[14px] text-muted">{t("It may have been deleted.")}</p>
+        <Link to="/recipes" className="mt-4 inline-block text-[13.5px] text-accent">{t("All recipes")}</Link>
       </div>
     );
   }
 
   function insert(tool: string, at: number) {
-    const check = canInsert(chain, at, tool, label, defaultsOf);
+    const check = canInsert(chain, at, tool, label, defaultsOf, tr);
     if (!check.ok) {
       setFlash({ tool, reason: check.reason });
       return;
@@ -161,21 +163,21 @@ export default function RecipeBuilder() {
     navigate(`/r/${saved.id}`);
   }
 
-  const heading = initial.mode === "edit" ? "Edit recipe" : initial.mode === "copy" ? "Customize recipe" : initial.mode === "shared" ? "Shared recipe" : "New recipe";
+  const heading = initial.mode === "edit" ? tr("Edit recipe") : initial.mode === "copy" ? tr("Customize recipe") : initial.mode === "shared" ? tr("Shared recipe") : tr("New recipe");
 
   return (
     <div className="min-h-0 flex-1 overflow-auto">
       <div className="mx-auto max-w-[1180px] px-8 py-7">
-        <Link to="/recipes" className="text-[13px] text-muted hover:text-text">← All recipes</Link>
+        <Link to="/recipes" className="text-[13px] text-muted hover:text-text">{t("← All recipes")}</Link>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="m-0 text-[22px] font-semibold tracking-[-0.01em] text-text">{heading}</h1>
             <p className="mt-1.5 max-w-[62ch] text-sm text-muted">
               {initial.mode === "copy"
-                ? `Starting from “${initial.source}”. Change any step's settings, add or remove steps, then save it as your own.`
+                ? t("Starting from “{{source}}”. Change any step's settings, add or remove steps, then save it as your own.", { source: initial.source })
                 : initial.mode === "shared"
-                  ? "This recipe came from a recipe code. Check the steps, then save it to use it."
-                  : "Chain tools together and set each one up the way you want. Saved on this machine."}
+                  ? t("This recipe came from a recipe code. Check the steps, then save it to use it.")
+                  : t("Chain tools together and set each one up the way you want. Saved on this machine.")}
             </p>
           </div>
           <StatusPill analysis={analysis} empty={steps.length === 0} />
@@ -183,25 +185,25 @@ export default function RecipeBuilder() {
 
         <div className="mt-6 grid gap-3 grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <label className="flex flex-col gap-1.5">
-            <span className="text-[12.5px] font-semibold">Name</span>
+            <span className="text-[12.5px] font-semibold">{t("Name")}</span>
             <input
               id="recipe-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={60}
-              placeholder={steps.length > 0 ? defaultTitle(chain, label) : "e.g. Exam form photo"}
+              placeholder={steps.length > 0 ? defaultTitle(chain, label) : t("e.g. Exam form photo")}
               className="h-10 w-full rounded-lg border border-border-hi bg-surface px-3 text-[14px] text-text outline-none focus:border-accent"
             />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-[12.5px] font-semibold">
-              What it's for <span className="font-normal text-faint">(optional)</span>
+              {t("What it's for")}{" "}<span className="font-normal text-faint">{t("(optional)")}</span>
             </span>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={200}
-              placeholder="e.g. Photos of marksheets into one PDF under 300 KB"
+              placeholder={t("e.g. Photos of marksheets into one PDF under 300 KB")}
               className="h-10 w-full rounded-lg border border-border-hi bg-surface px-3 text-[14px] text-text outline-none focus:border-accent"
             />
           </label>
@@ -218,7 +220,7 @@ export default function RecipeBuilder() {
           />
           </div>
 
-          <section aria-label="Recipe steps" className="min-w-0">
+          <section aria-label={t("Recipe steps")} className="min-w-0">
             <InputNode chain={chain} analysis={analysis} />
 
             {steps.length === 0 ? (
@@ -260,7 +262,7 @@ export default function RecipeBuilder() {
                   <Connector
                     slot={steps.length}
                     chain={chain}
-                    flow={analysis.output ? flowLabel(analysis.output.kind, analysis.output.count) : undefined}
+                    flow={analysis.output ? flowLabel(analysis.output.kind, analysis.output.count, tr) : undefined}
                     broken={false}
                     dragTool={dragTool}
                     onDropTool={(tool) => insert(tool, steps.length)}
@@ -275,14 +277,14 @@ export default function RecipeBuilder() {
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button variant="primary" onClick={save} disabled={!canSave} className="h-[38px] px-5 font-semibold">
-                {initial.mode === "edit" ? "Save changes" : "Save recipe"}
+                {initial.mode === "edit" ? t("Save changes") : t("Save recipe")}
               </Button>
               <Link to={initial.mode === "edit" ? `/r/${initial.existing.id}` : "/recipes"} className="text-[13.5px] text-muted hover:text-text">
-                Cancel
+                {t("Cancel")}
               </Link>
               {!canSave && steps.length > 0 && (
                 <span className="text-[12.5px] text-danger">
-                  Fix {analysis.errors === 1 ? "the problem" : `the ${analysis.errors} problems`} marked in red to save.
+                  {t("Fix the {{count}} problems marked in red to save.", { count: analysis.errors })}
                 </span>
               )}
             </div>
@@ -299,12 +301,12 @@ function StatusPill({ analysis, empty }: { analysis: ChainAnalysis; empty: boole
   const state = empty ? "empty" : analysis.errors > 0 ? "error" : analysis.warnings > 0 ? "warning" : "ok";
   const text =
     state === "empty"
-      ? "No steps yet"
+      ? tr("No steps yet")
       : state === "error"
-        ? `${analysis.errors} problem${analysis.errors === 1 ? "" : "s"} to fix`
+        ? tr("{{count}} problems to fix", { count: analysis.errors })
         : state === "warning"
-          ? `Works · ${analysis.warnings} thing${analysis.warnings === 1 ? "" : "s"} to check`
-          : `Ready · ${analysis.steps.length} step${analysis.steps.length === 1 ? "" : "s"}`;
+          ? tr("Works · {{count}} things to check", { count: analysis.warnings })
+          : tr("Ready · {{count}} steps", { count: analysis.steps.length });
   const tone =
     state === "error"
       ? "border-danger/40 bg-danger-soft text-danger"
@@ -364,41 +366,42 @@ function ToolPalette({
   onDragTool: (tool: string | null) => void;
   flash: { tool: string; reason: string } | null;
 }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const wide = true;
   const matches = (slug: string) => {
     if (!q) return true;
-    const t = toolById(slug);
-    return `${t?.title ?? ""} ${t?.description ?? ""} ${RECIPE_TOOLS[slug]?.blurb ?? ""}`.toLowerCase().includes(q);
+    const tool = toolById(slug);
+    return `${label(slug)} ${tr(tool?.description ?? "")} ${tr(RECIPE_TOOLS[slug]?.blurb ?? "")}`.toLowerCase().includes(q);
   };
   const shortReason = (slug: string): string => {
     const spec = RECIPE_TOOLS[slug];
-    if (chain.length >= MAX_STEPS) return "Recipe is full";
-    if (analysis.output && spec.in !== analysis.output.kind) return `Needs ${spec.in === "pdf" ? "a PDF" : kindLabel(spec.in, true)}`;
-    return "Doesn't fit at the end";
+    if (chain.length >= MAX_STEPS) return tr("Recipe is full");
+    if (analysis.output && spec.in !== analysis.output.kind) return tr("Needs {{kind}}", { kind: spec.in === "pdf" ? tr("a PDF") : kindLabel(spec.in, true, tr) });
+    return tr("Doesn't fit at the end");
   };
 
   return (
-    <aside aria-label="Tools" className="rounded-2xl border border-border bg-surface sticky top-0">
+    <aside aria-label={t("Tools")} className="rounded-2xl border border-border bg-surface sticky top-0">
       <div className="border-b border-border p-3.5">
-        <div className="text-[12.5px] font-semibold">Tools</div>
+        <div className="text-[12.5px] font-semibold">{t("Tools")}</div>
         <p className="mt-0.5 text-[11.5px] leading-snug text-muted">
-          Tap to add at the end, or drag into any gap in the chain. Each tool says why when it can't go somewhere.
+          {t("Tap to add at the end, or drag into any gap in the chain. Each tool says why when it can't go somewhere.")}
         </p>
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find a tool"
-          aria-label="Find a tool"
+          placeholder={t("Find a tool")}
+          aria-label={t("Find a tool")}
           className="mt-2.5 h-8 w-full rounded-lg border border-border bg-surface-2 px-2.5 text-[12.5px] outline-none focus:border-accent"
         />
       </div>
       <div className="max-h-[calc(100vh-190px)] overflow-y-auto p-2">
         {(() => {
           const all = Object.keys(RECIPE_TOOLS).filter(matches);
-          const fits = new Map(all.map((slug) => [slug, canInsert(chain, chain.length, slug, label, defaultsOf)]));
+          const fits = new Map(all.map((slug) => [slug, canInsert(chain, chain.length, slug, label, defaultsOf, tr)]));
           const item = (slug: string) => {
             const fit = fits.get(slug)!;
             return (
@@ -420,7 +423,7 @@ function ToolPalette({
               if (inGroup.length === 0) return null;
               return (
                 <div key={g} className="mb-2">
-                  <div className="px-1.5 pb-1 pt-2 font-mono text-[10px] font-bold tracking-[0.13em] text-faint">{GROUP_LABEL[g].toUpperCase()}</div>
+                  <div className="px-1.5 pb-1 pt-2 font-mono text-[10px] font-bold tracking-[0.13em] text-faint">{tr(GROUP_LABEL[g]).toUpperCase()}</div>
                   <div className="flex flex-col gap-1">{inGroup.map(item)}</div>
                 </div>
               );
@@ -432,17 +435,17 @@ function ToolPalette({
           return (
             <>
               <div className="px-1.5 pb-1 pt-2 font-mono text-[10px] font-bold tracking-[0.13em] text-ok">
-                FITS AFTER STEP {chain.length} · {ok.length}
+                {t("FITS AFTER STEP {{step}} · {{count}}", { step: chain.length, count: ok.length })}
               </div>
               {ok.length === 0 ? (
-                <p className="px-1.5 pb-2 text-[12px] text-muted">Nothing can follow the last step.</p>
+                <p className="px-1.5 pb-2 text-[12px] text-muted">{t("Nothing can follow the last step.")}</p>
               ) : (
                 <div className="mb-2 flex flex-col gap-1">{ok.map(item)}</div>
               )}
               {no.length > 0 && (
                 <details className="group/no border-t border-border pt-1" open={wide}>
                   <summary className="cursor-pointer list-none px-1.5 py-1.5 font-mono text-[10px] font-bold tracking-[0.13em] text-faint">
-                    <span className="inline-block transition-transform group-open/no:rotate-90">›</span> DOESN'T FIT THERE · {no.length}
+                    <span className="inline-block transition-transform group-open/no:rotate-90">›</span>{" "}{t("DOESN'T FIT THERE · {{count}}", { count: no.length })}
                   </summary>
                   {groups(no)}
                 </details>
@@ -453,7 +456,7 @@ function ToolPalette({
         {Object.keys(UNAVAILABLE_TOOLS).some(matches) && (
           <details className="group mt-1 px-1.5 pb-1.5">
             <summary className="cursor-pointer list-none py-1.5 font-mono text-[10px] font-bold tracking-[0.13em] text-faint">
-              <span className="inline-block transition-transform group-open:rotate-90">›</span> NOT AVAILABLE IN RECIPES
+              <span className="inline-block transition-transform group-open:rotate-90">›</span>{" "}{t("NOT AVAILABLE IN RECIPES")}
             </summary>
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
               {Object.entries(UNAVAILABLE_TOOLS)
@@ -465,7 +468,7 @@ function ToolPalette({
                     </span>
                     <span className="min-w-0">
                       <span className="block text-[12.5px]">{label(slug)}</span>
-                      <span className="block text-[11px] leading-snug text-muted">{why}</span>
+                      <span className="block text-[11px] leading-snug text-muted">{tr(why)}</span>
                     </span>
                   </li>
                 ))}
@@ -494,6 +497,7 @@ function PaletteItem({
   onAdd: () => void;
   onDragTool: (tool: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const [scope, animate] = useAnimate<HTMLButtonElement>();
   useEffect(() => {
     if (flashing && scope.current) animate(scope.current, { x: [0, -5, 5, -3, 3, 0] }, { duration: 0.35 });
@@ -514,7 +518,7 @@ function PaletteItem({
         }}
         onDragEnd={() => onDragTool(null)}
         onClick={onAdd}
-        aria-label={`Add ${label(slug)}`}
+        aria-label={t("Add {{label}}", { label: label(slug) })}
         aria-description={reason}
         title={reason}
         className={`group flex w-full items-center gap-2.5 rounded-[10px] border px-2 py-1.5 text-left transition-[border-color,background-color,opacity,transform] duration-150 ${
@@ -528,7 +532,7 @@ function PaletteItem({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium">{label(slug)}</span>
-          <span className={`block truncate text-[11px] ${ok ? "text-muted" : "text-danger"}`}>{ok ? RECIPE_TOOLS[slug].blurb : short}</span>
+          <span className={`block truncate text-[11px] ${ok ? "text-muted" : "text-danger"}`}>{ok ? tr(RECIPE_TOOLS[slug].blurb) : short}</span>
         </span>
         {ok ? (
           <span className="grid size-5 place-items-center rounded-full bg-surface-2 text-[13px] text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden>
@@ -559,6 +563,7 @@ function PaletteItem({
 // The chain
 
 function InputNode({ chain, analysis }: { chain: RecipeStep[]; analysis: ChainAnalysis }) {
+  const { t } = useTranslation();
   const first = chain[0] ? toolById(chain[0].tool) : undefined;
   const accept = first?.accepts.filter((a) => !["jpeg", "heif", "tif", "text", "htm"].includes(a)).slice(0, 6).map((a) => a.toUpperCase()) ?? [];
   const batch = first && !first.multiple;
@@ -570,15 +575,15 @@ function InputNode({ chain, analysis }: { chain: RecipeStep[]; analysis: ChainAn
         </svg>
       </span>
       <div className="min-w-0">
-        <div className="text-[13px] font-semibold">Your files</div>
+        <div className="text-[13px] font-semibold">{t("Your files")}</div>
         <div className="text-[12px] text-muted">
           {!first
-            ? "The first step decides what files the recipe takes."
+            ? t("The first step decides what files the recipe takes.")
             : analysis.needsTwoFiles
-              ? `Two or more ${accept.join(", ")} files, joined in the order you add them`
+              ? t("Two or more {{accept}} files, joined in the order you add them", { accept: accept.join(", ") })
               : batch
-                ? `One or more ${accept.join(", ")} files. Each one goes through the recipe on its own.`
-                : `One or more ${accept.join(", ")} files`}
+                ? t("One or more {{accept}} files. Each one goes through the recipe on its own.", { accept: accept.join(", ") })
+                : t("One or more {{accept}} files", { accept: accept.join(", ") })}
         </div>
       </div>
     </div>
@@ -586,6 +591,7 @@ function InputNode({ chain, analysis }: { chain: RecipeStep[]; analysis: ChainAn
 }
 
 function OutputNode({ analysis }: { analysis: ChainAnalysis }) {
+  const { t } = useTranslation();
   const ok = analysis.errors === 0;
   return (
     <motion.div
@@ -604,9 +610,9 @@ function OutputNode({ analysis }: { analysis: ChainAnalysis }) {
         )}
       </span>
       <div className="min-w-0">
-        <div className="text-[13px] font-semibold">{ok ? "You get" : "Can't finish yet"}</div>
+        <div className="text-[13px] font-semibold">{ok ? t("You get") : t("Can't finish yet")}</div>
         <div className="text-[12px] text-muted">
-          {ok ? describeOutput(analysis.output) : "Fix the steps marked in red and the result shows up here."}
+          {ok ? describeOutput(analysis.output, tr) : t("Fix the steps marked in red and the result shows up here.")}
         </div>
       </div>
     </motion.div>
@@ -622,6 +628,7 @@ function EmptyChain({
   onDropTool: (tool: string) => void;
   onTemplate: (r: { steps: RecipeStep[] }) => void;
 }) {
+  const { t } = useTranslation();
   const [over, setOver] = useState(false);
   const templates = RECIPES.filter((r) => r.popular).slice(0, 6);
   const [code, setCode] = useState("");
@@ -646,9 +653,9 @@ function EmptyChain({
           over ? "scale-[1.01] border-ok bg-ok-soft" : dragTool ? "border-accent bg-accent-soft" : "border-border bg-surface"
         }`}
       >
-        <div className="text-[14px] font-semibold">{dragTool ? `Drop ${label(dragTool)} here` : "Add your first step"}</div>
+        <div className="text-[14px] font-semibold">{dragTool ? t("Drop {{label}} here", { label: label(dragTool) }) : t("Add your first step")}</div>
         <p className="mx-auto mt-1 max-w-[46ch] text-[12.5px] text-muted">
-          Pick a tool on the left, or start from a ready-made recipe and change it to suit you.
+          {t("Pick a tool on the left, or start from a ready-made recipe and change it to suit you.")}
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           {templates.map((r) => (
@@ -659,7 +666,7 @@ function EmptyChain({
               className="flex items-center gap-2 rounded-full border border-border bg-surface-2 py-1 pl-1.5 pr-3 text-[12.5px] transition-[transform,border-color] duration-150 hover:-translate-y-px hover:border-accent active:scale-[0.97]"
             >
               <ChainStrip steps={r.steps} size={20} />
-              {r.title}
+              {tr(r.title)}
             </button>
           ))}
         </div>
@@ -679,15 +686,15 @@ function EmptyChain({
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="Or paste a recipe code"
-            aria-label="Recipe code"
+            placeholder={t("Or paste a recipe code")}
+            aria-label={t("Recipe code")}
             className="h-8 min-w-0 flex-1 rounded-lg border border-border-hi bg-surface px-2.5 font-mono text-[12px] text-text outline-none focus:border-accent"
           />
           <Button type="submit" size="sm" disabled={!code.trim()}>
-            Use code
+            {t("Use code")}
           </Button>
         </form>
-        {codeError && <p className="mt-2 text-[12.5px] text-danger">That isn't a recipe code this app can read.</p>}
+        {codeError && <p className="mt-2 text-[12.5px] text-danger">{t("That isn't a recipe code this app can read.")}</p>}
       </div>
     </>
   );
@@ -731,9 +738,10 @@ function Connector({
   onPicker: () => void;
   onPick: (tool: string) => void;
 }) {
+  const { t } = useTranslation();
   const [over, setOver] = useState(false);
-  const fit = dragTool ? canInsert(chain, slot, dragTool, label, defaultsOf) : null;
-  const where = slot === 0 ? "at the start" : slot >= chain.length ? "at the end" : `before step ${slot + 1}`;
+  const fit = dragTool ? canInsert(chain, slot, dragTool, label, defaultsOf, tr) : null;
+  const where = slot === 0 ? tr("at the start") : slot >= chain.length ? tr("at the end") : `before step ${slot + 1}`;
 
   return (
     <div
@@ -770,7 +778,7 @@ function Connector({
                     : `border-danger/60 text-danger ${over ? "bg-danger-soft" : "bg-surface"}`
                 }`}
               >
-                {fit.ok ? `Drop to add ${where}` : `Can't go ${where}: ${fit.reason}`}
+                {fit.ok ? t("Drop to add {{where}}", { where }) : t("Can't go {{where}}: {{reason}}", { where, reason: fit.reason })}
               </div>
             </div>
           </motion.div>
@@ -791,7 +799,7 @@ function Connector({
                 <button
                   type="button"
                   onClick={onPicker}
-                  aria-label={`Insert a step ${where}`}
+                  aria-label={t("Insert a step {{where}}", { where })}
                   aria-expanded={pickerOpen}
                   className={`grid size-6 place-items-center rounded-full border text-[14px] leading-none transition-[transform,background-color,border-color] duration-150 hover:scale-110 active:scale-95 ${
                     pickerOpen ? "rotate-45 border-accent bg-accent text-on-accent" : "border-border bg-surface text-muted hover:border-accent hover:text-text"
@@ -823,14 +831,15 @@ function Connector({
 }
 
 function InsertPicker({ chain, slot, onPick, where }: { chain: RecipeStep[]; slot: number; onPick: (tool: string) => void; where: string }) {
-  const all = Object.keys(RECIPE_TOOLS).map((slug) => ({ slug, fit: canInsert(chain, slot, slug, label, defaultsOf) }));
+  const { t } = useTranslation();
+  const all = Object.keys(RECIPE_TOOLS).map((slug) => ({ slug, fit: canInsert(chain, slot, slug, label, defaultsOf, tr) }));
   const fits = all.filter((x) => x.fit.ok);
   const rest = all.filter((x) => !x.fit.ok);
   return (
     <div className="mb-2 rounded-2xl border border-accent/50 bg-surface p-3 shadow-[var(--shadow-card)]">
-      <div className="text-[12px] font-semibold">Add a step {where}</div>
+      <div className="text-[12px] font-semibold">{t("Add a step {{where}}", { where })}</div>
       {fits.length === 0 ? (
-        <p className="mt-1 text-[12px] text-muted">No tool fits here.</p>
+        <p className="mt-1 text-[12px] text-muted">{t("No tool fits here.")}</p>
       ) : (
         <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {fits.map(({ slug }, i) => (
@@ -851,7 +860,7 @@ function InsertPicker({ chain, slot, onPick, where }: { chain: RecipeStep[]; slo
       )}
       {rest.length > 0 && (
         <p className="mt-2 text-[11.5px] leading-snug text-faint">
-          Doesn't fit here: {rest.map((x) => label(x.slug)).join(", ")}.
+          {t("Doesn't fit here: {{tools}}.", { tools: rest.map((x) => label(x.slug)).join(", ") })}
         </p>
       )}
     </div>
@@ -897,6 +906,7 @@ function StepItem({
   onPicker: () => void;
   onPick: (tool: string) => void;
 }) {
+  const { t } = useTranslation();
   const tool = toolById(draft.tool);
   const controls = useDragControls();
   const [scope, animate] = useAnimate<HTMLDivElement>();
@@ -916,7 +926,7 @@ function StepItem({
   if (!tool) return null;
   const options = { ...tool.defaults, ...draft.options } as OptionValues;
   const broken = errors.some((e) => e.fix?.type === "insert" || /hands over|reaches Merge/.test(e.message));
-  const flow = index === 0 ? undefined : prev ? flowLabel(prev.outKind, prev.outCount) : undefined;
+  const flow = index === 0 ? undefined : prev ? flowLabel(prev.outKind, prev.outCount, tr) : undefined;
   const tone = errors.length > 0 ? "border-danger bg-danger-soft/40" : warnings.length > 0 ? "border-warn/60" : open ? "border-accent" : "border-border";
 
   return (
@@ -946,16 +956,16 @@ function StepItem({
           <button
             type="button"
             onPointerDown={(e) => controls.start(e)}
-            aria-label={`Drag ${tool.title} to reorder`}
+            aria-label={t("Drag {{title}} to reorder", { title: tool.title })}
             className="cursor-grab touch-none px-0.5 text-faint hover:text-text active:cursor-grabbing"
           >
             <GripVertical className="size-4" aria-hidden />
           </button>
           <span className="grid size-5 flex-none place-items-center rounded-full bg-surface-2 font-mono text-[10.5px] text-muted">{index + 1}</span>
           <StepIcon tool={draft.tool} size={32} />
-          <button type="button" onClick={onToggle} aria-expanded={open} aria-label={`Settings for ${tool.title}`} className="min-w-0 flex-1 text-left">
+          <button type="button" onClick={onToggle} aria-expanded={open} aria-label={t("Settings for {{title}}", { title: tool.title })} className="min-w-0 flex-1 text-left">
             <span className="flex items-center gap-1.5">
-              <span className="truncate text-[14px] font-semibold">{tool.title}</span>
+              <span className="truncate text-[14px] font-semibold">{tr(tool.title)}</span>
               {errors.length > 0 && (
                 <span className="text-danger">
                   <IssueIcon level="error" />
@@ -979,12 +989,12 @@ function StepItem({
             >
               <ChevronDown className="size-4" />
             </button>
-            <IconButton label={`Move ${tool.title} up`} disabled={index === 0} onClick={() => onMove(-1)}><ArrowUp className="size-3.5" /></IconButton>
-            <IconButton label={`Move ${tool.title} down`} disabled={index === count - 1} onClick={() => onMove(1)}><ArrowDown className="size-3.5" /></IconButton>
-            <IconButton label={`Duplicate ${tool.title}`} disabled={count >= MAX_STEPS} onClick={onDuplicate}>
+            <IconButton label={t("Move {{title}} up", { title: tool.title })} disabled={index === 0} onClick={() => onMove(-1)}><ArrowUp className="size-3.5" /></IconButton>
+            <IconButton label={t("Move {{title}} down", { title: tool.title })} disabled={index === count - 1} onClick={() => onMove(1)}><ArrowDown className="size-3.5" /></IconButton>
+            <IconButton label={t("Duplicate {{title}}", { title: tool.title })} disabled={count >= MAX_STEPS} onClick={onDuplicate}>
               <Copy className="size-3.5" />
             </IconButton>
-            <IconButton label={`Remove ${tool.title}`} danger onClick={onRemove}><X className="size-3.5" /></IconButton>
+            <IconButton label={t("Remove {{title}}", { title: tool.title })} danger onClick={onRemove}><X className="size-3.5" /></IconButton>
           </div>
         </div>
 
@@ -1004,10 +1014,10 @@ function StepItem({
               className="overflow-hidden"
             >
               <div className="border-t border-border bg-surface-2/50 p-4">
-                <div className="mb-3 font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">SETTINGS</div>
+                <div className="mb-3 font-mono text-[10.5px] font-bold tracking-[0.13em] text-faint">{t("SETTINGS")}</div>
                 {draft.tool === "protect" && (
                   <p className="mb-3 rounded-lg border border-border bg-surface px-3 py-2 text-[12px] text-muted">
-                    Passwords are never saved with the recipe. You type it each time you run it.
+                    {t("Passwords are never saved with the recipe. You type it each time you run it.")}
                   </p>
                 )}
                 <ToolOptions tool={tool} values={options} onChange={(v) => onChange(v)} />
