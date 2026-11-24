@@ -2,6 +2,9 @@
 ; bundle.windows.nsis.installerHooks). They run inside its Install and
 ; Uninstall sections, where LogicLib and ${MANUPRODUCTKEY} are available.
 
+; Explorer right-click submenu (context-menu.nsh, next to this file).
+!include /CHARSET=UTF8 "${__FILEDIR__}\context-menu.nsh"
+
 !macro NSIS_HOOK_POSTINSTALL
   Push $0
 
@@ -24,10 +27,14 @@
   WriteRegStr HKCU "${MANUPRODUCTKEY}" "Installer Language" "$LANGUAGE"
 
   Pop $0
+
+  !insertmacro ILP_INSTALL_CONTEXT_MENU
 !macroend
 
 !macro NSIS_HOOK_PREUNINSTALL
   ; Not one of the bundled files, so the uninstaller wouldn't know to remove
   ; it, and the install folder would be left behind.
   Delete "$INSTDIR\installer-language"
+
+  !insertmacro ILP_REMOVE_CONTEXT_MENU
 !macroend
