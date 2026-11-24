@@ -5,6 +5,18 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.1] - 2026-11-24
+
+### Changed
+- Every screen is now translated into Spanish, French, Hindi, Marathi and
+  Kannada: tool options, recipes and the recipe builder, results, error
+  messages, settings and update notices. 0.7.0 covered only the main screens.
+- Counted text has proper singular forms in every language, English included
+  ("1 file" instead of "1 files").
+
+### Fixed
+- The signature dialog's "Saved initialss" heading.
+
 ## [0.7.0] - 2026-11-23
 
 ### Added
