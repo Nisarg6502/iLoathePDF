@@ -1,6 +1,13 @@
-import { useDeferredValue, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react";
 import { msg, useTranslation } from "@iloathepdf/i18n";
 import { formatDuration, textStats } from "@/lib/textStats";
+import { WordCounterIcon } from "@/text/registry";
+import { KeywordsPanel } from "@/text/KeywordsPanel";
+import { ReadabilityPanel } from "@/text/ReadabilityPanel";
+import { LimitsPanel } from "@/text/LimitsPanel";
+import { TransformMenu } from "@/text/TransformMenu";
+import { NoTextFoundNotice, OpenFileButton } from "@/text/OpenFileButton";
+import { ExtractTextError, extractText } from "@/text/extractText";
 
 /**
  * Attributes that ask writing-assistant extensions (Grammarly, LanguageTool)
@@ -23,10 +30,18 @@ const UNITS = { hr: msg("hr"), min: msg("min"), sec: msg("sec") };
 export function WordCounter() {
   const { t, i18n } = useTranslation();
   const [text, setText] = useState("");
+  /** The text before the last whole-box change (case change, clean-up, opened file), for Undo. */
+  const [undoText, setUndoText] = useState<string | null>(null);
+  /** Feedback for a file dropped on the box (the Open file button shows its own). */
+  const [dropNote, setDropNote] = useState<ReactNode>(null);
+  const [dragging, setDragging] = useState(false);
+  const [selection, setSelection] = useState<[number, number]>([0, 0]);
   const boxRef = useRef<HTMLTextAreaElement>(null);
   // Counting a long document on every keystroke can lag; let typing win.
   const counted = useDeferredValue(text);
   const stats = useMemo(() => textStats(counted), [counted]);
+  const selected = selection[1] > selection[0] ? text.slice(selection[0], selection[1]) : "";
+  const selectedStats = useMemo(() => (selected ? textStats(selected) : null), [selected]);
   const num = useMemo(() => new Intl.NumberFormat(i18n.language), [i18n.language]);
   const canPaste = typeof navigator !== "undefined" && !!navigator.clipboard?.readText;
 
@@ -42,16 +57,66 @@ export function WordCounter() {
       const clip = await navigator.clipboard.readText();
       box.focus();
       box.setRangeText(clip, box.selectionStart, box.selectionEnd, "end");
-      setText(box.value);
+      edit(box.value);
     } catch {
       // Permission refused or nothing readable: Ctrl+V still works.
       box.focus();
     }
   }
 
-  function clear() {
-    setText("");
+  function edit(next: string) {
+    setText(next);
+    setUndoText(null);
+  }
+
+  /** Replaces the whole text in one step that Undo can take back. */
+  function replaceAll(next: string) {
+    if (next === text) return;
+    setUndoText(text);
+    setText(next);
+    setSelection([0, 0]);
+  }
+
+  function undo() {
+    if (undoText === null) return;
+    setText(undoText);
+    setUndoText(null);
     boxRef.current?.focus();
+  }
+
+  function clear() {
+    replaceAll("");
+    boxRef.current?.focus();
+  }
+
+  function openedFile(next: string) {
+    setDropNote(null);
+    replaceAll(next);
+    boxRef.current?.focus();
+  }
+
+  function hasFiles(e: DragEvent) {
+    return Array.from(e.dataTransfer.types).includes("Files");
+  }
+
+  async function dropFile(e: DragEvent<HTMLTextAreaElement>) {
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (!file) return; // dropped text: let the browser insert it
+    e.preventDefault();
+    setDropNote(t("Opening…"));
+    try {
+      const extracted = await extractText(file);
+      if (!extracted.trim()) setDropNote(<NoTextFoundNotice />);
+      else openedFile(extracted);
+    } catch (err) {
+      setDropNote(<span className="text-danger">{err instanceof ExtractTextError ? err.message : t("Couldn't read this file.")}</span>);
+    }
+  }
+
+  function trackSelection(e: { currentTarget: HTMLTextAreaElement }) {
+    const { selectionStart, selectionEnd } = e.currentTarget;
+    setSelection((prev) => (prev[0] === selectionStart && prev[1] === selectionEnd ? prev : [selectionStart, selectionEnd]));
   }
 
   const secondary = [
@@ -66,10 +131,7 @@ export function WordCounter() {
     <div>
       <div className="mx-auto flex max-w-6xl items-start gap-3.5 px-5 sm:px-8 pt-8">
         <span className="grid size-9.5 flex-none place-items-center rounded-[11px] border border-border bg-accent-soft">
-          <svg viewBox="0 0 18 18" fill="none" stroke="var(--accent-deep)" strokeWidth="1.5" strokeLinecap="round" className="size-5" aria-hidden="true">
-            <path d="M2.5 4h13M2.5 7.5h13M2.5 11h7" />
-            <path d="M12.5 10.5v5M15.5 10.5v5M11.5 12.2h5M11.5 13.8h5" />
-          </svg>
+          <WordCounterIcon className="size-5" />
         </span>
         <div>
           <h1 className="m-0 text-[28px] font-semibold tracking-[-0.028em]">{t("Word counter")}</h1>
@@ -77,8 +139,9 @@ export function WordCounter() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-6xl gap-5 px-5 sm:px-8 pt-6 pb-14 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="flex min-w-0 flex-col">
+      {/* Phones: counts, then the box, then the limit. Desktop: the box on the left, counts and limit beside it. */}
+      <div className="mx-auto grid max-w-6xl gap-5 px-5 sm:px-8 pt-6 pb-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:grid-rows-[auto_1fr]">
+        <div className="flex min-w-0 flex-col lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <label htmlFor="word-counter-text" className="sr-only">
             {t("Your text")}
           </label>
@@ -86,9 +149,20 @@ export function WordCounter() {
             id="word-counter-text"
             ref={boxRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t("Start typing, or paste your text here…")}
-            className="min-h-[22rem] w-full resize-y rounded-[12px] border border-border-hi bg-surface p-4 text-[15px] leading-relaxed text-text placeholder:text-faint focus:border-accent focus:outline-none lg:min-h-[30rem]"
+            onChange={(e) => {
+              edit(e.target.value);
+              trackSelection(e);
+            }}
+            onSelect={trackSelection}
+            onDragOver={(e) => {
+              if (!hasFiles(e)) return;
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={dropFile}
+            placeholder={t("Start typing, paste your text, or drop a PDF, Word or text file here…")}
+            className={`min-h-[22rem] w-full resize-y rounded-[12px] border border-border-hi bg-surface p-4 text-[15px] leading-relaxed text-text placeholder:text-faint focus:border-accent focus:outline-none lg:min-h-[30rem] ${dragging ? "border-accent bg-accent-soft" : ""}`}
             {...NO_ASSISTANTS}
           />
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -101,6 +175,14 @@ export function WordCounter() {
                 {t("Paste")}
               </button>
             )}
+            <OpenFileButton onText={(next) => openedFile(next)} />
+            <TransformMenu
+              text={text}
+              onChange={(next) => {
+                replaceAll(next);
+                boxRef.current?.focus();
+              }}
+            />
             <button
               type="button"
               onClick={clear}
@@ -109,6 +191,16 @@ export function WordCounter() {
             >
               {t("Clear")}
             </button>
+            {undoText !== null && (
+              <button
+                type="button"
+                onClick={undo}
+                className="flex h-9 items-center rounded-[9px] border border-border px-3.5 text-[13px] font-medium text-muted transition-transform duration-100 hover:bg-surface-2 hover:text-text active:scale-[0.96]"
+              >
+                {t("Undo")}
+              </button>
+            )}
+            {dropNote && <p className="text-[12.5px] text-muted" role="status">{dropNote}</p>}
             <p className="ml-auto flex items-center gap-1.5 text-[12.5px] text-muted">
               <span className="size-1.5 flex-none rounded-full bg-ok" aria-hidden="true" />
               {t("Counted in this tab. Your text is never uploaded or saved.")}
@@ -116,8 +208,17 @@ export function WordCounter() {
           </div>
         </div>
 
-        <aside aria-label={t("Counts")} className="max-lg:order-first lg:sticky lg:top-[86px] lg:self-start">
+        <aside aria-label={t("Counts")} className="max-lg:order-first lg:col-start-2 lg:row-start-1">
           <div className="rounded-[14px] border border-border bg-surface p-5">
+            {selectedStats && (
+              <p className="-mx-1 mb-4 rounded-[9px] bg-accent-soft px-3 py-2 text-[12.5px] text-text" data-testid="selection-count">
+                <span className="font-mono text-[10px] font-bold tracking-[0.13em] text-accent-deep">{t("SELECTED")}</span>{" "}
+                {t("{{words}} words · {{characters}} characters", {
+                  words: num.format(selectedStats.words),
+                  characters: num.format(selectedStats.characters),
+                })}
+              </p>
+            )}
             <dl className="grid grid-cols-2 gap-4">
               <div>
                 <dt className="font-mono text-[10.5px] font-bold tracking-[0.13em] text-muted">{t("WORDS")}</dt>
@@ -145,6 +246,14 @@ export function WordCounter() {
             {t("Reading time assumes 238 words a minute; speaking time, 150.")}
           </p>
         </aside>
+        <div className="lg:col-start-2 lg:row-start-2 lg:self-start">
+          <LimitsPanel stats={stats} />
+        </div>
+      </div>
+
+      <div className="mx-auto grid max-w-6xl items-start gap-5 px-5 sm:px-8 pb-16 lg:grid-cols-2">
+        <KeywordsPanel text={counted} />
+        <ReadabilityPanel text={counted} />
       </div>
     </div>
   );

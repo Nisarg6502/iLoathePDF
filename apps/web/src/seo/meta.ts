@@ -108,21 +108,64 @@ export function staticPages(): PageMeta[] {
       jsonLd: [breadcrumb([{ name: "Home", path: "/" }, { name: "Recipes", path: "/recipes" }])],
     },
     {
+      path: "/text",
+      title: `Private text tools: word counter, compare texts | ${SITE_NAME}`,
+      description:
+        "A word counter and a text compare tool that work entirely in your browser tab. For text you'd rather not paste into a stranger's website: nothing is uploaded, saved or tracked.",
+      index: true,
+      priority: 0.7,
+      heading: "Text tools",
+      body: "For text you'd rather not paste into a stranger's website. Everything is worked out in your browser tab: nothing is uploaded, saved or tracked.",
+      links: [
+        { href: "/text/word-counter", label: "Word counter" },
+        { href: "/text/compare", label: "Compare texts" },
+      ],
+      jsonLd: [breadcrumb([{ name: "Home", path: "/" }, { name: "Text tools", path: "/text" }])],
+    },
+    {
       path: "/text/word-counter",
       title: `Word counter: private, nothing uploaded | ${SITE_NAME}`,
       description:
-        "Count words, characters, sentences, paragraphs and reading time as you type or paste. Your text is counted in your browser tab and is never uploaded, saved or tracked.",
+        "Count words, characters, sentences and reading time as you type, paste or open a PDF or Word file. See your most-used words, readability score and character limits. Nothing is uploaded or saved.",
       index: true,
       priority: 0.8,
       heading: "Word counter",
-      body: "Paste or type your text to count words, characters (with and without spaces), sentences, paragraphs, and reading and speaking time. Everything is counted in your browser tab: the text is never uploaded or saved.",
-      links: [{ href: "/tools", label: "PDF and image tools" }],
+      body: "Paste or type your text, or open a PDF, Word or text file, to count words, characters (with and without spaces), sentences, paragraphs, and reading and speaking time. It also shows your most-used words and phrases, a Flesch readability score, progress against limits like a 280-character post or a 160-character meta description, and counts for just the part you select. Change case or clean up text copied from a PDF in one click. Everything happens in your browser tab: the text is never uploaded or saved.",
+      links: [
+        { href: "/text/compare", label: "Compare texts" },
+        { href: "/tools", label: "PDF and image tools" },
+      ],
       jsonLd: [
         breadcrumb([
           { name: "Home", path: "/" },
+          { name: "Text tools", path: "/text" },
           { name: "Word counter", path: "/text/word-counter" },
         ]),
-        webApp(`Word counter (${SITE_NAME})`, "Counts words, characters, sentences and reading time in the browser. Text is never uploaded.", "/text/word-counter"),
+        webApp(`Word counter (${SITE_NAME})`, "Counts words, characters, sentences and reading time in the browser. Text is never uploaded.", "/text/word-counter", {
+          featureList: ["Word and character count", "Most-used words", "Readability score", "Character limits", "Selection count", "Open PDF and Word files", "Change case"],
+        }),
+      ],
+    },
+    {
+      path: "/text/compare",
+      title: `Compare texts: see what changed, privately | ${SITE_NAME}`,
+      description:
+        "Paste two versions of a text and see every word that was added or removed, inline or side by side. Ignore case or extra spaces. It runs entirely in your browser: your text is never uploaded.",
+      index: true,
+      priority: 0.7,
+      heading: "Compare texts",
+      body: "Paste two versions of a text and see every word that was added or removed, inline or side by side, with options to ignore case and extra spaces. The comparison runs in your browser tab: neither text is uploaded or saved.",
+      links: [
+        { href: "/text/word-counter", label: "Word counter" },
+        { href: "/text", label: "Text tools" },
+      ],
+      jsonLd: [
+        breadcrumb([
+          { name: "Home", path: "/" },
+          { name: "Text tools", path: "/text" },
+          { name: "Compare texts", path: "/text/compare" },
+        ]),
+        webApp(`Compare texts (${SITE_NAME})`, "Shows the words added and removed between two texts, in the browser. Text is never uploaded.", "/text/compare"),
       ],
     },
     {
