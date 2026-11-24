@@ -50,6 +50,9 @@
   ${EndIf}
 !macroend
 
+; Explorer right-click submenu (context-menu.nsh, next to this file).
+!include /CHARSET=UTF8 "${__FILEDIR__}\context-menu.nsh"
+
 !macro NSIS_HOOK_POSTINSTALL
   Push $0
 
@@ -73,6 +76,8 @@
 
   Pop $0
   !insertmacro ILP_INSTALL_SENDTO
+
+  !insertmacro ILP_INSTALL_CONTEXT_MENU
 !macroend
 
 !macro NSIS_HOOK_PREUNINSTALL
@@ -80,4 +85,6 @@
   ; it, and the install folder would be left behind.
   Delete "$INSTDIR\installer-language"
   !insertmacro ILP_REMOVE_SENDTO
+
+  !insertmacro ILP_REMOVE_CONTEXT_MENU
 !macroend
