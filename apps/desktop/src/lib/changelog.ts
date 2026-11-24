@@ -19,6 +19,17 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.9.0",
+    date: "2026-11-25",
+    highlights: [
+      "Right-click files in File Explorer and pick iLoathePDF: merge, compress, split or protect PDFs, and turn images into a PDF, without opening the app first. On Windows 11 it's under \"Show more options\".",
+      "Select many files at once and they all land in one tool, ready to go.",
+      "Send to → iLoathePDF picks the right tool for you: images become a PDF, several PDFs get merged.",
+      "Files you open with the app, or drop on its icon, now load straight in.",
+      "Sending files while the app is open uses the window you have, and nothing runs until you press the button.",
+    ],
+  },
+  {
     version: "0.8.0",
     date: "2026-11-24",
     highlights: [

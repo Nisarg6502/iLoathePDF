@@ -1445,5 +1445,12 @@
   "Paste two versions to see every word that was added or removed. Your text never leaves this computer.": "ಸೇರಿಸಿದ ಅಥವಾ ತೆಗೆದ ಪ್ರತಿಯೊಂದು ಪದವನ್ನು ನೋಡಲು ಎರಡು ಆವೃತ್ತಿಗಳನ್ನು ಅಂಟಿಸಿ. ನಿಮ್ಮ ಪಠ್ಯ ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಹೊರಗೆ ಹೋಗುವುದಿಲ್ಲ.",
   "TEXT": "ಟೆಕ್ಸ್ಟ್",
   "TEXT · PASTE OR TYPE, NOTHING SAVED": "ಟೆಕ್ಸ್ಟ್ · ಅಂಟಿಸಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ, ಏನನ್ನೂ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ",
-  "Text, PDF and Word files": "ಟೆಕ್ಸ್ಟ್, PDF ಮತ್ತು Word ಫೈಲುಗಳು"
+  "Text, PDF and Word files": "ಟೆಕ್ಸ್ಟ್, PDF ಮತ್ತು Word ಫೈಲುಗಳು",
+  "{{count}} items were left out because they are folders or no longer exist.": "{{count}} ಐಟಂಗಳನ್ನು ಬಿಡಲಾಗಿದೆ, ಏಕೆಂದರೆ ಅವು ಫೋಲ್ಡರ್‌ಗಳು ಅಥವಾ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.",
+  "{{count}} items were left out because they are folders or no longer exist._one": "{{count}} ಐಟಂ ಅನ್ನು ಬಿಡಲಾಗಿದೆ, ಏಕೆಂದರೆ ಅದು ಫೋಲ್ಡರ್ ಅಥವಾ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.",
+  "There is no tool called “{{id}}”. Choose one on this screen.": "“{{id}}” ಎಂಬ ಹೆಸರಿನ ಯಾವುದೇ ಪರಿಕರ ಇಲ್ಲ. ಈ ಪರದೆಯಲ್ಲಿ ಒಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+  "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} ಕೇವಲ {{files}} ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಈ ಫೈಲುಗಳಿಗೆ ಬೇರೆ ಪರಿಕರವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+  "{{count}} files were left out: {{tool}} takes {{files}}.": "{{count}} ಫೈಲುಗಳನ್ನು ಬಿಡಲಾಗಿದೆ: {{tool}} ಕೇವಲ {{files}} ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.",
+  "{{count}} files were left out: {{tool}} takes {{files}}._one": "{{count}} ಫೈಲ್ ಅನ್ನು ಬಿಡಲಾಗಿದೆ: {{tool}} ಕೇವಲ {{files}} ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.",
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} ಒಮ್ಮೆಗೆ ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ {{name}} ಅನ್ನು ಮಾತ್ರ ತೆರೆಯಲಾಗಿದೆ."
 }
