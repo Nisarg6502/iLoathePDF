@@ -10,14 +10,16 @@ const NAV_LINKS = [
   { to: "/", label: msg("Home"), end: true },
   { to: "/tools", label: msg("Tools"), menu: true },
   { to: "/recipes", label: msg("Recipes") },
+  { to: "/text", label: msg("Text") },
   { to: "/how-it-works", label: msg("How it works") },
   { to: "/privacy", label: msg("Privacy") },
 ];
 
 /**
- * The full nav needs about 780px, so below the `lg` breakpoint it collapses
- * into a menu button. Without that the nav forced the whole page wider than a
- * phone screen, and mobile browsers zoomed out to fit it.
+ * The full nav needs about 1,000px in English and more in French or Spanish,
+ * so below the `xl` breakpoint (1280px) it collapses into a menu button.
+ * Without that the nav forced the whole page wider than the screen (on a
+ * phone, mobile browsers zoomed out to fit it) or wrapped its labels.
  */
 export function SiteHeader() {
   const { t } = useTranslation();
@@ -41,13 +43,13 @@ export function SiteHeader() {
 
   return (
     <div className="sticky top-0 z-20 border-b border-border bg-bg">
-      <div className="mx-auto flex h-[62px] max-w-6xl items-center gap-3 px-5 sm:px-8 lg:gap-8">
+      <div className="mx-auto flex h-[62px] max-w-6xl items-center gap-3 px-5 sm:px-8 xl:gap-8">
         <Link to="/" className="flex flex-none items-center gap-2">
           <LogoMark size={26} />
           <Wordmark className="text-[17px]" />
         </Link>
 
-        <nav aria-label={t("Primary")} className="flex items-center gap-0.5 max-lg:hidden">
+        <nav aria-label={t("Primary")} className="flex items-center gap-0.5 max-xl:hidden">
           {NAV_LINKS.map((link) =>
             link.menu ? (
               <ToolsMenu key={link.to} />
@@ -72,7 +74,7 @@ export function SiteHeader() {
         <ThemeToggle />
         <Link
           to="/download"
-          className="flex h-8 flex-none items-center gap-1.5 rounded-[9px] border border-border-hi bg-surface-2 px-3.5 text-[13px] font-semibold text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96] max-lg:hidden"
+          className="flex h-8 flex-none items-center gap-1.5 rounded-[9px] border border-border-hi bg-surface-2 px-3.5 text-[13px] font-semibold text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96] max-xl:hidden"
         >
           {t("Desktop app")}
         </Link>
@@ -83,7 +85,7 @@ export function SiteHeader() {
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
           onClick={() => setOpen((o) => !o)}
-          className="grid size-10 flex-none place-items-center rounded-lg border border-border-hi bg-surface-2 text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96] lg:hidden"
+          className="grid size-10 flex-none place-items-center rounded-lg border border-border-hi bg-surface-2 text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96] xl:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
             {open ? <path d="M4 4l10 10M14 4 4 14" /> : <path d="M3 5.5h12M3 9h12M3 12.5h12" />}
@@ -95,7 +97,7 @@ export function SiteHeader() {
         <nav
           id={panelId}
           aria-label={t("Menu")}
-          className="absolute inset-x-0 top-full max-h-[calc(100dvh-62px)] overflow-y-auto border-b border-border bg-bg px-5 pb-4 pt-2 shadow-[var(--shadow-card)] sm:px-8 lg:hidden"
+          className="absolute inset-x-0 top-full max-h-[calc(100dvh-62px)] overflow-y-auto border-b border-border bg-bg px-5 pb-4 pt-2 shadow-[var(--shadow-card)] sm:px-8 xl:hidden"
         >
           <ul className="mx-auto flex max-w-6xl flex-col">
             {NAV_LINKS.map((link) => (

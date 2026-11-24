@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { Routes, Route, Outlet, useLocation } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
 import { RequestStatusProvider } from "@/components/layout/RequestStatusContext";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -15,6 +15,7 @@ const RecipeDetail = lazy(() => import("@/pages/RecipeDetail").then((m) => ({ de
 const RecipeBuilder = lazy(() => import("@/pages/RecipeBuilder").then((m) => ({ default: m.RecipeBuilder })));
 const HowItWorks = lazy(() => import("@/pages/HowItWorks").then((m) => ({ default: m.HowItWorks })));
 const Privacy = lazy(() => import("@/pages/Privacy").then((m) => ({ default: m.Privacy })));
+const WordCounter = lazy(() => import("@/pages/WordCounter").then((m) => ({ default: m.WordCounter })));
 const Download = lazy(() => import("@/pages/Download").then((m) => ({ default: m.Download })));
 
 function Layout() {
@@ -45,6 +46,8 @@ export default function App() {
           <Route path="recipes/new" element={<RecipeBuilder />} />
           <Route path="recipes/:slug/edit" element={<RecipeBuilder />} />
           <Route path="recipes/:slug" element={<RecipeDetail />} />
+          <Route path="text" element={<Navigate to="/text/word-counter" replace />} />
+          <Route path="text/word-counter" element={<WordCounter />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="download" element={<Download />} />
