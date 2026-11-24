@@ -1436,5 +1436,11 @@
   "Remove line breaks": "ओळ खंड काढा",
   "Rejoins lines copied from a PDF": "PDF मधून कॉपी केलेल्या ओळी पुन्हा जोडते",
   "Remove empty lines": "रिकाम्या ओळी काढा",
-  "Blank lines between paragraphs": "परिच्छेदांमधील रिकाम्या ओळी"
+  "Blank lines between paragraphs": "परिच्छेदांमधील रिकाम्या ओळी",
+  "Counted on this computer. Your text is never uploaded or saved.": "याच संगणकावर मोजले जाते. तुमचा मजकूर कधीही अपलोड किंवा सेव्ह होत नाही.",
+  "Compared on this computer. Your text is never uploaded or saved.": "याच संगणकावर तुलना केली. तुमचा मजकूर कधीही अपलोड किंवा सेव्ह होत नाही.",
+  "Paste two versions to see every word that was added or removed. Your text never leaves this computer.": "दोन आवृत्त्या पेस्ट करा आणि जोडलेला किंवा काढलेला प्रत्येक शब्द पाहा. तुमचा मजकूर हा संगणक कधीच सोडत नाही.",
+  "TEXT": "टेक्स्ट",
+  "TEXT · PASTE OR TYPE, NOTHING SAVED": "टेक्स्ट · पेस्ट करा किंवा टाइप करा, काहीही सेव्ह होत नाही",
+  "Text, PDF and Word files": "टेक्स्ट, PDF आणि Word फाइल्स"
 }

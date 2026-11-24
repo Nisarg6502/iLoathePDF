@@ -1439,5 +1439,11 @@
   "Remove line breaks": "ಸಾಲು ವಿರಾಮಗಳನ್ನು ತೆಗೆದುಹಾಕಿ",
   "Rejoins lines copied from a PDF": "PDF ನಿಂದ ನಕಲಿಸಿದ ಸಾಲುಗಳನ್ನು ಮತ್ತೆ ಜೋಡಿಸುತ್ತದೆ",
   "Remove empty lines": "ಖಾಲಿ ಸಾಲುಗಳನ್ನು ತೆಗೆದುಹಾಕಿ",
-  "Blank lines between paragraphs": "ಪ್ಯಾರಾಗ್ರಾಫ್‌ಗಳ ನಡುವಿನ ಖಾಲಿ ಸಾಲುಗಳು"
+  "Blank lines between paragraphs": "ಪ್ಯಾರಾಗ್ರಾಫ್‌ಗಳ ನಡುವಿನ ಖಾಲಿ ಸಾಲುಗಳು",
+  "Counted on this computer. Your text is never uploaded or saved.": "ಈ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲೇ ಎಣಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಪಠ್ಯವನ್ನು ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಅಥವಾ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ.",
+  "Compared on this computer. Your text is never uploaded or saved.": "ಈ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲೇ ಹೋಲಿಸಲಾಗಿದೆ. ನಿಮ್ಮ ಪಠ್ಯವನ್ನು ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಅಥವಾ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ.",
+  "Paste two versions to see every word that was added or removed. Your text never leaves this computer.": "ಸೇರಿಸಿದ ಅಥವಾ ತೆಗೆದ ಪ್ರತಿಯೊಂದು ಪದವನ್ನು ನೋಡಲು ಎರಡು ಆವೃತ್ತಿಗಳನ್ನು ಅಂಟಿಸಿ. ನಿಮ್ಮ ಪಠ್ಯ ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಹೊರಗೆ ಹೋಗುವುದಿಲ್ಲ.",
+  "TEXT": "ಟೆಕ್ಸ್ಟ್",
+  "TEXT · PASTE OR TYPE, NOTHING SAVED": "ಟೆಕ್ಸ್ಟ್ · ಅಂಟಿಸಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ, ಏನನ್ನೂ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ",
+  "Text, PDF and Word files": "ಟೆಕ್ಸ್ಟ್, PDF ಮತ್ತು Word ಫೈಲುಗಳು"
 }

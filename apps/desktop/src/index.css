@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* The text tools shared with the website. */
+@source "../../../packages/text/src";
 
 /* ==========================================================================
    Fonts. Self-hosted on purpose: the design calls for General Sans and Space
@@ -78,6 +80,8 @@
   --accent: oklch(0.775 0.155 78);
   --accent-hi: oklch(0.715 0.160 72);
   --accent-soft: oklch(0.958 0.048 82);
+  /* Accent dark enough for small text and icons on a light surface. */
+  --accent-deep: oklch(0.52 0.15 66);
   --on-accent: oklch(0.235 0.045 68);
 
   --ok: oklch(0.545 0.115 162);
@@ -141,6 +145,7 @@
   --accent: oklch(0.8 0.152 80);
   --accent-hi: oklch(0.87 0.14 84);
   --accent-soft: oklch(0.295 0.055 78);
+  --accent-deep: oklch(0.62 0.145 78);
   --on-accent: oklch(0.185 0.035 68);
 
   --ok: oklch(0.805 0.125 162);
@@ -196,6 +201,7 @@
   --color-accent: var(--accent);
   --color-accent-hi: var(--accent-hi);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-deep: var(--accent-deep);
   --color-on-accent: var(--on-accent);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
@@ -338,6 +344,18 @@ input[type="range"].ihp-slider:disabled {
 }
 .ihp-pulse {
   animation: ihp-pulse 1.6s ease-in-out infinite;
+}
+
+/* Drop-down menus (the text tools' Change case menu). */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+.menu-in {
+  transform-origin: top left;
+  animation: menu-in 160ms var(--ease-out-strong);
 }
 
 @media (prefers-reduced-motion: reduce) {

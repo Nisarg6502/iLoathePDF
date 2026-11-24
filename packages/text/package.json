@@ -1,0 +1,19 @@
+{
+  "name": "@iloathepdf/text",
+  "private": true,
+  "license": "MIT",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Text tools (word counter, compare texts) shared by the web and desktop apps",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@iloathepdf/i18n": "*",
+    "fflate": "^0.8.3"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-router-dom": ">=7"
+  }
+}

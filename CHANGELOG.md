@@ -5,6 +5,25 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-11-24
+
+### Added
+- Text tools, in a new Text section of the sidebar and the home screen:
+  - Word counter: words, characters (with and without spaces), sentences,
+    paragraphs, reading and speaking time, and a count for the selection.
+    Shows your most-used words and phrases, a readability score, and progress
+    against a limit (tweet, SMS, meta description and more, or your own).
+    Opens PDF, Word (.docx), .txt, .md and .csv files from a dialog or a drop
+    on the window. Change case and clean-ups (extra spaces, line breaks, empty
+    lines) with Undo.
+  - Compare texts: word-by-word differences between two versions, inline or
+    side by side, optionally ignoring case and extra spaces.
+- Text never leaves the computer and is not saved.
+
+### Changed
+- The sidebar's tool list scrolls when the window is too short, so Settings
+  and the collapse button always stay visible.
+
 ## [0.7.1] - 2026-11-24
 
 ### Changed

@@ -10,7 +10,7 @@
  * Sentences and words follow the same rules as lib/textStats.ts, so the
  * counts here agree with the ones beside them on the page.
  */
-import { countWords } from "@/lib/textStats";
+import { countWords } from "./textStats";
 
 /** Fewer words than this and the score says more about luck than writing. */
 export const MIN_WORDS = 30;

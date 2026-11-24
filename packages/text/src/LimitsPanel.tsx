@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from "react";
 import { useTranslation } from "@iloathepdf/i18n";
-import type { TextStats } from "@/lib/textStats";
+import type { TextStats } from "./textStats";
 import {
   DEFAULT_CUSTOM,
   LIMIT_PRESETS,

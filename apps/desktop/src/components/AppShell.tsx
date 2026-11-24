@@ -4,12 +4,13 @@
  * The OS decorations are switched off (`decorations: false`), so the title bar
  * here is the real one -- including the drag region and the window buttons.
  */
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useTranslation } from "@iloathepdf/i18n";
 
 import { TOOLS, type Tool } from "@/lib/tools";
+import { TEXT_TOOLS } from "@/lib/textTools";
 import { cn } from "@/lib/utils";
 import { isTauri } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
@@ -194,7 +195,7 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
 function RailHeading({ children, show }: { children: ReactNode; show: boolean }) {
   if (!show) return <div className="h-2" />;
   return (
-    <div className="px-3.5 pt-3.5 pb-1.5 font-mono text-[11px] font-bold tracking-[0.13em] text-faint first:pt-1">
+    <div className="px-3.5 pt-2.5 pb-1 font-mono text-[11px] font-bold tracking-[0.13em] text-faint first:pt-1">
       {children}
     </div>
   );
@@ -235,7 +236,7 @@ function RailItem({
   );
 }
 
-function ToolIcon({ tool }: { tool: Tool }) {
+function ToolIcon({ tool }: { tool: Pick<Tool, "icon" | "tint"> }) {
   return (
     <tool.icon
       className="size-4"
@@ -267,51 +268,69 @@ function Rail() {
   const imageTools = TOOLS.filter((tool) => tool.group === "image");
   const documentTools = TOOLS.filter((tool) => tool.group === "document");
 
+  // Keep the current screen's item in view when the list has to scroll.
+  const listRef = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
+  useEffect(() => {
+    listRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest" });
+  }, [pathname]);
+
   return (
     <nav
       style={{ width: expanded ? 184 : 52 }}
       className="flex flex-none flex-col overflow-hidden border-r border-border bg-surface py-2.5 transition-[width] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
     >
-      <RailItem to="/" label={t("All tools")} showLabel={expanded} end>
-        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="2" y="2" width="5.5" height="5.5" rx="1.2" />
-          <rect x="10.5" y="2" width="5.5" height="5.5" rx="1.2" />
-          <rect x="2" y="10.5" width="5.5" height="5.5" rx="1.2" />
-          <rect x="10.5" y="10.5" width="5.5" height="5.5" rx="1.2" />
-        </svg>
-      </RailItem>
-
-      <RailItem to="/recipes" label={t("Recipes")} showLabel={expanded}>
-        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="2" y="2.5" width="5" height="4" rx="1" />
-          <rect x="11" y="7" width="5" height="4" rx="1" />
-          <rect x="2" y="11.5" width="5" height="4" rx="1" />
-          <path d="M7 4.5h2.2a1 1 0 0 1 1 1V9H11M7 13.5h2.2a1 1 0 0 0 1-1V9" />
-        </svg>
-      </RailItem>
-
-      <RailHeading show={expanded}>{t("PDF")}</RailHeading>
-      {pdfTools.map((tool) => (
-        <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
-          <ToolIcon tool={tool} />
+      {/* The tool list scrolls (wheel, keyboard, or following the current
+          screen) when the window is too short for it, so Settings and the
+          collapse button below always stay in view. No scrollbar: it would
+          eat the width the tool names need. */}
+      <div ref={listRef} className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]">
+        <RailItem to="/" label={t("All tools")} showLabel={expanded} end>
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="2" y="2" width="5.5" height="5.5" rx="1.2" />
+            <rect x="10.5" y="2" width="5.5" height="5.5" rx="1.2" />
+            <rect x="2" y="10.5" width="5.5" height="5.5" rx="1.2" />
+            <rect x="10.5" y="10.5" width="5.5" height="5.5" rx="1.2" />
+          </svg>
         </RailItem>
-      ))}
 
-      <RailHeading show={expanded}>{t("IMAGES")}</RailHeading>
-      {imageTools.map((tool) => (
-        <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
-          <ToolIcon tool={tool} />
+        <RailItem to="/recipes" label={t("Recipes")} showLabel={expanded}>
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="2" y="2.5" width="5" height="4" rx="1" />
+            <rect x="11" y="7" width="5" height="4" rx="1" />
+            <rect x="2" y="11.5" width="5" height="4" rx="1" />
+            <path d="M7 4.5h2.2a1 1 0 0 1 1 1V9H11M7 13.5h2.2a1 1 0 0 0 1-1V9" />
+          </svg>
         </RailItem>
-      ))}
 
-      <RailHeading show={expanded}>{t("TO PDF")}</RailHeading>
-      {documentTools.map((tool) => (
-        <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
-          <ToolIcon tool={tool} />
-        </RailItem>
-      ))}
+        <RailHeading show={expanded}>{t("PDF")}</RailHeading>
+        {pdfTools.map((tool) => (
+          <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
+            <ToolIcon tool={tool} />
+          </RailItem>
+        ))}
 
-      <div className="flex-1" />
+        <RailHeading show={expanded}>{t("IMAGES")}</RailHeading>
+        {imageTools.map((tool) => (
+          <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
+            <ToolIcon tool={tool} />
+          </RailItem>
+        ))}
+
+        <RailHeading show={expanded}>{t("TO PDF")}</RailHeading>
+        {documentTools.map((tool) => (
+          <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
+            <ToolIcon tool={tool} />
+          </RailItem>
+        ))}
+
+        <RailHeading show={expanded}>{t("TEXT")}</RailHeading>
+        {TEXT_TOOLS.map((tool) => (
+          <RailItem key={tool.id} to={tool.path} label={t(tool.title)} showLabel={expanded}>
+            <ToolIcon tool={tool} />
+          </RailItem>
+        ))}
+      </div>
 
       <RailItem to="/settings" label={t("Settings")} showLabel={expanded}>
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.8">
