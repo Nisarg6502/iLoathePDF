@@ -1436,5 +1436,12 @@
   "Paste two versions to see every word that was added or removed. Your text never leaves this computer.": "दो संस्करण पेस्ट करें और देखें कि कौन-सा हर शब्द जोड़ा या हटाया गया। आपका टेक्स्ट इस कंप्यूटर से बाहर नहीं जाता।",
   "TEXT": "टेक्स्ट",
   "TEXT · PASTE OR TYPE, NOTHING SAVED": "टेक्स्ट · पेस्ट करें या टाइप करें, कुछ भी सेव नहीं होता",
-  "Text, PDF and Word files": "टेक्स्ट, PDF और Word फ़ाइलें"
+  "Text, PDF and Word files": "टेक्स्ट, PDF और Word फ़ाइलें",
+  "{{count}} items were left out because they are folders or no longer exist.": "{{count}} आइटम छोड़ दिए गए, क्योंकि वे फ़ोल्डर हैं या अब मौजूद नहीं हैं।",
+  "{{count}} items were left out because they are folders or no longer exist._one": "{{count}} आइटम छोड़ दिया गया, क्योंकि वह फ़ोल्डर है या अब मौजूद नहीं है।",
+  "There is no tool called “{{id}}”. Choose one on this screen.": "“{{id}}” नाम का कोई टूल नहीं है। इस स्क्रीन पर कोई टूल चुनें।",
+  "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} केवल {{files}} लेता है। इन फ़ाइलों के लिए कोई दूसरा टूल चुनें।",
+  "{{count}} files were left out: {{tool}} takes {{files}}.": "{{count}} फ़ाइलें छोड़ दी गईं: {{tool}} केवल {{files}} लेता है।",
+  "{{count}} files were left out: {{tool}} takes {{files}}._one": "{{count}} फ़ाइल छोड़ दी गई: {{tool}} केवल {{files}} लेता है।",
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} एक बार में एक ही फ़ाइल पर काम करता है, इसलिए केवल {{name}} खोली गई।"
 }

@@ -5,10 +5,13 @@
  * here is the real one -- including the drag region and the window buttons.
  */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useTranslation } from "@iloathepdf/i18n";
 
+import { pickedFromPaths } from "@/components/FileDropZone";
+import { setPendingFiles } from "@/lib/handoff";
+import { claimLaunch, startLaunchListener, useLaunch } from "@/lib/launch";
 import { TOOLS, type Tool } from "@/lib/tools";
 import { TEXT_TOOLS } from "@/lib/textTools";
 import { cn } from "@/lib/utils";
@@ -551,6 +554,74 @@ function UpdateBanner() {
 }
 
 // ---------------------------------------------------------------------------
+// Files from Windows ("Send to", the right-click menu, "Open with")
+// ---------------------------------------------------------------------------
+
+/** Which launch put the user on this screen, if one did. */
+function launchSeqOf(state: unknown): number | undefined {
+  const seq = (state as { launch?: unknown } | null)?.launch;
+  return typeof seq === "number" ? seq : undefined;
+}
+
+/**
+ * Opens the screen a launch asks for, with its files already in place, the
+ * same way Home hands a drop to a tool. Nothing runs until the user presses
+ * the button. Anything left out or not understood is said in a banner on
+ * that screen, which goes away once the user moves on.
+ */
+function LaunchBanner() {
+  const { t } = useTranslation();
+  const launch = useLaunch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [dismissed, setDismissed] = useState(0);
+
+  useEffect(() => startLaunchListener(), []);
+
+  useEffect(() => {
+    if (!launch || !claimLaunch(launch)) return;
+    setPendingFiles(pickedFromPaths(launch.files));
+    // The state also remounts the screen (see AppShell's <main> key), so
+    // files sent to the tool that is already open replace what it shows.
+    navigate(launch.path, { state: { launch: launch.seq } });
+  }, [launch, navigate]);
+
+  if (
+    !launch ||
+    launch.notices.length === 0 ||
+    dismissed === launch.seq ||
+    launchSeqOf(location.state) !== launch.seq
+  ) {
+    return null;
+  }
+
+  return (
+    <div
+      role="status"
+      className="flex flex-none items-start gap-3 border-b border-border bg-warn-soft px-3.5 py-2"
+    >
+      <div className="min-w-0 flex-1 space-y-0.5">
+        {launch.notices.map((notice) => (
+          <p key={notice} className="text-[13px] text-text">
+            {notice}
+          </p>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => setDismissed(launch.seq)}
+        aria-label={t("Dismiss this notice")}
+        className="grid size-6 flex-none place-items-center rounded text-muted outline-none hover:text-text focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1.2">
+          <path d="M1 1l8 8M9 1L1 9" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 
 export function AppShell() {
   const { theme, toggle } = useTheme();
@@ -566,9 +637,13 @@ export function AppShell() {
     <div className="flex h-full flex-col overflow-hidden bg-bg text-text">
       <TitleBar theme={theme} onToggleTheme={toggle} />
       <UpdateBanner />
+      <LaunchBanner />
       <div className="flex min-h-0 flex-1">
         <Rail />
-        <main key={location.pathname} className="ihp-fade flex min-w-0 flex-1 flex-col">
+        <main
+          key={`${location.pathname}:${launchSeqOf(location.state) ?? ""}`}
+          className="ihp-fade flex min-w-0 flex-1 flex-col"
+        >
           <Outlet />
         </main>
       </div>
