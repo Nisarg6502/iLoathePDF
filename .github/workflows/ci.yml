@@ -68,6 +68,26 @@ jobs:
       - name: Build
         run: npm run build --workspace=apps/web
 
+  extension:
+    name: Browser extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck --workspace=apps/extension
+      - name: Test
+        run: npm run test --workspace=apps/extension
+      - name: Build
+        run: npm run build --workspace=apps/extension
+      - name: Package
+        run: npm run zip --workspace=apps/extension
+
   engine:
     name: Document engine
     runs-on: ubuntu-latest
