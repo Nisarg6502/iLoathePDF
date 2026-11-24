@@ -29,8 +29,8 @@ const FAQS: [string, React.ReactNode][] = [
   [
     msg("What about macOS or Linux?"),
     <Trans
-      i18nKey="There's no installer for those yet — the web app runs all but one of the same tools in any modern browser on any OS (PDF to Excel needs the desktop build). See <link>browser support</link> for the specifics."
-      components={{ link: <Link to="/how-it-works" className="text-accent" /> }}
+      i18nKey="There's no installer for those yet — the web app runs all but one of the same tools in any modern browser on any OS (PDF to Excel needs the desktop build). See <a>browser support</a> for the specifics."
+      components={{ a: <Link to="/how-it-works" className="text-accent" /> }}
     />,
   ],
 ];

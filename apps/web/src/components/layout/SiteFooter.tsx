@@ -22,6 +22,7 @@ export function SiteFooter() {
           <Link to="/tools" className="text-[12.5px] text-muted hover:text-text">{t("All tools")}</Link>
           <Link to="/tools/compress" className="text-[12.5px] text-muted hover:text-text">{t("Compress")}</Link>
           <Link to="/text/word-counter" className="text-[12.5px] text-muted hover:text-text">{t("Word counter")}</Link>
+          <Link to="/text/compare" className="text-[12.5px] text-muted hover:text-text">{t("Compare texts")}</Link>
           <Link to="/download" className="text-[12.5px] text-muted hover:text-text">{t("Desktop app")}</Link>
         </div>
 

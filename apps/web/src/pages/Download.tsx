@@ -105,14 +105,14 @@ export function Download() {
 
           <p className="mt-5 text-[13.5px] leading-relaxed text-muted">
             <Trans
-              i18nKey="Builds are published from <link>the project's GitHub Releases</link>."
-              components={{ link: <a href={RELEASES_URL} className="text-accent" /> }}
+              i18nKey="Builds are published from <a>the project's GitHub Releases</a>."
+              components={{ a: <a href={RELEASES_URL} className="text-accent" /> }}
             />
           </p>
           <p className="mt-6 text-[13.5px] leading-relaxed text-muted">
             <Trans
-              i18nKey="No installer for macOS or Linux yet. Both work fine in the browser version: <link>open the tools</link> instead."
-              components={{ link: <Link to="/tools" className="text-accent" /> }}
+              i18nKey="No installer for macOS or Linux yet. Both work fine in the browser version: <a>open the tools</a> instead."
+              components={{ a: <Link to="/tools" className="text-accent" /> }}
             />
           </p>
         </div>
