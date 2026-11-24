@@ -16,7 +16,7 @@ import { ChainStrip } from "../components/recipes/ChainStrip";
 import { AnimatePresence, motion } from "motion/react";
 import { useWindowFileDrop, type PickedFile } from "../components/FileDropZone";
 import { scrimVariants, sheetVariants } from "../lib/motion";
-import { setPendingFiles } from "../lib/handoff";
+import { setPendingFiles, takePendingFiles } from "../lib/handoff";
 import { Button } from "../components/ui/button";
 import { tr, useTranslation } from "@iloathepdf/i18n";
 
@@ -28,6 +28,13 @@ export default function Home() {
 
   const onDrop = useCallback((files: PickedFile[]) => setDropped(files), []);
   const dragging = useWindowFileDrop(onDrop);
+
+  // Files sent from Windows that need a tool picked ("Send to" with a single
+  // PDF, a mix, or a tool that can't take them) arrive like a drop.
+  useEffect(() => {
+    const handed = takePendingFiles();
+    if (handed.length) setDropped(handed);
+  }, []);
 
   // Escape dismisses the suggestion sheet.
   useEffect(() => {

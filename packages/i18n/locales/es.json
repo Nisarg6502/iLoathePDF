@@ -1445,5 +1445,12 @@
   "Paste two versions to see every word that was added or removed. Your text never leaves this computer.": "Pega dos versiones para ver cada palabra añadida o eliminada. Tu texto nunca sale de este equipo.",
   "TEXT": "TEXTO",
   "TEXT · PASTE OR TYPE, NOTHING SAVED": "TEXTO · PEGA O ESCRIBE, NO SE GUARDA NADA",
-  "Text, PDF and Word files": "Archivos de texto, PDF y Word"
+  "Text, PDF and Word files": "Archivos de texto, PDF y Word",
+  "{{count}} items were left out because they are folders or no longer exist.": "Se omitieron {{count}} elementos porque son carpetas o ya no existen.",
+  "{{count}} items were left out because they are folders or no longer exist._one": "Se omitió {{count}} elemento porque es una carpeta o ya no existe.",
+  "There is no tool called “{{id}}”. Choose one on this screen.": "No hay ninguna herramienta llamada “{{id}}”. Elige una en esta pantalla.",
+  "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} solo admite {{files}}. Elige otra herramienta para estos archivos.",
+  "{{count}} files were left out: {{tool}} takes {{files}}.": "Se omitieron {{count}} archivos: {{tool}} solo admite {{files}}.",
+  "{{count}} files were left out: {{tool}} takes {{files}}._one": "Se omitió {{count}} archivo: {{tool}} solo admite {{files}}.",
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} trabaja con un archivo cada vez, así que solo se abrió {{name}}."
 }

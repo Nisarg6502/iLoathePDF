@@ -5,6 +5,23 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-11-25
+
+### Added
+- iLoathePDF in File Explorer's right-click menu. Right-click PDFs for Merge
+  PDFs, Compress, Split, Convert to images and Protect with password;
+  right-click images for Convert to PDF, Convert image format and Make
+  scanned PDF. Works with many files selected at once, and is labelled in the
+  language you picked in the installer. On Windows 11 it is under
+  "Show more options".
+- Send to → iLoathePDF: the app picks the tool from the files you send
+  (images → Images to PDF, several PDFs → Merge).
+- Opening files with the app ("Open with", or dropping them on the app's
+  icon) now loads them instead of being ignored.
+- Files sent while the app is already open go to that window instead of
+  starting a second copy, and the tool always opens for you to check before
+  anything runs.
+
 ## [0.8.0] - 2026-11-24
 
 ### Added

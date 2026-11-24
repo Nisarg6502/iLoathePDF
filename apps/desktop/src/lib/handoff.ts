@@ -1,5 +1,6 @@
 /**
- * Carries files from the home screen's drop into the tool workspace.
+ * Carries files from the home screen's drop into the tool workspace, and
+ * files sent from Windows (src/lib/launch.ts) into a tool or Home's picker.
  *
  * Router state cannot do this: under Tauri a picked file is a path, but in the
  * browser it is a live `File` object, and `history.state` must be structured-
