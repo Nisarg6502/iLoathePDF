@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb, degrees, type PDFImage } from "pdf-lib
 import { embedImageBytes } from "@/lib/embedImage";
 import { parseRanges } from "@/lib/ranges";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 type ContentKind = "text" | "image";
 type Placement = "single" | "tiled";
@@ -75,7 +76,7 @@ function alignedXY(
 
 export const watermarkEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF.");
+  if (!file) throw new Error(tr("Add a PDF."));
 
   const mode = options.mode as string;
   if (!["watermark", "page_numbers", "stamp"].includes(mode)) {
@@ -95,10 +96,10 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
     }
     let image: PDFImage | undefined;
     if (spec.content === "image") {
-      if (!spec.imageDataUrl) throw new Error("Add an image for the watermark.");
+      if (!spec.imageDataUrl) throw new Error(tr("Add an image for the watermark."));
       image = await embedImageFromDataUrl(doc, spec.imageDataUrl);
     } else if (!spec.text) {
-      throw new Error("Add watermark text.");
+      throw new Error(tr("Add watermark text."));
     }
 
     for (const pageIndex of targetIndices) {
@@ -160,10 +161,10 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
     const [xPct, yPct, hAlign, vAlign] = ALL_POSITIONS[spec.position];
     let image: PDFImage | undefined;
     if (spec.content === "image") {
-      if (!spec.imageDataUrl) throw new Error("Add a stamp image.");
+      if (!spec.imageDataUrl) throw new Error(tr("Add a stamp image."));
       image = await embedImageFromDataUrl(doc, spec.imageDataUrl);
     } else if (!spec.text) {
-      throw new Error("Add stamp text.");
+      throw new Error(tr("Add stamp text."));
     }
     for (const pageIndex of targetIndices) {
       const page = pages[pageIndex];
@@ -193,7 +194,7 @@ export const watermarkEngine: Engine = async ({ files, options }) => {
         blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `${targetIndices.length} page${targetIndices.length === 1 ? "" : "s"} affected`,
+    summary: tr("{{pages}} affected", { pages: tr("{{count}} pages", { count: targetIndices.length }) }),
     isPreview: false,
   };
 };

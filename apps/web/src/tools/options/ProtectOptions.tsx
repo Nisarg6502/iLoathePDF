@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { useTranslation } from "@iloathepdf/i18n";
 
 export function ProtectOptions({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const mode = (options.mode as string) ?? "protect";
   const password = (options.password as string) ?? "";
@@ -24,14 +26,14 @@ export function ProtectOptions({ options, onChange, disabled }: OptionsPanelProp
               disabled={disabled}
               onChange={() => onChange({ ...options, mode: m, password: "", confirmPassword: "" })}
             />
-            <div className="text-[12.5px] font-semibold capitalize">{m}</div>
+            <div className="text-[12.5px] font-semibold">{m === "protect" ? t("Protect") : t("Unlock")}</div>
           </label>
         ))}
       </div>
 
       <label className="flex flex-col gap-1.5">
         <span className="text-[12.5px] font-semibold">
-          {mode === "protect" ? "Set password" : "Enter password"}
+          {mode === "protect" ? t("Set password") : t("Enter password")}
         </span>
         <div className="relative">
           <input
@@ -39,7 +41,7 @@ export function ProtectOptions({ options, onChange, disabled }: OptionsPanelProp
             disabled={disabled}
             value={password}
             onChange={(e) => onChange({ ...options, password: e.target.value })}
-            placeholder="At least 4 characters"
+            placeholder={t("At least 4 characters")}
             className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 pr-14 text-sm"
           />
           <button
@@ -47,30 +49,30 @@ export function ProtectOptions({ options, onChange, disabled }: OptionsPanelProp
             onClick={() => setShowPassword((v) => !v)}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-[11.5px] text-muted hover:text-text"
           >
-            {showPassword ? "Hide" : "Show"}
+            {showPassword ? t("Hide") : t("Show")}
           </button>
         </div>
       </label>
 
       {mode === "protect" && (
         <label className="flex flex-col gap-1.5">
-          <span className="text-[12.5px] font-semibold">Confirm password</span>
+          <span className="text-[12.5px] font-semibold">{t("Confirm password")}</span>
           <input
             type={showPassword ? "text" : "password"}
             disabled={disabled}
             value={confirmPassword}
             onChange={(e) => onChange({ ...options, confirmPassword: e.target.value })}
-            placeholder="Repeat the password"
+            placeholder={t("Repeat the password")}
             className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm"
           />
-          {mismatch && <span className="text-[11.5px] text-danger">Passwords do not match.</span>}
+          {mismatch && <span className="text-[11.5px] text-danger">{t("Passwords do not match.")}</span>}
         </label>
       )}
 
       <div className="rounded-lg bg-accent-soft p-3 text-[11.5px] leading-relaxed text-on-accent">
         {mode === "protect"
-          ? "Anyone opening this PDF will need the password you set here."
-          : "Enter the PDF's current password to remove it."}
+          ? t("Anyone opening this PDF will need the password you set here.")
+          : t("Enter the PDF's current password to remove it.")}
       </div>
     </div>
   );

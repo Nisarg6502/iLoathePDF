@@ -19,6 +19,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.7.1",
+    date: "2026-11-24",
+    highlights: [
+      "Every screen is now translated into Spanish, French, Hindi, Marathi and Kannada: tool options, recipes and the recipe builder, results, error messages and update notices. 0.7.0 covered only the main screens.",
+      "Counts read naturally in every language, for example “1 file” instead of “1 files”.",
+      "Fixed the signature dialog's “Saved initialss” heading.",
+    ],
+  },
+  {
     version: "0.7.0",
     date: "2026-11-23",
     highlights: [

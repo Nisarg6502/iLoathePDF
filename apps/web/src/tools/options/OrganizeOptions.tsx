@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 export function OrganizeOptions({ options, onChange, disabled, files }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const order = (options.order as number[]) ?? [];
   const remove = new Set((options.remove as number[]) ?? []);
   const file = files?.[0];
@@ -24,7 +26,7 @@ export function OrganizeOptions({ options, onChange, disabled, files }: OptionsP
         onChange({ ...options, order: Array.from({ length: count }, (_, i) => i) });
       })
       .catch(() => {
-        if (!cancelled) setError("Couldn't read that PDF to count its pages.");
+        if (!cancelled) setError(tr("Couldn't read that PDF to count its pages."));
       });
     return () => {
       cancelled = true;
@@ -52,21 +54,21 @@ export function OrganizeOptions({ options, onChange, disabled, files }: OptionsP
   }
 
   if (order.length === 0) {
-    return <p className="text-[12.5px] text-muted">Add a PDF to see its pages here.</p>;
+    return <p className="text-[12.5px] text-muted">{t("Add a PDF to see its pages here.")}</p>;
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[12.5px] font-semibold">{order.length} pages</span>
+      <span className="text-[12.5px] font-semibold">{t("{{count}} pages", { count: order.length })}</span>
       <ul className="flex flex-col gap-1.5">
         {order.map((pageIndex, position) => (
           <li key={pageIndex} className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-[12.5px]">
-            <span className={remove.has(pageIndex) ? "text-faint line-through" : ""}>Page {pageIndex + 1}</span>
+            <span className={remove.has(pageIndex) ? "text-faint line-through" : ""}>{t("Page {{page}}", { page: pageIndex + 1 })}</span>
             <span className="flex-1" />
             <button type="button" disabled={disabled} onClick={() => move(position, position - 1)}>↑</button>
             <button type="button" disabled={disabled} onClick={() => move(position, position + 1)}>↓</button>
             <button type="button" disabled={disabled} onClick={() => toggleRemove(pageIndex)}>
-              {remove.has(pageIndex) ? "Keep" : "Remove"}
+              {remove.has(pageIndex) ? t("Keep") : t("Remove")}
             </button>
           </li>
         ))}

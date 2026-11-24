@@ -9,6 +9,7 @@ import pdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import "pdfjs-dist/web/pdf_viewer.css";
 import { FileDropZone } from "@/components/FileDropZone";
 import type { ToolConfig } from "@/tools/ToolConfig";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -136,6 +137,7 @@ const btn =
   "flex h-8 min-w-8 items-center justify-center rounded-lg border border-border bg-surface px-2 text-[13px] hover:bg-surface-2 disabled:pointer-events-none disabled:opacity-40";
 
 export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [doc, setDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -177,8 +179,8 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
         const locked = e instanceof Error && e.name === "PasswordException";
         setError(
           locked
-            ? "This PDF is password protected. Remove the password with Protect & Unlock first, then open it here."
-            : "That PDF couldn't be opened.",
+            ? tr("This PDF is password protected. Remove the password with Protect & Unlock first, then open it here.")
+            : tr("That PDF couldn't be opened."),
         );
       }
     })();
@@ -294,22 +296,22 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
               }}
             >
               <input
-                aria-label="Page number"
+                aria-label={t("Page number")}
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 className="h-8 w-12 rounded-lg border border-border bg-surface px-2 text-center text-[13px]"
               />
-              <span className="text-[13px] text-muted">of {doc.numPages}</span>
+              <span className="text-[13px] text-muted">{t("of {{total}}", { total: doc.numPages })}</span>
             </form>
-            <button type="button" aria-label="Zoom out" className={btn} onClick={() => zoomIndex(-1)}>
+            <button type="button" aria-label={t("Zoom out")} className={btn} onClick={() => zoomIndex(-1)}>
               −
             </button>
             <span className="w-12 text-center font-mono text-[12px] text-muted">{Math.round(scale * 100)}%</span>
-            <button type="button" aria-label="Zoom in" className={btn} onClick={() => zoomIndex(1)}>
+            <button type="button" aria-label={t("Zoom in")} className={btn} onClick={() => zoomIndex(1)}>
               +
             </button>
             <button type="button" className={btn} onClick={() => setZoom("fit")} aria-pressed={zoom === "fit"}>
-              Fit width
+              {t("Fit width")}
             </button>
             <form
               className="flex items-center gap-1.5 max-sm:w-full sm:ml-auto"
@@ -319,20 +321,20 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
               }}
             >
               <input
-                aria-label="Find in document"
-                placeholder="Find…"
+                aria-label={t("Find in document")}
+                placeholder={t("Find…")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-surface px-2.5 text-[13px] sm:w-40 sm:flex-none"
               />
-              <button type="button" aria-label="Previous match" className={btn} disabled={!matches.length} onClick={() => step(-1)}>
+              <button type="button" aria-label={t("Previous match")} className={btn} disabled={!matches.length} onClick={() => step(-1)}>
                 ↑
               </button>
-              <button type="button" aria-label="Next match" className={btn} disabled={!matches.length} onClick={() => step(1)}>
+              <button type="button" aria-label={t("Next match")} className={btn} disabled={!matches.length} onClick={() => step(1)}>
                 ↓
               </button>
               <span className="w-[4.5rem] flex-none text-[12px] text-muted sm:w-24" aria-live="polite">
-                {searching ? "Searching…" : matches.length ? `${matchIndex + 1} of ${matches.length}` : query.trim() ? "No matches" : ""}
+                {searching ? t("Searching…") : matches.length ? `${matchIndex + 1} of ${matches.length}` : query.trim() ? t("No matches") : ""}
               </span>
             </form>
           </>
@@ -345,7 +347,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
             setDoc(null);
           }}
         >
-          Close
+          {t("Close")}
         </button>
       </div>
 
@@ -356,7 +358,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
           ref={scroller}
           onScroll={onScroll}
           className="min-h-0 flex-1 overflow-auto rounded-2xl border border-border bg-surface-2 p-4"
-          aria-label={`Pages of ${file.name}, page ${current}`}
+          aria-label={t("Pages of {{name}}, page {{current}}", { name: file.name, current })}
         >
           {doc ? (
             numbers.map((n) => (
@@ -372,7 +374,7 @@ export function ReaderWorkspace({ tool }: { tool: ToolConfig }) {
               />
             ))
           ) : (
-            <div className="grid h-full place-items-center text-sm text-muted">Opening…</div>
+            <div className="grid h-full place-items-center text-sm text-muted">{t("Opening…")}</div>
           )}
         </div>
       )}

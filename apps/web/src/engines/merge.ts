@@ -2,10 +2,11 @@ import { PDFDocument } from "pdf-lib";
 import { parseRanges } from "@/lib/ranges";
 import { outputFileName } from "@/lib/outputName";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 export const mergeEngine: Engine = async ({ files, options }) => {
   if (files.length === 0) {
-    throw new Error("Add at least one PDF to merge.");
+    throw new Error(tr("Add at least one PDF to merge."));
   }
 
   const ranges = (options.ranges as Record<string, string> | undefined) ?? {};
@@ -25,7 +26,7 @@ export const mergeEngine: Engine = async ({ files, options }) => {
   const bytes = await out.save();
   return {
     files: [{ name: outputFileName(options.outputName, "merged"), blob: new Blob([bytes as BlobPart], { type: "application/pdf" }) }],
-    summary: `${files.length} files → 1 file, ${totalPages} pages`,
+    summary: tr("{{files}} → 1 file, {{pages}}", { files: tr("{{count}} files", { count: files.length }), pages: tr("{{count}} pages", { count: totalPages }) }),
     isPreview: false,
   };
 };

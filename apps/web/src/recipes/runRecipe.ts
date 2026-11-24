@@ -17,6 +17,7 @@ import { getTool } from "@/tools/registry";
 import type { EngineResult, EngineOutputFile } from "@/engines/types";
 import type { RecipeConfig } from "./registry";
 import type { Options } from "./chain";
+import { tr } from "@iloathepdf/i18n";
 
 export interface StepEvent {
   index: number;
@@ -94,18 +95,27 @@ export async function runRecipe(
         stepProgress?.(1);
       }
     } catch (err) {
-      const where = batches.length > 1 ? ` on ${batches[b]?.[0]?.name ?? "a file"}` : "";
+      const vars = { step: i + 1, total, tool: tr(tool.name), file: batches[b]?.[0]?.name ?? tr("a file") };
       const message = err instanceof Error ? err.message : String(err);
-      throw new Error(`Step ${i + 1} of ${total} (${tool.name}) failed${where}: ${message}`);
+      const stepLabel =
+        batches.length > 1 ? tr("Step {{step}} of {{total}} ({{tool}}) failed on {{file}}", vars) : tr("Step {{step}} of {{total}} ({{tool}}) failed", vars);
+      throw new Error(`${stepLabel}: ${message}`);
     }
     if (outputs.length === 0) {
-      throw new Error(`Step ${i + 1} of ${total} (${tool.name}) produced no files: ${summaries.at(-1) ?? "nothing to pass on"}`);
+      throw new Error(
+        tr("Step {{step}} of {{total}} ({{tool}}) produced no files: {{reason}}", {
+          step: i + 1,
+          total,
+          tool: tr(tool.name),
+          reason: summaries.at(-1) ?? tr("nothing to pass on"),
+        }),
+      );
     }
 
     const named = uniqueNames(outputs);
     lastResult = {
       files: named,
-      summary: batches.length === 1 ? summaries[0] : `${batches.length} files in, ${named.length} out`,
+      summary: batches.length === 1 ? summaries[0] : tr("{{count}} files in, {{out}} out", { count: batches.length, out: named.length }),
       isPreview: anyPreview,
     };
     currentFiles = outputsToFiles(named);

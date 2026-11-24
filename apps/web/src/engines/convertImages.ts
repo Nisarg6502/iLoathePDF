@@ -1,5 +1,6 @@
 import type { Engine, EngineOutputFile } from "./types";
 import { renderRotatedCropped, DEFAULT_IMAGE_EDIT, type ImageEdit, type ImageEdits } from "@/tools/imageEdit";
+import { tr } from "@iloathepdf/i18n";
 
 const MIME_BY_FORMAT: Record<string, string> = {
   png: "image/png",
@@ -51,7 +52,7 @@ async function convertOne(file: File, to: string, edit: ImageEdit, quality: numb
 }
 
 export const convertImagesEngine: Engine = async ({ files, options }) => {
-  if (files.length === 0) throw new Error("Add at least one image.");
+  if (files.length === 0) throw new Error(tr("Add at least one image."));
 
   const to = (options.to as string) ?? "png";
   if (!Object.hasOwn(MIME_BY_FORMAT, to)) throw new Error(`Unsupported target format: ${to}`);
@@ -59,7 +60,7 @@ export const convertImagesEngine: Engine = async ({ files, options }) => {
   // 40-100, the same scale as desktop. PNG is lossless and ignores it.
   const qualityPct = Number(options.quality ?? 92);
   if (!Number.isFinite(qualityPct) || qualityPct < 1 || qualityPct > 100) {
-    throw new Error("Quality must be between 1 and 100.");
+    throw new Error(tr("Quality must be between 1 and 100."));
   }
   const quality = qualityPct / 100;
 
@@ -79,15 +80,15 @@ export const convertImagesEngine: Engine = async ({ files, options }) => {
       files: converted,
       summary:
         converted.length > 0
-          ? `${converted.length} converted · ${heicEntries.length} HEIC file(s) need the full engine (preview) and were skipped`
-          : `HEIC decoding is a preview feature — 0 of ${heicEntries.length} file(s) converted yet`,
+          ? tr("{{converted}} converted · {{heic}} need the full engine (preview) and were skipped", { converted: converted.length, heic: tr("{{count}} HEIC files", { count: heicEntries.length }) })
+          : tr("HEIC decoding is a preview feature — 0 of {{files}} converted yet", { files: tr("{{count}} files", { count: heicEntries.length }) }),
       isPreview: true,
     };
   }
 
   return {
     files: converted,
-    summary: `${converted.length} image(s) converted to ${to.toUpperCase()}`,
+    summary: tr("{{images}} converted to {{format}}", { images: tr("{{count}} images", { count: converted.length }), format: to.toUpperCase() }),
     isPreview: false,
   };
 };

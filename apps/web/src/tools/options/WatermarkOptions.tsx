@@ -1,19 +1,21 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { msg, tr, useTranslation } from "@iloathepdf/i18n";
 
 const MODES = [
-  { value: "watermark", label: "Watermark" },
-  { value: "page_numbers", label: "Page Numbers" },
-  { value: "stamp", label: "Stamp" },
+  { value: "watermark", label: msg("Watermark") },
+  { value: "page_numbers", label: msg("Page Numbers") },
+  { value: "stamp", label: msg("Stamp") },
 ] as const;
 
 const PAGE_NUMBER_POSITIONS = ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"];
 const STAMP_POSITIONS = [...PAGE_NUMBER_POSITIONS, "left", "center", "right"];
 
 function PageRangeField({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const pages = (options.pages as string) ?? "all";
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[12.5px] font-semibold">Apply to</span>
+      <span className="text-[12.5px] font-semibold">{t("Apply to")}</span>
       <div className="flex gap-1.5">
         {(["all", "first", "custom"] as const).map((p) => (
           <label
@@ -32,7 +34,7 @@ function PageRangeField({ options, onChange, disabled }: OptionsPanelProps) {
               checked={p === "custom" ? !["all", "first"].includes(pages) : pages === p}
               onChange={() => onChange({ ...options, pages: p === "custom" ? "1" : p })}
             />
-            {p === "all" ? "All pages" : p === "first" ? "First page only" : "Custom"}
+            {p === "all" ? t("All pages") : p === "first" ? t("First page only") : t("Custom")}
           </label>
         ))}
       </div>
@@ -70,7 +72,7 @@ export function WatermarkOptions(props: OptionsPanelProps) {
               checked={mode === m.value}
               onChange={() => onChange({ ...options, mode: m.value })}
             />
-            {m.label}
+            {tr(m.label)}
           </label>
         ))}
       </div>
@@ -109,6 +111,7 @@ function ContentToggle({
 }
 
 function WatermarkFields({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const wm = (options.watermark as Record<string, unknown>) ?? {};
   const set = (patch: Record<string, unknown>) => onChange({ ...options, watermark: { ...wm, ...patch } });
   const content = (wm.content as string) ?? "text";
@@ -119,21 +122,21 @@ function WatermarkFields({ options, onChange, disabled }: OptionsPanelProps) {
       {content === "text" ? (
         <>
           <input
-            type="text" disabled={disabled} placeholder="CONFIDENTIAL"
+            type="text" disabled={disabled} placeholder={t("CONFIDENTIAL")}
             value={(wm.text as string) ?? ""}
             onChange={(e) => set({ text: e.target.value })}
             className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm"
           />
           <div className="flex gap-2">
             <label className="flex flex-1 items-center justify-between text-[12.5px]">
-              Font size
+              {t("Font size")}
               <input type="number" min={4} disabled={disabled}
                 value={(wm.fontSize as number) ?? 48}
                 onChange={(e) => set({ fontSize: Number(e.target.value) })}
                 className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-sm" />
             </label>
             <label className="flex items-center gap-2 text-[12.5px]">
-              Color
+              {t("Color")}
               <input type="color" disabled={disabled}
                 value={(wm.color as string) ?? "#888888"}
                 onChange={(e) => set({ color: e.target.value })}
@@ -145,13 +148,13 @@ function WatermarkFields({ options, onChange, disabled }: OptionsPanelProps) {
         <ImagePicker disabled={!!disabled} onPick={(dataUrl) => set({ imageDataUrl: dataUrl })} />
       )}
       <label className="flex items-center justify-between text-[12.5px]">
-        Opacity
+        {t("Opacity")}
         <input type="range" min={0} max={1} step={0.05} disabled={disabled}
           value={(wm.opacity as number) ?? 0.35}
           onChange={(e) => set({ opacity: Number(e.target.value) })} />
       </label>
       <label className="flex items-center justify-between text-[12.5px]">
-        Rotation (degrees)
+        {t("Rotation (degrees)")}
         <input type="number" disabled={disabled}
           value={(wm.rotation as number) ?? 45}
           onChange={(e) => set({ rotation: Number(e.target.value) })}
@@ -170,6 +173,7 @@ function WatermarkFields({ options, onChange, disabled }: OptionsPanelProps) {
 }
 
 function PageNumberFields({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const pn = (options.page_numbers as Record<string, unknown>) ?? {};
   const set = (patch: Record<string, unknown>) => onChange({ ...options, page_numbers: { ...pn, ...patch } });
 
@@ -192,11 +196,11 @@ function PageNumberFields({ options, onChange, disabled }: OptionsPanelProps) {
         className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm"
       >
         <option value="n">1</option>
-        <option value="page-n">Page 1</option>
-        <option value="n-of-total">1 of N</option>
+        <option value="page-n">{t("Page 1")}</option>
+        <option value="n-of-total">{t("1 of N")}</option>
       </select>
       <label className="flex items-center justify-between text-[12.5px]">
-        Starting number
+        {t("Starting number")}
         <input type="number" min={1} disabled={disabled}
           value={(pn.start as number) ?? 1}
           onChange={(e) => set({ start: Number(e.target.value) })}
@@ -204,14 +208,14 @@ function PageNumberFields({ options, onChange, disabled }: OptionsPanelProps) {
       </label>
       <div className="flex gap-2">
         <label className="flex flex-1 items-center justify-between text-[12.5px]">
-          Font size
+          {t("Font size")}
           <input type="number" min={4} disabled={disabled}
             value={(pn.fontSize as number) ?? 11}
             onChange={(e) => set({ fontSize: Number(e.target.value) })}
             className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-sm" />
         </label>
         <label className="flex items-center gap-2 text-[12.5px]">
-          Color
+          {t("Color")}
           <input type="color" disabled={disabled}
             value={(pn.color as string) ?? "#000000"}
             onChange={(e) => set({ color: e.target.value })}
@@ -223,6 +227,7 @@ function PageNumberFields({ options, onChange, disabled }: OptionsPanelProps) {
 }
 
 function StampFields({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const st = (options.stamp as Record<string, unknown>) ?? {};
   const set = (patch: Record<string, unknown>) => onChange({ ...options, stamp: { ...st, ...patch } });
   const content = (st.content as string) ?? "text";
@@ -233,21 +238,21 @@ function StampFields({ options, onChange, disabled }: OptionsPanelProps) {
       {content === "text" ? (
         <>
           <input
-            type="text" disabled={disabled} placeholder="APPROVED"
+            type="text" disabled={disabled} placeholder={t("APPROVED")}
             value={(st.text as string) ?? ""}
             onChange={(e) => set({ text: e.target.value })}
             className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm"
           />
           <div className="flex gap-2">
             <label className="flex flex-1 items-center justify-between text-[12.5px]">
-              Font size
+              {t("Font size")}
               <input type="number" min={4} disabled={disabled}
                 value={(st.fontSize as number) ?? 24}
                 onChange={(e) => set({ fontSize: Number(e.target.value) })}
                 className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-sm" />
             </label>
             <label className="flex items-center gap-2 text-[12.5px]">
-              Color
+              {t("Color")}
               <input type="color" disabled={disabled}
                 value={(st.color as string) ?? "#000000"}
                 onChange={(e) => set({ color: e.target.value })}

@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import type { RedactBox } from "@/lib/redactTypes";
+import { useTranslation } from "@iloathepdf/i18n";
 
 /** One placed redaction box: draggable by its body, resizable from the bottom-right handle. */
 export function RedactBoxElement({
@@ -17,6 +18,7 @@ export function RedactBoxElement({
   onDelete: () => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const { t } = useTranslation();
   const drag = useRef<{ mode: "move" | "resize"; startX: number; startY: number; box: RedactBox } | null>(null);
 
   function onPointerDown(e: React.PointerEvent, mode: "move" | "resize") {
@@ -76,7 +78,7 @@ export function RedactBoxElement({
               onDelete();
             }}
             className="absolute -right-2.5 -top-2.5 grid size-5 place-items-center rounded-full bg-danger text-[10px] text-white shadow"
-            aria-label="Delete box"
+            aria-label={t("Delete box")}
           >
             ✕
           </button>

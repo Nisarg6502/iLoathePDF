@@ -3,6 +3,7 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/r
 import { getTool } from "@/tools/registry";
 import { tintColor, tintWash } from "@/tools/tint";
 import { canInsert } from "@/recipes/chain";
+import { msg, tr, useTranslation } from "@iloathepdf/i18n";
 
 /**
  * A looping, illustrative glimpse of the recipe builder, driven by a pretend
@@ -60,35 +61,36 @@ const FINAL = STAGES.length - 1;
 
 const PALETTE = ["images-to-pdf", "ocr", "compress", "merge", "compress-images", "watermark"];
 const SHORT: Record<string, string> = {
-  "images-to-pdf": "Images to PDF",
+  "images-to-pdf": msg("Images to PDF"),
   ocr: "OCR",
-  compress: "Compress",
-  merge: "Merge",
-  "compress-images": "Shrink images",
-  watermark: "Page numbers",
+  compress: msg("Compress"),
+  merge: msg("Merge"),
+  "compress-images": msg("Shrink images"),
+  watermark: msg("Page numbers"),
 };
 const DONE_NOTE: Record<ChainSlug, string> = {
-  "images-to-pdf": "3 photos → 1 PDF",
+  "images-to-pdf": msg("3 photos → 1 PDF"),
   compress: "8.4 MB → 1.1 MB",
-  ocr: "text layer added",
+  ocr: msg("text layer added"),
 };
 const ease = [0.23, 1, 0.32, 1] as const;
 const name = (slug: string) => getTool(slug)?.name ?? slug;
 
 function Icon({ slug, size = 26, lit = true }: { slug: string; size?: number; lit?: boolean }) {
-  const t = getTool(slug);
-  if (!t) return null;
+  const tool = getTool(slug);
+  if (!tool) return null;
   return (
     <span
       className="grid flex-none place-items-center rounded-[8px] transition-[filter,background-color] duration-200"
-      style={{ width: size, height: size, background: tintWash(t.tint, 16), filter: lit ? "none" : "grayscale(1)" }}
+      style={{ width: size, height: size, background: tintWash(tool.tint, 16), filter: lit ? "none" : "grayscale(1)" }}
     >
-      <t.Icon width={size * 0.58} height={size * 0.58} />
+      <tool.Icon width={size * 0.58} height={size * 0.58} />
     </span>
   );
 }
 
 export function RecipeDemo() {
+  const { t } = useTranslation();
   const reduce = useReducedMotion();
   const [stage, setStage] = useState(reduce ? FINAL : 0);
 
@@ -97,8 +99,8 @@ export function RecipeDemo() {
       setStage(FINAL);
       return;
     }
-    const t = window.setTimeout(() => setStage((s) => (s + 1) % STAGES.length), STAGES[stage].ms);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setStage((s) => (s + 1) % STAGES.length), STAGES[stage].ms);
+    return () => window.clearTimeout(timer);
   }, [stage, reduce]);
 
   const s = STAGES[stage];
@@ -126,13 +128,13 @@ export function RecipeDemo() {
     setCursor({ x: r.left - root.left + Math.min(r.width * 0.5, 60), y: r.top - root.top + r.height * 0.55 });
   }, [stage, s.cursor]);
 
-  const status = s.chain.length === 0 ? "No steps yet" : s.warn ? "1 thing to check" : `Ready · ${s.chain.length} step${s.chain.length === 1 ? "" : "s"}`;
+  const status = s.chain.length === 0 ? tr("No steps yet") : s.warn ? tr("1 thing to check") : tr("Ready · {{count}} steps", { count: s.chain.length });
   const tone = s.chain.length === 0 ? "border-border text-faint" : s.warn ? "border-warn/50 bg-warn-soft text-warn" : "border-ok/40 bg-ok-soft text-ok";
 
   return (
     <div
       role="img"
-      aria-label="Animated example of building a recipe: drag Images to PDF, OCR and Compress into a chain, get warned that Compress after OCR would wipe the searchable text, fix the order with one click, lower Compress's DPI, then run it to turn three photos into one small, searchable PDF."
+      aria-label={t("Animated example of building a recipe: drag Images to PDF, OCR and Compress into a chain, get warned that Compress after OCR would wipe the searchable text, fix the order with one click, lower Compress's DPI, then run it to turn three photos into one small, searchable PDF.")}
       className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]"
     >
       <div aria-hidden className="flex h-[38px] items-center gap-2 border-b border-border bg-surface-2 px-3.5">
@@ -142,7 +144,7 @@ export function RecipeDemo() {
           <span className="size-2.5 rounded-full bg-border-hi" />
         </span>
         <span className="flex-1 truncate text-center font-mono text-[10.5px] text-faint">
-          {stage >= 14 ? "Scan to searchable PDF" : "New recipe"}
+          {stage >= 14 ? t("Scan to searchable PDF") : t("New recipe")}
         </span>
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span
@@ -161,7 +163,7 @@ export function RecipeDemo() {
       <div aria-hidden ref={box} className="relative grid min-h-[460px] grid-cols-[96px_1fr] gap-3 p-3.5 sm:grid-cols-[118px_1fr] sm:gap-4 sm:p-4">
         {/* palette */}
         <div className="flex flex-col gap-1">
-          <div className="px-1 pb-1 font-mono text-[9px] font-bold tracking-[0.13em] text-faint">TOOLS</div>
+          <div className="px-1 pb-1 font-mono text-[9px] font-bold tracking-[0.13em] text-faint">{t("TOOLS")}</div>
           {PALETTE.map((slug) => {
             const fits = canInsert(chainSteps, chainSteps.length, slug, name).ok;
             const grabbed = s.cursor === `tool:${slug}` && s.press;
@@ -178,7 +180,7 @@ export function RecipeDemo() {
                 }}
               >
                 <Icon slug={slug} size={22} lit={fits} />
-                <span className="min-w-0 flex-1 truncate text-[11px]">{SHORT[slug]}</span>
+                <span className="min-w-0 flex-1 truncate text-[11px]">{t(SHORT[slug])}</span>
                 {!fits && (
                   <svg viewBox="0 0 16 16" className="size-2.5 flex-none text-faint">
                     <rect x="3.5" y="7" width="9" height="6.5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
@@ -191,7 +193,7 @@ export function RecipeDemo() {
           <AnimatePresence>
             {s.chain.length > 0 && (
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-1 px-1 text-[9.5px] leading-snug text-faint">
-                Greyed tools can't follow the last step.
+                {t("Greyed tools can't follow the last step.")}
               </motion.p>
             )}
           </AnimatePresence>
@@ -210,7 +212,7 @@ export function RecipeDemo() {
                 />
               ))}
             </div>
-            <span className="text-[11px] text-muted">3 photos</span>
+            <span className="text-[11px] text-muted">{t("3 photos")}</span>
           </div>
 
           <LayoutGroup>
@@ -219,7 +221,7 @@ export function RecipeDemo() {
                 {s.chain.map((slug, i) => {
                   const st = run === 0 ? "idle" : run > i + 1 ? "done" : run === i + 1 ? "running" : "waiting";
                   const warn = s.warn && slug === "compress";
-                  const t = getTool(slug)!;
+                  const tool = getTool(slug)!;
                   return (
                     <motion.li
                       key={slug}
@@ -229,22 +231,22 @@ export function RecipeDemo() {
                       exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.18 } }}
                       transition={{ type: "spring", stiffness: 520, damping: 34 }}
                     >
-                      <Wire flowing={st === "running" || (run === 0 && !warn)} broken={false} label={i === 0 ? "photos" : "1 PDF"} />
+                      <Wire flowing={st === "running" || (run === 0 && !warn)} broken={false} label={i === 0 ? t("photos") : "1 PDF"} />
                       <motion.div
                         ref={reg(`card:${slug}`)}
                         animate={warn ? { x: [0, -5, 5, -3, 3, 0] } : { x: 0 }}
                         transition={{ duration: 0.4 }}
                         className="rounded-xl border bg-surface transition-[border-color,background-color] duration-200"
                         style={{
-                          borderColor: warn ? "var(--warn)" : st === "running" ? tintColor(t.tint) : st === "done" ? "var(--ok)" : "var(--border)",
+                          borderColor: warn ? "var(--warn)" : st === "running" ? tintColor(tool.tint) : st === "done" ? "var(--ok)" : "var(--border)",
                         }}
                       >
                         <div className="flex items-center gap-2 px-2.5 py-2">
                           <Icon slug={slug} size={26} lit={st !== "waiting"} />
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-[12.5px] font-semibold">{t.name}</div>
+                            <div className="truncate text-[12.5px] font-semibold">{t(tool.name)}</div>
                             <div className="truncate font-mono text-[10px] text-muted">
-                              {st === "done" ? DONE_NOTE[slug] : st === "running" ? "working…" : st === "waiting" ? "waiting" : slug === "compress" ? `${s.dpi ?? 144} DPI · ${(s.dpi ?? 144) <= 110 ? "small file" : "sharp"}` : slug === "ocr" ? "English text layer" : "A4 · 8 mm margin"}
+                              {st === "done" ? t(DONE_NOTE[slug]) : st === "running" ? t("working…") : st === "waiting" ? t("waiting") : slug === "compress" ? `${s.dpi ?? 144} DPI · ${(s.dpi ?? 144) <= 110 ? tr("small file") : "sharp"}` : slug === "ocr" ? t("English text layer") : t("A4 · 8 mm margin")}
                             </div>
                           </div>
                           <StepMark state={st} />
@@ -254,13 +256,13 @@ export function RecipeDemo() {
                           {warn && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease }} className="overflow-hidden">
                               <div className="mx-2 mb-2 rounded-lg border border-warn/40 bg-warn-soft px-2 py-1.5 text-[10.5px] leading-snug">
-                                <span className="text-text">Compress turns pages into pictures and wipes OCR's text.</span>{" "}
+                                <span className="text-text">{t("Compress turns pages into pictures and wipes OCR's text.")}</span>{" "}
                                 <span
                                   ref={reg("fix")}
                                   className="mt-1 inline-block rounded border border-warn px-1.5 py-px font-semibold text-warn transition-transform duration-100"
                                   style={{ transform: stage === 10 ? "scale(0.93)" : "scale(1)" }}
                                 >
-                                  Move OCR to the end
+                                  {t("Move OCR to the end")}
                                 </span>
                               </div>
                             </motion.div>
@@ -269,7 +271,7 @@ export function RecipeDemo() {
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease }} className="overflow-hidden">
                               <div className="border-t border-border px-2.5 py-2">
                                 <div className="flex justify-between text-[10.5px]">
-                                  <span className="font-semibold">Image DPI</span>
+                                  <span className="font-semibold">{t("Image DPI")}</span>
                                   <DpiCounter />
                                 </div>
                                 <div ref={reg("slider")} className="relative mt-1.5 h-1.5 rounded-full bg-surface-3">
@@ -299,7 +301,7 @@ export function RecipeDemo() {
                     color: s.drag ? "var(--ok)" : "var(--faint)",
                   }}
                 >
-                  {s.drag ? `Drop to add ${SHORT[s.drag]}` : s.chain.length === 0 ? "Drag a tool here" : "Drag the next tool here"}
+                  {s.drag ? t("Drop to add {{tool}}", { tool: t(SHORT[s.drag]) }) : s.chain.length === 0 ? t("Drag a tool here") : t("Drag the next tool here")}
                 </div>
               ) : (
                 <Result done={done} run={run} slotRef={reg("slot")} />
@@ -317,7 +319,7 @@ export function RecipeDemo() {
                 transform: stage === 14 ? "scale(0.94)" : "scale(1)",
               }}
             >
-              {run > 0 && run < 4 ? "Working…" : done ? "Run again" : "Run"}
+              {run > 0 && run < 4 ? t("Working…") : done ? t("Run again") : t("Run")}
             </span>
           </div>
         </div>
@@ -334,7 +336,7 @@ export function RecipeDemo() {
               transition={{ duration: 0.6, ease }}
             >
               <Icon slug={s.drag} size={22} />
-              <span className="text-[11px] font-medium">{SHORT[s.drag]}</span>
+              <span className="text-[11px] font-medium">{t(SHORT[s.drag])}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -402,6 +404,7 @@ function StepMark({ state }: { state: "idle" | "waiting" | "running" | "done" })
 }
 
 function Result({ done, run, slotRef }: { done: boolean; run: number; slotRef: (el: HTMLElement | null) => void }): ReactNode {
+  const { t } = useTranslation();
   const size = run >= 3 || done ? "1.1 MB" : run === 2 ? "8.4 MB" : "—";
   return (
     <div
@@ -410,16 +413,16 @@ function Result({ done, run, slotRef }: { done: boolean; run: number; slotRef: (
       style={{ borderColor: done ? "var(--ok)" : "var(--border)", background: done ? "var(--ok-soft)" : "var(--surface-2)" }}
     >
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[9.5px] font-bold tracking-[0.12em] text-faint">{done ? "RESULT" : "YOU GET"}</span>
-        {done && <span className="font-mono text-[9.5px] font-bold text-ok">DONE · ON THIS DEVICE</span>}
+        <span className="font-mono text-[9.5px] font-bold tracking-[0.12em] text-faint">{done ? t("RESULT") : t("YOU GET")}</span>
+        {done && <span className="font-mono text-[9.5px] font-bold text-ok">{t("DONE · ON THIS DEVICE")}</span>}
       </div>
       <div className="mt-1 flex items-baseline justify-between gap-2">
-        <span className="truncate text-[12.5px] font-medium">{done ? "scan.pdf" : "One PDF"}</span>
+        <span className="truncate text-[12.5px] font-medium">{done ? "scan.pdf" : t("One PDF")}</span>
         <motion.span key={size} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease }} className="font-mono text-[18px] font-bold tracking-[-0.03em]">
           {size}
         </motion.span>
       </div>
-      {done && <div className="font-mono text-[10px] text-muted">−87% · searchable</div>}
+      {done && <div className="font-mono text-[10px] text-muted">{t("−87% · searchable")}</div>}
     </div>
   );
 }

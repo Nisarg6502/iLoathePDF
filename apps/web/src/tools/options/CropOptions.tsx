@@ -1,14 +1,17 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { msg, useTranslation } from "@iloathepdf/i18n";
 
 const SIDES = ["top", "right", "bottom", "left"] as const;
+const SIDE_LABEL = { top: msg("Top (%)"), right: msg("Right (%)"), bottom: msg("Bottom (%)"), left: msg("Left (%)") };
 
 export function CropOptions({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         {SIDES.map((side) => (
           <label key={side} className="flex flex-col gap-1.5">
-            <span className="text-[12.5px] font-semibold capitalize">{side} (%)</span>
+            <span className="text-[12.5px] font-semibold">{t(SIDE_LABEL[side])}</span>
             <input
               type="number"
               min={0}
@@ -23,20 +26,19 @@ export function CropOptions({ options, onChange, disabled }: OptionsPanelProps) 
         ))}
       </div>
       <label className="flex flex-col gap-1.5">
-        <span className="text-[12.5px] font-semibold">Pages</span>
+        <span className="text-[12.5px] font-semibold">{t("Pages")}</span>
         <input
           type="text"
-          placeholder="All pages"
+          placeholder={t("All pages")}
           disabled={disabled}
           value={(options.pages as string) ?? ""}
           onChange={(e) => onChange({ ...options, pages: e.target.value })}
           className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm"
         />
-        <span className="text-[11.5px] text-muted">Leave empty for every page. Example: 1-3,8</span>
+        <span className="text-[11.5px] text-muted">{t("Leave empty for every page. Example: 1-3,8")}</span>
       </label>
       <div className="rounded-lg bg-accent-soft p-3 text-[11.5px] leading-relaxed text-on-accent">
-        Each side is trimmed by a percentage of the page. Cropped-out content stays inside the file, hidden — use
-        Redact to remove it for good.
+        {t("Each side is trimmed by a percentage of the page. Cropped-out content stays inside the file, hidden — use Redact to remove it for good.")}
       </div>
     </div>
   );

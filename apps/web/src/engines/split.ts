@@ -1,6 +1,7 @@
 import { PDFDocument } from "pdf-lib";
 import { parseRanges } from "@/lib/ranges";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 type SplitMode = "ranges" | "everyN" | "extract" | "delete";
 
@@ -18,13 +19,13 @@ async function buildPdf(src: PDFDocument, indices: number[]): Promise<Uint8Array
  */
 function requireSpec(raw: unknown, what: string): string {
   const spec = String(raw ?? "").trim();
-  if (!spec.split(",").some((s) => s.trim() !== "")) throw new Error(`Enter ${what}.`);
+  if (!spec.split(",").some((s) => s.trim() !== "")) throw new Error(tr("Enter {{what}}.", { what }));
   return spec;
 }
 
 export const splitEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to split.");
+  if (!file) throw new Error(tr("Add a PDF to split."));
 
   const mode = options.mode as SplitMode;
   const bytes = await file.arrayBuffer();
@@ -44,12 +45,12 @@ export const splitEngine: Engine = async ({ files, options }) => {
         return { name: `${baseName}-part${i + 1}.pdf`, blob: new Blob([pdfBytes as BlobPart], { type: "application/pdf" }) };
       }),
     );
-    return { files: outputs, summary: `${pageCount} pages → ${outputs.length} files`, isPreview: false };
+    return { files: outputs, summary: tr("{{pages}} → {{files}}", { pages: tr("{{count}} pages", { count: pageCount }), files: tr("{{count}} files", { count: outputs.length }) }), isPreview: false };
   }
 
   if (mode === "everyN") {
     const n = Number(options.n);
-    if (!Number.isInteger(n) || n < 1) throw new Error("Pages per file must be at least 1.");
+    if (!Number.isInteger(n) || n < 1) throw new Error(tr("Pages per file must be at least 1."));
     const outputs: { name: string; blob: Blob }[] = [];
     for (let start = 0; start < pageCount; start += n) {
       const indices = Array.from(
@@ -59,27 +60,27 @@ export const splitEngine: Engine = async ({ files, options }) => {
       const pdfBytes = await buildPdf(src, indices);
       outputs.push({ name: `${baseName}-part${outputs.length + 1}.pdf`, blob: new Blob([pdfBytes as BlobPart], { type: "application/pdf" }) });
     }
-    return { files: outputs, summary: `${pageCount} pages → ${outputs.length} files of up to ${n} pages`, isPreview: false };
+    return { files: outputs, summary: tr("{{pages}} → {{files}} of up to {{max}}", { pages: tr("{{count}} pages", { count: pageCount }), files: tr("{{count}} files", { count: outputs.length }), max: tr("{{count}} pages", { count: n }) }), isPreview: false };
   }
 
   if (mode === "extract") {
-    const indices = parseRanges(requireSpec(options.ranges, "the pages to keep, like 1-3,5"), pageCount);
+    const indices = parseRanges(requireSpec(options.ranges, tr("the pages to keep, like 1-3,5")), pageCount);
     const pdfBytes = await buildPdf(src, indices);
     return {
       files: [{ name: `${baseName}-extracted.pdf`, blob: new Blob([pdfBytes as BlobPart], { type: "application/pdf" }) }],
-      summary: `${indices.length} of ${pageCount} pages extracted`,
+      summary: tr("{{done}} of {{pages}} extracted", { done: indices.length, pages: tr("{{count}} pages", { count: pageCount }) }),
       isPreview: false,
     };
   }
 
   if (mode === "delete") {
-    const toRemove = new Set(parseRanges(requireSpec(options.ranges, "the pages to remove, like 2,4"), pageCount));
+    const toRemove = new Set(parseRanges(requireSpec(options.ranges, tr("the pages to remove, like 2,4")), pageCount));
     const indices = Array.from({ length: pageCount }, (_, i) => i).filter((i) => !toRemove.has(i));
-    if (indices.length === 0) throw new Error("That would remove every page. Keep at least one.");
+    if (indices.length === 0) throw new Error(tr("That would remove every page. Keep at least one."));
     const pdfBytes = await buildPdf(src, indices);
     return {
       files: [{ name: `${baseName}-deleted.pdf`, blob: new Blob([pdfBytes as BlobPart], { type: "application/pdf" }) }],
-      summary: `${toRemove.size} pages removed, ${indices.length} remain`,
+      summary: tr("{{removed}} removed, {{count}} remain", { removed: tr("{{count}} pages", { count: toRemove.size }), count: indices.length }),
       isPreview: false,
     };
   }

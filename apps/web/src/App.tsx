@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Home } from "@/pages/Home";
 import { ToolsIndex } from "@/pages/ToolsIndex";
 import { useSeo } from "@/seo/useSeo";
+import { useTranslation } from "@iloathepdf/i18n";
 
 // Everything below the landing pages loads on demand, so the first visit only
 // downloads what the home page and tool list need.
@@ -35,6 +36,7 @@ function Layout() {
 }
 
 export default function App() {
+  const { t } = useTranslation();
   return (
     <RequestStatusProvider>
       <Routes>
@@ -55,7 +57,7 @@ export default function App() {
             path="*"
             element={
               <div className="mx-auto max-w-6xl px-5 sm:px-8 py-24 text-center">
-                <p className="text-lg font-semibold">Page not found</p>
+                <p className="text-lg font-semibold">{t("Page not found")}</p>
               </div>
             }
           />

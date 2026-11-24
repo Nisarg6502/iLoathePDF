@@ -1,16 +1,17 @@
 import { PDFDocument, degrees } from "pdf-lib";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 export const organizeEngine: Engine = async ({ files, options }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to organize.");
+  if (!file) throw new Error(tr("Add a PDF to organize."));
 
   const order = (options.order as number[] | undefined) ?? [];
   const rotate = (options.rotate as Record<number, number> | undefined) ?? {};
   const remove = new Set((options.remove as number[] | undefined) ?? []);
 
   for (const deg of Object.values(rotate)) {
-    if (deg % 90 !== 0) throw new Error(`Rotation must be a multiple of 90 degrees, got ${deg}.`);
+    if (deg % 90 !== 0) throw new Error(tr("Rotation must be a multiple of 90 degrees, got {{deg}}.", { deg }));
   }
 
   const bytes = await file.arrayBuffer();
@@ -19,13 +20,13 @@ export const organizeEngine: Engine = async ({ files, options }) => {
 
   for (const i of order) {
     if (i < 0 || i >= srcPageCount) {
-      throw new Error(`Page count doesn't match the PDF (${srcPageCount} pages).`);
+      throw new Error(tr("Page count doesn't match the PDF ({{srcPageCount}} pages).", { srcPageCount }));
     }
   }
 
   const keptOriginalIndices = order.filter((i) => !remove.has(i));
   if (keptOriginalIndices.length === 0) {
-    throw new Error("Nothing to organize — no pages selected.");
+    throw new Error(tr("Nothing to organize — no pages selected."));
   }
 
   const out = await PDFDocument.create();
@@ -45,7 +46,7 @@ export const organizeEngine: Engine = async ({ files, options }) => {
         blob: new Blob([outBytes as BlobPart], { type: "application/pdf" }),
       },
     ],
-    summary: `${src.getPageCount()} pages in → ${pages.length} pages out`,
+    summary: tr("{{before}} in → {{after}} out", { before: tr("{{count}} pages", { count: src.getPageCount() }), after: tr("{{count}} pages", { count: pages.length }) }),
     isPreview: false,
   };
 };

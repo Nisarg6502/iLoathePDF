@@ -34,9 +34,10 @@ import { EASE_OUT, panelVariants } from "@/lib/motion";
 import { toolById, type OptionValues } from "@/lib/tools";
 import { cn, formatBytes } from "@/lib/utils";
 import type { Recipe } from "@/lib/recipes";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 type StepState = { status: "waiting" | "running" | "done" | "failed"; event?: StepEvent };
-const label = (id: string) => toolById(id)?.title ?? id;
+const label = (id: string) => tr(toolById(id)?.title ?? id);
 const defaultsOf = (id: string) => (toolById(id)?.defaults ?? {}) as Record<string, unknown>;
 
 type RunState =
@@ -46,6 +47,7 @@ type RunState =
   | { phase: "error"; error: JobError };
 
 export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
+  const { t } = useTranslation();
   const firstTool = toolById(recipe.steps[0]?.tool);
   const navigate = useNavigate();
 
@@ -61,7 +63,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     recipe.steps.map((s) => ({ ...toolById(s.tool)?.defaults, ...(s.options as OptionValues | undefined) })),
   );
   const effectiveSteps = recipe.steps.map((s, i) => ({ tool: s.tool, options: runOpts[i] as Record<string, unknown> }));
-  const analysis = analyzeChain(effectiveSteps, label, defaultsOf, true);
+  const analysis = analyzeChain(effectiveSteps, label, defaultsOf, true, tr);
   const firstNeed = analysis.steps.findIndex((s) => s.needs);
   const [openStep, setOpenStep] = useState<number | null>(firstNeed >= 0 ? firstNeed : null);
   const changed = recipe.steps.some((s, i) => {
@@ -95,12 +97,12 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
   }, [recipe, firstTool]);
 
   const blocker = useMemo(() => {
-    if (!firstTool) return "This recipe is misconfigured.";
-    if (files.length === 0) return `Add ${firstTool.acceptsLabel} to continue.`;
-    if (analysis.errors > 0) return "Fix the problem in the steps first.";
-    if (firstNeed >= 0) return `Step ${firstNeed + 1}: ${analysis.steps[firstNeed].needs}.`;
+    if (!firstTool) return tr("This recipe is misconfigured.");
+    if (files.length === 0) return tr("Add {{files}} to continue.", { files: tr(firstTool.acceptsLabel) });
+    if (analysis.errors > 0) return tr("Fix the problem in the steps first.");
+    if (firstNeed >= 0) return tr("Step {{step}}: {{needs}}.", { step: firstNeed + 1, needs: analysis.steps[firstNeed].needs ?? "" });
     if (analysis.needsTwoFiles && files.length < 2) {
-      return "Merging needs at least two PDFs.";
+      return tr("Merging needs at least two PDFs.");
     }
     return null;
   }, [files.length, firstTool, analysis, firstNeed]);
@@ -114,7 +116,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
     setStartedAt(Date.now());
     setCurrentStep(0);
     setStepStates(recipe.steps.map(() => ({ status: "waiting" })));
-    setState({ phase: "running", pct: 0, note: "Starting…" });
+    setState({ phase: "running", pct: 0, note: tr("Starting…") });
 
     const onProgress = (p: Progress) =>
       setState((prev) =>
@@ -158,7 +160,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
   if (!firstTool) {
     return (
       <div className="grid flex-1 place-items-center p-10 text-center text-[14px] text-muted">
-        This recipe references a tool that no longer exists.
+        {t("This recipe references a tool that no longer exists.")}
       </div>
     );
   }
@@ -167,9 +169,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
   const inputSummary =
     files.length === 0
       ? null
-      : `${files.length} file${files.length === 1 ? "" : "s"}${
-          totalBytes ? ` · ${formatBytes(totalBytes)}` : ""
-        }`;
+      : `${tr("{{count}} files", { count: files.length })}${totalBytes ? ` · ${formatBytes(totalBytes)}` : ""}`;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -177,8 +177,8 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
       <header className="flex h-[54px] flex-none items-center gap-3 border-b border-border bg-surface px-5">
         <ChainStrip steps={recipe.steps} size={24} />
         <div className="min-w-0">
-          <div className="text-[15px] font-semibold tracking-[-0.005em] text-text">{recipe.title}</div>
-          <div className="truncate text-[12.5px] text-muted">{recipe.description}</div>
+          <div className="text-[15px] font-semibold tracking-[-0.005em] text-text">{tr(recipe.title)}</div>
+          <div className="truncate text-[12.5px] text-muted">{tr(recipe.description)}</div>
         </div>
 
         <div className="flex-1" />
@@ -189,7 +189,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         ) : (
           <Button variant="secondary" size="sm" className="mr-2" disabled={running} onClick={() => navigate(`/r/new?from=${recipe.id}`)}>
             <SlidersHorizontal />
-            Customize
+            {t("Customize")}
           </Button>
         )}
 
@@ -198,7 +198,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
             <span className="text-[13px] text-muted">{inputSummary}</span>
             <Button variant="secondary" size="sm" onClick={browse} disabled={!isTauri()}>
               <Plus />
-              Add files
+              {t("Add files")}
             </Button>
             <Button
               variant="danger"
@@ -208,7 +208,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                 setState({ phase: "idle" });
               }}
             >
-              Clear
+              {t("Clear")}
             </Button>
           </div>
         ) : null}
@@ -229,7 +229,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
               >
                 <div className="w-full max-w-[560px]">
                   <JobProgress
-                    title={recipe.title}
+                    title={tr(recipe.title)}
                     progress={{ id: "current", pct: state.pct, note: state.note }}
                     phase="running"
                     startedAt={startedAt}
@@ -255,14 +255,14 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                     title={state.result.summary}
                     compression={state.result.compression}
                     onAgain={() => setState({ phase: "idle" })}
-                    againLabel="Back to start"
+                    againLabel={tr("Back to start")}
                   />
                   <div className="mt-4 rounded-[var(--radius-card)] border border-border bg-surface p-4">
-                    <div className="mb-3 font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">HOW IT WENT</div>
+                    <div className="mb-3 font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">{t("HOW IT WENT")}</div>
                     <RunTimeline recipe={recipe} states={stepStates} />
                     {recipe.steps.length > 1 ? (
                       <p className="mt-3 text-[12.5px] text-muted">
-                        In-between files from the earlier steps are in the “{STEPS_FOLDER}” folder next to the result. You can delete it.
+                        {t("In-between files from the earlier steps are in the “{{STEPS_FOLDER}}” folder next to the result. You can delete it.", { STEPS_FOLDER })}
                       </p>
                     ) : null}
                   </div>
@@ -306,7 +306,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                             }}
                           >
                             <SlidersHorizontal />
-                            Adjust step {currentStep} and retry
+                            {t("Adjust step {{step}} and retry", { step: currentStep })}
                           </Button>
                         ) : null}
                       </div>
@@ -346,12 +346,12 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                 </span>
                 <span className="text-center">
                   <span className="block text-[17px] font-semibold text-text">
-                    {picking ? "Opening the file picker…" : `Drop ${firstTool.acceptsLabel} here`}
+                    {picking ? t("Opening the file picker…") : t("Drop {{acceptsLabel}} here", { acceptsLabel: firstTool.acceptsLabel })}
                   </span>
                   <span className="mt-1 block text-[13.5px] text-muted">
                     {picking
-                      ? "Windows can take a moment the first time."
-                      : "or click anywhere in this box to browse"}
+                      ? t("Windows can take a moment the first time.")
+                      : t("or click anywhere in this box to browse")}
                   </span>
                 </span>
                 <span className="font-mono text-[11.5px] tracking-[0.13em] text-faint uppercase">
@@ -359,15 +359,14 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                 </span>
                 <span className="max-w-[46ch] text-center text-[13px] text-muted">
                   {analysis.needsTwoFiles
-                    ? "Two or more files, joined in the order you add them."
+                    ? t("Two or more files, joined in the order you add them.")
                     : firstTool.multiple
-                      ? "One or more files."
-                      : "One file, or several to run the recipe on each."}{" "}
-                  You get: {describeOutput(analysis.output).replace(/^\w/, (c) => c.toLowerCase())}.
+                      ? t("One or more files.")
+                      : t("One file, or several to run the recipe on each.")}{" "}{t("You get: {{output}}.", { output: describeOutput(analysis.output, tr).replace(/^\w/, (c) => c.toLowerCase()) })}
                 </span>
                 {rejected > 0 ? (
                   <span className="text-[13px] text-danger">
-                    {rejected} file{rejected === 1 ? "" : "s"} skipped — wrong format for this recipe.
+                    {t("{{count}} files skipped: wrong format for this recipe.", { count: rejected })}
                   </span>
                 ) : null}
               </motion.button>
@@ -390,8 +389,8 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         <aside className="flex w-[344px] flex-none flex-col border-l border-border bg-surface">
           <div className="min-h-0 flex-1 overflow-auto p-4">
             <div className="mb-2.5 flex items-baseline justify-between">
-              <span className="font-mono text-[12px] font-bold tracking-[0.13em] text-faint">STEPS</span>
-              <span className="text-[12px] text-muted">Click a step to adjust it</span>
+              <span className="font-mono text-[12px] font-bold tracking-[0.13em] text-faint">{t("STEPS")}</span>
+              <span className="text-[12px] text-muted">{t("Click a step to adjust it")}</span>
             </div>
             <StepsPanel
               recipe={recipe}
@@ -412,7 +411,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                   className="overflow-hidden"
                 >
                   <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-[12.5px]">
-                    <span className="text-muted">Changed settings apply to this run.</span>
+                    <span className="text-muted">{t("Changed settings apply to this run.")}</span>
                     <button
                       type="button"
                       className="flex-none font-semibold text-accent hover:underline"
@@ -421,12 +420,12 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                         if (recipe.custom) {
                           saveCustomRecipe({ id: recipe.id, title: recipe.title, description: recipe.description, steps });
                         } else {
-                          const saved = saveCustomRecipe({ title: `${recipe.title} (my version)`, description: recipe.description, steps });
+                          const saved = saveCustomRecipe({ title: `${tr(recipe.title)} (my version)`, description: recipe.description, steps });
                           navigate(`/r/${saved.id}`);
                         }
                       }}
                     >
-                      {recipe.custom ? "Save to recipe" : "Save as my recipe"}
+                      {recipe.custom ? t("Save to recipe") : t("Save as my recipe")}
                     </button>
                   </div>
                 </motion.div>
@@ -451,13 +450,14 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
 
 /** Edit / delete for a user-built recipe. Delete asks for a second click rather than a native dialog. */
 function CustomRecipeActions({ recipe, disabled }: { recipe: Recipe; disabled: boolean }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
   return (
     <div className="mr-2 flex items-center gap-2">
       <Button variant="secondary" size="sm" disabled={disabled} onClick={() => navigate(`/r/${recipe.id}/edit`)}>
         <Pencil />
-        Edit
+        {t("Edit")}
       </Button>
       {confirming ? (
         <>
@@ -469,16 +469,16 @@ function CustomRecipeActions({ recipe, disabled }: { recipe: Recipe; disabled: b
               navigate("/");
             }}
           >
-            Delete for good?
+            {t("Delete for good?")}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => setConfirming(false)}>
-            Keep
+            {t("Keep")}
           </Button>
         </>
       ) : (
         <Button variant="danger" size="sm" disabled={disabled} onClick={() => setConfirming(true)}>
           <Trash2 />
-          Delete
+          {t("Delete")}
         </Button>
       )}
     </div>
@@ -509,14 +509,13 @@ function RecipeCancelledCard({
   onRetry: () => void;
   onAgain: () => void;
 }) {
+  const { t } = useTranslation();
   const total = recipe.steps.length;
-  const dirLabel = outputDir ?? "the folder of the first input file";
+  const dirLabel = outputDir ?? tr("the folder of the first input file");
   const body =
     completedSteps > 0
-      ? `Stopped after step ${completedSteps} of ${total}. Files written by the completed step${
-          completedSteps === 1 ? "" : "s"
-        } are in the “${STEPS_FOLDER}” folder inside ${dirLabel} — nothing was deleted.`
-      : `Stopped before any step finished. No recipe output was written.`;
+      ? tr("Stopped after step {{completed}} of {{total}}. Files written by the completed steps are in the “{{folder}}” folder inside {{dir}}; nothing was deleted.", { count: completedSteps, completed: completedSteps, total, folder: STEPS_FOLDER, dir: dirLabel })
+      : tr("Stopped before any step finished. No recipe output was written.");
 
   return (
     <section className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-[var(--shadow-card)]">
@@ -525,7 +524,7 @@ function RecipeCancelledCard({
           <AlertTriangle className="h-4 w-4 text-muted" strokeWidth={2.25} />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-text">Cancelled</h3>
+          <h3 className="text-sm font-semibold text-text">{t("Cancelled")}</h3>
           <p className="mt-1 text-sm leading-relaxed text-muted">{body}</p>
         </div>
       </div>
@@ -536,14 +535,14 @@ function RecipeCancelledCard({
           className="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <RotateCcw className="h-3.5 w-3.5" />
-          Try again
+          {t("Try again")}
         </button>
         <button
           type="button"
           onClick={onAgain}
           className="ml-auto rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          Start over
+          {t("Start over")}
         </button>
       </footer>
     </section>
@@ -571,6 +570,7 @@ function StepsPanel({
   disabled: boolean;
   onChange: (i: number, v: OptionValues) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <ol className="grid gap-1.5">
       {recipe.steps.map((step, i) => {
@@ -580,7 +580,7 @@ function StepsPanel({
         if (!tool) {
           return (
             <li key={i} className="rounded-lg border border-danger/40 px-3 py-2.5 text-[13.5px] text-danger">
-              Unknown tool “{step.tool}”
+              {t("Unknown tool “{{tool}}”", { tool: step.tool })}
             </li>
           );
         }
@@ -596,13 +596,13 @@ function StepsPanel({
               type="button"
               onClick={() => onOpen(isOpen ? null : i)}
               aria-expanded={isOpen}
-              aria-label={`Step ${i + 1}: ${tool.title}`}
+              aria-label={t("Step {{step}}: {{title}}", { step: i + 1, title: tr(tool.title) })}
               className="flex w-full items-center gap-2.5 px-2.5 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <StepBadge index={i} state={states[i]?.status ?? "waiting"} />
               <StepIcon tool={step.tool} size={26} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13.5px] text-text">{tool.title}</span>
+                <span className="block truncate text-[13.5px] text-text">{tr(tool.title)}</span>
                 <span className={cn("block truncate text-[12px]", a.needs ? "text-info" : "text-muted")}>
                   {a.needs ?? stepSummary({ tool: step.tool, options: runOpts[i] }, {})}
                 </span>
@@ -630,7 +630,7 @@ function StepsPanel({
                 >
                   <fieldset disabled={disabled} className="border-t border-border bg-surface px-3 py-3">
                     {step.tool === "protect" ? (
-                      <p className="mb-3 text-[12px] text-muted">Passwords are never saved with a recipe.</p>
+                      <p className="mb-3 text-[12px] text-muted">{t("Passwords are never saved with a recipe.")}</p>
                     ) : null}
                     <ToolOptions tool={tool} values={runOpts[i]} onChange={(v) => onChange(i, v)} />
                   </fieldset>
@@ -679,6 +679,7 @@ function StepBadge({ index, state }: { index: number; state: StepState["status"]
 
 /** The recipe's steps lighting up one after another, with what each one did. */
 function RunTimeline({ recipe, states }: { recipe: Recipe; states: StepState[] }) {
+  const { t } = useTranslation();
   return (
     <ol className="grid">
       {recipe.steps.map((step, i) => {
@@ -705,11 +706,11 @@ function RunTimeline({ recipe, states }: { recipe: Recipe; states: StepState[] }
               <div className="flex items-center gap-2 text-[13.5px] text-text">
                 <StepIcon tool={step.tool} size={20} />
                 <span className="font-medium">{label(step.tool)}</span>
-                {st.status === "running" ? <span className="font-mono text-[11.5px] text-accent">working…</span> : null}
+                {st.status === "running" ? <span className="font-mono text-[11.5px] text-accent">{t("working…")}</span> : null}
               </div>
               {ev && st.status === "done" ? (
                 <motion.div initial={{ opacity: 0, y: -2 }} animate={{ opacity: 1, y: 0 }} className="mt-0.5 font-mono text-[11.5px] text-muted">
-                  {ev.filesIn} → {ev.filesOut} file{ev.filesOut === 1 ? "" : "s"} · {formatBytes(ev.bytesOut ?? 0)}
+                  {t("{{filesIn}} → {{files}}", { filesIn: ev.filesIn, files: t("{{count}} files", { count: ev.filesOut }) })} · {formatBytes(ev.bytesOut ?? 0)}
                   {ev.ms !== undefined ? ` · ${ev.ms < 1000 ? `${Math.round(ev.ms)} ms` : `${(ev.ms / 1000).toFixed(1)} s`}` : ""}
                 </motion.div>
               ) : null}
@@ -723,13 +724,14 @@ function RunTimeline({ recipe, states }: { recipe: Recipe; states: StepState[] }
 
 /** Copies a recipe code another copy of the app can paste into "New recipe". */
 function ShareCode({ recipe }: { recipe: Recipe }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
     <Button
       variant="ghost"
       size="sm"
       className="mr-1"
-      title="Copy a code that recreates this recipe on another computer"
+      title={t("Copy a code that recreates this recipe on another computer")}
       onClick={() => {
         void navigator.clipboard
           .writeText(encodeShare(recipe))
@@ -741,7 +743,7 @@ function ShareCode({ recipe }: { recipe: Recipe }) {
       }}
     >
       {copied ? <Check /> : <Copy />}
-      {copied ? "Code copied" : "Copy code"}
+      {copied ? t("Code copied") : t("Copy code")}
     </Button>
   );
 }
@@ -761,19 +763,20 @@ function RunFooter({
   onRun: () => void;
   fileCount: number;
 }) {
+  const { t } = useTranslation();
   const { outputDir, choose } = useOutputDir();
 
   return (
     <div className="flex-none border-t border-border bg-surface-2 px-4 pt-3 pb-3.5">
       <div className="mb-1.5 font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
-        SAVE TO
+        {t("SAVE TO")}
       </div>
       <div className="flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => void choose()}
           disabled={!isTauri()}
-          title={outputDir ?? "Beside each input file"}
+          title={outputDir ?? t("Beside each input file")}
           className={cn(
             "flex h-[30px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-hi bg-surface px-2.5",
             "outline-none transition-colors duration-150 hover:border-accent",
@@ -782,18 +785,18 @@ function RunFooter({
         >
           <FolderOpen className="size-3.5 flex-none" style={{ color: "var(--tint-e)" }} />
           <span className="min-w-0 flex-1 truncate text-left font-mono text-[12px] text-text">
-            {outputDir ?? "Beside each input file"}
+            {outputDir ?? t("Beside each input file")}
           </span>
         </button>
         <Button variant="secondary" size="sm" onClick={() => void choose()} disabled={!isTauri()}>
-          Change
+          {t("Change")}
         </Button>
       </div>
 
       <p className="mt-1.5 text-[12px] text-muted">
         {fileCount > 0
-          ? `Your ${fileCount} input file${fileCount === 1 ? " is" : "s are"} untouched. Only the final result lands here.`
-          : "Inputs are never modified. Only the final result lands here."}
+          ? t("Your {{count}} input files are untouched. Only the final result lands here.", { count: fileCount })
+          : t("Inputs are never modified. Only the final result lands here.")}
       </p>
 
       <Button
@@ -803,8 +806,8 @@ function RunFooter({
         className="mt-2.5 h-[38px] w-full text-[14.5px] font-semibold"
       >
         {running ? <Loader2 className="animate-spin" /> : <Play />}
-        <span>{running ? "Working…" : recipe.steps.length === 1 ? "Run" : `Run ${recipe.steps.length} steps`}</span>
-        <span className="font-mono text-[12px] font-normal opacity-70">Ctrl+Enter</span>
+        <span>{running ? t("Working…") : recipe.steps.length === 1 ? t("Run") : t("Run {{count}} steps", { count: recipe.steps.length })}</span>
+        <span className="font-mono text-[12px] font-normal opacity-70">{t("Ctrl+Enter")}</span>
       </Button>
 
       {blocker ? <p className="mt-2 text-center text-[13px] text-muted">{blocker}</p> : null}
@@ -823,6 +826,7 @@ function FileList({
   onChange: (files: PickedFile[]) => void;
   ordered: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <ul className="grid gap-1.5">
       {files.map((file, i) => (
@@ -850,7 +854,7 @@ function FileList({
           <Button
             variant="danger"
             size="iconSm"
-            aria-label={`Remove ${file.name}`}
+            aria-label={t("Remove {{name}}", { name: file.name })}
             onClick={() => onChange(files.filter((f) => f.id !== file.id))}
           >
             <X />

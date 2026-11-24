@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { trimCanvasToInk } from "@/lib/trimCanvas";
 import { loadSavedMarks, saveMark, removeMark, type SavedSignKind, type SavedSignMark } from "@/lib/signatureStore";
+import { useTranslation } from "@iloathepdf/i18n";
 
 const CANVAS_SIZE: Record<SavedSignKind, { w: number; h: number }> = {
   signature: { w: 560, h: 200 },
@@ -17,13 +18,13 @@ export function SignatureCapture({
   onClose: () => void;
   onPick: (imageDataUrl: string) => void;
 }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<"draw" | "upload">("draw");
   const [saved, setSaved] = useState<SavedSignMark[]>(() => loadSavedMarks(kind));
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [hasInk, setHasInk] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
-  const label = kind === "signature" ? "signature" : "initials";
   const size = CANVAS_SIZE[kind];
 
   useEffect(() => {
@@ -114,26 +115,26 @@ export function SignatureCapture({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="m-0 text-[16px] font-semibold capitalize text-text">Add {label}</h2>
-          <Button variant="ghost" size="iconSm" onClick={onClose} aria-label="Close">
+          <h2 className="m-0 text-[16px] font-semibold capitalize text-text">{kind === "signature" ? t("Add signature") : t("Add initials")}</h2>
+          <Button variant="ghost" size="iconSm" onClick={onClose} aria-label={t("Close")}>
             ✕
           </Button>
         </div>
 
         {saved.length > 0 && (
           <div className="mt-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">Saved {label}s</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-faint">{kind === "signature" ? t("Saved signatures") : t("Saved initials")}</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {saved.map((m) => (
                 <div key={m.id} className="group relative rounded-lg border border-border bg-white p-1.5">
                   <button type="button" onClick={() => pickSaved(m)} className="block">
-                    <img src={m.imageDataUrl} alt="Saved mark" className="h-10 w-auto object-contain" />
+                    <img src={m.imageDataUrl} alt={t("Saved mark")} className="h-10 w-auto object-contain" />
                   </button>
                   <button
                     type="button"
                     onClick={() => removeSaved(m.id)}
                     className="absolute -right-1.5 -top-1.5 hidden size-4.5 place-items-center rounded-full bg-surface-3 text-[10px] text-muted group-hover:grid hover:text-danger"
-                    aria-label="Remove saved mark"
+                    aria-label={t("Remove saved mark")}
                   >
                     ✕
                   </button>
@@ -149,14 +150,14 @@ export function SignatureCapture({
             onClick={() => setTab("draw")}
             className={`flex-1 rounded-lg py-1.5 font-medium ${tab === "draw" ? "bg-surface shadow-sm" : "text-muted"}`}
           >
-            Draw
+            {t("Draw")}
           </button>
           <button
             type="button"
             onClick={() => setTab("upload")}
             className={`flex-1 rounded-lg py-1.5 font-medium ${tab === "upload" ? "bg-surface shadow-sm" : "text-muted"}`}
           >
-            Upload
+            {t("Upload")}
           </button>
         </div>
 
@@ -174,7 +175,7 @@ export function SignatureCapture({
               onPointerLeave={endDraw}
             />
             <button type="button" onClick={clearDraw} className="mt-2 text-[12.5px] text-muted hover:text-text">
-              Clear
+              {t("Clear")}
             </button>
           </div>
         ) : (
@@ -187,7 +188,7 @@ export function SignatureCapture({
             />
             {uploadPreview && (
               <div className="mt-3 grid place-items-center rounded-xl border border-border bg-white p-3">
-                <img src={uploadPreview} alt="Upload preview" className="max-h-[140px] object-contain" />
+                <img src={uploadPreview} alt={t("Upload preview")} className="max-h-[140px] object-contain" />
               </div>
             )}
           </div>
@@ -195,10 +196,10 @@ export function SignatureCapture({
 
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" size="sm" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button variant="primary" size="sm" onClick={confirm} disabled={!canConfirm}>
-            Use this {label}
+            {kind === "signature" ? t("Use this signature") : t("Use these initials")}
           </Button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import type { PDFDocument, PDFImage } from "pdf-lib";
+import { tr } from "@iloathepdf/i18n";
 
 /**
  * Embeds image bytes of any browser-decodable format.
@@ -18,7 +19,7 @@ export async function embedImageBytes(doc: PDFDocument, bytes: Uint8Array): Prom
   try {
     bitmap = await createImageBitmap(new Blob([bytes as BlobPart]));
   } catch {
-    throw new Error("That image format isn't supported. Use a PNG, JPG, WebP or GIF.");
+    throw new Error(tr("That image format isn't supported. Use a PNG, JPG, WebP or GIF."));
   }
   const canvas = document.createElement("canvas");
   canvas.width = bitmap.width;

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "@iloathepdf/i18n";
 
 const smallButton =
   "flex-none rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium hover:bg-surface-3 disabled:pointer-events-none disabled:opacity-40 max-sm:min-h-10 max-sm:min-w-10";
@@ -22,6 +23,7 @@ export function PdfInputList({
   /** Shows a spinner on every row. */
   running: boolean;
 }) {
+  const { t } = useTranslation();
   const addInput = useRef<HTMLInputElement>(null);
   // Stable React keys: names repeat and positions change when reordering.
   const keys = useRef(new WeakMap<File, number>());
@@ -74,7 +76,7 @@ export function PdfInputList({
             )}
             <button
               type="button"
-              aria-label={`Move ${f.name} up`}
+              aria-label={t("Move {{name}} up", { name: f.name })}
               disabled={disabled || i === 0}
               onClick={() => move(i, i - 1)}
               className={smallButton}
@@ -83,7 +85,7 @@ export function PdfInputList({
             </button>
             <button
               type="button"
-              aria-label={`Move ${f.name} down`}
+              aria-label={t("Move {{name}} down", { name: f.name })}
               disabled={disabled || i === files.length - 1}
               onClick={() => move(i, i + 1)}
               className={smallButton}
@@ -92,7 +94,7 @@ export function PdfInputList({
             </button>
             <button
               type="button"
-              aria-label={`Remove ${f.name}`}
+              aria-label={t("Remove {{name}}", { name: f.name })}
               disabled={disabled}
               onClick={() => onFilesChange(files.filter((_, j) => j !== i))}
               className={`${smallButton} hover:text-danger`}
@@ -121,7 +123,7 @@ export function PdfInputList({
         onClick={() => addInput.current?.click()}
         className="mt-3 flex h-10 w-full items-center justify-center rounded-[11px] border border-dashed border-border text-sm font-medium text-muted hover:border-accent hover:text-text disabled:pointer-events-none disabled:opacity-50"
       >
-        + Add more files
+        {t("+ Add more files")}
       </button>
     </>
   );

@@ -1,6 +1,8 @@
 import type { OptionsPanelProps } from "@/tools/ToolConfig";
+import { useTranslation } from "@iloathepdf/i18n";
 
 export function PdfToImagesOptions({ options, onChange, disabled }: OptionsPanelProps) {
+  const { t } = useTranslation();
   const dpi = (options.dpi as number) ?? 144;
   const format = (options.format as string) ?? "png";
 
@@ -8,7 +10,7 @@ export function PdfToImagesOptions({ options, onChange, disabled }: OptionsPanel
     <div className="flex flex-col gap-4">
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[12.5px] font-semibold">Image DPI</span>
+          <span className="text-[12.5px] font-semibold">{t("Image DPI")}</span>
           <span className="font-mono text-[11.5px] text-muted">{dpi}</span>
         </div>
         <input
@@ -23,7 +25,7 @@ export function PdfToImagesOptions({ options, onChange, disabled }: OptionsPanel
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <span className="text-[12.5px] font-semibold">Format</span>
+        <span className="text-[12.5px] font-semibold">{t("Format")}</span>
         <div className="flex gap-1.5">
           {["png", "jpg"].map((f) => (
             <button

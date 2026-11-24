@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DesktopAppArt } from "@/components/DesktopAppArt";
+import { tr, Trans, useTranslation } from "@iloathepdf/i18n";
 
 const RELEASES_URL = "https://github.com/Nisarg6502/iLoathePDF/releases";
 const LATEST_RELEASE_API = "https://api.github.com/repos/Nisarg6502/iLoathePDF/releases/latest";
@@ -45,28 +46,27 @@ function useLatestRelease() {
 }
 
 export function Download() {
+  const { t } = useTranslation();
   const { state, release } = useLatestRelease();
 
   const perks = [
-    ["Files of any size", "Limited by your disk, not by tab memory."],
-    ["Batch and folders", "Point it at 300 scans and walk away."],
-    ["Output where you want it", "Per-tool destinations, remembered."],
-    ["Ghostscript compression", "The full engine, not the browser preview."],
-    ["Offline by default", "An optional update check is off until you turn it on."],
+    [tr("Files of any size"), tr("Limited by your disk, not by tab memory.")],
+    [tr("Batch and folders"), tr("Point it at 300 scans and walk away.")],
+    [tr("Output where you want it"), tr("Per-tool destinations, remembered.")],
+    [tr("Ghostscript compression"), tr("The full engine, not the browser preview.")],
+    [tr("Offline by default"), tr("An optional update check is off until you turn it on.")],
   ];
 
   return (
     <div className="mx-auto max-w-[1100px] px-5 sm:px-8 py-14">
       <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-[1fr_400px]">
         <div>
-          <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-accent">WINDOWS</span>
+          <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-accent">{t("WINDOWS")}</span>
           <h1 className="mt-4 text-[40px] font-semibold leading-[1.05] tracking-[-0.035em]">
-            All twenty-two tools, with no browser in the way.
+            {t("All twenty-two tools, with no browser in the way.")}
           </h1>
           <p className="mt-4 max-w-[48ch] text-base leading-relaxed text-muted">
-            Bigger files, whole folders at once, output saved where you want
-            it. Your files never touch the network. The only network feature
-            is an optional update check, off until you switch it on.
+            {t("Bigger files, whole folders at once, output saved where you want it. Your files never touch the network. The only network feature is an optional update check, off until you switch it on.")}
           </p>
 
           <div className="mt-7 flex items-center gap-3">
@@ -78,7 +78,7 @@ export function Download() {
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
                   <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
                 </svg>
-                Download for Windows
+                {t("Download for Windows")}
               </a>
             ) : state === "loading" ? (
               <span className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-surface-3 px-5 text-[14.5px] font-semibold text-faint">
@@ -86,14 +86,14 @@ export function Download() {
                   <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" />
                   <path d="M18 10a8 8 0 0 0-8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
-                Checking latest release…
+                {t("Checking latest release…")}
               </span>
             ) : (
               <a
                 href={RELEASES_URL}
                 className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]"
               >
-                See the latest release
+                {t("See the latest release")}
               </a>
             )}
             {state === "ready" && release && (
@@ -104,15 +104,16 @@ export function Download() {
           </div>
 
           <p className="mt-5 text-[13.5px] leading-relaxed text-muted">
-            Builds are published from{" "}
-            <a href={RELEASES_URL} className="text-accent">
-              the project's GitHub Releases
-            </a>
-            .
+            <Trans
+              i18nKey="Builds are published from <link>the project's GitHub Releases</link>."
+              components={{ link: <a href={RELEASES_URL} className="text-accent" /> }}
+            />
           </p>
           <p className="mt-6 text-[13.5px] leading-relaxed text-muted">
-            No installer for macOS or Linux yet. Both work fine in the
-            browser version — <Link to="/tools" className="text-accent">open the tools</Link> instead.
+            <Trans
+              i18nKey="No installer for macOS or Linux yet. Both work fine in the browser version: <link>open the tools</link> instead."
+              components={{ link: <Link to="/tools" className="text-accent" /> }}
+            />
           </p>
         </div>
 
@@ -121,7 +122,7 @@ export function Download() {
 
           <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-card)]">
             <div className="border-b border-border px-4.5 py-3.5 text-[12.5px] font-semibold">
-              What the desktop app adds
+              {t("What the desktop app adds")}
             </div>
             <div className="px-4.5 pb-3.5 pt-1.5">
               {perks.map(([title, body]) => (

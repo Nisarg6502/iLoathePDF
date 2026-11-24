@@ -19,6 +19,7 @@ import { useSyncExternalStore } from "react";
 
 import { isNewerVersion } from "./updates";
 import { isTauri } from "./jobs";
+import { tr } from "@iloathepdf/i18n";
 
 const ENABLED_KEY = "iloathepdf.updateCheck";
 const AUTO_KEY = "iloathepdf.updateAutoDownload";
@@ -119,7 +120,7 @@ export async function checkForUpdate(installed: string = __APP_VERSION__): Promi
   if (!isTauri()) {
     // The browser preview has no Rust core, and the webview's CSP would block a
     // direct request anyway. Say so rather than failing mysteriously.
-    set({ status: "error", error: "Checking for updates needs the desktop app." });
+    set({ status: "error", error: tr("Checking for updates needs the desktop app.") });
     return;
   }
   busy = true;
@@ -141,7 +142,7 @@ export async function checkForUpdate(installed: string = __APP_VERSION__): Promi
     startAuto = newer && state.autoDownload;
   } catch (e) {
     if (!state.enabled) return;
-    set({ status: "error", error: messageOf(e, "Could not reach GitHub.") });
+    set({ status: "error", error: messageOf(e, tr("Could not reach GitHub.")) });
   } finally {
     busy = false;
   }
@@ -166,7 +167,7 @@ export async function downloadUpdate(): Promise<void> {
     set({
       status: "available",
       progress: null,
-      error: messageOf(e, "The update could not be downloaded."),
+      error: messageOf(e, tr("The update could not be downloaded.")),
     });
   } finally {
     busy = false;
@@ -185,7 +186,7 @@ export async function installUpdate(): Promise<void> {
     const { invoke } = await import("@tauri-apps/api/core");
     await invoke("install_update");
   } catch (e) {
-    set({ status: "ready", error: messageOf(e, "The update could not be started.") });
+    set({ status: "ready", error: messageOf(e, tr("The update could not be started.")) });
   } finally {
     busy = false;
   }

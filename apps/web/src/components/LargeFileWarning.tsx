@@ -1,4 +1,5 @@
-/**
+
+import { useTranslation } from "@iloathepdf/i18n";/**
  * Shared with ToolPage and RecipeDetail: warns when the selected input(s)
  * exceed a size a browser tab can reasonably hold in memory. Recipes are
  * the most memory-hungry path on web -- multiple sequential Blobs held at
@@ -15,19 +16,19 @@ export function LargeFileWarning({
   totalBytes: number;
   onDismiss: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="page-in mt-3 flex items-start gap-3 rounded-xl border border-border bg-surface-2 p-3.5">
       <span className="mt-0.5 flex-none text-[13px]">⚠</span>
       <div className="flex-1 text-[12.5px] leading-relaxed text-muted">
-        {(totalBytes / (1024 * 1024)).toFixed(0)} MB is a lot for one browser tab — this may
-        run slowly or the tab may run out of memory. The desktop app has no such limit.
+        {t("{{size}} MB is a lot for one browser tab — this may run slowly or the tab may run out of memory. The desktop app has no such limit.", { size: (totalBytes / (1024 * 1024)).toFixed(0) })}
       </div>
       <button
         type="button"
         onClick={onDismiss}
         className="flex-none text-[12.5px] text-muted hover:text-text"
       >
-        Dismiss
+        {t("Dismiss")}
       </button>
     </div>
   );

@@ -17,7 +17,7 @@ import { useWindowFileDrop, type PickedFile } from "../components/FileDropZone";
 import { scrimVariants, sheetVariants } from "../lib/motion";
 import { setPendingFiles } from "../lib/handoff";
 import { Button } from "../components/ui/button";
-import { useTranslation } from "@iloathepdf/i18n";
+import { tr, useTranslation } from "@iloathepdf/i18n";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -224,6 +224,7 @@ function NewRecipeCard({ index }: { index: number }) {
 }
 
 function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
+  const { t } = useTranslation();
   return (
     <Link
       to={`/r/${recipe.id}`}
@@ -240,16 +241,16 @@ function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
       <span className="flex items-center justify-between gap-2">
         <ChainStrip steps={recipe.steps} size={26} />
         {recipe.custom ? (
-          <span className="rounded-full bg-accent-soft px-2 py-0.5 font-mono text-[10.5px] font-bold tracking-[0.06em] text-on-accent">YOURS</span>
+          <span className="rounded-full bg-accent-soft px-2 py-0.5 font-mono text-[10.5px] font-bold tracking-[0.06em] text-on-accent">{t("YOURS")}</span>
         ) : null}
       </span>
 
       <span className="flex-1">
         <span className="block text-[16px] font-semibold tracking-[-0.01em] text-text">
-          {recipe.title}
+          {tr(recipe.title)}
         </span>
         <span className="mt-1 block text-[14px] leading-relaxed text-muted">
-          {recipe.description}
+          {tr(recipe.description)}
         </span>
       </span>
 

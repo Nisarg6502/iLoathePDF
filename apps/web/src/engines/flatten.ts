@@ -13,6 +13,7 @@ import {
   type PDFPage,
 } from "pdf-lib";
 import type { Engine } from "./types";
+import { tr } from "@iloathepdf/i18n";
 
 const FLAG_HIDDEN = 2;
 const FLAG_NO_VIEW = 32;
@@ -83,7 +84,7 @@ function bake(page: PDFPage, annot: PDFDict, index: number): boolean {
 
 export const flattenEngine: Engine = async ({ files }) => {
   const file = files[0];
-  if (!file) throw new Error("Add a PDF to flatten.");
+  if (!file) throw new Error(tr("Add a PDF to flatten."));
 
   const doc = await PDFDocument.load(await file.arrayBuffer());
   const hasForm = doc.catalog.has(PDFName.of("AcroForm"));
@@ -122,8 +123,8 @@ export const flattenEngine: Engine = async ({ files }) => {
     ],
     summary:
       flattened === 0
-        ? "Nothing to flatten — no form fields or annotations"
-        : `${flattened} form field${flattened === 1 ? "" : "s"} / annotation${flattened === 1 ? "" : "s"} flattened`,
+        ? tr("Nothing to flatten — no form fields or annotations")
+        : tr("{{count}} form fields / annotations flattened", { count: flattened }),
     isPreview: false,
   };
 };
