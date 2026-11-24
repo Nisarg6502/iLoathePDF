@@ -21,6 +21,7 @@ export function SiteFooter() {
           <span className="font-mono text-[10px] font-bold tracking-[0.13em] text-faint">{t("TOOLS")}</span>
           <Link to="/tools" className="text-[12.5px] text-muted hover:text-text">{t("All tools")}</Link>
           <Link to="/tools/compress" className="text-[12.5px] text-muted hover:text-text">{t("Compress")}</Link>
+          <Link to="/text/word-counter" className="text-[12.5px] text-muted hover:text-text">{t("Word counter")}</Link>
           <Link to="/download" className="text-[12.5px] text-muted hover:text-text">{t("Desktop app")}</Link>
         </div>
 

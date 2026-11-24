@@ -109,6 +109,10 @@ function main() {
     "",
     ...live.map((t) => `- [${t.name}](${SITE}/tools/${t.slug}): ${t.description}`),
     "",
+    "## Text tools",
+    "",
+    `- [Word counter](${SITE}/text/word-counter): counts words, characters, sentences, paragraphs and reading time; the text is never uploaded or saved.`,
+    "",
     "## Recipes",
     "",
     ...CATEGORIES.flatMap((c) => [

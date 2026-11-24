@@ -108,6 +108,24 @@ export function staticPages(): PageMeta[] {
       jsonLd: [breadcrumb([{ name: "Home", path: "/" }, { name: "Recipes", path: "/recipes" }])],
     },
     {
+      path: "/text/word-counter",
+      title: `Word counter: private, nothing uploaded | ${SITE_NAME}`,
+      description:
+        "Count words, characters, sentences, paragraphs and reading time as you type or paste. Your text is counted in your browser tab and is never uploaded, saved or tracked.",
+      index: true,
+      priority: 0.8,
+      heading: "Word counter",
+      body: "Paste or type your text to count words, characters (with and without spaces), sentences, paragraphs, and reading and speaking time. Everything is counted in your browser tab: the text is never uploaded or saved.",
+      links: [{ href: "/tools", label: "PDF and image tools" }],
+      jsonLd: [
+        breadcrumb([
+          { name: "Home", path: "/" },
+          { name: "Word counter", path: "/text/word-counter" },
+        ]),
+        webApp(`Word counter (${SITE_NAME})`, "Counts words, characters, sentences and reading time in the browser. Text is never uploaded.", "/text/word-counter"),
+      ],
+    },
+    {
       path: "/how-it-works",
       title: `How it works: no upload, all on your device | ${SITE_NAME}`,
       description: "How iLoathePDF processes PDFs and images inside your browser tab or the desktop app, without sending files to any server.",
