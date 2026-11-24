@@ -1439,5 +1439,11 @@
   "Remove line breaks": "Supprimer les retours à la ligne",
   "Rejoins lines copied from a PDF": "Recolle les lignes copiées d’un PDF",
   "Remove empty lines": "Supprimer les lignes vides",
-  "Blank lines between paragraphs": "Lignes vides entre les paragraphes"
+  "Blank lines between paragraphs": "Lignes vides entre les paragraphes",
+  "Counted on this computer. Your text is never uploaded or saved.": "Compté sur cet ordinateur. Votre texte n'est jamais envoyé ni enregistré.",
+  "Compared on this computer. Your text is never uploaded or saved.": "Comparé sur cet ordinateur. Votre texte n'est jamais envoyé ni enregistré.",
+  "Paste two versions to see every word that was added or removed. Your text never leaves this computer.": "Collez deux versions pour voir chaque mot ajouté ou supprimé. Votre texte ne quitte jamais cet ordinateur.",
+  "TEXT": "TEXTE",
+  "TEXT · PASTE OR TYPE, NOTHING SAVED": "TEXTE · COLLEZ OU TAPEZ, RIEN N'EST ENREGISTRÉ",
+  "Text, PDF and Word files": "Fichiers texte, PDF et Word"
 }

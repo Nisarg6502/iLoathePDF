@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trans, useTranslation } from "@iloathepdf/i18n";
-import { ExtractTextError, TEXT_FILE_ACCEPT, extractText } from "./extractText";
+import { ExtractTextError, TEXT_FILE_ACCEPT, extractText, type OpenPdf } from "./extractText";
 
 /**
  * Shown when a PDF has no text layer, usually a scan. Reusable for drops.
  * (The tag is <a>, not <link>: Trans parses <link> as a void HTML element and
  * would leave the link empty.)
  */
-export function NoTextFoundNotice() {
+export function NoTextFoundNotice({ ocrPath }: { ocrPath: string }) {
   return (
     <span className="text-[12.5px] text-muted">
       <Trans
         i18nKey="No text found in this PDF. If it's a scan, <a>run OCR first</a>."
-        components={{ a: <Link to="/tools/ocr" className="font-semibold text-accent-deep underline underline-offset-2 hover:text-accent" /> }}
+        components={{ a: <Link to={ocrPath} className="font-semibold text-accent-deep underline underline-offset-2 hover:text-accent" /> }}
       />
     </span>
   );
@@ -25,7 +25,19 @@ type Status = { kind: "idle" } | { kind: "busy" } | { kind: "error"; message: st
  * "Open file" button for the word counter: reads a .txt, .md, .csv, .pdf or
  * .docx in this tab and hands its text to onText. Nothing is uploaded.
  */
-export function OpenFileButton({ onText }: { onText: (text: string, fileName: string) => void }) {
+export function OpenFileButton({
+  onText,
+  openPdf,
+  ocrPath,
+  pick,
+}: {
+  onText: (text: string, fileName: string) => void;
+  openPdf: OpenPdf;
+  /** Where the "run OCR first" link goes in this app. */
+  ocrPath: string;
+  /** The app's own file picker (the desktop's native dialog). Without it, a file input is used. Resolves null when cancelled. */
+  pick?: () => Promise<File | null>;
+}) {
   const { t } = useTranslation();
   const input = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -40,7 +52,7 @@ export function OpenFileButton({ onText }: { onText: (text: string, fileName: st
   async function open(file: File) {
     setStatus({ kind: "busy" });
     try {
-      const text = await extractText(file);
+      const text = await extractText(file, { openPdf });
       if (!alive.current) return;
       if (!text.trim() && /\.pdf$/i.test(file.name)) {
         setStatus({ kind: "empty" });
@@ -55,6 +67,21 @@ export function OpenFileButton({ onText }: { onText: (text: string, fileName: st
   }
 
   const busy = status.kind === "busy";
+
+  async function choose() {
+    if (!pick) {
+      input.current?.click();
+      return;
+    }
+    let file: File | null;
+    try {
+      file = await pick();
+    } catch {
+      setStatus({ kind: "error", message: t("Couldn't read this file.") });
+      return;
+    }
+    if (file && alive.current) await open(file);
+  }
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-y-1.5">
@@ -73,7 +100,7 @@ export function OpenFileButton({ onText }: { onText: (text: string, fileName: st
       />
       <button
         type="button"
-        onClick={() => input.current?.click()}
+        onClick={() => void choose()}
         disabled={busy}
         aria-busy={busy}
         className="flex h-9 items-center gap-2 rounded-[9px] border border-border-hi bg-surface-2 px-3.5 text-[13px] font-semibold text-text transition-transform duration-100 hover:bg-surface-3 active:scale-[0.96] disabled:pointer-events-none disabled:opacity-60"
@@ -90,7 +117,7 @@ export function OpenFileButton({ onText }: { onText: (text: string, fileName: st
       </button>
       <span role="status" aria-live="polite" className="min-w-0 pl-3 empty:pl-0">
         {status.kind === "error" && <span className="text-[12.5px] text-danger">{status.message}</span>}
-        {status.kind === "empty" && <NoTextFoundNotice />}
+        {status.kind === "empty" && <NoTextFoundNotice ocrPath={ocrPath} />}
       </span>
     </div>
   );

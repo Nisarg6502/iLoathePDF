@@ -21,10 +21,11 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = new URL("../../../", import.meta.url).pathname;
-const LOCALES = new URL("../locales/", import.meta.url).pathname;
-const SOURCE_DIRS = ["apps/web/src", "apps/desktop/src"];
+const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
+const LOCALES = fileURLToPath(new URL("../locales/", import.meta.url));
+const SOURCE_DIRS = ["apps/web/src", "apps/desktop/src", "packages/text/src"];
 
 const REGISTRY_FIELDS: Record<string, string[]> = {
   "apps/web/src/tools/registry.tsx": ["name", "description", "desktopOnlyNote"],

@@ -10,6 +10,7 @@ import {
   type ToolGroup,
 } from "../lib/tools";
 import { RECIPES, type Recipe } from "../lib/recipes";
+import { TEXT_TOOLS } from "../lib/textTools";
 import { useCustomRecipes } from "../lib/useCustomRecipes";
 import { ChainStrip } from "../components/recipes/ChainStrip";
 import { AnimatePresence, motion } from "motion/react";
@@ -114,6 +115,21 @@ export default function Home() {
         <section className="mt-6.5">
           <div className="flex items-center gap-2.5">
             <span className="font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
+              {t("TEXT · PASTE OR TYPE, NOTHING SAVED")}
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="mt-3 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+            {TEXT_TOOLS.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} index={cardIndex++} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-6.5">
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[11.5px] font-bold tracking-[0.13em] text-faint">
               {t("RECIPES · SEVERAL TOOLS IN ONE GO")}
             </span>
             <span className="h-px flex-1 bg-border" />
@@ -153,7 +169,7 @@ export default function Home() {
 
 // ---------------------------------------------------------------------------
 
-function ToolCard({ tool, index }: { tool: Tool; index: number }) {
+function ToolCard({ tool, index }: { tool: Pick<Tool, "path" | "tint" | "icon" | "title" | "description">; index: number }) {
   const { t } = useTranslation();
   const Icon = tool.icon;
   return (

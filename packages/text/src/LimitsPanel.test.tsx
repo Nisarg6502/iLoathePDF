@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { textStats } from "@/lib/textStats";
+import { textStats } from "./textStats";
 import { LimitsPanel } from "./LimitsPanel";
 import { LIMIT_STORAGE_KEY } from "./limits";
 

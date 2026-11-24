@@ -19,6 +19,18 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.8.0",
+    date: "2026-11-24",
+    highlights: [
+      "New Text section with a word counter: words, characters, sentences, paragraphs and reading time as you type, plus the count for whatever you select.",
+      "The word counter also shows your most-used words, a readability score, and how close you are to a limit (a tweet, an SMS, a meta description, or your own).",
+      "Open a PDF, Word or text file into the word counter, or drop it on the window. Change case and clean up spacing and line breaks in one click, with Undo.",
+      "Compare texts: paste two versions and see every word that was added or removed, inline or side by side.",
+      "Like everything else in the app, your text stays on this computer and is never saved.",
+      "The sidebar's tool list scrolls in short windows, so Settings is always in reach.",
+    ],
+  },
+  {
     version: "0.7.1",
     date: "2026-11-24",
     highlights: [

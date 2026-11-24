@@ -5,7 +5,8 @@
   "workspaces": [
     "apps/desktop",
     "apps/web",
-    "packages/i18n"
+    "packages/i18n",
+    "packages/text"
   ],
   "scripts": {
     "dev:desktop": "npm run tauri dev --workspace=apps/desktop",

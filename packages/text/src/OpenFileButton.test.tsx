@@ -1,14 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { PDFDocument } from "pdf-lib";
 import { OpenFileButton } from "./OpenFileButton";
+import type { OpenPdf } from "./extractText";
 
-function setup() {
+/** A PDF with no text layer, like a scan. */
+const emptyPdf: OpenPdf = async () => ({ numPages: 1, pageText: async () => [], close: async () => {} });
+
+function setup(pickFile?: () => Promise<File | null>) {
   const onText = vi.fn();
   render(
     <MemoryRouter>
-      <OpenFileButton onText={onText} />
+      <OpenFileButton onText={onText} openPdf={emptyPdf} ocrPath="/somewhere/ocr" pick={pickFile} />
     </MemoryRouter>,
   );
   const input = screen.getByTestId("open-file-input") as HTMLInputElement;
@@ -38,12 +41,22 @@ describe("OpenFileButton", () => {
 
   it("points to OCR when a PDF has no text", async () => {
     const { onText, pick } = setup();
-    const doc = await PDFDocument.create();
-    doc.addPage([200, 200]);
-    pick(new File([(await doc.save()) as BlobPart], "scan.pdf", { type: "application/pdf" }));
+    pick(new File(["%PDF"], "scan.pdf", { type: "application/pdf" }));
     const link = await screen.findByRole("link", { name: "run OCR first" });
-    expect(link).toHaveAttribute("href", "/tools/ocr");
+    expect(link).toHaveAttribute("href", "/somewhere/ocr");
     expect(screen.getByRole("status")).toHaveTextContent("No text found in this PDF. If it's a scan, run OCR first.");
     expect(onText).not.toHaveBeenCalled();
+  });
+
+  it("uses the app's own picker when it has one, and does nothing when it's cancelled", async () => {
+    const picked: (File | null)[] = [null, new File(["from the dialog"], "a.txt", { type: "text/plain" })];
+    const { onText, input } = setup(async () => picked.shift() ?? null);
+    const click = vi.spyOn(input, "click");
+    fireEvent.click(screen.getByRole("button", { name: "Open file" }));
+    await waitFor(() => expect(picked).toHaveLength(1));
+    expect(onText).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Open file" }));
+    await waitFor(() => expect(onText).toHaveBeenCalledWith("from the dialog", "a.txt"));
+    expect(click).not.toHaveBeenCalled();
   });
 });

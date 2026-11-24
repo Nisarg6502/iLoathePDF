@@ -4,9 +4,35 @@ import { tr } from "@iloathepdf/i18n";
 /**
  * Reads the text out of a file the user picked or dropped, entirely in this
  * tab: nothing is uploaded. Plain text, Markdown and CSV are decoded as text;
- * PDFs go through pdf.js (loaded only when a PDF is opened); Word files are
- * unzipped and their body XML read.
+ * PDFs go through the app's own pdf.js (see OpenPdf); Word files are unzipped
+ * and their body XML read.
  */
+
+/** One line-ish run of text on a PDF page, as pdf.js reports it. */
+export interface PdfTextItem {
+  str: string;
+  hasEOL: boolean;
+}
+
+/** An opened PDF, reduced to what text extraction needs. */
+export interface PdfTextSource {
+  numPages: number;
+  pageText(pageNumber: number): Promise<PdfTextItem[]>;
+  close(): Promise<void>;
+}
+
+/**
+ * Opens PDF bytes with the app's own pdf.js. Each app provides one: the web
+ * app and the desktop app ship their own pdf.js copy and start its worker
+ * differently, and both only load pdf.js when a PDF is actually opened.
+ * Rejects with an error named "PasswordException" for a locked PDF, as pdf.js
+ * itself does.
+ */
+export type OpenPdf = (bytes: Uint8Array) => Promise<PdfTextSource>;
+
+export interface ExtractTextOptions {
+  openPdf: OpenPdf;
+}
 
 /** For an <input type="file"> accept attribute. */
 export const TEXT_FILE_ACCEPT =
@@ -46,7 +72,7 @@ function kindOf(file: File): Kind | null {
  * Throws ExtractTextError for unsupported types, locked PDFs and files that
  * can't be read.
  */
-export async function extractText(file: File): Promise<string> {
+export async function extractText(file: File, { openPdf }: ExtractTextOptions): Promise<string> {
   const kind = kindOf(file);
   if (!kind) {
     throw new ExtractTextError("unsupported", tr("That file type isn't supported. Open a .txt, .md, .csv, .pdf or .docx file."));
@@ -59,7 +85,7 @@ export async function extractText(file: File): Promise<string> {
   }
   if (kind === "text") return decodeText(bytes);
   if (kind === "docx") return docxText(bytes);
-  return pdfText(bytes);
+  return pdfText(bytes, openPdf);
 }
 
 function unreadable() {
@@ -123,31 +149,24 @@ function docxText(bytes: Uint8Array): string {
   return lines.join("\n");
 }
 
-async function pdfText(bytes: Uint8Array): Promise<string> {
-  // Loaded on demand: pdf.js is large and most people paste text.
-  const [pdfjs, worker] = await Promise.all([import("pdfjs-dist"), import("pdfjs-dist/build/pdf.worker.mjs?url")]);
-  if (!pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
-
-  const task = pdfjs.getDocument({ data: bytes });
+async function pdfText(bytes: Uint8Array, openPdf: OpenPdf): Promise<string> {
+  let doc: PdfTextSource;
   try {
-    let doc;
-    try {
-      doc = await task.promise;
-    } catch (e) {
-      if (e instanceof Error && e.name === "PasswordException") {
-        throw new ExtractTextError(
-          "password",
-          tr("This PDF is password protected. Remove the password with Protect & Unlock first, then open it here."),
-        );
-      }
-      throw unreadable();
+    doc = await openPdf(bytes);
+  } catch (e) {
+    if (e instanceof Error && e.name === "PasswordException") {
+      throw new ExtractTextError(
+        "password",
+        tr("This PDF is password protected. Remove the password with Protect & Unlock first, then open it here."),
+      );
     }
+    throw unreadable();
+  }
+  try {
     const pages: string[] = [];
     for (let n = 1; n <= doc.numPages; n++) {
-      const content = await (await doc.getPage(n)).getTextContent();
       let page = "";
-      for (const item of content.items) {
-        if (!("str" in item)) continue;
+      for (const item of await doc.pageText(n)) {
         page += item.str;
         if (item.hasEOL) page += "\n";
       }
@@ -159,7 +178,9 @@ async function pdfText(bytes: Uint8Array): Promise<string> {
       if (tidy) pages.push(tidy);
     }
     return pages.join("\n\n");
+  } catch {
+    throw unreadable();
   } finally {
-    await task.destroy();
+    await doc.close();
   }
 }

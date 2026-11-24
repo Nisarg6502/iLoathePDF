@@ -8,6 +8,7 @@ import ToolWorkspace from "./routes/ToolWorkspace";
 import RecipeWorkspace from "./routes/RecipeWorkspace";
 import RecipeBuilder from "./routes/RecipeBuilder";
 import Recipes from "./routes/Recipes";
+import { TextComparePage, WordCounterPage } from "./routes/TextToolPage";
 import { useCustomRecipes } from "./lib/useCustomRecipes";
 import { TOOLS } from "./lib/tools";
 import { RECIPES } from "./lib/recipes";
@@ -30,6 +31,8 @@ export default function App() {
           <Route path="/r/new" element={<RecipeBuilder />} />
           <Route path="/r/:id/edit" element={<RecipeBuilder />} />
           <Route path="/r/:id" element={<RecipeRoute />} />
+          <Route path="/text/word-counter" element={<WordCounterPage />} />
+          <Route path="/text/compare" element={<TextComparePage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/t/:id" element={<UnknownTool />} />
           {/* Component workbench; dev builds only, never shipped. */}
