@@ -1535,5 +1535,19 @@
   "{{count}} items got a new name because the name was taken._one": "{{count}} चीज़ को नया नाम मिला क्योंकि उसका नाम पहले से इस्तेमाल में था।",
   "{{count}} shortcuts (symbolic links) were left out.": "{{count}} शॉर्टकट (सिंबॉलिक लिंक) छोड़ दिए गए।",
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} शॉर्टकट (सिंबॉलिक लिंक) छोड़ दिया गया।",
-  "{{files}} and {{folders}} extracted.": "{{files}} और {{folders}} निकाले गए।"
+  "{{files}} and {{folders}} extracted.": "{{files}} और {{folders}} निकाले गए।",
+  "{{count}} selected_one": "{{count}} चुना गया",
+  "{{count}} selected_other": "{{count}} चुने गए",
+  "Clear selection": "चयन हटाएँ",
+  "Move to position": "इस स्थान पर ले जाएँ",
+  "Move": "ले जाएँ",
+  "Click a page to select it (Shift or Ctrl to select more), then drag to a new place. Double-click to see it large. On a phone, hold a page to pick it up.": "पेज चुनने के लिए उस पर क्लिक करें (और चुनने के लिए Shift या Ctrl), फिर नई जगह पर खींचें। बड़ा देखने के लिए डबल-क्लिक करें। फ़ोन पर, पेज को दबाकर रखें और खींचें।",
+  "Will be removed": "हटाया जाएगा",
+  "Preview page {{page}}": "पेज {{page}} देखें",
+  "{{kept}} of {{total}} pages kept": "{{total}} में से {{kept}} पेज रखे गए",
+  "Removing: {{pages}}": "हटाए जा रहे: {{pages}}",
+  "Undo all changes": "सभी बदलाव वापस लें",
+  "position {{pos}} of {{total}}": "{{total}} में से स्थान {{pos}}",
+  "Previous": "पिछला",
+  "Next": "अगला"
 }

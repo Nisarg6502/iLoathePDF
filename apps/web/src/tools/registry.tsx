@@ -33,6 +33,7 @@ const SplitOptions = lazyComponent(() => import("./options/SplitOptions").then((
 const splitEngine = lazyEngine(() => import("@/engines/split").then((m) => m.splitEngine));
 const OrganizeOptions = lazyComponent(() => import("./options/OrganizeOptions").then((m) => m.OrganizeOptions));
 const organizeEngine = lazyEngine(() => import("@/engines/organize").then((m) => m.organizeEngine));
+const OrganizeWorkspace = lazyComponent(() => import("./organize/OrganizeWorkspace").then((m) => m.OrganizeWorkspace));
 const PdfToImagesOptions = lazyComponent(() => import("./options/PdfToImagesOptions").then((m) => m.PdfToImagesOptions));
 const pdfToImagesEngine = lazyEngine(() => import("@/engines/pdfToImages").then((m) => m.pdfToImagesEngine));
 const ImagesToPdfOptions = lazyComponent(() => import("./options/ImagesToPdfOptions").then((m) => m.ImagesToPdfOptions));
@@ -84,7 +85,7 @@ const desktopOnlyEngine: Engine = async () => {
 export const TOOLS: ToolConfig[] = [
   { slug: "merge", name: "Merge PDF", description: "Combine PDFs in the order you choose, with page ranges per file.", category: "pdf", Icon: MergeIcon, accept: [".pdf"], multiple: true, defaultOptions: { outputName: "merged" }, OptionsPanel: MergeOptions, engine: mergeEngine, status: "live", tint: "a" },
   { slug: "split", name: "Split PDF", description: "Cut into ranges, chop every N pages, extract or delete a selection.", category: "pdf", Icon: SplitIcon, accept: [".pdf"], multiple: false, defaultOptions: { mode: "ranges", ranges: "", n: 2 }, OptionsPanel: SplitOptions, engine: splitEngine, status: "live", tint: "b" },
-  { slug: "organize", name: "Organize pages", description: "Reorder, rotate and drop pages on a page canvas.", category: "pdf", Icon: OrganizeIcon, accept: [".pdf"], multiple: false, defaultOptions: { order: [], rotate: {}, remove: [] }, OptionsPanel: OrganizeOptions, engine: organizeEngine, status: "live", tint: "c" },
+  { slug: "organize", name: "Organize pages", description: "Reorder, rotate and drop pages on a page canvas.", category: "pdf", Icon: OrganizeIcon, accept: [".pdf"], multiple: false, defaultOptions: { order: [], rotate: {}, remove: [] }, OptionsPanel: OrganizeOptions, engine: organizeEngine, status: "live", tint: "c", Workspace: OrganizeWorkspace },
   { slug: "compress", name: "Compress PDF", description: "Shrink for email, with the quality trade-off shown before you commit.", category: "pdf", Icon: CompressIcon, accept: [".pdf"], multiple: false, defaultOptions: { dpi: 96 }, OptionsPanel: CompressOptions, engine: compressEngine, status: "preview", tint: "d" },
   { slug: "pdf-to-images", name: "PDF to images", description: "Render pages to PNG or JPG at the DPI you pick.", category: "pdf", Icon: PdfToImagesIcon, accept: [".pdf"], multiple: false, defaultOptions: { dpi: 144, format: "png" }, OptionsPanel: PdfToImagesOptions, engine: pdfToImagesEngine, status: "live", tint: "e" },
   { slug: "images-to-pdf", name: "Images to PDF", description: "Scans and photos into one PDF, one image per page.", category: "image", Icon: ImagesToPdfIcon, accept: [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"], multiple: true, defaultOptions: { outputName: "images", page_size: "fit", orientation: "auto", margin_mm: 0 }, OptionsPanel: ImagesToPdfOptions, engine: imagesToPdfEngine, status: "live", tint: "f" },

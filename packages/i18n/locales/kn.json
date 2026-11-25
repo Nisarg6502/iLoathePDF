@@ -1544,5 +1544,19 @@
   "{{count}} items got a new name because the name was taken._one": "ಹೆಸರು ಈಗಾಗಲೇ ಬಳಕೆಯಲ್ಲಿದ್ದ ಕಾರಣ {{count}} ಐಟಂಗೆ ಹೊಸ ಹೆಸರು ನೀಡಲಾಗಿದೆ.",
   "{{count}} shortcuts (symbolic links) were left out.": "{{count}} ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು (ಸಿಂಬಾಲಿಕ್ ಲಿಂಕ್‌ಗಳು) ಬಿಡಲಾಗಿದೆ.",
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು (ಸಿಂಬಾಲಿಕ್ ಲಿಂಕ್) ಬಿಡಲಾಗಿದೆ.",
-  "{{files}} and {{folders}} extracted.": "{{files}} ಮತ್ತು {{folders}} ಹೊರತೆಗೆಯಲಾಗಿದೆ."
+  "{{files}} and {{folders}} extracted.": "{{files}} ಮತ್ತು {{folders}} ಹೊರತೆಗೆಯಲಾಗಿದೆ.",
+  "{{count}} selected_one": "{{count}} ಆಯ್ಕೆ",
+  "{{count}} selected_other": "{{count}} ಆಯ್ಕೆಗಳು",
+  "Clear selection": "ಆಯ್ಕೆ ತೆರವುಗೊಳಿಸಿ",
+  "Move to position": "ಈ ಸ್ಥಾನಕ್ಕೆ ಸರಿಸಿ",
+  "Move": "ಸರಿಸಿ",
+  "Click a page to select it (Shift or Ctrl to select more), then drag to a new place. Double-click to see it large. On a phone, hold a page to pick it up.": "ಪುಟವನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ (ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗೆ Shift ಅಥವಾ Ctrl), ನಂತರ ಹೊಸ ಸ್ಥಳಕ್ಕೆ ಎಳೆಯಿರಿ. ದೊಡ್ಡದಾಗಿ ನೋಡಲು ಡಬಲ್-ಕ್ಲಿಕ್ ಮಾಡಿ. ಫೋನ್‌ನಲ್ಲಿ, ಪುಟವನ್ನು ಒತ್ತಿ ಹಿಡಿದು ಎಳೆಯಿರಿ.",
+  "Will be removed": "ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ",
+  "Preview page {{page}}": "ಪುಟ {{page}} ನೋಡಿ",
+  "{{kept}} of {{total}} pages kept": "{{total}} ರಲ್ಲಿ {{kept}} ಪುಟಗಳು ಉಳಿದಿವೆ",
+  "Removing: {{pages}}": "ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ: {{pages}}",
+  "Undo all changes": "ಎಲ್ಲಾ ಬದಲಾವಣೆಗಳನ್ನು ರದ್ದುಮಾಡಿ",
+  "position {{pos}} of {{total}}": "{{total}} ರಲ್ಲಿ ಸ್ಥಾನ {{pos}}",
+  "Previous": "ಹಿಂದಿನ",
+  "Next": "ಮುಂದಿನ"
 }

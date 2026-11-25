@@ -1544,5 +1544,19 @@
   "{{count}} items got a new name because the name was taken._one": "{{count}} elemento recibió un nombre nuevo porque el suyo ya existía.",
   "{{count}} shortcuts (symbolic links) were left out.": "Se omitieron {{count}} accesos directos (enlaces simbólicos).",
   "{{count}} shortcuts (symbolic links) were left out._one": "Se omitió {{count}} acceso directo (enlace simbólico).",
-  "{{files}} and {{folders}} extracted.": "Se extrajeron {{files}} y {{folders}}."
+  "{{files}} and {{folders}} extracted.": "Se extrajeron {{files}} y {{folders}}.",
+  "{{count}} selected_one": "{{count}} seleccionada",
+  "{{count}} selected_other": "{{count}} seleccionadas",
+  "Clear selection": "Quitar selección",
+  "Move to position": "Mover a la posición",
+  "Move": "Mover",
+  "Click a page to select it (Shift or Ctrl to select more), then drag to a new place. Double-click to see it large. On a phone, hold a page to pick it up.": "Haz clic en una página para seleccionarla (Mayús o Ctrl para seleccionar más) y arrástrala a otro lugar. Doble clic para verla en grande. En el móvil, mantén pulsada una página para moverla.",
+  "Will be removed": "Se eliminará",
+  "Preview page {{page}}": "Ver página {{page}}",
+  "{{kept}} of {{total}} pages kept": "{{kept}} de {{total}} páginas se conservan",
+  "Removing: {{pages}}": "Se eliminan: {{pages}}",
+  "Undo all changes": "Deshacer todos los cambios",
+  "position {{pos}} of {{total}}": "posición {{pos}} de {{total}}",
+  "Previous": "Anterior",
+  "Next": "Siguiente"
 }
