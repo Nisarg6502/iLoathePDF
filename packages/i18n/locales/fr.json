@@ -1544,8 +1544,6 @@
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} raccourci (lien symbolique) a été ignoré.",
   "{{files}} and {{folders}} extracted.": "{{files}} et {{folders}} extraits.",
   "Windows 10 and 11, 64-bit": "Windows 10 et 11, 64 bits",
-  "Checking latest release…": "Recherche de la dernière version…",
-  "See the latest release": "Voir la dernière version",
   "{{count}} selected_one": "{{count}} sélectionnée",
   "{{count}} selected_other": "{{count}} sélectionnées",
   "Clear selection": "Effacer la sélection",

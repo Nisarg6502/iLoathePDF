@@ -1535,8 +1535,6 @@
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} शॉर्टकट (सिंबॉलिक लिंक) छोड़ दिया गया।",
   "{{files}} and {{folders}} extracted.": "{{files}} और {{folders}} निकाले गए।",
   "Windows 10 and 11, 64-bit": "Windows 10 और 11, 64-बिट",
-  "Checking latest release…": "नवीनतम रिलीज़ जाँची जा रही है…",
-  "See the latest release": "नवीनतम रिलीज़ देखें",
   "{{count}} selected_one": "{{count}} चुना गया",
   "{{count}} selected_other": "{{count}} चुने गए",
   "Clear selection": "चयन हटाएँ",
