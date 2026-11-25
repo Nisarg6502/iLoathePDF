@@ -19,6 +19,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.12.0",
+    date: "2026-11-26",
+    highlights: [
+      "iLoathePDF now runs on Mac too: download it for Apple silicon or Intel Macs from the website. It is free, so the first time you open it macOS asks you to confirm it once.",
+      "On a Mac, open PDFs and images with iLoathePDF from Finder's Open With menu, or drop them on its icon in the Dock.",
+      "Updates work the same on Mac: turn on the update check in Settings and the app restarts into the new version when you're ready.",
+    ],
+  },
+  {
     version: "0.11.0",
     date: "2026-11-25",
     highlights: [

@@ -5,6 +5,25 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.12.0] - 2026-11-26
+
+### Added
+- macOS app, free: disk images for Macs with Apple silicon and for Intel
+  Macs (macOS 11 or later). The app is signed ad hoc rather than with a paid
+  Apple Developer ID and is not notarised, so the first launch needs one
+  confirmation (System Settings > Privacy & Security > Open Anyway, or
+  Control-click > Open on macOS 14 and earlier). The download page walks
+  through it.
+- On a Mac, PDFs and images open in iLoathePDF from Finder's Open With menu
+  or when dropped on its Dock icon. The window keeps macOS's own close,
+  minimise and zoom buttons.
+- In-app updates on Mac: the same opt-in, signature-checked update check;
+  the app restarts into the new version.
+
+### Changed
+- Every release now ships the Windows installer and both Mac disk images
+  together, with one update manifest for all of them.
+
 ## [0.11.0] - 2026-11-25
 
 ### Added
