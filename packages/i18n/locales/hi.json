@@ -175,7 +175,6 @@
   "Check the page ranges and options, then try again.": "पेज रेंज और विकल्प जाँचें, फिर दोबारा कोशिश करें।",
   "Check the page selection.": "पेज का चुनाव जाँचें।",
   "Checking for updates needs the desktop app.": "अपडेट जाँचने के लिए डेस्कटॉप ऐप चाहिए।",
-  "Checking latest release…": "नवीनतम रिलीज़ जाँची जा रही है…",
   "Checking…": "जाँच हो रही है…",
   "Choose a tool for the dropped files": "डाली गई फ़ाइलों के लिए टूल चुनें",
   "Choose an image": "एक इमेज चुनें",
@@ -885,7 +884,6 @@
   "Searching…": "खोजा जा रहा है…",
   "Security": "सुरक्षा",
   "See all →": "सभी देखें →",
-  "See the latest release": "नवीनतम रिलीज़ देखें",
   "Select": "चुनें",
   "Select all": "सब चुनें",
   "Sending personal documents by email": "ईमेल से निजी डॉक्यूमेंट भेजना",
@@ -1535,5 +1533,6 @@
   "{{count}} items got a new name because the name was taken._one": "{{count}} चीज़ को नया नाम मिला क्योंकि उसका नाम पहले से इस्तेमाल में था।",
   "{{count}} shortcuts (symbolic links) were left out.": "{{count}} शॉर्टकट (सिंबॉलिक लिंक) छोड़ दिए गए।",
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} शॉर्टकट (सिंबॉलिक लिंक) छोड़ दिया गया।",
-  "{{files}} and {{folders}} extracted.": "{{files}} और {{folders}} निकाले गए।"
+  "{{files}} and {{folders}} extracted.": "{{files}} और {{folders}} निकाले गए।",
+  "Windows 10 and 11, 64-bit": "Windows 10 और 11, 64-बिट"
 }

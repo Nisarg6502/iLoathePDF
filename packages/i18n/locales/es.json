@@ -175,7 +175,6 @@
   "Check the page ranges and options, then try again.": "Revisa los rangos de páginas y las opciones, y vuelve a intentarlo.",
   "Check the page selection.": "Revisa la selección de páginas.",
   "Checking for updates needs the desktop app.": "Buscar actualizaciones requiere la app de escritorio.",
-  "Checking latest release…": "Comprobando la última versión…",
   "Checking…": "Comprobando…",
   "Choose a tool for the dropped files": "Elige una herramienta para los archivos soltados",
   "Choose an image": "Elige una imagen",
@@ -887,7 +886,6 @@
   "Searching…": "Buscando…",
   "Security": "Seguridad",
   "See all →": "Ver todas →",
-  "See the latest release": "Ver la última versión",
   "Select": "Seleccionar",
   "Select all": "Seleccionar todo",
   "Sending personal documents by email": "Enviar documentos personales por correo",
@@ -1544,5 +1542,6 @@
   "{{count}} items got a new name because the name was taken._one": "{{count}} elemento recibió un nombre nuevo porque el suyo ya existía.",
   "{{count}} shortcuts (symbolic links) were left out.": "Se omitieron {{count}} accesos directos (enlaces simbólicos).",
   "{{count}} shortcuts (symbolic links) were left out._one": "Se omitió {{count}} acceso directo (enlace simbólico).",
-  "{{files}} and {{folders}} extracted.": "Se extrajeron {{files}} y {{folders}}."
+  "{{files}} and {{folders}} extracted.": "Se extrajeron {{files}} y {{folders}}.",
+  "Windows 10 and 11, 64-bit": "Windows 10 y 11, 64 bits"
 }
