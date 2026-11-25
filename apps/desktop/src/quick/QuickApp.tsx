@@ -36,10 +36,27 @@ interface Row {
   pct: number;
   outcomes: QuickRunOutcome[];
   controller?: AbortController;
+  /** Not started before this time (ms since epoch); see GATHER_MS. */
+  startAfter: number;
 }
 
 /** Seconds a successful run stays on screen before the window closes. */
 const LINGER_MS = 6000;
+
+/**
+ * How long an action that makes one file from the whole selection (Merge into
+ * one PDF, Combine into one PDF) waits after its last file arrived before it
+ * starts. Explorer starts one process per selected file, and on a busy
+ * machine one can come in after the 400 ms the Rust side waits; it then
+ * joins this request instead of becoming a merge of one file. Actions that
+ * work file by file start at once: a late file there is just one more run.
+ */
+const GATHER_MS = 1500;
+
+function startAfter(plan: QuickPlan): number {
+  const combines = plan.ok && !plan.action.perFile && plan.tool.multiple;
+  return combines ? Date.now() + GATHER_MS : 0;
+}
 
 async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T | undefined> {
   if (!isTauri()) return undefined;
@@ -84,10 +101,19 @@ export default function QuickApp() {
           for (const f of request.files) if (!seen.has(f.toLowerCase())) files.push(f);
           files.sort((a, b) => baseName(a).localeCompare(baseName(b), undefined, { numeric: true, sensitivity: "base" }));
           const merged = { ...twin.request, files, skipped: twin.request.skipped + request.skipped };
-          next[next.indexOf(twin)] = { ...twin, request: merged, plan: planQuick(merged) };
+          const plan = planQuick(merged);
+          next[next.indexOf(twin)] = { ...twin, request: merged, plan, startAfter: startAfter(plan) };
         } else {
           const plan = planQuick(request);
-          next.push({ key: request.id, request, plan, status: plan.ok ? "waiting" : "finished", pct: 0, outcomes: [] });
+          next.push({
+            key: request.id,
+            request,
+            plan,
+            status: plan.ok ? "waiting" : "finished",
+            pct: 0,
+            outcomes: [],
+            startAfter: startAfter(plan),
+          });
         }
       }
       return next;
@@ -113,10 +139,17 @@ export default function QuickApp() {
 
   // --- run them one at a time ---------------------------------------------------
   const running = rows.some((r) => r.status === "running");
+  const [tick, setTick] = useState(0);
   useEffect(() => {
     if (running) return;
     const next = rows.find((r) => r.status === "waiting");
     if (!next || !next.plan.ok || launched.current.has(next.key)) return;
+    const wait = next.startAfter - Date.now();
+    if (wait > 0) {
+      // Still gathering late files: look again once the time is up.
+      const timer = window.setTimeout(() => setTick((n) => n + 1), wait);
+      return () => window.clearTimeout(timer);
+    }
     launched.current.add(next.key);
     const plan = next.plan;
     const controller = new AbortController();
@@ -126,7 +159,7 @@ export default function QuickApp() {
     void runQuick(plan, (pct) => update({ pct }), controller.signal).then((outcomes) =>
       update({ status: "finished", outcomes, pct: 100, controller: undefined }),
     );
-  }, [rows, running]);
+  }, [rows, running, tick]);
 
   // --- size the window to its content -------------------------------------------
   useLayoutEffect(() => {
@@ -191,14 +224,21 @@ export default function QuickApp() {
             {t("Getting ready…")}
           </li>
         ) : (
-          rows.map((row) => <QuickRow key={row.key} row={row} onDismiss={() => dismiss(row)} />)
+          rows.map((row, i) => (
+            <QuickRow
+              key={row.key}
+              row={row}
+              queued={rows.slice(0, i).some((r) => r.status !== "finished")}
+              onDismiss={() => dismiss(row)}
+            />
+          ))
         )}
       </ul>
     </div>
   );
 }
 
-function QuickRow({ row, onDismiss }: { row: Row; onDismiss: () => void }) {
+function QuickRow({ row, queued, onDismiss }: { row: Row; queued: boolean; onDismiss: () => void }) {
   const { t } = useTranslation();
   const { plan } = row;
 
@@ -211,7 +251,7 @@ function QuickRow({ row, onDismiss }: { row: Row; onDismiss: () => void }) {
             files: t(plan.tool.acceptsLabel),
           });
     return (
-      <RowShell icon={<AlertTriangle className="h-4 w-4 text-danger" />} title={message} onDismiss={onDismiss} dismissLabel={t("Dismiss")} />
+      <RowShell icon={<AlertTriangle className="h-4 w-4 text-danger" />} title={message} onDismiss={onDismiss} dismissLabel={t("Dismiss")} wrap />
     );
   }
 
@@ -225,7 +265,7 @@ function QuickRow({ row, onDismiss }: { row: Row; onDismiss: () => void }) {
     notices.push(t("{{count}} items were left out because they are folders or no longer exist.", { count: plan.skipped }));
   }
 
-  if (row.status === "waiting") {
+  if (row.status === "waiting" && queued) {
     return (
       <RowShell
         icon={<Clock className="h-4 w-4 text-muted" />}
@@ -238,7 +278,7 @@ function QuickRow({ row, onDismiss }: { row: Row; onDismiss: () => void }) {
     );
   }
 
-  if (row.status === "running") {
+  if (row.status === "waiting" || row.status === "running") {
     return (
       <RowShell
         icon={<Loader2 className="h-4 w-4 animate-spin text-accent" />}
@@ -279,6 +319,7 @@ function QuickRow({ row, onDismiss }: { row: Row; onDismiss: () => void }) {
     return (
       <RowShell
         icon={<Icon className="h-4 w-4 text-danger" />}
+        wrap
         title={copy.title}
         detail={bad.length > 1 ? `${t("{{count}} files failed.", { count: bad.length })} ${copy.body}` : `${baseName(bad[0]?.files[0] ?? "")}: ${copy.body}`}
         onDismiss={onDismiss}
@@ -357,6 +398,7 @@ function RowShell({
   onDismiss,
   dismissLabel,
   muted,
+  wrap,
   children,
 }: {
   icon: ReactNode;
@@ -365,16 +407,23 @@ function RowShell({
   onDismiss: () => void;
   dismissLabel: string;
   muted?: boolean;
+  /** Show the whole text instead of cutting it short: errors must be read in full. */
+  wrap?: boolean;
   children?: ReactNode;
 }) {
   return (
     <li className="flex items-start gap-3 px-4 py-3">
       <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="min-w-0 flex-1">
-        <p className={cn("truncate text-[13px] font-medium", muted ? "text-muted" : "text-text")} title={title}>
+        <p
+          className={cn("text-[13px] font-medium", wrap ? "break-words" : "truncate", muted ? "text-muted" : "text-text")}
+          title={title}
+        >
           {title}
         </p>
-        {detail ? <p className="mt-0.5 line-clamp-3 text-[12px] leading-snug text-muted">{detail}</p> : null}
+        {detail ? (
+          <p className={cn("mt-0.5 text-[12px] leading-snug text-muted", wrap ? "break-words" : "line-clamp-3")}>{detail}</p>
+        ) : null}
         {children}
       </div>
       <button
