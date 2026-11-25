@@ -13,7 +13,11 @@ const scope = globalThis as unknown as Record<string, unknown>;
 if (!scope[FLAG]) {
   scope[FLAG] = true;
   let ui: FitUi | null = null;
-  const start = () => (ui ??= createFitUi(document, { fitterUrl: chrome.runtime.getURL("fit.html"), css }));
+  const fitterUrl = chrome.runtime.getURL("fit.html");
+  // The URL's own origin (Firefox, and Chrome without dynamic URLs), and
+  // Chrome's fixed extension origin, where a dynamic-URL document really runs.
+  const fitterOrigins = [new URL(fitterUrl).origin, `chrome-extension://${chrome.runtime.id}`];
+  const start = () => (ui ??= createFitUi(document, { fitterUrl, fitterOrigins, css }));
 
   start();
 

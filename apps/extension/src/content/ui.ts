@@ -21,6 +21,12 @@ const GAP = 6;
 export interface FitUiOptions {
   /** URL of fit.html (chrome.runtime.getURL in the extension). */
   fitterUrl: string;
+  /**
+   * Origins the fitter document may have. With Chrome's use_dynamic_url the
+   * iframe loads from a per-session URL, but the document inside runs at the
+   * extension's fixed origin, so both are listed (see open()).
+   */
+  fitterOrigins: string[];
   css: string;
 }
 
@@ -68,7 +74,7 @@ export function createFitUi(doc: Document, options: FitUiOptions): FitUi {
 
   const buttons = new Map<HTMLInputElement, HTMLButtonElement>();
   let lastContextTarget: EventTarget | null = null;
-  let overlay: { el: HTMLElement; port?: MessagePort; input: HTMLInputElement } | null = null;
+  let overlay: { el: HTMLElement; port?: MessagePort; input: HTMLInputElement; onHello?: (e: MessageEvent) => void } | null = null;
   let toastEl: HTMLElement | null = null;
   let toastTimer = 0;
   let frame = 0;
@@ -130,9 +136,10 @@ export function createFitUi(doc: Document, options: FitUiOptions): FitUi {
 
   function close() {
     if (!overlay) return;
-    const { el, port, input } = overlay;
+    const { el, port, input, onHello } = overlay;
     overlay = null;
     port?.close();
+    if (onHello) win.removeEventListener("message", onHello);
     el.remove();
     doc.removeEventListener("keydown", onKey, true);
     (anchorFor(input) as HTMLElement | null)?.focus?.();
@@ -157,7 +164,7 @@ export function createFitUi(doc: Document, options: FitUiOptions): FitUi {
   function open(input: HTMLInputElement) {
     close();
     const url = options.fitterUrl;
-    const origin = new URL(url).origin;
+    const origins = new Set(options.fitterOrigins);
     const backdrop = doc.createElement("div");
     backdrop.className = "backdrop";
     const iframe = doc.createElement("iframe");
@@ -172,21 +179,24 @@ export function createFitUi(doc: Document, options: FitUiOptions): FitUi {
     overlay = current;
     doc.addEventListener("keydown", onKey, true);
 
-    iframe.addEventListener(
-      "load",
-      () => {
-        // A private channel: the page can't read messages on this port, and
-        // the init message only goes to the extension's own origin.
-        const channel = new MessageChannel();
-        current.port = channel.port1;
-        channel.port1.onmessage = (e: MessageEvent<FitterMessage>) =>
-          handleFitterMessage(input, e.data, (r) => channel.port1.postMessage(r));
-        const init: FitterInit = { type: "iloathepdf:init", constraints: readConstraints(input), host: win.location.hostname };
-        iframe.contentWindow?.postMessage(init, origin, [channel.port2]);
-        iframe.focus();
-      },
-      { once: true },
-    );
+    // The fitter speaks first ("hello") and the reply goes to the origin the
+    // hello really came from, provided it is our iframe and one of our own
+    // origins. Posting to the URL's origin instead fails silently in Chrome,
+    // whose dynamic web-accessible URLs differ from the document's origin.
+    // The reply carries a private channel: the page can't read messages on
+    // it, and nothing is ever sent to an origin that isn't the extension.
+    current.onHello = (e: MessageEvent) => {
+      if (e.source !== iframe.contentWindow || !origins.has(e.origin) || (e.data as { type?: string } | null)?.type !== "iloathepdf:hello") return;
+      if (overlay !== current || current.port) return;
+      win.removeEventListener("message", current.onHello!);
+      const channel = new MessageChannel();
+      current.port = channel.port1;
+      channel.port1.onmessage = (m: MessageEvent<FitterMessage>) => handleFitterMessage(input, m.data, (r) => channel.port1.postMessage(r));
+      const init: FitterInit = { type: "iloathepdf:init", constraints: readConstraints(input), host: win.location.hostname };
+      iframe.contentWindow?.postMessage(init, e.origin, [channel.port2]);
+      iframe.focus();
+    };
+    win.addEventListener("message", current.onHello);
   }
 
   function toast(text: string, tone: "info" | "error" = "info") {

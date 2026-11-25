@@ -3,6 +3,11 @@
   "extDescription": { "message": "Fit a photo or PDF to an upload form's size limit, and turn page images into a PDF. Files never leave your computer." },
   "menuAddImage": { "message": "Add image to PDF" },
   "menuFitForm": { "message": "Fit a file to this form" },
+  "menuSavePdf": { "message": "Save image as PDF" },
+  "menuSaveJpg": { "message": "Save image as JPG" },
+  "menuSavePng": { "message": "Save image as PNG" },
+  "toastImageSaved": { "message": "Saved $1 to your Downloads folder." },
+  "toastSaveFailed": { "message": "Couldn't save that image. Try another format, or save it to your computer first." },
 
   "fitButton": { "message": "Fit" },
   "fitButtonTitle": { "message": "Fit a file to this field (iLoathePDF)" },

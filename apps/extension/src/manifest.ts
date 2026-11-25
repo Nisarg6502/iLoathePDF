@@ -35,8 +35,16 @@ export function chromeManifest(version: string) {
       // sites the user chose "Always show on this site" for
       // (registerContentScripts).
       "scripting",
-      // The right-click items "Add image to PDF" and "Fit a file to this form".
+      // The right-click items "Save image as PDF / JPG / PNG", "Add image to
+      // PDF" and "Fit a file to this form".
       "contextMenus",
+      // Saves the converted image to the Downloads folder. Shows "Manage your
+      // downloads" at install; the extension only ever starts downloads of
+      // files it made, and never reads the download history.
+      "downloads",
+      // A hidden page to convert the image in: the background worker has no
+      // canvas. Chrome only; Firefox's background is a page already.
+      "offscreen",
     ],
 
     // Nothing is granted at install. The popup asks for one site
@@ -74,6 +82,7 @@ export function firefoxManifest(version: string) {
   void _chromeOnly;
   return {
     ...rest,
+    permissions: rest.permissions.filter((p) => p !== "offscreen"),
     background: { scripts: ["background.js"] },
     // Firefox doesn't know use_dynamic_url; leave it out rather than warn.
     web_accessible_resources: web_accessible_resources.map(({ use_dynamic_url: _dyn, ...r }) => (void _dyn, r)),

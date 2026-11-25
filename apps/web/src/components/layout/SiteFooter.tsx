@@ -24,6 +24,7 @@ export function SiteFooter() {
           <Link to="/text/word-counter" className="text-[12.5px] text-muted hover:text-text">{t("Word counter")}</Link>
           <Link to="/text/compare" className="text-[12.5px] text-muted hover:text-text">{t("Compare texts")}</Link>
           <Link to="/download" className="text-[12.5px] text-muted hover:text-text">{t("Desktop app")}</Link>
+          <Link to="/extension" className="text-[12.5px] text-muted hover:text-text">{t("Browser extension")}</Link>
         </div>
 
         <div className="flex flex-col gap-2">

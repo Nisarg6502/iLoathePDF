@@ -3,6 +3,11 @@
   "extDescription": { "message": "Ajusta una foto o un PDF al límite de tamaño de un formulario y convierte imágenes de páginas en PDF. Nada sale de tu equipo." },
   "menuAddImage": { "message": "Añadir imagen al PDF" },
   "menuFitForm": { "message": "Ajustar un archivo a este formulario" },
+  "menuSavePdf": { "message": "Guardar imagen como PDF" },
+  "menuSaveJpg": { "message": "Guardar imagen como JPG" },
+  "menuSavePng": { "message": "Guardar imagen como PNG" },
+  "toastImageSaved": { "message": "$1 guardado en tu carpeta de Descargas." },
+  "toastSaveFailed": { "message": "No se pudo guardar esa imagen. Prueba otro formato o guárdala primero en tu equipo." },
 
   "fitButton": { "message": "Ajustar" },
   "fitButtonTitle": { "message": "Ajustar un archivo a este campo (iLoathePDF)" },

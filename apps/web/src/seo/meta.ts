@@ -76,6 +76,7 @@ export function staticPages(): PageMeta[] {
         { href: "/how-it-works", label: "How it works" },
         { href: "/privacy", label: "Privacy" },
         { href: "/download", label: "Desktop app" },
+        { href: "/extension", label: "Browser extension" },
       ],
       jsonLd: [
         { "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, url: `${SITE}/` },
@@ -191,6 +192,15 @@ export function staticPages(): PageMeta[] {
       index: true,
       priority: 0.6,
       heading: "Desktop app",
+    },
+    {
+      path: "/extension",
+      title: `Browser extension: fit files to forms, save images as PDF | ${SITE_NAME}`,
+      description:
+        "A free extension for Chrome, Edge and Firefox: shrink a photo or PDF to an upload form's size limit and put it in the form, or right-click any image to save it as PDF, JPG or PNG. Files stay on your computer.",
+      index: true,
+      priority: 0.6,
+      heading: "Browser extension",
     },
     {
       path: "/recipes/new",

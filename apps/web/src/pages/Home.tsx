@@ -52,6 +52,12 @@ export function Home() {
             >
               {t("Get the desktop app")}
             </Link>
+            <Link
+              to="/extension"
+              className="inline-flex h-11 items-center whitespace-nowrap rounded-[11px] px-3 text-[14.5px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text"
+            >
+              {t("Get the extension")}
+            </Link>
           </div>
           <div className="mt-6 flex w-fit items-center gap-3.5 rounded-[10px] border border-border bg-surface px-3.5 py-2.5">
             <span className="flex items-center gap-1.5 text-xs text-ok">

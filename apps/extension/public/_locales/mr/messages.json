@@ -3,6 +3,11 @@
   "extDescription": { "message": "फोटो किंवा PDF फॉर्मच्या आकार मर्यादेत बसवा आणि पानावरील इमेजपासून PDF बनवा. फाइली तुमच्या कॉम्प्युटरबाहेर जात नाहीत." },
   "menuAddImage": { "message": "इमेज PDF मध्ये जोडा" },
   "menuFitForm": { "message": "फाइल या फॉर्मनुसार बनवा" },
+  "menuSavePdf": { "message": "इमेज PDF म्हणून सेव्ह करा" },
+  "menuSaveJpg": { "message": "इमेज JPG म्हणून सेव्ह करा" },
+  "menuSavePng": { "message": "इमेज PNG म्हणून सेव्ह करा" },
+  "toastImageSaved": { "message": "$1 तुमच्या Downloads फोल्डरमध्ये सेव्ह झाली." },
+  "toastSaveFailed": { "message": "ही इमेज सेव्ह करता आली नाही. दुसरा फॉरमॅट वापरून पाहा, किंवा आधी ती तुमच्या संगणकावर सेव्ह करा." },
 
   "fitButton": { "message": "बसवा" },
   "fitButtonTitle": { "message": "फाइल या फील्डनुसार बनवा (iLoathePDF)" },

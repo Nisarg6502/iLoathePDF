@@ -6,7 +6,7 @@ import { chromeManifest } from "./src/manifest.ts";
 /**
  * One config, three builds (see package.json "build"):
  *
- *   --mode pages       popup.html and fit.html: ordinary ES-module pages with
+ *   --mode pages       popup.html, fit.html and offscreen.html: ordinary ES-module pages with
  *                      shared chunks. These are the only places the PDF and
  *                      image engines run. Also copies public/ (icons,
  *                      _locales) and writes manifest.json.
@@ -83,6 +83,7 @@ export default defineConfig(({ mode }): UserConfig => {
         input: {
           popup: path.resolve(import.meta.dirname, "popup.html"),
           fit: path.resolve(import.meta.dirname, "fit.html"),
+          offscreen: path.resolve(import.meta.dirname, "offscreen.html"),
         },
       },
     },

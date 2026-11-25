@@ -3,6 +3,11 @@
   "extDescription": { "message": "फ़ोटो या PDF को फ़ॉर्म की साइज़ लिमिट में लाएँ और पेज की इमेज से PDF बनाएँ। फ़ाइलें आपके कंप्यूटर से बाहर नहीं जातीं।" },
   "menuAddImage": { "message": "इमेज को PDF में जोड़ें" },
   "menuFitForm": { "message": "फ़ाइल को इस फ़ॉर्म के हिसाब से बनाएँ" },
+  "menuSavePdf": { "message": "इमेज को PDF के रूप में सेव करें" },
+  "menuSaveJpg": { "message": "इमेज को JPG के रूप में सेव करें" },
+  "menuSavePng": { "message": "इमेज को PNG के रूप में सेव करें" },
+  "toastImageSaved": { "message": "$1 आपके Downloads फ़ोल्डर में सेव हो गई।" },
+  "toastSaveFailed": { "message": "यह इमेज सेव नहीं हो सकी। कोई दूसरा फ़ॉर्मैट आज़माएँ, या पहले इसे अपने कंप्यूटर पर सेव करें।" },
 
   "fitButton": { "message": "फ़िट करें" },
   "fitButtonTitle": { "message": "फ़ाइल को इस फ़ील्ड के हिसाब से बनाएँ (iLoathePDF)" },

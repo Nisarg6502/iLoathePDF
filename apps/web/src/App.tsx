@@ -20,6 +20,7 @@ const TextToolsIndex = lazy(() => import("@/pages/TextToolsIndex").then((m) => (
 const TextCompare = lazy(() => import("@/pages/TextCompare").then((m) => ({ default: m.TextCompare })));
 const WordCounter = lazy(() => import("@/pages/WordCounter").then((m) => ({ default: m.WordCounter })));
 const Download = lazy(() => import("@/pages/Download").then((m) => ({ default: m.Download })));
+const Extension = lazy(() => import("@/pages/Extension").then((m) => ({ default: m.Extension })));
 
 function Layout() {
   const { pathname } = useLocation();
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="download" element={<Download />} />
+          <Route path="extension" element={<Extension />} />
           <Route
             path="*"
             element={

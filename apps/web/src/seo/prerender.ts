@@ -127,6 +127,7 @@ function main() {
     `- [How it works](${SITE}/how-it-works): how files are processed on the device.`,
     `- [Privacy](${SITE}/privacy): what the site does and doesn't do with files.`,
     `- [Desktop app](${SITE}/download): the Windows app, with every tool offline.`,
+    `- [Browser extension](${SITE}/extension): fits files to upload forms and saves any image as PDF, JPG or PNG, in Chrome, Edge and Firefox.`,
     `- [Source code](https://github.com/Nisarg6502/iLoathePDF): MIT licensed.`,
     "",
   ].join("\n");

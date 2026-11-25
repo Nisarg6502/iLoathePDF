@@ -347,4 +347,7 @@ document.addEventListener("keydown", (e) => {
 
 document.title = t("fitTitle");
 render();
+// Opened over a page: say hello so the content script can connect (it
+// replies only to an extension origin, so this carries nothing but its type).
+if (window.parent !== window) window.parent.postMessage({ type: "iloathepdf:hello" }, "*");
 void initEngineStrings();

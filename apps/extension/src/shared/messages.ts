@@ -25,3 +25,15 @@ export type FitterMessage = { type: "apply"; files: File[] } | { type: "close" }
 export type FitterReply = { type: "applied"; ok: boolean; gone?: boolean };
 
 export const CONTENT_SCRIPT = "content.js";
+
+/** Background -> converter page (offscreen.html), for "Save image as ...". */
+export interface ConverterRequest {
+  type: "iloathepdf:convert";
+  /** The image, as a data: URL: extension messages carry JSON only. */
+  dataUrl: string;
+  name: string;
+  format: import("./saveFormats").SaveFormat;
+}
+
+/** Converter page -> background. The blob: URL lives in the converter page. */
+export type ConverterReply = { ok: true; url: string; name: string } | { ok: false; error: string };

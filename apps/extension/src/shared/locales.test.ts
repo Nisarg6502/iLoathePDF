@@ -40,7 +40,7 @@ describe("extension catalogs (_locales)", () => {
 describe("manifest", () => {
   it("asks for no host access at install and keeps the CSP to the extension's own code", () => {
     const m = chromeManifest("1.2.3");
-    expect(m.permissions.sort()).toEqual(["activeTab", "contextMenus", "scripting"]);
+    expect(m.permissions.sort()).toEqual(["activeTab", "contextMenus", "downloads", "offscreen", "scripting"]);
     expect(m).not.toHaveProperty("host_permissions");
     expect(m).not.toHaveProperty("content_scripts");
     expect(m.optional_host_permissions).toEqual(["<all_urls>"]);
@@ -51,6 +51,7 @@ describe("manifest", () => {
   it("gives Firefox an event-page background and an add-on id", () => {
     const f = firefoxManifest("1.2.3");
     expect(f.background).toEqual({ scripts: ["background.js"] });
+    expect(f.permissions).not.toContain("offscreen");
     expect(f.browser_specific_settings.gecko.id).toBe("extension@iloathepdf.com");
     expect(f).not.toHaveProperty("minimum_chrome_version");
     expect(f.web_accessible_resources[0]).not.toHaveProperty("use_dynamic_url");
