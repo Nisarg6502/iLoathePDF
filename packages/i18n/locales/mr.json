@@ -1540,5 +1540,19 @@
   "{{count}} shortcuts (symbolic links) were left out.": "{{count}} शॉर्टकट (सिम्बॉलिक लिंक) वगळले.",
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} शॉर्टकट (सिम्बॉलिक लिंक) वगळला.",
   "{{files}} and {{folders}} extracted.": "{{files}} आणि {{folders}} काढले.",
-  "Windows 10 and 11, 64-bit": "Windows 10 आणि 11, 64-बिट"
+  "Windows 10 and 11, 64-bit": "Windows 10 आणि 11, 64-बिट",
+  "{{count}} selected_one": "{{count}} निवडले",
+  "{{count}} selected_other": "{{count}} निवडले",
+  "Clear selection": "निवड काढा",
+  "Move to position": "या स्थानावर हलवा",
+  "Move": "हलवा",
+  "Click a page to select it (Shift or Ctrl to select more), then drag to a new place. Double-click to see it large. On a phone, hold a page to pick it up.": "पान निवडण्यासाठी त्यावर क्लिक करा (आणखी निवडण्यासाठी Shift किंवा Ctrl), मग नवीन जागी ओढा. मोठे पाहण्यासाठी डबल-क्लिक करा. फोनवर, पान दाबून धरा आणि ओढा.",
+  "Will be removed": "काढले जाईल",
+  "Preview page {{page}}": "पान {{page}} पाहा",
+  "{{kept}} of {{total}} pages kept": "{{total}} पैकी {{kept}} पाने ठेवली",
+  "Removing: {{pages}}": "काढली जात आहेत: {{pages}}",
+  "Undo all changes": "सर्व बदल रद्द करा",
+  "position {{pos}} of {{total}}": "{{total}} पैकी स्थान {{pos}}",
+  "Previous": "मागील",
+  "Next": "पुढील"
 }
