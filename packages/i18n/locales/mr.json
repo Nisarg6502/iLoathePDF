@@ -175,7 +175,6 @@
   "Check the page ranges and options, then try again.": "पान श्रेणी आणि पर्याय तपासा, मग पुन्हा प्रयत्न करा.",
   "Check the page selection.": "पानांची निवड तपासा.",
   "Checking for updates needs the desktop app.": "अपडेट तपासण्यासाठी डेस्कटॉप अ‍ॅप लागते.",
-  "Checking latest release…": "नवीनतम आवृत्ती तपासत आहे…",
   "Checking…": "तपासत आहे…",
   "Choose a tool for the dropped files": "टाकलेल्या फाइल्ससाठी टूल निवडा",
   "Choose an image": "एक इमेज निवडा",
@@ -886,7 +885,6 @@
   "Searching…": "शोधत आहे…",
   "Security": "सुरक्षा",
   "See all →": "सर्व पाहा →",
-  "See the latest release": "नवीनतम आवृत्ती पाहा",
   "Select": "निवडा",
   "Select all": "सर्व निवडा",
   "Sending personal documents by email": "ईमेलने वैयक्तिक कागदपत्रे पाठवणे",
@@ -1541,5 +1539,6 @@
   "{{count}} items got a new name because the name was taken._one": "{{count}} गोष्टीला नवीन नाव मिळाले कारण तिचे नाव आधीच वापरात होते.",
   "{{count}} shortcuts (symbolic links) were left out.": "{{count}} शॉर्टकट (सिम्बॉलिक लिंक) वगळले.",
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} शॉर्टकट (सिम्बॉलिक लिंक) वगळला.",
-  "{{files}} and {{folders}} extracted.": "{{files}} आणि {{folders}} काढले."
+  "{{files}} and {{folders}} extracted.": "{{files}} आणि {{folders}} काढले.",
+  "Windows 10 and 11, 64-bit": "Windows 10 आणि 11, 64-बिट"
 }
