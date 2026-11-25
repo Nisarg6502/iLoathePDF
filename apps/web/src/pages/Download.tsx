@@ -1,53 +1,16 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DesktopAppArt } from "@/components/DesktopAppArt";
 import { tr, Trans, useTranslation } from "@iloathepdf/i18n";
 
 const RELEASES_URL = "https://github.com/Nisarg6502/iLoathePDF/releases";
-const LATEST_RELEASE_API = "https://api.github.com/repos/Nisarg6502/iLoathePDF/releases/latest";
-
-interface LatestRelease {
-  version: string;
-  downloadUrl: string;
-  sizeMb: number;
-}
-
-function useLatestRelease() {
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [release, setRelease] = useState<LatestRelease | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(LATEST_RELEASE_API)
-      .then((res) => {
-        if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
-        return res.json();
-      })
-      .then((data: { tag_name: string; assets: { name: string; browser_download_url: string; size: number }[] }) => {
-        if (cancelled) return;
-        const asset = data.assets.find((a) => a.name.endsWith(".exe"));
-        if (!asset) throw new Error("no .exe asset on the latest release");
-        setRelease({
-          version: data.tag_name,
-          downloadUrl: asset.browser_download_url,
-          sizeMb: Math.round(asset.size / (1024 * 1024)),
-        });
-        setState("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setState("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { state, release };
-}
+// A fixed file name on every release (see release-desktop.yml), so this
+// always downloads the newest installer. The page can't ask the GitHub API
+// which version is newest: the site's CSP allows no connections to other
+// servers, and that promise matters more than showing a version number.
+const INSTALLER_URL = "https://github.com/Nisarg6502/iLoathePDF/releases/latest/download/iLoathePDF-setup.exe";
 
 export function Download() {
   const { t } = useTranslation();
-  const { state, release } = useLatestRelease();
 
   const perks = [
     [tr("Files of any size"), tr("Limited by your disk, not by tab memory.")],
@@ -70,37 +33,16 @@ export function Download() {
           </p>
 
           <div className="mt-7 flex items-center gap-3">
-            {state === "ready" && release ? (
-              <a
-                href={release.downloadUrl}
-                className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]"
-              >
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
-                  <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
-                </svg>
-                {t("Download for Windows")}
-              </a>
-            ) : state === "loading" ? (
-              <span className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-surface-3 px-5 text-[14.5px] font-semibold text-faint">
-                <svg className="spinner size-3.5" viewBox="0 0 20 20" fill="none">
-                  <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" />
-                  <path d="M18 10a8 8 0 0 0-8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                {t("Checking latest release…")}
-              </span>
-            ) : (
-              <a
-                href={RELEASES_URL}
-                className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]"
-              >
-                {t("See the latest release")}
-              </a>
-            )}
-            {state === "ready" && release && (
-              <span className="font-mono text-[12px] text-muted">
-                {release.version} · {release.sizeMb} MB
-              </span>
-            )}
+            <a
+              href={INSTALLER_URL}
+              className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]"
+            >
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
+                <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
+              </svg>
+              {t("Download for Windows")}
+            </a>
+            <span className="font-mono text-[12px] text-muted">{t("Windows 10 and 11, 64-bit")}</span>
           </div>
 
           <p className="mt-5 text-[13.5px] leading-relaxed text-muted">

@@ -98,7 +98,5 @@
   "{{count}} items got a new name because the name was taken._one": "{{count}} item got a new name because the name was taken.",
   "{{count}} items got a new name because the name was taken._other": "{{count}} items got a new name because the name was taken.",
   "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} shortcut (symbolic link) was left out.",
-  "{{count}} shortcuts (symbolic links) were left out._other": "{{count}} shortcuts (symbolic links) were left out.",
-  "{{count}} selected_one": "{{count}} selected",
-  "{{count}} selected_other": "{{count}} selected"
+  "{{count}} shortcuts (symbolic links) were left out._other": "{{count}} shortcuts (symbolic links) were left out."
 }

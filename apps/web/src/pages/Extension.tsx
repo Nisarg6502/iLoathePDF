@@ -1,57 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { tr, Trans, useTranslation } from "@iloathepdf/i18n";
+import { version } from "../../../extension/package.json";
 
-const RELEASES_URL = "https://github.com/Nisarg6502/iLoathePDF/releases";
-// Extension releases are never marked "latest" (that one is the desktop app,
-// which its updater reads), so look through the recent ones for its tag.
-const RELEASES_API = "https://api.github.com/repos/Nisarg6502/iLoathePDF/releases?per_page=30";
-const TAG_PREFIX = "extension-v";
-
-interface ExtensionRelease {
-  version: string;
-  pageUrl: string;
-  chromeZip?: string;
-  firefoxZip?: string;
-}
-
-type Asset = { name: string; browser_download_url: string };
-type Release = { tag_name: string; html_url: string; draft: boolean; prerelease: boolean; assets: Asset[] };
-
-function useExtensionRelease() {
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [release, setRelease] = useState<ExtensionRelease | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(RELEASES_API)
-      .then((res) => {
-        if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
-        return res.json() as Promise<Release[]>;
-      })
-      .then((releases) => {
-        if (cancelled) return;
-        const found = releases.find((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(TAG_PREFIX));
-        if (!found) throw new Error("no extension release yet");
-        const zip = (suffix: string) => found.assets.find((a) => a.name.endsWith(suffix))?.browser_download_url;
-        setRelease({
-          version: found.tag_name.slice(TAG_PREFIX.length),
-          pageUrl: found.html_url,
-          chromeZip: zip("-chrome.zip"),
-          firefoxZip: zip("-firefox.zip"),
-        });
-        setState("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setState("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { state, release };
-}
+// Straight links to this version's files. The site is built from the same
+// commit as the extension, so the version matches the newest release once its
+// tag is pushed. (The page can't ask the GitHub API: the site's CSP allows no
+// connections to other servers.)
+const RELEASE = `https://github.com/Nisarg6502/iLoathePDF/releases/download/extension-v${version}`;
+const CHROME_ZIP = `${RELEASE}/iloathepdf-extension-${version}-chrome.zip`;
+const FIREFOX_ZIP = `${RELEASE}/iloathepdf-extension-${version}-firefox.zip`;
 
 const BUTTON =
   "inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]";
@@ -66,7 +23,6 @@ function Check() {
 
 export function Extension() {
   const { t } = useTranslation();
-  const { state, release } = useExtensionRelease();
 
   const features = [
     [
@@ -110,32 +66,20 @@ export function Extension() {
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            {state === "ready" && release?.chromeZip ? (
-              <a href={release.chromeZip} className={BUTTON}>
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-                  <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
-                </svg>
-                {t("Get the extension for Chrome and Edge")}
-              </a>
-            ) : state === "loading" ? (
-              <span className="inline-flex h-11 items-center gap-2 rounded-[11px] bg-surface-3 px-5 text-[14.5px] font-semibold text-faint">
-                {t("Checking latest release…")}
-              </span>
-            ) : (
-              <a href={release?.pageUrl ?? RELEASES_URL} className={BUTTON}>
-                {t("See the latest release")}
-              </a>
-            )}
-            {state === "ready" && release && <span className="font-mono text-[12px] text-muted">v{release.version}</span>}
+            <a href={CHROME_ZIP} className={BUTTON}>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
+              </svg>
+              {t("Get the extension for Chrome and Edge")}
+            </a>
+            <span className="font-mono text-[12px] text-muted">v{version}</span>
           </div>
-          {state === "ready" && release?.firefoxZip && (
-            <p className="mt-3 text-[13.5px] text-muted">
-              <Trans
-                i18nKey="Firefox: <a>download the Firefox zip</a> and open it from about:debugging (Load Temporary Add-on). Firefox removes it when it restarts, until the extension is in the add-ons store."
-                components={{ a: <a href={release.firefoxZip} className="text-accent" /> }}
-              />
-            </p>
-          )}
+          <p className="mt-3 text-[13.5px] text-muted">
+            <Trans
+              i18nKey="Firefox: <a>download the Firefox zip</a> and open it from about:debugging (Load Temporary Add-on). Firefox removes it when it restarts, until the extension is in the add-ons store."
+              components={{ a: <a href={FIREFOX_ZIP} className="text-accent" /> }}
+            />
+          </p>
 
           <h2 className="mt-12 text-[13px] font-semibold">{t("Install it in Chrome or Edge")}</h2>
           <p className="mt-1.5 text-[13.5px] text-muted">{t("It isn't in the browser stores yet, so it installs by hand. It takes a minute.")}</p>
