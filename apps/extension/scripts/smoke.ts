@@ -224,6 +224,18 @@ async function main() {
       return r.result.value;
     }
 
+    /** Runs a function in the target with real arguments, so no value is pasted into code. */
+    async function callIn<T>(sessionId: string, fn: (...args: never[]) => unknown, args: unknown[]): Promise<T> {
+      const global = (await c.send("Runtime.evaluate", { expression: "globalThis" }, sessionId)) as { result: { objectId: string } };
+      const r = (await c.send(
+        "Runtime.callFunctionOn",
+        { objectId: global.result.objectId, functionDeclaration: fn.toString(), arguments: args.map((value) => ({ value })), awaitPromise: true, returnByValue: true },
+        sessionId,
+      )) as { result: { value: T }; exceptionDetails?: { text: string; exception?: { description?: string } } };
+      if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description ?? r.exceptionDetails.text);
+      return r.result.value;
+    }
+
     // 1. The service worker. The browser's own component extensions have
     // workers too, so pick ours by its manifest.
     const ours = await until("the extension's service worker", async () => {
@@ -383,9 +395,18 @@ async function main() {
       ["pdf", "logo.pdf", "%PDF-"],
       ["jpg", "logo.jpg", "ÿØÿ"],
     ] as const) {
-      const result = await evaluate<string>(
+      const result = await callIn<string>(
         sw,
-        `(async () => { const [tab] = await chrome.tabs.query({ url: ${JSON.stringify(pageUrl)} }); await iloathepdfBackground.saveImageAs(tab.id, 0, ${JSON.stringify(`http://127.0.0.1:${pagePort}/logo.png`)}, ${JSON.stringify(format)}); return "ok"; })()`,
+        async function (this: unknown, page: string, image: string, as: string) {
+          const g = globalThis as unknown as {
+            chrome: { tabs: { query(q: { url: string }): Promise<{ id: number }[]> } };
+            iloathepdfBackground: { saveImageAs(tab: number, frame: number, url: string, format: string): Promise<void> };
+          };
+          const [tab] = await g.chrome.tabs.query({ url: page });
+          await g.iloathepdfBackground.saveImageAs(tab.id, 0, image, as);
+          return "ok";
+        },
+        [pageUrl, `http://127.0.0.1:${pagePort}/logo.png`, format],
       ).catch((e: unknown) => String(e));
       const bytes = await saved(file);
       check(bytes && bytes.subarray(0, magic.length).toString("latin1") === magic, `Save image as ${format.toUpperCase()} saves ${file} (${result}, ${bytes?.length ?? 0} bytes)`);
