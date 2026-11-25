@@ -1185,7 +1185,7 @@
   "YOUR RECIPE": "VOTRE RECETTE",
   "YOUR RECIPES": "VOS RECETTES",
   "Your recipes": "Vos recettes",
-  "your theme choice is the one exception, kept in this browser via localStorage.": "votre choix de thème est la seule exception, conservé dans ce navigateur via localStorage.",
+  "none at all. A few preferences (theme, word counter limit, compare view) and, only if you press Save text, your word counter text are kept in this browser's localStorage, which is never sent anywhere. Saved text is deleted when you turn Save text off, or after 7 days unused.": "aucun. Quelques préférences (thème, limite du compteur de mots, affichage de la comparaison) et, seulement si vous appuyez sur Enregistrer le texte, le texte du compteur de mots sont conservés dans le localStorage de ce navigateur, qui n'est jamais envoyé nulle part. Le texte enregistré est supprimé quand vous désactivez Enregistrer le texte, ou après 7 jours sans utilisation.",
   "Your {{count}} input files are untouched. Only the final result lands here.": "Vos {{count}} fichiers d'entrée restent intacts. Seul le résultat final arrive ici.",
   "Your {{count}} input files are untouched. Only the final result lands here._one": "Votre fichier d'entrée reste intact. Seul le résultat final arrive ici.",
   "YOURS": "LES VÔTRES",
@@ -1452,5 +1452,16 @@
   "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} n’accepte que {{files}}. Choisissez un autre outil pour ces fichiers.",
   "{{count}} files were left out: {{tool}} takes {{files}}.": "{{count}} fichiers ont été ignorés : {{tool}} n’accepte que {{files}}.",
   "{{count}} files were left out: {{tool}} takes {{files}}._one": "{{count}} fichier a été ignoré : {{tool}} n’accepte que {{files}}.",
-  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} traite un fichier à la fois : seul {{name}} a été ouvert."
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} traite un fichier à la fois : seul {{name}} a été ouvert.",
+  "Save text": "Enregistrer le texte",
+  "Saved": "Enregistré",
+  "Your text is saved on this device. Click to stop saving and delete it.": "Votre texte est enregistré sur cet appareil. Cliquez pour arrêter l'enregistrement et le supprimer.",
+  "Keep this text after a refresh or when you come back. It stays on this device and is never uploaded.": "Gardez ce texte après une actualisation ou à votre retour. Il reste sur cet appareil et n'est jamais envoyé.",
+  "Too long to save on this device. Your text is still here, but a refresh will clear it.": "Trop long pour être enregistré sur cet appareil. Votre texte est toujours là, mais une actualisation l'effacera.",
+  "This browser isn't letting the page save (a private window?). Your text is still here.": "Ce navigateur ne laisse pas la page enregistrer (fenêtre privée ?). Votre texte est toujours là.",
+  "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "Enregistré uniquement dans ce navigateur, jamais envoyé. Oublié après 7 jours sans utilisation.",
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "Enregistré uniquement sur cet ordinateur, jamais envoyé. Oublié après 7 jours sans utilisation.",
+  "verb": "verbe",
+  "to really, really hate something.": "détester vraiment, vraiment quelque chose.",
+  "We loathe PDF tools that upload your files, so we built one that doesn't.": "Nous détestons les outils PDF qui envoient vos fichiers en ligne, alors nous en avons fait un qui ne le fait pas."
 }

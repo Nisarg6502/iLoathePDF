@@ -1183,7 +1183,7 @@
   "YOUR RECIPE": "तुमची रेसिपी",
   "YOUR RECIPES": "तुमच्या रेसिपी",
   "Your recipes": "तुमच्या रेसिपी",
-  "your theme choice is the one exception, kept in this browser via localStorage.": "फक्त तुमची थीमची निवड अपवाद आहे, जी localStorage द्वारे याच ब्राउझरमध्ये राहते.",
+  "none at all. A few preferences (theme, word counter limit, compare view) and, only if you press Save text, your word counter text are kept in this browser's localStorage, which is never sent anywhere. Saved text is deleted when you turn Save text off, or after 7 days unused.": "अजिबात नाही. काही पसंती (थीम, शब्द मोजणीची मर्यादा, तुलनेचे दृश्य) आणि, तुम्ही मजकूर सेव्ह करा दाबल्यासच, शब्द मोजणीतील तुमचा मजकूर या ब्राउझरच्या localStorage मध्ये ठेवले जातात, जे कधीही कुठेही पाठवले जात नाही. मजकूर सेव्ह करा बंद केल्यावर, किंवा 7 दिवस वापर न झाल्यास, सेव्ह केलेला मजकूर हटवला जातो.",
   "Your {{count}} input files are untouched. Only the final result lands here.": "तुमच्या {{count}} इनपुट फाइल्सना हात लावला जात नाही. इथे फक्त अंतिम निकाल येतो.",
   "Your {{count}} input files are untouched. Only the final result lands here._one": "तुमच्या इनपुट फाइलला हात लावला जात नाही. इथे फक्त अंतिम निकाल येतो.",
   "YOURS": "तुमच्या",
@@ -1449,5 +1449,16 @@
   "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} फक्त {{files}} घेते. या फाइल्ससाठी दुसरे टूल निवडा.",
   "{{count}} files were left out: {{tool}} takes {{files}}.": "{{count}} फाइल्स वगळल्या: {{tool}} फक्त {{files}} घेते.",
   "{{count}} files were left out: {{tool}} takes {{files}}._one": "{{count}} फाइल वगळली: {{tool}} फक्त {{files}} घेते.",
-  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} एका वेळी एकाच फाइलवर काम करते, म्हणून फक्त {{name}} उघडली."
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} एका वेळी एकाच फाइलवर काम करते, म्हणून फक्त {{name}} उघडली.",
+  "Save text": "मजकूर सेव्ह करा",
+  "Saved": "सेव्ह झाले",
+  "Your text is saved on this device. Click to stop saving and delete it.": "तुमचा मजकूर याच डिव्हाइसवर सेव्ह आहे. सेव्ह करणे थांबवून तो हटवण्यासाठी क्लिक करा.",
+  "Keep this text after a refresh or when you come back. It stays on this device and is never uploaded.": "रिफ्रेश केल्यावर किंवा परत आल्यावरही हा मजकूर राहू द्या. तो याच डिव्हाइसवर राहतो आणि कधीही अपलोड होत नाही.",
+  "Too long to save on this device. Your text is still here, but a refresh will clear it.": "या डिव्हाइसवर सेव्ह करण्यासाठी खूप मोठा आहे. तुमचा मजकूर अजून इथेच आहे, पण रिफ्रेश केल्यावर तो पुसला जाईल.",
+  "This browser isn't letting the page save (a private window?). Your text is still here.": "हा ब्राउझर पेजला सेव्ह करू देत नाही (कदाचित प्रायव्हेट विंडो?). तुमचा मजकूर अजून इथेच आहे.",
+  "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "फक्त याच ब्राउझरमध्ये सेव्ह, कधीही अपलोड नाही. 7 दिवस वापर न झाल्यास आपोआप विसरला जातो.",
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "फक्त याच संगणकावर सेव्ह, कधीही अपलोड नाही. 7 दिवस वापर न झाल्यास आपोआप विसरला जातो.",
+  "verb": "क्रियापद",
+  "to really, really hate something.": "एखाद्या गोष्टीचा मनापासून तिरस्कार करणे.",
+  "We loathe PDF tools that upload your files, so we built one that doesn't.": "तुमच्या फाइल्स अपलोड करणाऱ्या PDF टूल्सचा आम्हाला तिरस्कार आहे, म्हणून आम्ही असे टूल बनवले जे तसे करत नाही."
 }

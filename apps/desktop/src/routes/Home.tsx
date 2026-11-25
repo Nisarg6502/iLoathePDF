@@ -69,6 +69,13 @@ export default function Home() {
           )}
         </p>
 
+        {/* Many people don't know the word in the name. */}
+        <p className="mt-2.5 max-w-[640px] border-l-2 border-accent pl-3 text-[13px] leading-relaxed text-muted">
+          <span className="font-semibold text-text">loathe</span>{" "}
+          <span className="font-mono text-[11px] italic">{t("verb")}</span> — {t("to really, really hate something.")}{" "}
+          {t("We loathe PDF tools that upload your files, so we built one that doesn't.")}
+        </p>
+
         {/* The primary way in: the window itself is the drop target. */}
         <Link
           to="/t/merge"

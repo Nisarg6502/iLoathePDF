@@ -48,6 +48,7 @@ export function WordCounterPage() {
         ocrPath="/t/ocr"
         files={textFiles}
         privacyNote={t("Counted on this computer. Your text is never uploaded or saved.")}
+        savedNote={t("Saved on this computer only, never uploaded. Forgotten after 7 days unused.")}
       />
     </TextToolLayout>
   );

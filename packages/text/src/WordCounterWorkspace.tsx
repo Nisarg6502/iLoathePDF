@@ -8,6 +8,7 @@ import { TransformMenu } from "./TransformMenu";
 import { NoTextFoundNotice, OpenFileButton } from "./OpenFileButton";
 import { ExtractTextError, extractText, type OpenPdf } from "./extractText";
 import { NO_ASSISTANTS } from "./noAssistants";
+import { forgetSavedText, loadSavedText, writeSavedText, type SaveResult } from "./savedText";
 
 /**
  * An app's own way of getting files, for apps where the page can't do it
@@ -30,7 +31,12 @@ export interface WordCounterWorkspaceProps {
   files?: TextFileSource;
   /** The privacy line under the box, worded for where it runs. */
   privacyNote: string;
+  /** The privacy line while Save text is on, worded for where it runs. */
+  savedNote: string;
 }
+
+/** Writes after typing pauses; a refresh or a closed tab writes at once. */
+const SAVE_DELAY_MS = 400;
 
 const UNITS = { hr: msg("hr"), min: msg("min"), sec: msg("sec") };
 
@@ -39,9 +45,13 @@ const UNITS = { hr: msg("hr"), min: msg("min"), sec: msg("sec") };
  * limit, most-used words and readability. Each app puts its own heading and
  * page padding around it.
  */
-export function WordCounterWorkspace({ openPdf, ocrPath, files, privacyNote }: WordCounterWorkspaceProps) {
+export function WordCounterWorkspace({ openPdf, ocrPath, files, privacyNote, savedNote }: WordCounterWorkspaceProps) {
   const { t, i18n } = useTranslation();
-  const [text, setText] = useState("");
+  /** What Save text left last time; null when it's off. Read once, on mount. */
+  const [restored] = useState(loadSavedText);
+  const [text, setText] = useState(restored ?? "");
+  const [saving, setSaving] = useState(restored !== null);
+  const [saveProblem, setSaveProblem] = useState<Exclude<SaveResult, "saved"> | null>(null);
   /** The text before the last whole-box change (case change, clean-up, opened file), for Undo. */
   const [undoText, setUndoText] = useState<string | null>(null);
   /** Feedback for a file dropped on the box (the Open file button shows its own). */
@@ -61,6 +71,38 @@ export function WordCounterWorkspace({ openPdf, ocrPath, files, privacyNote }: W
     formatDuration(seconds)
       .map((p) => `${num.format(p.value)} ${t(UNITS[p.unit])}`)
       .join(" ");
+
+  // Save text: keep the stored copy in step with the box while it's on.
+  const latestText = useRef(text);
+  latestText.current = text;
+  useEffect(() => {
+    if (!saving) return;
+    const save = () => {
+      const result = writeSavedText(latestText.current);
+      if (result !== "saved") {
+        setSaving(false);
+        setSaveProblem(result);
+      }
+    };
+    const timer = window.setTimeout(save, SAVE_DELAY_MS);
+    window.addEventListener("pagehide", save);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pagehide", save);
+    };
+  }, [saving, text]);
+
+  function toggleSaving() {
+    setSaveProblem(null);
+    if (saving) {
+      setSaving(false);
+      forgetSavedText();
+      return;
+    }
+    const result = writeSavedText(text);
+    if (result === "saved") setSaving(true);
+    else setSaveProblem(result);
+  }
 
   async function paste() {
     const box = boxRef.current;
@@ -221,14 +263,41 @@ export function WordCounterWorkspace({ openPdf, ocrPath, files, privacyNote }: W
                 {t("Undo")}
               </button>
             )}
+            <button
+              type="button"
+              onClick={toggleSaving}
+              aria-pressed={saving}
+              title={
+                saving
+                  ? t("Your text is saved on this device. Click to stop saving and delete it.")
+                  : t("Keep this text after a refresh or when you come back. It stays on this device and is never uploaded.")
+              }
+              className={`flex h-9 items-center gap-1.5 rounded-[9px] border px-3.5 text-[13px] font-medium transition-transform duration-100 active:scale-[0.96] ${
+                saving ? "border-accent bg-accent-soft text-accent-deep" : "border-border text-muted hover:bg-surface-2 hover:text-text"
+              }`}
+            >
+              {saving && (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path d="M2.5 6.2l2.3 2.3 4.7-5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+              {saving ? t("Saved") : t("Save text")}
+            </button>
             {dropNote && (
               <p className="text-[12.5px] text-muted" role="status">
                 {dropNote}
               </p>
             )}
-            <p className="ml-auto flex items-center gap-1.5 text-[12.5px] text-muted">
+            {saveProblem && (
+              <p className="text-[12.5px] text-danger" role="status">
+                {saveProblem === "too-big"
+                  ? t("Too long to save on this device. Your text is still here, but a refresh will clear it.")
+                  : t("This browser isn't letting the page save (a private window?). Your text is still here.")}
+              </p>
+            )}
+            <p className="ml-auto flex items-center gap-1.5 text-[12.5px] text-muted" data-testid="privacy-note">
               <span className="size-1.5 flex-none rounded-full bg-ok" aria-hidden="true" />
-              {privacyNote}
+              {saving ? savedNote : privacyNote}
             </p>
           </div>
         </div>
