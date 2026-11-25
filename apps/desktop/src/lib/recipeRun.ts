@@ -25,6 +25,7 @@ import { JobError, type Progress } from "./jobs";
 import type { PickedFile } from "@/components/FileDropZone";
 import type { Recipe } from "./recipes";
 import { tr } from "@iloathepdf/i18n";
+import { baseName, joinPath } from "./utils";
 
 export const STEPS_FOLDER = "iLoathePDF recipe steps";
 
@@ -50,7 +51,7 @@ function outputsToPickedFiles(outputs: { path: string; bytes: number }[]): Picke
   return outputs.map((o) => ({
     id: o.path,
     path: o.path,
-    name: o.path.split("\\").pop() ?? o.path,
+    name: baseName(o.path),
     size: o.bytes,
   }));
 }
@@ -61,7 +62,7 @@ export async function runRecipe(recipe: Recipe, files: PickedFile[], opts: Recip
   if (files.length === 0) throw new JobError("BAD_PARAMS", tr("Add files to run the recipe on."));
 
   const finalDir = outputDirFor(files[0].path);
-  const stepsDir = `${finalDir.endsWith("\\") ? finalDir : finalDir + "\\"}${STEPS_FOLDER}`;
+  const stepsDir = joinPath(finalDir, STEPS_FOLDER);
 
   let currentFiles = files;
   let lastResult: JobResult | null = null;

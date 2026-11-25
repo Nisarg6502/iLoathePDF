@@ -199,10 +199,12 @@ pub async fn download_update(
     Ok(())
 }
 
-/// Runs the downloaded installer. On success this does not return: the app
-/// exits and the installer takes over (and reopens the app when it is done).
+/// Runs the downloaded installer. On Windows this does not return on success:
+/// the app exits and the installer takes over (and reopens the app when it is
+/// done). On a Mac the new app replaces this one in place, then the app
+/// restarts into it.
 #[tauri::command]
-pub async fn install_update(store: State<'_, UpdateStore>) -> Result<(), JobError> {
+pub async fn install_update(app: AppHandle, store: State<'_, UpdateStore>) -> Result<(), JobError> {
     let update = store
         .pending
         .lock()
@@ -223,7 +225,13 @@ pub async fn install_update(store: State<'_, UpdateStore>) -> Result<(), JobErro
                 e.to_string(),
             )))
         })
-        .map_err(|e| error("The update could not be started.", e))
+        .map_err(|e| error("The update could not be started.", e))?;
+
+    #[cfg(target_os = "macos")]
+    app.restart();
+    #[cfg(not(target_os = "macos"))]
+    let _ = app;
+    Ok(())
 }
 
 #[cfg(test)]

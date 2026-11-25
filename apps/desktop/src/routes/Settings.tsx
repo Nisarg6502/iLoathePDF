@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { CHANGELOG } from "@/lib/changelog";
 import { isTauri, ping, type PingResult } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
+import { isMac } from "@/lib/utils";
 import {
   checkForUpdate,
   downloadUpdate,
@@ -161,7 +162,9 @@ function UpdatesPanel() {
                       })
                     : t("Downloading {{version}}…", { version: latest.version })
                   : status === "ready" && latest
-                    ? t("Version {{version}} is downloaded and ready. Windows will ask for permission, then the app reopens.", { version: latest.version })
+                    ? isMac()
+                      ? t("Version {{version}} is downloaded and ready. The app restarts with the new version.", { version: latest.version })
+                      : t("Version {{version}} is downloaded and ready. Windows will ask for permission, then the app reopens.", { version: latest.version })
                     : status === "installing"
                       ? t("Handing over to the installer…")
                       : status === "available" && latest

@@ -12,7 +12,7 @@ import {
   type Progress,
 } from "./jobs";
 import { resolveOutputDir } from "./settings";
-import { isAbsoluteWindowsPath, safeFileStem, stripExt } from "./utils";
+import { isAbsolutePath, joinPath, safeFileStem, stripExt } from "./utils";
 import type { OptionValues, Tool } from "./tools";
 import type { SignElementParams } from "./jobs";
 import type { PickedFile } from "@/components/FileDropZone";
@@ -48,7 +48,7 @@ export function outputDirFor(inputPath: string): string {
   // A destination chosen in Settings or the status bar wins; otherwise results
   // land beside the input, which is the sane default for a one-off job.
   const dir = resolveOutputDir(inputPath) ?? "";
-  if (!dir || !isAbsoluteWindowsPath(dir)) {
+  if (!dir || !isAbsolutePath(dir)) {
     throw new JobError(
       "FILE_NOT_FOUND",
       tr("That file's location on disk is unknown, so there is nowhere to save the result. Add it again by dragging it in or using Select files."),
@@ -79,7 +79,7 @@ export async function execute(
   const dir = dirOverride ?? outputDirFor(first.path);
   const base = stripExt(first.name);
   // A drive root already ends in a separator ("G:\"); do not double it.
-  const join = (name: string) => `${dir.endsWith("\\") ? dir : dir + "\\"}${name}`;
+  const join = (name: string) => joinPath(dir, name);
   const place = (name: string) => placeOutput(join(name));
   const opts = { onProgress, signal };
   const str = (k: string, fallback = "") => String(v[k] ?? fallback);

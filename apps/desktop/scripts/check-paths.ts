@@ -12,7 +12,7 @@
  *
  *   npm run check:paths
  */
-import { baseName, dirName, isAbsoluteWindowsPath, safeFileStem, stripExt } from "../src/lib/utils.ts";
+import { baseName, dirName, isAbsolutePath, joinPath, safeFileStem, stripExt } from "../src/lib/utils.ts";
 
 const BS = String.fromCharCode(92);
 const win = (...parts: string[]) => parts.join(BS);
@@ -28,19 +28,30 @@ const photo = win("C:", "Users", "Me", "Pictures", "Self pic.jpg");
 check("baseName of a Windows path", baseName(photo), "Self pic.jpg");
 check("dirName of a Windows path", dirName(photo), win("C:", "Users", "Me", "Pictures"));
 check("dirName of a file in a drive root keeps the separator", dirName(win("G:", "a.jpg")), win("G:", ""));
-check("a drive-root parent is still absolute", isAbsoluteWindowsPath(dirName(win("G:", "a.jpg"))), true);
+check("a drive-root parent is still absolute", isAbsolutePath(dirName(win("G:", "a.jpg"))), true);
 check("baseName of a UNC path", baseName(win("", "", "server", "share", "x.png")), "x.png");
 check("baseName of a POSIX-style path", baseName("/home/me/x.png"), "x.png");
 check("baseName of a bare name", baseName("x.png"), "x.png");
 check("stripExt", stripExt("Self pic.jpg"), "Self pic");
 
-check("absolute: drive path", isAbsoluteWindowsPath(win("C:", "Users", "Me")), true);
-check("absolute: drive root", isAbsoluteWindowsPath(win("G:", "")), true);
-check("absolute: drive path with forward slashes", isAbsoluteWindowsPath("C:/Users/Me"), true);
-check("absolute: UNC path", isAbsoluteWindowsPath(win("", "", "server", "share")), true);
-check("absolute: bare file name", isAbsoluteWindowsPath("x.png"), false);
-check("absolute: relative path", isAbsoluteWindowsPath(win("Users", "Me")), false);
-check("absolute: empty", isAbsoluteWindowsPath(""), false);
+check("absolute: drive path", isAbsolutePath(win("C:", "Users", "Me")), true);
+check("absolute: drive root", isAbsolutePath(win("G:", "")), true);
+check("absolute: drive path with forward slashes", isAbsolutePath("C:/Users/Me"), true);
+check("absolute: UNC path", isAbsolutePath(win("", "", "server", "share")), true);
+check("absolute: bare file name", isAbsolutePath("x.png"), false);
+check("absolute: relative path", isAbsolutePath(win("Users", "Me")), false);
+check("absolute: empty", isAbsolutePath(""), false);
+
+// macOS paths: the file picker and Finder hand over "/Users/..." paths.
+check("baseName of a macOS path", baseName("/Users/me/Pictures/Self pic.jpg"), "Self pic.jpg");
+check("dirName of a macOS path", dirName("/Users/me/Pictures/Self pic.jpg"), "/Users/me/Pictures");
+check("dirName of a file at the top of the disk", dirName("/a.jpg"), "/");
+check("absolute: macOS path", isAbsolutePath("/Users/me"), true);
+check("absolute: macOS parent of a top-level file", isAbsolutePath(dirName("/a.jpg")), true);
+check("joinPath on macOS", joinPath("/Users/me", "x.pdf"), "/Users/me/x.pdf");
+check("joinPath on the macOS root", joinPath("/", "x.pdf"), "/x.pdf");
+check("joinPath on Windows", joinPath(win("C:", "Users"), "x.pdf"), win("C:", "Users", "x.pdf"));
+check("joinPath on a Windows drive root", joinPath(win("G:", ""), "x.pdf"), win("G:", "x.pdf"));
 
 check("safeFileStem keeps a normal name", safeFileStem("Trip photos", "images"), "Trip photos");
 check("safeFileStem blank -> fallback", safeFileStem("   ", "images"), "images");

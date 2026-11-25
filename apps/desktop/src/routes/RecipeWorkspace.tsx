@@ -32,7 +32,7 @@ import { takePendingFiles } from "@/lib/handoff";
 import { useOutputDir } from "@/lib/settings";
 import { EASE_OUT, panelVariants } from "@/lib/motion";
 import { toolById, type OptionValues } from "@/lib/tools";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes, isMac } from "@/lib/utils";
 import type { Recipe } from "@/lib/recipes";
 import { tr, useTranslation } from "@iloathepdf/i18n";
 
@@ -350,7 +350,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                   </span>
                   <span className="mt-1 block text-[13.5px] text-muted">
                     {picking
-                      ? t("Windows can take a moment the first time.")
+                      ? (isMac() ? t("This can take a moment the first time.") : t("Windows can take a moment the first time."))
                       : t("or click anywhere in this box to browse")}
                   </span>
                 </span>

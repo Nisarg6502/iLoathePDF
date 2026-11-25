@@ -1,5 +1,9 @@
 name: Release desktop
 
+# Push a tag like `v0.12.0` to build the Windows installer and the two macOS
+# disk images (Apple Silicon and Intel) in parallel, then publish them all in
+# one GitHub release with a single update manifest (latest.json).
+
 on:
   push:
     tags: ["v*.*.*"]
@@ -13,15 +17,13 @@ permissions:
   contents: read
 
 jobs:
-  build-and-release:
-    name: Build installer and publish release
+  windows:
+    name: Windows installer
     runs-on: windows-latest
     timeout-minutes: 30
     # The "release" environment only deploys from `main` and `v*.*.*` tags, so a
     # feature branch can never run this workflow with the signing key.
     environment: release
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -124,45 +126,8 @@ jobs:
         run: |
           $installer = Get-ChildItem -Path "apps/desktop/src-tauri/target/release/bundle/nsis" -Filter "*.exe" | Select-Object -First 1
           if (-not $installer) { throw "No NSIS installer found in apps/desktop/src-tauri/target/release/bundle/nsis" }
+          if (-not (Test-Path "$($installer.FullName).sig")) { throw "No signature next to $($installer.Name) - is TAURI_SIGNING_PRIVATE_KEY set?" }
           echo "path=$($installer.FullName)" >> $env:GITHUB_OUTPUT
-
-      - name: Determine release tag
-        id: tag
-        shell: pwsh
-        env:
-          REF_TYPE: ${{ github.ref_type }}
-          REF_NAME: ${{ github.ref_name }}
-          RUN_NUMBER: ${{ github.run_number }}
-        run: |
-          if ($env:REF_TYPE -eq "tag") {
-            echo "tag=$env:REF_NAME" >> $env:GITHUB_OUTPUT
-            echo "prerelease=false" >> $env:GITHUB_OUTPUT
-          } else {
-            echo "tag=dev-$env:RUN_NUMBER" >> $env:GITHUB_OUTPUT
-            echo "prerelease=true" >> $env:GITHUB_OUTPUT
-          }
-
-      - name: Write update manifest (latest.json)
-        shell: pwsh
-        run: |
-          $installer = Get-Item "${{ steps.installer.outputs.path }}"
-          $sigFile = "$($installer.FullName).sig"
-          if (-not (Test-Path $sigFile)) { throw "No signature file at $sigFile - is TAURI_SIGNING_PRIVATE_KEY set?" }
-          $version = "${{ steps.tag.outputs.tag }}".TrimStart("v")
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/$($installer.Name)"
-          $manifest = [ordered]@{
-            version  = $version
-            notes    = "See https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag.outputs.tag }}"
-            pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-            platforms = [ordered]@{
-              "windows-x86_64" = [ordered]@{
-                signature = (Get-Content $sigFile -Raw).Trim()
-                url       = $url
-              }
-            }
-          }
-          $manifest | ConvertTo-Json -Depth 5 | Set-Content -Path latest.json -Encoding utf8
-          Get-Content latest.json
 
       # The website's Download button links to
       # releases/latest/download/iLoathePDF-setup.exe, which only works with a
@@ -177,6 +142,156 @@ jobs:
           Copy-Item "${{ steps.installer.outputs.path }}" $copy
           echo "path=$copy" >> $env:GITHUB_OUTPUT
 
+      - name: Keep the Windows files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows
+          path: |
+            ${{ steps.installer.outputs.path }}
+            ${{ steps.installer.outputs.path }}.sig
+            ${{ steps.stable.outputs.path }}
+          if-no-files-found: error
+
+  # Free builds with no Apple Developer account: signed ad hoc, not notarised
+  # (see apps/desktop/scripts/build-macos.sh). One per architecture, because
+  # the Python engine's libraries are built per architecture.
+  macos:
+    name: macOS app (${{ matrix.name }})
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - runner: macos-15
+            name: Apple Silicon
+            arch: aarch64
+            dmg: iLoathePDF-mac-apple-silicon.dmg
+          - runner: macos-15-intel
+            name: Intel
+            arch: x86_64
+            dmg: iLoathePDF-mac-intel.dmg
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    environment: release
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: apps/desktop/sidecar/requirements.txt
+
+      - name: Install npm dependencies
+        working-directory: .
+        run: npm ci
+
+      - name: Check version consistency
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$REF_TYPE" = "tag" ]; then
+            npm run check:version -- "$REF_NAME"
+          else
+            npm run check:version
+          fi
+
+      - name: Build the app
+        run: bash scripts/build-macos.sh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      - name: Check the bundle
+        run: bash scripts/check-macos-bundle.sh src-tauri/target/release/bundle/macos/iLoathePDF.app "$RUNNER_TEMP/screenshot.png"
+
+      # The website links to releases/latest/download/<fixed name>.dmg, like
+      # the Windows installer. The update archive gets the version and the
+      # architecture in its name, so the two Mac builds don't collide.
+      - name: Name the files
+        id: files
+        env:
+          DMG: ${{ matrix.dmg }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          bundle=src-tauri/target/release/bundle
+          version=$(node -p "require('./package.json').version")
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          cp "$(ls "$bundle"/dmg/*.dmg | head -1)" "$out/$DMG"
+          archive="iLoathePDF_${version}_${ARCH}.app.tar.gz"
+          cp "$bundle/macos/iLoathePDF.app.tar.gz" "$out/$archive"
+          cp "$bundle/macos/iLoathePDF.app.tar.gz.sig" "$out/$archive.sig"
+          ls -lh "$out"
+          echo "dir=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Keep the macOS files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: ${{ steps.files.outputs.dir }}/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: apps/desktop/scripts
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Determine release tag
+        id: tag
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if [ "$REF_TYPE" = "tag" ]; then
+            echo "tag=$REF_NAME" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=dev-$RUN_NUMBER" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # One manifest for every platform. Installed copies read it from
+      # releases/latest/download/latest.json (tauri.conf.json).
+      - name: Write update manifest (latest.json)
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 apps/desktop/scripts/write-update-manifest.py dist "$TAG" "$REPO" > latest.json
+          cat latest.json
+          ls -lh dist
+
       - name: Publish release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
@@ -185,6 +300,5 @@ jobs:
           prerelease: ${{ steps.tag.outputs.prerelease }}
           generate_release_notes: true
           files: |
-            ${{ steps.installer.outputs.path }}
-            ${{ steps.stable.outputs.path }}
+            dist/*
             latest.json

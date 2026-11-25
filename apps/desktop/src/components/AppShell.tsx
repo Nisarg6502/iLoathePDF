@@ -14,7 +14,7 @@ import { setPendingFiles } from "@/lib/handoff";
 import { claimLaunch, startLaunchListener, useLaunch } from "@/lib/launch";
 import { TOOLS, type Tool } from "@/lib/tools";
 import { TEXT_TOOLS } from "@/lib/textTools";
-import { cn } from "@/lib/utils";
+import { cn, isMac } from "@/lib/utils";
 import { isTauri } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
 import {
@@ -105,8 +105,18 @@ function WindowButton({
 function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
   const { t } = useTranslation();
   const { enabled: updateCheckOn } = useUpdateCheck();
+  // On a Mac the window keeps its own traffic-light buttons, drawn over the
+  // left of this bar (tauri.macos.conf.json), so leave room for them and
+  // don't draw the Windows-style ones on the right.
+  const mac = isTauri() && isMac();
   return (
-    <div className="flex h-9 flex-none items-center gap-2.5 border-b border-border bg-surface pl-3 select-none">
+    <div
+      data-tauri-drag-region={mac ? true : undefined}
+      className={cn(
+        "flex h-9 flex-none items-center gap-2.5 border-b border-border bg-surface select-none",
+        mac ? "pl-[78px]" : "pl-3",
+      )}
+    >
       <Link
         to="/"
         aria-label={t("All tools")}
@@ -166,7 +176,7 @@ function TitleBar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () =>
         <span>{theme === "dark" ? t("Light") : t("Dark")}</span>
       </button>
 
-      {isTauri() ? (
+      {isTauri() && !mac ? (
         <div className="ml-2 flex">
           <WindowButton label={t("Minimise")} onClick={() => void windowAction("minimize")}>
             <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1">
@@ -486,7 +496,7 @@ function UpdateBanner() {
       <>
         <span className="font-semibold">{t("iLoathePDF {{version}} is ready to install.", { version: latest.version })}</span>{" "}
         <span className="text-muted">
-          {error ?? t("Windows will ask for permission, then the app reopens.")}
+          {error ?? (isMac() ? t("The app restarts with the new version.") : t("Windows will ask for permission, then the app reopens."))}
         </span>
       </>
     );

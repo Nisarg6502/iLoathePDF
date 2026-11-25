@@ -1,0 +1,48 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "app": {
+    "windows": [
+      {
+        "title": "iLoathePDF",
+        "width": 1180,
+        "height": 800,
+        "minWidth": 940,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "visible": false,
+        "dragDropEnabled": true,
+        "decorations": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": { "x": 14, "y": 18 },
+        "transparent": false
+      }
+    ]
+  },
+  "bundle": {
+    "targets": ["app", "dmg"],
+    "fileAssociations": [
+      {
+        "ext": ["pdf"],
+        "contentTypes": ["com.adobe.pdf"],
+        "name": "PDF document",
+        "role": "Viewer",
+        "rank": "Alternate"
+      },
+      {
+        "ext": ["jpg", "jpeg", "png", "heic", "heif", "webp", "tif", "tiff", "bmp", "gif"],
+        "contentTypes": ["public.image"],
+        "name": "Image",
+        "role": "Viewer",
+        "rank": "Alternate"
+      }
+    ],
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "signingIdentity": "-",
+      "hardenedRuntime": false
+    }
+  }
+}
