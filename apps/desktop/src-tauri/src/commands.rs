@@ -1,5 +1,6 @@
 //! The Rust <-> UI surface. Deliberately tiny: a few commands, no document logic.
 
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use serde_json::Value;
@@ -88,4 +89,87 @@ pub async fn read_file_bytes(path: String) -> Result<tauri::ipc::Response, JobEr
             detail: None,
         })?;
     Ok(tauri::ipc::Response::new(bytes))
+}
+
+/// `path` if nothing is there yet, else the first free "name (2).ext",
+/// "name (3).ext", ... beside it. The same rule as the engine's own
+/// `unique_path` (sidecar/ops/_common.py), for the outputs whose name the UI
+/// chooses: quick actions never overwrite a file.
+pub fn free_path(path: &Path, exists: impl Fn(&Path) -> bool) -> Option<PathBuf> {
+    if !exists(path) {
+        return Some(path.to_path_buf());
+    }
+    let parent = path.parent()?;
+    let stem = path.file_stem()?.to_string_lossy();
+    let ext = path
+        .extension()
+        .map(|e| format!(".{}", e.to_string_lossy()))
+        .unwrap_or_default();
+    (2..10_000)
+        .map(|n| parent.join(format!("{stem} ({n}){ext}")))
+        .find(|candidate| !exists(candidate))
+}
+
+#[tauri::command]
+pub fn unique_output_path(path: String) -> Result<String, JobError> {
+    let wanted = PathBuf::from(&path);
+    if !wanted.is_absolute() {
+        return Err(JobError {
+            code: "BAD_PARAMS".into(),
+            message: format!("Output path must be absolute, got {path:?}"),
+            detail: None,
+        });
+    }
+    free_path(&wanted, |p| p.exists())
+        .map(|p| p.to_string_lossy().into_owned())
+        .ok_or_else(|| JobError {
+            code: "OUTPUT_WRITE_FAILED".into(),
+            message: format!("Could not find a free file name near {path}"),
+            detail: None,
+        })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    fn fs(names: &[&str]) -> impl Fn(&Path) -> bool {
+        let set: HashSet<PathBuf> = names.iter().map(|n| dir().join(n)).collect();
+        move |p: &Path| set.contains(p)
+    }
+
+    fn dir() -> PathBuf {
+        std::env::temp_dir().join("free path tests")
+    }
+
+    #[test]
+    fn a_free_name_is_kept() {
+        let wanted = dir().join("report-compressed.pdf");
+        assert_eq!(free_path(&wanted, fs(&[])), Some(wanted));
+    }
+
+    #[test]
+    fn a_taken_name_gets_the_first_free_number() {
+        let wanted = dir().join("merged.pdf");
+        let taken = fs(&["merged.pdf", "merged (2).pdf"]);
+        assert_eq!(
+            free_path(&wanted, taken),
+            Some(dir().join("merged (3).pdf"))
+        );
+    }
+
+    #[test]
+    fn names_without_an_extension_and_non_ascii_names() {
+        let wanted = dir().join("दस्तावेज़");
+        assert_eq!(
+            free_path(&wanted, fs(&["दस्तावेज़"])),
+            Some(dir().join("दस्तावेज़ (2)"))
+        );
+        let wanted = dir().join("Résumé.v2.pdf");
+        assert_eq!(
+            free_path(&wanted, fs(&["Résumé.v2.pdf"])),
+            Some(dir().join("Résumé.v2 (2).pdf"))
+        );
+    }
 }

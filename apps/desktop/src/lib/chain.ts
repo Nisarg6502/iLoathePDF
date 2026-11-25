@@ -112,6 +112,7 @@ export const UNAVAILABLE_TOOLS: Record<string, string> = {
   redact: msg("Needs you to draw boxes over what to hide, page by page."),
   organize: msg("Needs you to drag pages around by hand."),
   reader: msg("Only shows a PDF; it doesn't make a new file."),
+  "extract-zip": msg("Makes a folder of files, which no other step can take in."),
 };
 
 export const MAX_STEPS = 10;

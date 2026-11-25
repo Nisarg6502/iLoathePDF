@@ -19,6 +19,16 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.11.0",
+    date: "2026-11-25",
+    highlights: [
+      "Right-click quick actions that just do it: compress a PDF, merge PDFs, turn images into PDFs or JPGs, without opening the app. The result lands next to your file and never replaces one.",
+      "A small card in the corner shows the progress, then lets you open the result or show it in its folder. Run several in a row and they wait their turn.",
+      "Extract ZIP files from the right-click menu (here, or into a new folder) or with the new Extract ZIP tool. Nothing is overwritten, and ZIPs that try to write outside their folder are refused.",
+      "Updates now install quietly: no installer window, just Windows' permission prompt, and the app reopens on its own.",
+    ],
+  },
+  {
     version: "0.10.0",
     date: "2026-11-25",
     highlights: [

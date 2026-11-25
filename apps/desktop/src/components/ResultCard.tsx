@@ -265,6 +265,30 @@ export function describeJobError(error: JobError): ErrorCopy {
         body: tr("The file looks damaged or is not really a PDF. If it was downloaded or emailed, try getting a fresh copy."),
         tone: "danger",
       };
+    case "ENCRYPTED_ARCHIVE":
+      return {
+        title: tr("This ZIP is password protected"),
+        body: tr("iLoathePDF can't open password-protected archives. Extract it with the program that made it, or with 7-Zip, and enter the password there."),
+        tone: "danger",
+      };
+    case "CORRUPT_ARCHIVE":
+      return {
+        title: tr("This ZIP could not be read"),
+        body: tr("The file looks damaged or incomplete. If it was downloaded or emailed, try getting a fresh copy. Nothing was extracted."),
+        tone: "danger",
+      };
+    case "UNSAFE_ARCHIVE":
+      return {
+        title: tr("This ZIP was not extracted, to keep your files safe"),
+        body: tr("Some of its files are set to land outside the folder they are extracted to, which is how harmful archives overwrite files elsewhere on your computer. Nothing was extracted."),
+        tone: "danger",
+      };
+    case "EMPTY_ARCHIVE":
+      return {
+        title: tr("This ZIP is empty"),
+        body: tr("There are no files or folders in it, so there was nothing to extract."),
+        tone: "muted",
+      };
     case "FILE_NOT_FOUND":
       return {
         title: tr("That file has gone missing"),
@@ -323,7 +347,7 @@ export function ErrorCard({ error, onRetry, onAgain, className }: ErrorCardProps
   const [showDetail, setShowDetail] = useState(false);
   const copy = describeJobError(error);
   const danger = copy.tone === "danger";
-  const Icon = error.code === "ENCRYPTED_PDF" ? Lock : AlertTriangle;
+  const Icon = error.code === "ENCRYPTED_PDF" || error.code === "ENCRYPTED_ARCHIVE" ? Lock : AlertTriangle;
 
   return (
     <section

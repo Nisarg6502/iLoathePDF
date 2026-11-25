@@ -5,6 +5,32 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] - 2026-11-25
+
+### Added
+- Quick actions in File Explorer's right-click menu that do the job right
+  there, without opening the app: Compress and Merge into one PDF for PDFs;
+  Convert to PDF (one PDF per image), Combine into one PDF and Convert to JPG
+  for images. The result is saved next to the original under a new name
+  (never over an existing file), and a small card in the corner of the screen
+  shows the progress, then Show in folder and Open. If something goes wrong
+  it says what, and Open in iLoathePDF takes you to the full tool. Several
+  quick actions in a row wait their turn instead of being lost.
+- Extract ZIP files: Extract here and Extract to a new folder in the
+  right-click menu, and an Extract ZIP tool in the app. Nothing that already
+  exists is overwritten (a taken name gets " (2)"), archives that try to put
+  files outside the folder are refused outright, names in any language are
+  kept, and password-protected or damaged ZIPs are reported clearly with
+  nothing left half-extracted.
+
+### Changed
+- The right-click menu items that open the app now end in "…" (Merge PDFs…,
+  Compress…, Images to PDF…), with a line separating them from the quick
+  actions.
+- Updates install quietly: after Restart & update there is no installer
+  window any more, only Windows' permission prompt, and the app reopens by
+  itself.
+
 ## [0.10.0] - 2026-11-25
 
 ### Added

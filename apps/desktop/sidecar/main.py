@@ -19,7 +19,7 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
 
 from ops._common import Cancelled, OpError  # noqa: E402
 
-VERSION = "0.10.0"
+VERSION = "0.11.0"
 
 # op name -> "module:function". Modules are imported on first use so that a
 # half-finished op can never stop the sidecar from starting.
@@ -42,6 +42,7 @@ DISPATCH: dict[str, str] = {
     "csv.to_pdf": "ops.doc_to_pdf:run_csv",
     "html.to_pdf": "ops.doc_to_pdf:run_html",
     "zip.to_pdf": "ops.zip_to_pdf:run",
+    "zip.extract": "ops.zip_extract:run",
     "scan.to_pdf": "ops.scan_to_pdf:run",
     "img.convert": "ops.img_convert:run",
     "img.to_pdf": "ops.img_to_pdf:run",

@@ -16,9 +16,9 @@
 ; computer never get it. Uninstalling removes it for the account running the
 ; uninstaller only.
 ;
-; Updates, including the passive ones the app starts itself, write it again:
+; Updates, including the quiet ones the app starts itself, write it again:
 ; that is how people on an earlier version get it (and why a deleted one comes
-; back). It never shows a prompt, so a passive install stays unattended.
+; back). It never shows a prompt, so a quiet install stays unattended.
 ; ---------------------------------------------------------------------------
 
 !macro ILP_INSTALL_SENDTO
