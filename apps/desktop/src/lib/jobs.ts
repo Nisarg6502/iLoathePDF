@@ -27,6 +27,7 @@ export type OpName =
   | "csv.to_pdf"
   | "html.to_pdf"
   | "zip.to_pdf"
+  | "zip.extract"
   | "img.convert"
   | "img.to_pdf"
   | "pdf.to_img";
@@ -44,6 +45,10 @@ export type ErrorCode =
   | "OUTPUT_WRITE_FAILED"
   | "CANCELLED"
   | "WRONG_PASSWORD"
+  | "ENCRYPTED_ARCHIVE"
+  | "CORRUPT_ARCHIVE"
+  | "UNSAFE_ARCHIVE"
+  | "EMPTY_ARCHIVE"
   | "INTERNAL";
 
 export class JobError extends Error {
@@ -260,6 +265,22 @@ export interface ZipToPdfParams {
 }
 export interface ZipToPdfResult { output: string; bytes: number; pages: number; files: number; skipped: number }
 
+export type ExtractMode = "here" | "folder";
+export interface ZipExtractParams { input: string; mode: ExtractMode; output_dir?: string }
+export interface ZipExtractResult {
+  /** The new folder ("folder"), or the folder the items went into ("here"). */
+  output: string;
+  /** The top-level items placed, with their total size. */
+  outputs: OutputFile[];
+  files: number;
+  folders: number;
+  bytes: number;
+  /** Top-level items given a " (2)" name because theirs was taken. */
+  renamed: number;
+  /** Symbolic links, which are never extracted. */
+  skipped: number;
+}
+
 export interface PingResult { pong: boolean; version: string; python: string }
 
 /** Maps each op to its params and result types, so runJob() is fully typed. */
@@ -284,6 +305,7 @@ export interface OpMap {
   "csv.to_pdf": [DocToPdfParams, DocToPdfResult];
   "html.to_pdf": [DocToPdfParams, DocToPdfResult];
   "zip.to_pdf": [ZipToPdfParams, ZipToPdfResult];
+  "zip.extract": [ZipExtractParams, ZipExtractResult];
   "img.convert": [ImgConvertParams, ImgConvertResult];
   "img.to_pdf": [ImgToPdfParams, ImgToPdfResult];
   "pdf.to_img": [PdfToImgParams, PdfToImgResult];
@@ -398,6 +420,16 @@ async function mockJob(
       const elements = (p.elements as unknown[] | undefined)?.length ?? 0;
       return { output: out, bytes: 128432, pages: 6, elements };
     }
+    case "zip.extract":
+      return {
+        output: (p.output_dir as string) ?? "C:\\mock\\archive",
+        outputs: [{ path: "C:\\mock\\archive", bytes: 40000 }],
+        files: 3,
+        folders: 1,
+        bytes: 40000,
+        renamed: 0,
+        skipped: 0,
+      };
     case "pdf.split":
     case "txt.to_pdf":
     case "csv.to_pdf":

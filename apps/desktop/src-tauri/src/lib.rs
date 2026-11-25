@@ -2,6 +2,7 @@ mod commands;
 mod instance_gate;
 mod launch;
 mod locale;
+mod quick;
 mod sidecar;
 mod update_download;
 mod updates;
@@ -23,8 +24,10 @@ pub fn run() {
         // First, so a second process hands over its files and exits before
         // anything else (the document engine included) starts.
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
-            launch::receive(app, argv, Path::new(&cwd), true);
-            launch::focus_main_window(app);
+            // A quick action (`--run`) only shows its own small window.
+            if launch::receive(app, argv, Path::new(&cwd), true) != launch::LaunchKind::Quick {
+                launch::focus_main_window(app);
+            }
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
@@ -46,7 +49,14 @@ pub fn run() {
                 .map(|a| a.to_string_lossy().into_owned())
                 .collect();
             let cwd = std::env::current_dir().unwrap_or_default();
-            launch::receive(app.handle(), argv, &cwd, false);
+            let kind = launch::receive(app.handle(), argv, &cwd, false);
+
+            // The main window starts hidden (tauri.conf.json) so that a
+            // quick action from the right-click menu shows nothing but its
+            // progress card. Every other start shows it straight away.
+            if kind != launch::LaunchKind::Quick {
+                launch::focus_main_window(app.handle());
+            }
 
             // A failure to start the engine is not fatal: the window still
             // opens and the UI reports what went wrong, which is far easier
@@ -67,12 +77,23 @@ pub fn run() {
             app.manage(state);
             Ok(())
         })
+        .on_window_event(|window, event| {
+            if window.label() == quick::LABEL {
+                if let tauri::WindowEvent::Destroyed = event {
+                    quick::on_closed(window.app_handle());
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             commands::run_job,
             commands::cancel_job,
             commands::sidecar_health,
             commands::read_file_bytes,
+            commands::unique_output_path,
             launch::take_launch_request,
+            launch::take_quick_requests,
+            quick::quick_window_fit,
+            quick::quick_open_in_app,
             locale::installer_language,
             updates::check_for_update,
             updates::download_update,

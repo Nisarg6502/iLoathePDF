@@ -145,3 +145,23 @@ def test_missing_file_is_reported_not_raised(engine, tmp_path):
     terminal, _ = engine.run("nf", "pdf.info", {"input": str(tmp_path / "nope.pdf")})
     assert terminal["type"] == "error"
     assert terminal["code"] == "FILE_NOT_FOUND"
+
+
+def test_zip_extract_over_the_wire(engine, tmp_path):
+    import zipfile
+
+    src = tmp_path / "bundle.zip"
+    with zipfile.ZipFile(src, "w") as z:
+        z.writestr("दस्तावेज़.txt", "hello")
+    terminal, progress = engine.run("z1", "zip.extract", {"input": str(src), "mode": "folder"})
+    assert terminal["type"] == "result", terminal
+    assert (tmp_path / "bundle" / "दस्तावेज़.txt").read_text() == "hello"
+    assert terminal["data"]["output"] == str(tmp_path / "bundle")
+    assert progress
+
+    slip = tmp_path / "slip.zip"
+    with zipfile.ZipFile(slip, "w") as z:
+        z.writestr("../evil.txt", "x")
+    terminal, _ = engine.run("z2", "zip.extract", {"input": str(slip), "mode": "here"})
+    assert terminal["type"] == "error"
+    assert terminal["code"] == "UNSAFE_ARCHIVE"

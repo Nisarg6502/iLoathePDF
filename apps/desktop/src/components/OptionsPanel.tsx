@@ -1015,6 +1015,31 @@ export function ToolOptions({
         </OptionsPanel>
       );
 
+    case "extract-zip":
+      return (
+        <OptionsPanel
+          className={className}
+          description={t("Unpacks beside the ZIP. A name that is already taken gets a number, so nothing is ever overwritten. Paths that would land outside the folder are refused.")}
+        >
+          <Field label={t("Where")}>
+            {() => (
+              <RadioGroup value={str("mode")} onValueChange={(v) => set({ mode: v })} aria-label={t("Where")}>
+                <RadioGroupItem
+                  value="folder"
+                  label={t("In a new folder")}
+                  hint={t("A folder named after the ZIP, next to it.")}
+                />
+                <RadioGroupItem
+                  value="here"
+                  label={t("Right here")}
+                  hint={t("The files and folders go straight into the ZIP's folder.")}
+                />
+              </RadioGroup>
+            )}
+          </Field>
+        </OptionsPanel>
+      );
+
     case "pdfa":
       return (
         <OptionsPanel

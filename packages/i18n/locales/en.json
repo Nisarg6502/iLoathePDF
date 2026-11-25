@@ -82,5 +82,21 @@
   "{{count}} STEPS_other": "{{count}} STEPS",
   "{{count}} steps_other": "{{count}} steps",
   "{{removed}} removed, {{count}} remain_one": "{{removed}} removed, {{count}} remains",
-  "{{removed}} removed, {{count}} remain_other": "{{removed}} removed, {{count}} remain"
+  "{{removed}} removed, {{count}} remain_other": "{{removed}} removed, {{count}} remain",
+  "Combining {{count}} images into one PDF_one": "Combining {{count}} image into one PDF",
+  "Combining {{count}} images into one PDF_other": "Combining {{count}} images into one PDF",
+  "Converting {{count}} images to JPG_one": "Converting {{count}} image to JPG",
+  "Converting {{count}} images to JPG_other": "Converting {{count}} images to JPG",
+  "Merging {{count}} PDFs_one": "Merging {{count}} PDF",
+  "Merging {{count}} PDFs_other": "Merging {{count}} PDFs",
+  "{{count}} files failed._one": "{{count}} file failed.",
+  "{{count}} files failed._other": "{{count}} files failed.",
+  "{{count}} files saved next to the originals._one": "{{count}} file saved next to the original.",
+  "{{count}} files saved next to the originals._other": "{{count}} files saved next to the originals.",
+  "{{count}} folders_one": "{{count}} folder",
+  "{{count}} folders_other": "{{count}} folders",
+  "{{count}} items got a new name because the name was taken._one": "{{count}} item got a new name because the name was taken.",
+  "{{count}} items got a new name because the name was taken._other": "{{count}} items got a new name because the name was taken.",
+  "{{count}} shortcuts (symbolic links) were left out._one": "{{count}} shortcut (symbolic link) was left out.",
+  "{{count}} shortcuts (symbolic links) were left out._other": "{{count}} shortcuts (symbolic links) were left out."
 }

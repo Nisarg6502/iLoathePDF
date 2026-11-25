@@ -39,6 +39,10 @@ in the same commit. Downstream agents code against it and must not edit it.
 | `ALREADY_HAS_TEXT` | Input already has selectable text; `pdf.ocr` only accepts scanned/image-only PDFs |
 | `NO_TABLES_FOUND` | `pdf.to_excel` found no table on any page; nothing is written |
 | `OUTPUT_WRITE_FAILED` | Could not write the output file |
+| `ENCRYPTED_ARCHIVE` | ZIP is password protected (`zip.extract`) |
+| `CORRUPT_ARCHIVE` | ZIP could not be read, or an entry failed its CRC check (`zip.extract`) |
+| `UNSAFE_ARCHIVE` | An entry would land outside the destination: `..`, an absolute path, a drive letter (`zip.extract`) |
+| `EMPTY_ARCHIVE` | ZIP has nothing in it to extract (`zip.extract`) |
 | `CANCELLED` | Job cancelled by the user |
 | `INTERNAL` | Unexpected error; `detail` holds the traceback |
 
@@ -262,6 +266,28 @@ harmless), at most 1000 entries and 500 MB are read, and a password-protected
 archive is `ENCRYPTED_PDF`. An archive with nothing usable, or one that is not
 a ZIP, is `UNSUPPORTED_FORMAT`.
 result: `{"output": "...", "bytes": 4096, "pages": 7, "files": 5, "skipped": 2}`
+
+### `zip.extract`
+params:
+```json
+{"input": "a.zip", "mode": "here|folder", "output_dir": "abs dir (optional)"}
+```
+Unpacks the archive into `output_dir` (default: the ZIP's own folder).
+`folder` puts everything in a new folder named after the ZIP (an archive
+whose only top-level item is a folder of that name is not doubled up);
+`here` puts the archive's top-level items straight into `output_dir`.
+Nothing that exists is overwritten: a taken top-level name becomes
+`name (2)`, `name (3)`... and is counted in `renamed`. Every entry is checked
+before anything is written: a path that would escape the destination is
+`UNSAFE_ARCHIVE`, a password is `ENCRYPTED_ARCHIVE`, a compression method
+zipfile cannot read (Deflate64, PPMd...) is `UNSUPPORTED_FORMAT`, and too
+little free disk space is `OUTPUT_WRITE_FAILED`. Entries are written to a
+hidden staging folder first, so a damaged entry (`CORRUPT_ARCHIVE`) or a
+cancel leaves nothing behind. Names are made valid for Windows; symbolic
+links are skipped and counted.
+result: `{"output": "abs folder (folder) or output_dir (here)",
+"outputs": [{"path": "top-level item", "bytes": 1234}], "files": 12,
+"folders": 3, "bytes": 1234, "renamed": 0, "skipped": 0}`
 
 ### `scan.to_pdf`
 params:

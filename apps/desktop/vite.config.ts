@@ -15,6 +15,16 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(version) },
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
   clearScreen: false,
+  // Two pages: the app, and the small quick-action window that the
+  // right-click menu's in-place actions show (src-tauri/src/quick.rs).
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        quick: path.resolve(__dirname, "quick.html"),
+      },
+    },
+  },
   server: {
     port: 5173,
     strictPort: true,

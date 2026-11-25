@@ -6,19 +6,30 @@
 //!
 //! ```text
 //! iLoathePDF.exe [--action <tool-id>] <file> [<file> ...]
+//! iLoathePDF.exe --run <quick-action-id> <file> [<file> ...]
 //! ```
 //!
-//! `<tool-id>` is a tool `id` from `src/lib/tools.ts`. The UI decides what to
-//! do with the files (src/lib/launch.ts); this side only collects them.
+//! `--action` opens the main window on a tool: `<tool-id>` is a tool `id`
+//! from `src/lib/tools.ts`, and the UI decides what to do with the files
+//! (src/lib/launch.ts); this side only collects them.
+//!
+//! `--run` (added in 0.11) does the job in place without the main window: a
+//! small progress window (quick.html, src/quick/) runs `<quick-action-id>`, an
+//! id from `src/lib/quickActions.ts`, on the files and writes the results next
+//! to them. A launch that carries both flags is a `--run` launch. Older
+//! installs never pass `--run`, so their menus keep working unchanged.
 //!
 //! Explorer starts the verb once per selected file, as separate processes at
 //! nearly the same moment. The single-instance plugin forwards each later
 //! process's command line here and ends that process, so the files land in
 //! one place: [`Inbox`]. Arrivals are merged until nothing new has come in for
-//! [`QUIET_WINDOW`], then handed to the UI as one [`LaunchRequest`].
+//! [`QUIET_WINDOW`], then handed over as one [`LaunchRequest`] (main window)
+//! or one [`QuickRequest`] per quick action (progress window). Quick requests
+//! queue: one that arrives while another is running waits its turn.
 //!
-//! The UI pulls the request with [`take_launch_request`] when it mounts, and
-//! again whenever [`LAUNCH_EVENT`] fires. Pulling (rather than pushing the
+//! The UI pulls a request with [`take_launch_request`] or
+//! [`take_quick_requests`] when it mounts, and again whenever [`LAUNCH_EVENT`]
+//! or [`crate::quick::QUICK_EVENT`] fires. Pulling (rather than pushing the
 //! files in the event) means a request that is ready before the window has
 //! loaded waits here instead of being lost.
 
@@ -48,6 +59,9 @@ const FOLLOW_UP: Duration = Duration::from_secs(3);
 pub struct ParsedArgs {
     /// The `--action` value; `None` for "Send to", "Open with" and drops.
     pub action: Option<String>,
+    /// The `--run` value: a quick action to do in place, without the main
+    /// window. Takes precedence over `action`.
+    pub run: Option<String>,
     /// Existing files, absolute, in the order given.
     pub files: Vec<PathBuf>,
     /// Arguments that named something other than an existing file: a folder,
@@ -55,9 +69,30 @@ pub struct ParsedArgs {
     pub skipped: usize,
 }
 
+/// What a launch asks for, as far as the window that should appear goes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LaunchKind {
+    /// No files and no flags: a plain start, which shows the main window.
+    Nothing,
+    /// Files for the main window (`--action`, "Send to", "Open with").
+    Open,
+    /// A `--run` quick action: only the small progress window appears.
+    Quick,
+}
+
 impl ParsedArgs {
     fn is_empty(&self) -> bool {
-        self.action.is_none() && self.files.is_empty() && self.skipped == 0
+        self.action.is_none() && self.run.is_none() && self.files.is_empty() && self.skipped == 0
+    }
+
+    pub fn kind(&self) -> LaunchKind {
+        if self.run.is_some() {
+            LaunchKind::Quick
+        } else if self.is_empty() {
+            LaunchKind::Nothing
+        } else {
+            LaunchKind::Open
+        }
     }
 
     /// Adds another launch's files, skipping ones already here. The first
@@ -65,6 +100,9 @@ impl ParsedArgs {
     fn absorb(&mut self, other: ParsedArgs) {
         if self.action.is_none() {
             self.action = other.action;
+        }
+        if self.run.is_none() {
+            self.run = other.run;
         }
         let mut seen: HashSet<Vec<String>> = self.files.iter().map(|f| path_key(f)).collect();
         for file in other.files {
@@ -94,13 +132,22 @@ where
         if arg.is_empty() {
             continue;
         }
-        if arg == "--action" {
+        if arg == "--action" || arg == "--run" {
             let value = args.next();
-            set_action(&mut parsed, value.as_ref().map(|v| v.as_ref()));
+            let slot = if arg == "--run" {
+                &mut parsed.run
+            } else {
+                &mut parsed.action
+            };
+            set_once(slot, value.as_ref().map(|v| v.as_ref()));
             continue;
         }
         if let Some(value) = arg.strip_prefix("--action=") {
-            set_action(&mut parsed, Some(value));
+            set_once(&mut parsed.action, Some(value));
+            continue;
+        }
+        if let Some(value) = arg.strip_prefix("--run=") {
+            set_once(&mut parsed.run, Some(value));
             continue;
         }
         if arg.starts_with('-') {
@@ -117,12 +164,12 @@ where
     parsed
 }
 
-fn set_action(parsed: &mut ParsedArgs, value: Option<&str>) {
-    if parsed.action.is_some() {
+fn set_once(slot: &mut Option<String>, value: Option<&str>) {
+    if slot.is_some() {
         return;
     }
     if let Some(value) = value.map(str::trim).filter(|v| !v.is_empty()) {
-        parsed.action = Some(value.to_string());
+        *slot = Some(value.to_string());
     }
 }
 
@@ -192,7 +239,15 @@ fn sort_naturally(files: &mut [PathBuf]) {
     });
 }
 
-/// What the UI receives.
+fn sorted_strings(mut files: Vec<PathBuf>) -> Vec<String> {
+    sort_naturally(&mut files);
+    files
+        .iter()
+        .map(|f| f.to_string_lossy().into_owned())
+        .collect()
+}
+
+/// What the main window receives.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LaunchRequest {
@@ -202,18 +257,25 @@ pub struct LaunchRequest {
 }
 
 impl From<ParsedArgs> for LaunchRequest {
-    fn from(mut parsed: ParsedArgs) -> Self {
-        sort_naturally(&mut parsed.files);
+    fn from(parsed: ParsedArgs) -> Self {
         LaunchRequest {
             action: parsed.action,
-            files: parsed
-                .files
-                .iter()
-                .map(|f| f.to_string_lossy().into_owned())
-                .collect(),
+            files: sorted_strings(parsed.files),
             skipped: parsed.skipped,
         }
     }
+}
+
+/// What the quick-action window receives: one job to run in place.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuickRequest {
+    /// Unique for this app run, in arrival order.
+    pub id: u64,
+    /// The `--run` value. Unknown ids are passed through for the UI to explain.
+    pub run: String,
+    pub files: Vec<String>,
+    pub skipped: usize,
 }
 
 /// Collects launches and releases them once they stop arriving.
@@ -229,6 +291,12 @@ pub struct Inbox {
     ready: Option<ParsedArgs>,
     /// The last request settled, and when: see [`FOLLOW_UP`].
     last: Option<(Instant, ParsedArgs)>,
+    /// `--run` launches waiting for the quiet window, one per quick action.
+    pending_quick: Vec<ParsedArgs>,
+    /// Settled quick requests the progress window has not taken yet, oldest
+    /// first. Each keeps its id.
+    quick: Vec<(u64, ParsedArgs)>,
+    next_quick_id: u64,
 }
 
 impl Inbox {
@@ -238,26 +306,58 @@ impl Inbox {
         if parsed.is_empty() {
             return None;
         }
-        self.pending.absorb(parsed);
+        if parsed.run.is_some() {
+            match self.pending_quick.iter_mut().find(|p| p.run == parsed.run) {
+                Some(batch) => batch.absorb(parsed),
+                None => self.pending_quick.push(parsed),
+            }
+        } else {
+            self.pending.absorb(parsed);
+        }
         self.generation += 1;
         Some(self.generation)
     }
 
-    /// The generation to settle, if anything is waiting.
-    pub fn current(&self) -> Option<u64> {
-        (!self.pending.is_empty()).then_some(self.generation)
+    fn has_pending(&self) -> bool {
+        !self.pending.is_empty() || !self.pending_quick.is_empty()
     }
 
-    /// Moves the pending launches to `ready`, unless something arrived after
-    /// `generation`. Returns whether it did.
+    /// The generation to settle, if anything is waiting.
+    pub fn current(&self) -> Option<u64> {
+        self.has_pending().then_some(self.generation)
+    }
+
+    /// Moves the pending launches to `ready` (and the quick ones to the
+    /// quick queue), unless something arrived after `generation`. Returns
+    /// whether it did.
     ///
     /// A request the UI has not taken yet is extended rather than replaced,
     /// and so is one settled less than [`FOLLOW_UP`] ago with the same
     /// action: that is a straggler from the same Explorer gesture, and the UI
     /// gets the whole set again instead of just the late file.
+    ///
+    /// Quick requests only join a request that is still queued: one the
+    /// window has taken may already be running, so a straggler for it becomes
+    /// a request of its own rather than changing a job under way.
     pub fn settle(&mut self, generation: u64, now: Instant) -> bool {
-        if generation != self.generation || self.pending.is_empty() {
+        if generation != self.generation || !self.has_pending() {
             return false;
+        }
+        for batch in std::mem::take(&mut self.pending_quick) {
+            match self
+                .quick
+                .iter_mut()
+                .find(|(_, queued)| queued.run == batch.run)
+            {
+                Some((_, queued)) => queued.absorb(batch),
+                None => {
+                    self.next_quick_id += 1;
+                    self.quick.push((self.next_quick_id, batch));
+                }
+            }
+        }
+        if self.pending.is_empty() {
+            return true;
         }
         let batch = std::mem::take(&mut self.pending);
         let mut request = match self.ready.take() {
@@ -282,41 +382,87 @@ impl Inbox {
     pub fn take(&mut self) -> Option<LaunchRequest> {
         self.ready.take().map(LaunchRequest::from)
     }
+
+    /// Whether a settled main-window request is waiting.
+    pub fn has_ready(&self) -> bool {
+        self.ready.is_some()
+    }
+
+    /// Whether settled quick requests are waiting.
+    pub fn has_quick(&self) -> bool {
+        !self.quick.is_empty()
+    }
+
+    /// Every settled quick request, oldest first, once.
+    pub fn take_quick(&mut self) -> Vec<QuickRequest> {
+        std::mem::take(&mut self.quick)
+            .into_iter()
+            .map(|(id, parsed)| QuickRequest {
+                id,
+                run: parsed.run.unwrap_or_default(),
+                files: sorted_strings(parsed.files),
+                skipped: parsed.skipped,
+            })
+            .collect()
+    }
+
+    /// Hands files to the main window straight away, as if they had come in
+    /// with `--action` and the quiet window had passed. Used by the quick
+    /// window's "Open in iLoathePDF" after a failure.
+    pub fn open_now(&mut self, action: Option<String>, files: Vec<PathBuf>, now: Instant) {
+        let parsed = ParsedArgs {
+            action,
+            run: None,
+            files,
+            skipped: 0,
+        };
+        // Replaces whatever the window has not taken: this is a new gesture.
+        self.ready = Some(parsed.clone());
+        self.last = Some((now, parsed));
+    }
 }
 
 #[derive(Debug, Default)]
 pub struct LaunchState(Mutex<Inbox>);
 
 impl LaunchState {
-    fn with<T>(&self, f: impl FnOnce(&mut Inbox) -> T) -> T {
+    pub fn with<T>(&self, f: impl FnOnce(&mut Inbox) -> T) -> T {
         f(&mut self.0.lock().unwrap_or_else(PoisonError::into_inner))
     }
 }
 
-/// Records one process's command line.
+/// Records one process's command line, and says what it asked for.
 ///
 /// `arm` starts the quiet-window timer. The first process passes `false`: its
 /// own files are read during setup, before the event loop runs, and the other
 /// processes Explorer started are queued behind that loop. Timing from setup
 /// could hand the first file over alone; [`arm`] starts the timer once the
 /// loop is running instead.
-pub fn receive<R: Runtime>(app: &AppHandle<R>, argv: Vec<String>, cwd: &Path, arm: bool) {
+pub fn receive<R: Runtime>(
+    app: &AppHandle<R>,
+    argv: Vec<String>,
+    cwd: &Path,
+    arm: bool,
+) -> LaunchKind {
     let parsed = parse_args(&argv, cwd, Path::is_file);
-    if !parsed.is_empty() {
+    let kind = parsed.kind();
+    if kind != LaunchKind::Nothing {
         log::info!(
-            "launch: action {:?}, {} file(s), {} skipped",
+            "launch: action {:?}, run {:?}, {} file(s), {} skipped",
             parsed.action,
+            parsed.run,
             parsed.files.len(),
             parsed.skipped
         );
     }
     let Some(state) = app.try_state::<LaunchState>() else {
-        return;
+        return kind;
     };
     let generation = state.with(|inbox| inbox.push(parsed));
     if let (Some(generation), true) = (generation, arm) {
         settle_later(app.clone(), generation);
     }
+    kind
 }
 
 /// Starts the quiet-window timer for whatever arrived before the event loop.
@@ -332,13 +478,23 @@ pub fn arm<R: Runtime>(app: &AppHandle<R>) {
 fn settle_later<R: Runtime>(app: AppHandle<R>, generation: u64) {
     std::thread::spawn(move || {
         std::thread::sleep(QUIET_WINDOW);
-        let settled = app
-            .try_state::<LaunchState>()
-            .is_some_and(|state| state.with(|inbox| inbox.settle(generation, Instant::now())));
-        if settled {
+        let Some(state) = app.try_state::<LaunchState>() else {
+            return;
+        };
+        let (settled, open, quick) = state.with(|inbox| {
+            let settled = inbox.settle(generation, Instant::now());
+            (settled, inbox.has_ready(), inbox.has_quick())
+        });
+        if !settled {
+            return;
+        }
+        if open {
             if let Err(error) = app.emit(LAUNCH_EVENT, ()) {
                 log::warn!("could not announce a launch request: {error}");
             }
+        }
+        if quick {
+            crate::quick::announce(&app);
         }
     });
 }
@@ -366,6 +522,22 @@ pub fn take_launch_request(state: State<'_, LaunchState>) -> Option<LaunchReques
         );
     }
     request
+}
+
+/// The quick actions waiting to run, oldest first. Empty when there are none.
+#[tauri::command]
+pub fn take_quick_requests(state: State<'_, LaunchState>) -> Vec<QuickRequest> {
+    let requests = state.with(Inbox::take_quick);
+    for request in &requests {
+        log::info!(
+            "launch: quick action {} ({:?}), {} file(s), {} skipped",
+            request.id,
+            request.run,
+            request.files.len(),
+            request.skipped
+        );
+    }
+    requests
 }
 
 #[cfg(test)]
@@ -543,6 +715,7 @@ mod tests {
     fn launch(action: Option<&str>, names: &[&str]) -> ParsedArgs {
         ParsedArgs {
             action: action.map(String::from),
+            run: None,
             files: names.iter().map(|n| abs(n)).collect(),
             skipped: 0,
         }
@@ -685,6 +858,169 @@ mod tests {
         assert_eq!(
             serde_json::to_value(&request).unwrap(),
             serde_json::json!({ "action": "merge", "files": ["x"], "skipped": 1 })
+        );
+    }
+
+    fn quick(run: &str, names: &[&str]) -> ParsedArgs {
+        ParsedArgs {
+            run: Some(run.into()),
+            ..launch(None, names)
+        }
+    }
+
+    #[test]
+    fn run_flag_in_both_spellings() {
+        let parsed = parse_args(
+            argv(&["--run", "compress", "a.pdf"]),
+            &cwd(),
+            files(&["a.pdf"]),
+        );
+        assert_eq!(parsed.run.as_deref(), Some("compress"));
+        assert_eq!(parsed.action, None);
+        assert_eq!(parsed.kind(), LaunchKind::Quick);
+        let parsed = parse_args(
+            argv(&["a.pdf", "--run=extract-here"]),
+            &cwd(),
+            files(&["a.pdf"]),
+        );
+        assert_eq!(parsed.run.as_deref(), Some("extract-here"));
+        assert_eq!(parsed.files, vec![abs("a.pdf")]);
+    }
+
+    #[test]
+    fn run_wins_over_action_and_old_command_lines_are_unchanged() {
+        let parsed = parse_args(
+            argv(&["--action", "merge", "--run", "merge", "a.pdf"]),
+            &cwd(),
+            files(&["a.pdf"]),
+        );
+        assert_eq!(parsed.kind(), LaunchKind::Quick);
+        // What a 0.9/0.10 menu item passes still opens the main window.
+        let parsed = parse_args(
+            argv(&["--action", "merge", "a.pdf"]),
+            &cwd(),
+            files(&["a.pdf"]),
+        );
+        assert_eq!(parsed.run, None);
+        assert_eq!(parsed.kind(), LaunchKind::Open);
+        assert_eq!(
+            parse_args(argv(&[]), &cwd(), files(&[])).kind(),
+            LaunchKind::Nothing
+        );
+    }
+
+    #[test]
+    fn empty_or_dangling_run_is_no_run() {
+        let parsed = parse_args(argv(&["a.pdf", "--run"]), &cwd(), files(&["a.pdf"]));
+        assert_eq!(parsed.run, None);
+        assert_eq!(parsed.kind(), LaunchKind::Open);
+        let parsed = parse_args(argv(&["--run=", "a.pdf"]), &cwd(), files(&["a.pdf"]));
+        assert_eq!(parsed.run, None);
+    }
+
+    #[test]
+    fn quick_launches_batch_into_one_request_per_action() {
+        let mut inbox = Inbox::default();
+        // Explorer, one process per selected file.
+        inbox.push(quick("merge", &["b.pdf"]));
+        inbox.push(quick("merge", &["a.pdf"]));
+        let g = inbox.push(quick("merge", &["b.pdf"])).unwrap();
+        assert!(inbox.settle(g, now()));
+        assert!(
+            !inbox.has_ready(),
+            "quick actions never reach the main window"
+        );
+        assert_eq!(inbox.take(), None);
+        assert_eq!(
+            inbox.take_quick(),
+            vec![QuickRequest {
+                id: 1,
+                run: "merge".into(),
+                files: vec![abs_str("a.pdf"), abs_str("b.pdf")],
+                skipped: 0,
+            }]
+        );
+        assert!(inbox.take_quick().is_empty(), "handed over once");
+    }
+
+    #[test]
+    fn a_second_quick_action_is_queued_not_lost() {
+        let mut inbox = Inbox::default();
+        let t = now();
+        let g = inbox.push(quick("compress", &["a.pdf"])).unwrap();
+        assert!(inbox.settle(g, t));
+        let first = inbox.take_quick();
+        assert_eq!(first.len(), 1);
+        // While the first one runs: a different action, then the same one
+        // again on another file.
+        let g = inbox.push(quick("merge", &["x.pdf", "y.pdf"])).unwrap();
+        assert!(inbox.settle(g, t + Duration::from_secs(1)));
+        let g = inbox.push(quick("compress", &["b.pdf"])).unwrap();
+        assert!(inbox.settle(g, t + Duration::from_secs(5)));
+        let queued = inbox.take_quick();
+        assert_eq!(
+            queued
+                .iter()
+                .map(|q| (q.id, q.run.as_str()))
+                .collect::<Vec<_>>(),
+            vec![(2, "merge"), (3, "compress")]
+        );
+        assert_eq!(queued[1].files, vec![abs_str("b.pdf")]);
+    }
+
+    #[test]
+    fn a_quick_straggler_joins_its_request_only_while_it_is_queued() {
+        let mut inbox = Inbox::default();
+        let g = inbox.push(quick("merge", &["a.pdf"])).unwrap();
+        assert!(inbox.settle(g, now()));
+        // Not taken yet: the late file joins.
+        let g = inbox.push(quick("merge", &["b.pdf"])).unwrap();
+        assert!(inbox.settle(g, now()));
+        let taken = inbox.take_quick();
+        assert_eq!(taken.len(), 1);
+        assert_eq!(taken[0].files, vec![abs_str("a.pdf"), abs_str("b.pdf")]);
+        // Taken (maybe running): a later file is a request of its own.
+        let g = inbox.push(quick("merge", &["c.pdf"])).unwrap();
+        assert!(inbox.settle(g, now()));
+        let taken = inbox.take_quick();
+        assert_eq!(taken[0].id, 2);
+        assert_eq!(taken[0].files, vec![abs_str("c.pdf")]);
+    }
+
+    #[test]
+    fn quick_and_open_launches_in_the_same_moment_stay_apart() {
+        let mut inbox = Inbox::default();
+        inbox.push(quick("compress", &["a.pdf"]));
+        let g = inbox.push(launch(Some("split"), &["b.pdf"])).unwrap();
+        assert!(inbox.settle(g, now()));
+        let open = inbox.take().unwrap();
+        assert_eq!(open.action.as_deref(), Some("split"));
+        assert_eq!(open.files, vec![abs_str("b.pdf")]);
+        let quick = inbox.take_quick();
+        assert_eq!(quick.len(), 1);
+        assert_eq!(quick[0].files, vec![abs_str("a.pdf")]);
+    }
+
+    #[test]
+    fn open_now_hands_files_to_the_main_window_at_once() {
+        let mut inbox = Inbox::default();
+        inbox.open_now(Some("compress".into()), vec![abs("a.pdf")], now());
+        let request = inbox.take().unwrap();
+        assert_eq!(request.action.as_deref(), Some("compress"));
+        assert_eq!(request.files, vec![abs_str("a.pdf")]);
+    }
+
+    #[test]
+    fn quick_request_serialises_for_the_ui() {
+        let request = QuickRequest {
+            id: 7,
+            run: "extract-here".into(),
+            files: vec!["x.zip".into()],
+            skipped: 0,
+        };
+        assert_eq!(
+            serde_json::to_value(&request).unwrap(),
+            serde_json::json!({ "id": 7, "run": "extract-here", "files": ["x.zip"], "skipped": 0 })
         );
     }
 }

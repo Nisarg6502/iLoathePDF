@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "iLoathePDF",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "identifier": "com.nisarg.iloathepdf",
   "build": {
     "frontendDist": "../dist",
@@ -20,6 +20,7 @@
         "resizable": true,
         "fullscreen": false,
         "center": true,
+        "visible": false,
         "dragDropEnabled": true,
         "decorations": false,
         "transparent": false
@@ -36,7 +37,7 @@
         "https://github.com/Nisarg6502/iLoathePDF/releases/latest/download/latest.json"
       ],
       "windows": {
-        "installMode": "passive"
+        "installMode": "quiet"
       }
     }
   },

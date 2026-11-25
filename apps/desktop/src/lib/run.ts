@@ -68,12 +68,19 @@ export async function execute(
   redactBoxes: RedactBox[] = [],
   /** Write here instead of the usual destination (a recipe's in-between steps use this). */
   dirOverride?: string,
+  /**
+   * Final say over a single-file output's path, e.g. to move it off a name
+   * that is taken (quick actions never overwrite). Ops that write several
+   * files already pick free names in the engine.
+   */
+  placeOutput: (path: string) => Promise<string> = async (path) => path,
 ): Promise<JobResult> {
   const first = files[0];
   const dir = dirOverride ?? outputDirFor(first.path);
   const base = stripExt(first.name);
   // A drive root already ends in a separator ("G:\"); do not double it.
   const join = (name: string) => `${dir.endsWith("\\") ? dir : dir + "\\"}${name}`;
+  const place = (name: string) => placeOutput(join(name));
   const opts = { onProgress, signal };
   const str = (k: string, fallback = "") => String(v[k] ?? fallback);
   const num = (k: string, fallback = 0) => Number(v[k] ?? fallback);
@@ -82,7 +89,7 @@ export async function execute(
 
   switch (op) {
     case "pdf.merge": {
-      const out = join(`${safeFileStem(v.outputName, "merged")}.pdf`);
+      const out = await place(`${safeFileStem(v.outputName, "merged")}.pdf`);
       const r = await runJob(
         "pdf.merge",
         { inputs: files.map((f) => ({ path: f.path })), output: out },
@@ -131,7 +138,7 @@ export async function execute(
         "pdf.organize",
         {
           input: first.path,
-          output: join(`${safeFileStem(v.outputName, `${base}-organized`)}.pdf`),
+          output: await place(`${safeFileStem(v.outputName, `${base}-organized`)}.pdf`),
           order,
           rotations,
         },
@@ -148,7 +155,7 @@ export async function execute(
         "pdf.compress",
         {
           input: first.path,
-          output: join(`${base}-compressed.pdf`),
+          output: await place(`${base}-compressed.pdf`),
           level: str("level", "balanced") as "lossless" | "balanced" | "strong",
         },
         opts,
@@ -182,7 +189,7 @@ export async function execute(
       }));
       const r = await runJob(
         "pdf.sign",
-        { input: first.path, output: join(`${base}-signed.pdf`), elements },
+        { input: first.path, output: await place(`${base}-signed.pdf`), elements },
         opts,
       );
       return {
@@ -204,7 +211,7 @@ export async function execute(
       }));
       const r = await runJob(
         "pdf.redact",
-        { input: first.path, output: join(`${base}-redacted.pdf`), mode: str("mode", "visual") as "visual" | "true", boxes },
+        { input: first.path, output: await place(`${base}-redacted.pdf`), mode: str("mode", "visual") as "visual" | "true", boxes },
         opts,
       );
       return {
@@ -220,7 +227,7 @@ export async function execute(
         "pdf.protect",
         {
           input: first.path,
-          output: join(`${base}-${suffix}.pdf`),
+          output: await place(`${base}-${suffix}.pdf`),
           mode,
           password: str("password"),
         },
@@ -237,7 +244,7 @@ export async function execute(
         "pdf.ocr",
         {
           input: first.path,
-          output: join(`${base}-searchable.pdf`),
+          output: await place(`${base}-searchable.pdf`),
         },
         opts,
       );
@@ -252,7 +259,7 @@ export async function execute(
         "pdf.to_excel",
         {
           input: first.path,
-          output: join(`${base}-tables.xlsx`),
+          output: await place(`${base}-tables.xlsx`),
         },
         opts,
       );
@@ -272,7 +279,7 @@ export async function execute(
       const pages = str("pages").trim();
       const r = await runJob(
         "pdf.crop",
-        { input: first.path, output: join(`${base}-cropped.pdf`), pages: pages || undefined, margins },
+        { input: first.path, output: await place(`${base}-cropped.pdf`), pages: pages || undefined, margins },
         opts,
       );
       return {
@@ -284,7 +291,7 @@ export async function execute(
     case "pdf.flatten": {
       const r = await runJob(
         "pdf.flatten",
-        { input: first.path, output: join(`${base}-flattened.pdf`) },
+        { input: first.path, output: await place(`${base}-flattened.pdf`) },
         opts,
       );
       return {
@@ -301,7 +308,7 @@ export async function execute(
         "scan.to_pdf",
         {
           inputs: files.map((f) => f.path),
-          output: join(`${safeFileStem(v.outputName, "scan")}.pdf`),
+          output: await place(`${safeFileStem(v.outputName, "scan")}.pdf`),
           mode: str("mode", "enhanced") as "color" | "enhanced" | "bw",
           page_size: str("page_size", "a4") as "fit" | "a4" | "letter",
           orientation: str("orientation", "auto") as "auto" | "portrait" | "landscape",
@@ -312,7 +319,7 @@ export async function execute(
     }
 
     case "pdf.pdfa": {
-      const r = await runJob("pdf.pdfa", { input: first.path, output: join(`${base}-pdfa.pdf`) }, opts);
+      const r = await runJob("pdf.pdfa", { input: first.path, output: await place(`${base}-pdfa.pdf`) }, opts);
       return {
         outputs: [{ path: r.output, bytes: r.bytes }],
         summary: tr("{{pages}} converted to PDF/A-{{level}}.", { pages: tr("{{count}} pages", { count: r.pages }), level: `${r.part}${r.conformance.toLowerCase()}` }),
@@ -340,7 +347,7 @@ export async function execute(
         "zip.to_pdf",
         {
           input: first.path,
-          output: join(`${base}.pdf`),
+          output: await place(`${base}.pdf`),
           page_size: str("page_size", "fit") as "fit" | "a4" | "letter",
           orientation: str("orientation", "auto") as "auto" | "portrait" | "landscape",
         },
@@ -354,6 +361,22 @@ export async function execute(
           skipped: r.skipped,
         }),
       };
+    }
+
+    case "zip.extract": {
+      const r = await runJob(
+        "zip.extract",
+        { input: first.path, mode: str("mode", "folder") as "here" | "folder", output_dir: dir },
+        opts,
+      );
+      const counts = tr("{{files}} and {{folders}} extracted.", {
+        files: tr("{{count}} files", { count: r.files }),
+        folders: tr("{{count}} folders", { count: r.folders }),
+      });
+      const notes = [counts];
+      if (r.renamed) notes.push(tr("{{count}} items got a new name because the name was taken.", { count: r.renamed }));
+      if (r.skipped) notes.push(tr("{{count}} shortcuts (symbolic links) were left out.", { count: r.skipped }));
+      return { outputs: r.outputs, summary: notes.join(" ") };
     }
 
     case "pdf.to_img": {
@@ -374,7 +397,7 @@ export async function execute(
     }
 
     case "img.to_pdf": {
-      const out = join(`${safeFileStem(v.outputName, "images")}.pdf`);
+      const out = await place(`${safeFileStem(v.outputName, "images")}.pdf`);
       const pageSize = str("page_size", "fit") as "fit" | "a4" | "letter";
       const r = await runJob(
         "img.to_pdf",
@@ -421,7 +444,7 @@ export async function execute(
       const pages = str("pages") === "custom" ? str("customPages", "1") : str("pages", "all");
       const params: import("./jobs").PdfWatermarkParams = {
         input: first.path,
-        output: join(`${base}-${mode}.pdf`),
+        output: await place(`${base}-${mode}.pdf`),
         mode,
         pages,
       };
