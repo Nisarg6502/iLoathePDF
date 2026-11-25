@@ -225,6 +225,17 @@ async function main() {
     }
 
     /** Runs a function in the target with real arguments, so no value is pasted into code. */
+    /** SCREENSHOTS=<dir>: also saves 1280x800 store screenshots along the way. */
+    const shotDir = process.env.SCREENSHOTS;
+    async function shot(sessionId: string, name: string) {
+      if (!shotDir) return;
+      await c.send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false }, sessionId);
+      await sleep(600);
+      const { data } = (await c.send("Page.captureScreenshot", { format: "png" }, sessionId)) as { data: string };
+      mkdirSync(shotDir, { recursive: true });
+      writeFileSync(join(shotDir, `${name}.png`), Buffer.from(data, "base64"));
+    }
+
     async function callIn<T>(sessionId: string, fn: (...args: never[]) => unknown, args: unknown[]): Promise<T> {
       const global = (await c.send("Runtime.evaluate", { expression: "globalThis" }, sessionId)) as { result: { objectId: string } };
       const r = (await c.send(
@@ -276,6 +287,7 @@ async function main() {
       return n >= 2 ? n : null;
     }).catch(() => 0);
     check(rows === 2, `images added from the computer are listed (${rows})`);
+    await shot(popup, "4-popup-images-to-pdf");
 
     await evaluate(popup, "document.querySelector('button.primary').click()");
     await until("the PDF in the downloads folder", () => readdirSync(downloads).some((f) => f.endsWith(".pdf")), 20_000).catch(() => {});
@@ -357,10 +369,12 @@ async function main() {
     const closedSoon = () => until("the fitter to close", async () => (await fitterFrames()).length === 0).catch(() => false);
 
     check(await until("Fit buttons", firstFitButton).catch(() => null), "Fit buttons appear beside the page's file fields");
+    await shot(page, "1-fit-buttons");
 
     // ✕ closes it.
     const first = await openFitter();
     check(first, "clicking Fit opens the fitter over the page");
+    await shot(page, "2-fitter-open");
     if (first) {
       check(first.connected, "the fitter is connected to the field");
       const closeBtn = await findIn(first.session, (n) => n.nodeName === "BUTTON" && attr(n, "class") === "icon");
@@ -377,6 +391,7 @@ async function main() {
         (await evaluate<string>(second.session, "document.querySelector('section.card button.primary')?.textContent ?? ''")) || null,
       ).catch(() => "");
       check(putLabel === messages.putInForm.message, `the result offers "${messages.putInForm.message}" (got "${putLabel}")`);
+      await shot(page, "3-fitted-result");
       if (putLabel === messages.putInForm.message) {
         await evaluate(second.session, "document.querySelector('section.card button.primary').click()");
         const received = await until("the photo field to receive the file", async () =>
