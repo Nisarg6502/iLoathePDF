@@ -32,7 +32,37 @@ npm run build --workspace=apps/extension      # -> apps/extension/dist
 npm run test --workspace=apps/extension       # vitest (jsdom + node-canvas)
 npm run typecheck --workspace=apps/extension
 npm run zip --workspace=apps/extension        # -> apps/extension/release/*-chrome.zip and *-firefox.zip
+npm run smoke --workspace=apps/extension      # loads dist/ into a real Edge/Chromium (see below)
 ```
+
+### Smoke test in a real browser
+
+`npm run smoke` starts Edge or Chromium headless with `dist/` installed as an
+extension and drives it over the DevTools protocol:
+- the extension installs, its worker starts, and it has no site access;
+- the popup adds two images through its own file picker, and **Make PDF**
+  downloads a real PDF;
+- the fitter page loads;
+- nothing throws, and no request goes to another site.
+
+CI runs it on every push.
+
+Branded Google Chrome 137 and later ignores `--load-extension`, so the script
+prefers Edge or Chromium; set `BROWSER=/path/to/browser` to choose. The toolbar
+click, the right-click items and the Fit buttons on a page need real clicks
+(the `activeTab` grant), so check those by hand before a store submission.
+
+### Releasing
+
+1. Bump `version` in `apps/extension/package.json` (the manifest takes it from
+   there) and merge.
+2. Push a tag `extension-v<version>`, e.g. `extension-v0.1.0`.
+   `release-extension.yml` checks the tag matches, runs the tests and the smoke
+   test, and publishes both zips as a GitHub release.
+   - The release is never marked "latest", because the desktop app's updater
+     reads `releases/latest`.
+3. Store listings (Chrome Web Store, Edge Add-ons, Firefox AMO) are uploaded by
+   hand from those zips; each store needs its own developer account.
 
 `npm run build` runs Vite three times (see `vite.config.ts`): the popup and
 fitter pages as ES modules, then the content script and the background worker
