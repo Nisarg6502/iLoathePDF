@@ -129,19 +129,36 @@ async function main() {
       "--disable-features=DisableLoadExtensionCommandLineSwitch",
       "--no-first-run",
       "--no-default-browser-check",
+      // Ubuntu 24.04 runners block the unprivileged user namespaces the
+      // browser sandbox needs, and the browser exits at once. CI only.
+      ...(process.env.CI ? ["--no-sandbox"] : []),
       "about:blank",
     ],
-    { stdio: "ignore" },
+    { stdio: ["ignore", "ignore", "pipe"] },
   );
+  // Kept so a browser that dies at start-up can say why.
+  let browserLog = "";
+  proc.stderr?.on("data", (d: Buffer) => {
+    browserLog = (browserLog + d.toString()).slice(-4000);
+  });
+  proc.on("exit", (code) => {
+    if (code) browserLog += `\n(browser exited with code ${code})`;
+  });
 
   let cdp: Cdp | undefined;
   try {
-    const version = await until("the browser's debugging port", async () => {
-      try {
-        return (await (await fetch(`http://127.0.0.1:${PORT}/json/version`)).json()) as { webSocketDebuggerUrl: string; Browser: string };
-      } catch {
-        return null;
-      }
+    const version = await until(
+      "the browser's debugging port",
+      async () => {
+        try {
+          return (await (await fetch(`http://127.0.0.1:${PORT}/json/version`)).json()) as { webSocketDebuggerUrl: string; Browser: string };
+        } catch {
+          return null;
+        }
+      },
+      30_000,
+    ).catch((e: Error) => {
+      throw new Error(`${e.message}\n--- browser output ---\n${browserLog.trim() || "(none)"}`);
     });
     console.log(`Version: ${version.Browser}`);
     cdp = await Cdp.connect(version.webSocketDebuggerUrl);
