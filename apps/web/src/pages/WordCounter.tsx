@@ -22,6 +22,7 @@ export function WordCounter() {
           openPdf={openPdfText}
           ocrPath="/tools/ocr"
           privacyNote={t("Counted in this tab. Your text is never uploaded or saved.")}
+          savedNote={t("Saved in this browser only, never uploaded. Forgotten after 7 days unused.")}
         />
       </div>
     </div>

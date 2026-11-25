@@ -19,6 +19,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.10.0",
+    date: "2026-11-25",
+    highlights: [
+      "New Save text button in the word counter: turn it on and your text is still there after you close the app and come back.",
+      "Saved text stays on this computer only and is never uploaded. Turn Save text off and it's deleted straight away, and it's forgotten on its own after 7 days unused.",
+      "Save text is off until you press it, so nothing is kept unless you ask.",
+    ],
+  },
+  {
     version: "0.9.0",
     date: "2026-11-25",
     highlights: [

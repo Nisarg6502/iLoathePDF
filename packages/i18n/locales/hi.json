@@ -1182,7 +1182,7 @@
   "YOUR RECIPE": "आपकी रेसिपी",
   "YOUR RECIPES": "आपकी रेसिपी",
   "Your recipes": "आपकी रेसिपी",
-  "your theme choice is the one exception, kept in this browser via localStorage.": "बस थीम की आपकी पसंद अपवाद है, जो localStorage के ज़रिए इसी ब्राउज़र में रहती है।",
+  "none at all. A few preferences (theme, word counter limit, compare view) and, only if you press Save text, your word counter text are kept in this browser's localStorage, which is never sent anywhere. Saved text is deleted when you turn Save text off, or after 7 days unused.": "बिल्कुल नहीं। कुछ पसंदें (थीम, शब्द गणक की सीमा, तुलना का व्यू) और, सिर्फ़ तब जब आप टेक्स्ट सेव करें दबाएँ, शब्द गणक का आपका टेक्स्ट इस ब्राउज़र के localStorage में रहते हैं, जो कभी कहीं नहीं भेजा जाता। टेक्स्ट सेव करें बंद करने पर, या 7 दिन इस्तेमाल न होने पर, सेव किया गया टेक्स्ट मिटा दिया जाता है।",
   "Your {{count}} input files are untouched. Only the final result lands here.": "आपकी {{count}} इनपुट फ़ाइलें वैसी ही रहती हैं। यहाँ सिर्फ़ आखिरी नतीजा आता है।",
   "Your {{count}} input files are untouched. Only the final result lands here._one": "आपकी इनपुट फ़ाइल वैसी ही रहती है। यहाँ सिर्फ़ आखिरी नतीजा आता है।",
   "YOURS": "आपकी",
@@ -1443,5 +1443,13 @@
   "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} केवल {{files}} लेता है। इन फ़ाइलों के लिए कोई दूसरा टूल चुनें।",
   "{{count}} files were left out: {{tool}} takes {{files}}.": "{{count}} फ़ाइलें छोड़ दी गईं: {{tool}} केवल {{files}} लेता है।",
   "{{count}} files were left out: {{tool}} takes {{files}}._one": "{{count}} फ़ाइल छोड़ दी गई: {{tool}} केवल {{files}} लेता है।",
-  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} एक बार में एक ही फ़ाइल पर काम करता है, इसलिए केवल {{name}} खोली गई।"
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} एक बार में एक ही फ़ाइल पर काम करता है, इसलिए केवल {{name}} खोली गई।",
+  "Save text": "टेक्स्ट सेव करें",
+  "Saved": "सेव हो गया",
+  "Your text is saved on this device. Click to stop saving and delete it.": "आपका टेक्स्ट इसी डिवाइस पर सेव है। सेव करना बंद करने और इसे मिटाने के लिए क्लिक करें।",
+  "Keep this text after a refresh or when you come back. It stays on this device and is never uploaded.": "रीफ़्रेश करने या वापस आने पर भी यह टेक्स्ट बना रहे। यह इसी डिवाइस पर रहता है और कभी अपलोड नहीं होता।",
+  "Too long to save on this device. Your text is still here, but a refresh will clear it.": "इस डिवाइस पर सेव करने के लिए बहुत लंबा है। आपका टेक्स्ट अभी यहीं है, पर रीफ़्रेश करने पर मिट जाएगा।",
+  "This browser isn't letting the page save (a private window?). Your text is still here.": "यह ब्राउज़र पेज को सेव नहीं करने दे रहा (शायद प्राइवेट विंडो?)। आपका टेक्स्ट अभी यहीं है।",
+  "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "सिर्फ़ इसी ब्राउज़र में सेव, कभी अपलोड नहीं। 7 दिन इस्तेमाल न होने पर अपने-आप मिट जाता है।",
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "सिर्फ़ इसी कंप्यूटर पर सेव, कभी अपलोड नहीं। 7 दिन इस्तेमाल न होने पर अपने-आप मिट जाता है।"
 }

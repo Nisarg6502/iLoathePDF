@@ -7,7 +7,10 @@ export function Privacy() {
   const reqCount = useRequestCount();
   const items = [
     [tr("Upload your file"), tr("there is no endpoint that accepts one.")],
-    [tr("Set cookies"), tr("your theme choice is the one exception, kept in this browser via localStorage.")],
+    [
+      tr("Set cookies"),
+      tr("none at all. A few preferences (theme, word counter limit, compare view) and, only if you press Save text, your word counter text are kept in this browser's localStorage, which is never sent anywhere. Saved text is deleted when you turn Save text off, or after 7 days unused."),
+    ],
     [tr("Load web fonts or scripts from third parties"), tr("fonts and code are served from this domain.")],
     [tr("Ask who you are"), tr("no sign-up, no email, no usage cap tied to an identity.")],
   ];

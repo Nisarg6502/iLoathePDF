@@ -5,6 +5,20 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-11-25
+
+### Added
+- Save text in the word counter (desktop app and website): an opt-in button
+  that keeps your text after a refresh, a closed tab or a restart. It is off
+  until you press it, the text stays on this device only (the browser's
+  localStorage; never a cookie, never uploaded), turning it off deletes it at
+  once, and it is forgotten after 7 days without being opened.
+
+### Changed
+- The website's Privacy page now lists everything kept in the browser: the
+  theme, the word counter limit, the compare view and, only if you choose
+  Save text, your word counter text.
+
 ## [0.9.0] - 2026-11-25
 
 ### Added

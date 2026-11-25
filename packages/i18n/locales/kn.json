@@ -1184,7 +1184,7 @@
   "YOUR RECIPE": "ನಿಮ್ಮ ರೆಸಿಪಿ",
   "YOUR RECIPES": "ನಿಮ್ಮ ರೆಸಿಪಿಗಳು",
   "Your recipes": "ನಿಮ್ಮ ರೆಸಿಪಿಗಳು",
-  "your theme choice is the one exception, kept in this browser via localStorage.": "ನಿಮ್ಮ ಥೀಮ್ ಆಯ್ಕೆ ಮಾತ್ರ ಇದಕ್ಕೆ ಹೊರತು, ಅದನ್ನು localStorage ಮೂಲಕ ಈ ಬ್ರೌಸರ್ನಲ್ಲೇ ಇಡಲಾಗುತ್ತದೆ.",
+  "none at all. A few preferences (theme, word counter limit, compare view) and, only if you press Save text, your word counter text are kept in this browser's localStorage, which is never sent anywhere. Saved text is deleted when you turn Save text off, or after 7 days unused.": "ಯಾವುದೂ ಇಲ್ಲ. ಕೆಲವು ಆದ್ಯತೆಗಳು (ಥೀಮ್, ಪದ ಎಣಿಕೆಯ ಮಿತಿ, ಹೋಲಿಕೆಯ ನೋಟ) ಮತ್ತು, ನೀವು ಪಠ್ಯ ಉಳಿಸಿ ಒತ್ತಿದರೆ ಮಾತ್ರ, ಪದ ಎಣಿಕೆಯಲ್ಲಿನ ನಿಮ್ಮ ಪಠ್ಯವನ್ನು ಈ ಬ್ರೌಸರ್‌ನ localStorage ನಲ್ಲಿ ಇಡಲಾಗುತ್ತದೆ, ಅದನ್ನು ಎಂದಿಗೂ ಎಲ್ಲಿಗೂ ಕಳುಹಿಸಲಾಗುವುದಿಲ್ಲ. ಪಠ್ಯ ಉಳಿಸಿ ಆಫ್ ಮಾಡಿದಾಗ, ಅಥವಾ 7 ದಿನ ಬಳಸದಿದ್ದರೆ, ಉಳಿಸಿದ ಪಠ್ಯವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ.",
   "Your {{count}} input files are untouched. Only the final result lands here.": "ನಿಮ್ಮ {{count}} ಇನ್ಪುಟ್ ಫೈಲ್ಗಳನ್ನು ಮುಟ್ಟುವುದಿಲ್ಲ. ಅಂತಿಮ ಫಲಿತಾಂಶ ಮಾತ್ರ ಇಲ್ಲಿ ಬರುತ್ತದೆ.",
   "Your {{count}} input files are untouched. Only the final result lands here._one": "ನಿಮ್ಮ ಇನ್ಪುಟ್ ಫೈಲ್ ಅನ್ನು ಮುಟ್ಟುವುದಿಲ್ಲ. ಅಂತಿಮ ಫಲಿತಾಂಶ ಮಾತ್ರ ಇಲ್ಲಿ ಬರುತ್ತದೆ.",
   "YOURS": "ನಿಮ್ಮವು",
@@ -1452,5 +1452,13 @@
   "{{tool}} takes {{files}}. Pick another tool for these files.": "{{tool}} ಕೇವಲ {{files}} ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಈ ಫೈಲುಗಳಿಗೆ ಬೇರೆ ಪರಿಕರವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
   "{{count}} files were left out: {{tool}} takes {{files}}.": "{{count}} ಫೈಲುಗಳನ್ನು ಬಿಡಲಾಗಿದೆ: {{tool}} ಕೇವಲ {{files}} ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.",
   "{{count}} files were left out: {{tool}} takes {{files}}._one": "{{count}} ಫೈಲ್ ಅನ್ನು ಬಿಡಲಾಗಿದೆ: {{tool}} ಕೇವಲ {{files}} ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.",
-  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} ಒಮ್ಮೆಗೆ ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ {{name}} ಅನ್ನು ಮಾತ್ರ ತೆರೆಯಲಾಗಿದೆ."
+  "{{tool}} works on one file at a time, so only {{name}} was opened.": "{{tool}} ಒಮ್ಮೆಗೆ ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ {{name}} ಅನ್ನು ಮಾತ್ರ ತೆರೆಯಲಾಗಿದೆ.",
+  "Save text": "ಪಠ್ಯ ಉಳಿಸಿ",
+  "Saved": "ಉಳಿಸಲಾಗಿದೆ",
+  "Your text is saved on this device. Click to stop saving and delete it.": "ನಿಮ್ಮ ಪಠ್ಯವನ್ನು ಈ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ. ಉಳಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಿ ಅದನ್ನು ಅಳಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ.",
+  "Keep this text after a refresh or when you come back. It stays on this device and is never uploaded.": "ರಿಫ್ರೆಶ್ ಮಾಡಿದ ನಂತರ ಅಥವಾ ಮರಳಿ ಬಂದಾಗಲೂ ಈ ಪಠ್ಯ ಉಳಿಯಲಿ. ಇದು ಈ ಸಾಧನದಲ್ಲೇ ಇರುತ್ತದೆ ಮತ್ತು ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಆಗುವುದಿಲ್ಲ.",
+  "Too long to save on this device. Your text is still here, but a refresh will clear it.": "ಈ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲು ತುಂಬಾ ಉದ್ದವಾಗಿದೆ. ನಿಮ್ಮ ಪಠ್ಯ ಇನ್ನೂ ಇಲ್ಲೇ ಇದೆ, ಆದರೆ ರಿಫ್ರೆಶ್ ಮಾಡಿದರೆ ಅದು ಅಳಿಸಿಹೋಗುತ್ತದೆ.",
+  "This browser isn't letting the page save (a private window?). Your text is still here.": "ಈ ಬ್ರೌಸರ್ ಪುಟಕ್ಕೆ ಉಳಿಸಲು ಬಿಡುತ್ತಿಲ್ಲ (ಖಾಸಗಿ ವಿಂಡೋ ಇರಬಹುದೇ?). ನಿಮ್ಮ ಪಠ್ಯ ಇನ್ನೂ ಇಲ್ಲೇ ಇದೆ.",
+  "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಸಲಾಗಿದೆ, ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಆಗುವುದಿಲ್ಲ. 7 ದಿನ ಬಳಸದಿದ್ದರೆ ತಾನಾಗಿ ಮರೆಯಲಾಗುತ್ತದೆ.",
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "ಈ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಸಲಾಗಿದೆ, ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಆಗುವುದಿಲ್ಲ. 7 ದಿನ ಬಳಸದಿದ್ದರೆ ತಾನಾಗಿ ಮರೆಯಲಾಗುತ್ತದೆ."
 }
