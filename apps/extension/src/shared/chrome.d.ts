@@ -14,10 +14,10 @@ declare namespace chrome {
       id?: string;
       url?: string;
     }
+    type MessageListener = (message: unknown, sender: MessageSender, sendResponse: (response?: unknown) => void) => boolean | void;
     const onMessage: {
-      addListener(
-        callback: (message: unknown, sender: MessageSender, sendResponse: (response?: unknown) => void) => boolean | void,
-      ): void;
+      addListener(callback: MessageListener): void;
+      removeListener(callback: MessageListener): void;
     };
     const onInstalled: { addListener(callback: () => void): void };
     const onStartup: { addListener(callback: () => void): void };
@@ -98,4 +98,25 @@ declare namespace chrome {
     function getMessage(name: string, substitutions?: string | string[]): string;
     function getUILanguage(): string;
   }
+
+  namespace downloads {
+    interface DownloadDelta {
+      id: number;
+      state?: { current?: "in_progress" | "interrupted" | "complete"; previous?: string };
+    }
+    function download(options: { url: string; filename?: string; saveAs?: boolean }): Promise<number>;
+    const onChanged: {
+      addListener(callback: (delta: DownloadDelta) => void): void;
+      removeListener(callback: (delta: DownloadDelta) => void): void;
+    };
+  }
+
+  /** Chrome only: undefined in Firefox. */
+  const offscreen:
+    | {
+        createDocument(parameters: { url: string; reasons: string[]; justification: string }): Promise<void>;
+        closeDocument(): Promise<void>;
+        hasDocument(): Promise<boolean>;
+      }
+    | undefined;
 }

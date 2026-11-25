@@ -9,6 +9,9 @@ import type { FitterReply } from "../shared/messages";
 
 const PAGE = readFileSync(join(import.meta.dirname, "../../test-page/form.html"), "utf8");
 const FITTER = "chrome-extension://abcdefghijklmnop/fit.html";
+const STATIC_ORIGIN = "chrome-extension://abcdefghijklmnop";
+const DYNAMIC_ORIGIN = "chrome-extension://0b5e7c1a-1111-4d2e-9c3b-123456789abc";
+const DYNAMIC_FITTER = `${DYNAMIC_ORIGIN}/fit.html`;
 
 function loadPage() {
   const parsed = new DOMParser().parseFromString(PAGE, "text/html");
@@ -100,7 +103,7 @@ describe("setInputFiles", () => {
 describe("the injected UI", () => {
   let ui: FitUi;
   beforeEach(() => {
-    ui = createFitUi(document, { fitterUrl: FITTER, css: ".fit{}" });
+    ui = createFitUi(document, { fitterUrl: FITTER, fitterOrigins: [STATIC_ORIGIN], css: ".fit{}" });
   });
   afterEach(() => ui.destroy());
 
@@ -143,6 +146,35 @@ describe("the injected UI", () => {
     expect(iframe?.src).toBe(FITTER);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     expect(ui.root.querySelector("iframe")).toBeNull();
+  });
+
+  it("connects to the fitter when it says hello from the extension's real origin", () => {
+    // Chrome's use_dynamic_url: the iframe is loaded from a per-session URL,
+    // but the document inside runs at the extension's fixed origin. A message
+    // posted to the dynamic origin is silently dropped, so the fitter speaks
+    // first and the reply goes to the origin it really has.
+    ui.destroy();
+    ui = createFitUi(document, { fitterUrl: DYNAMIC_FITTER, fitterOrigins: [DYNAMIC_ORIGIN, STATIC_ORIGIN], css: "" });
+    ui.root.querySelector<HTMLButtonElement>("button.fit")!.click();
+    const frame = ui.root.querySelector("iframe")!.contentWindow!;
+    const posted = vi.spyOn(frame, "postMessage").mockImplementation(() => {});
+    const hello = (origin: string, source: Window = frame) =>
+      window.dispatchEvent(new MessageEvent("message", { origin, source, data: { type: "iloathepdf:hello" } }));
+
+    hello("https://evil.example");
+    hello(STATIC_ORIGIN, window);
+    expect(posted).not.toHaveBeenCalled();
+
+    hello(STATIC_ORIGIN);
+    expect(posted).toHaveBeenCalledTimes(1);
+    const [init, target, transfer] = posted.mock.calls[0] as unknown as [{ type: string; constraints: { maxBytes?: number } }, string, MessagePort[]];
+    expect(init.type).toBe("iloathepdf:init");
+    expect(init.constraints.maxBytes).toBe(100_000);
+    expect(target).toBe(STATIC_ORIGIN);
+    expect(transfer).toHaveLength(1);
+
+    hello(STATIC_ORIGIN);
+    expect(posted).toHaveBeenCalledTimes(1);
   });
 
   it("puts the fitter's result into the field and reports back", () => {

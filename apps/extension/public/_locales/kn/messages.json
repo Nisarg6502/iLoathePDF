@@ -3,6 +3,11 @@
   "extDescription": { "message": "ಫೋಟೋ ಅಥವಾ PDF ಅನ್ನು ಫಾರ್ಮ್‌ನ ಗಾತ್ರ ಮಿತಿಗೆ ಹೊಂದಿಸಿ, ಪುಟದ ಚಿತ್ರಗಳಿಂದ PDF ಮಾಡಿ. ಫೈಲ್‌ಗಳು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಬಿಟ್ಟು ಹೋಗುವುದಿಲ್ಲ." },
   "menuAddImage": { "message": "ಚಿತ್ರವನ್ನು PDF ಗೆ ಸೇರಿಸಿ" },
   "menuFitForm": { "message": "ಫೈಲ್ ಅನ್ನು ಈ ಫಾರ್ಮ್‌ಗೆ ಹೊಂದಿಸಿ" },
+  "menuSavePdf": { "message": "ಚಿತ್ರವನ್ನು PDF ಆಗಿ ಉಳಿಸಿ" },
+  "menuSaveJpg": { "message": "ಚಿತ್ರವನ್ನು JPG ಆಗಿ ಉಳಿಸಿ" },
+  "menuSavePng": { "message": "ಚಿತ್ರವನ್ನು PNG ಆಗಿ ಉಳಿಸಿ" },
+  "toastImageSaved": { "message": "$1 ಅನ್ನು ನಿಮ್ಮ Downloads ಫೋಲ್ಡರ್‌ಗೆ ಉಳಿಸಲಾಗಿದೆ." },
+  "toastSaveFailed": { "message": "ಆ ಚಿತ್ರವನ್ನು ಉಳಿಸಲಾಗಲಿಲ್ಲ. ಬೇರೆ ಫಾರ್ಮ್ಯಾಟ್ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಮೊದಲು ಅದನ್ನು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‌ಗೆ ಉಳಿಸಿ." },
 
   "fitButton": { "message": "ಹೊಂದಿಸಿ" },
   "fitButtonTitle": { "message": "ಫೈಲ್ ಅನ್ನು ಈ ಫೀಲ್ಡ್‌ಗೆ ಹೊಂದಿಸಿ (iLoathePDF)" },

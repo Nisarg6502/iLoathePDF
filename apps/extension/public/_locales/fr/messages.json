@@ -3,6 +3,11 @@
   "extDescription": { "message": "Adaptez une photo ou un PDF à la taille max. d'un formulaire et créez des PDF à partir d'images. Rien ne quitte votre ordinateur." },
   "menuAddImage": { "message": "Ajouter l'image au PDF" },
   "menuFitForm": { "message": "Adapter un fichier à ce formulaire" },
+  "menuSavePdf": { "message": "Enregistrer l'image en PDF" },
+  "menuSaveJpg": { "message": "Enregistrer l'image en JPG" },
+  "menuSavePng": { "message": "Enregistrer l'image en PNG" },
+  "toastImageSaved": { "message": "$1 enregistré dans votre dossier Téléchargements." },
+  "toastSaveFailed": { "message": "Impossible d'enregistrer cette image. Essayez un autre format, ou enregistrez-la d'abord sur votre ordinateur." },
 
   "fitButton": { "message": "Adapter" },
   "fitButtonTitle": { "message": "Adapter un fichier à ce champ (iLoathePDF)" },

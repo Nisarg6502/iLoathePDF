@@ -115,6 +115,12 @@ export function Download() {
               components={{ a: <Link to="/tools" className="text-accent" /> }}
             />
           </p>
+          <p className="mt-3 text-[13.5px] leading-relaxed text-muted">
+            <Trans
+              i18nKey="Use Chrome, Edge or Firefox? <a>Get the browser extension</a> to fit files to upload forms and save any image as a PDF."
+              components={{ a: <Link to="/extension" className="text-accent" /> }}
+            />
+          </p>
         </div>
 
         <div className="flex flex-col gap-5">

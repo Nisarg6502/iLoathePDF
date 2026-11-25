@@ -1,6 +1,6 @@
 # iLoathePDF browser extension
 
-A Manifest V3 extension for Chrome and Edge (Firefox works too) that does two
+A Manifest V3 extension for Chrome and Edge (Firefox works too) that does three
 things, entirely on your computer:
 
 1. **Fit to this form.** Next to every `<input type="file">` on a page it shows a
@@ -16,9 +16,13 @@ things, entirely on your computer:
 2. **Images to PDF from any page.** Right-click an image, **Add image to PDF**.
    The toolbar popup lists what you collected (reorder, remove, or add images
    from your computer) and **Make PDF** builds and downloads the PDF.
+3. **Save any image as PDF, JPG or PNG.** Right-click an image and pick the
+   format. The background worker has no canvas, so the image is converted in a
+   hidden extension page (an offscreen document in Chrome and Edge, a frame in
+   Firefox's background page) and saved with the downloads API.
 
 Nothing is uploaded. The extension makes no network requests except to load
-its own files, and, for "Add image to PDF", to read the one image you
+its own files, and, for the right-click image items, to read the one image you
 right-clicked from wherever the page loaded it (usually straight from the
 browser's cache).
 
@@ -43,14 +47,21 @@ extension and drives it over the DevTools protocol:
 - the popup adds two images through its own file picker, and **Make PDF**
   downloads a real PDF;
 - the fitter page loads;
+- on a local test page, the Fit buttons appear; Fit opens the fitter, which
+  connects to its field; ✕ closes it; a fitted JPEG goes into the field with
+  **Put in the form**, and the fitter closes itself;
+- **Save image as PDF** and **as JPG** save real files with the right names;
 - nothing throws, and no request goes to another site.
 
 CI runs it on every push.
 
 Branded Google Chrome 137 and later ignores `--load-extension`, so the script
-prefers Edge or Chromium; set `BROWSER=/path/to/browser` to choose. The toolbar
-click, the right-click items and the Fit buttons on a page need real clicks
-(the `activeTab` grant), so check those by hand before a store submission.
+prefers Edge or Chromium; set `BROWSER=/path/to/browser` to choose. The test
+loads a copy of `dist/` whose manifest also grants the local test page (the
+shipped one asks for no site access), and calls the save function the
+right-click items use, since DevTools can't open a real context menu. The
+toolbar click and the right-click menu itself still need a check by hand
+before a store submission.
 
 ### Releasing
 

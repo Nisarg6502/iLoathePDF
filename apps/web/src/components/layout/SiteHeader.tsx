@@ -120,6 +120,12 @@ export function SiteHeader() {
           >
             {t("Get the desktop app")}
           </Link>
+          <Link
+            to="/extension"
+            className="mx-auto mt-2 flex h-11 max-w-6xl items-center justify-center rounded-[10px] border border-border bg-bg text-[14px] font-semibold text-text hover:bg-surface-2"
+          >
+            {t("Get the extension")}
+          </Link>
         </nav>
       )}
     </div>
