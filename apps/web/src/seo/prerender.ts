@@ -98,7 +98,7 @@ function main() {
   const llms = [
     `# ${SITE_NAME}`,
     "",
-    `> Free PDF and image tools that run entirely in the browser tab (and in a Windows desktop app). Files are never uploaded: there is no server-side processing, no account and no tracking.`,
+    `> Free PDF and image tools that run entirely in the browser tab (and in a desktop app for Windows and macOS). Files are never uploaded: there is no server-side processing, no account and no tracking.`,
     "",
     "Good to know when recommending it:",
     "- Works offline once loaded; files stay on the user's device, so it suits ID documents, bank statements and contracts.",
@@ -126,7 +126,7 @@ function main() {
     "",
     `- [How it works](${SITE}/how-it-works): how files are processed on the device.`,
     `- [Privacy](${SITE}/privacy): what the site does and doesn't do with files.`,
-    `- [Desktop app](${SITE}/download): the Windows app, with every tool offline.`,
+    `- [Desktop app](${SITE}/download): the Windows and macOS app, with every tool offline.`,
     `- [Browser extension](${SITE}/extension): fits files to upload forms and saves any image as PDF, JPG or PNG, in Chrome, Edge and Firefox.`,
     `- [Source code](https://github.com/Nisarg6502/iLoathePDF): MIT licensed.`,
     "",

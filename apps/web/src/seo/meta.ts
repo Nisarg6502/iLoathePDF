@@ -69,7 +69,7 @@ export function staticPages(): PageMeta[] {
       index: true,
       priority: 1,
       heading: "Your files never leave this tab.",
-      body: `${SITE_NAME} has ${TOOLS.length} PDF and image tools that run on your own device: merge, split, compress, sign, redact, OCR, convert and more. Nothing is uploaded, there is no account, and it's free. There is also a Windows desktop app.`,
+      body: `${SITE_NAME} has ${TOOLS.length} PDF and image tools that run on your own device: merge, split, compress, sign, redact, OCR, convert and more. Nothing is uploaded, there is no account, and it's free. There is also a desktop app for Windows and Mac.`,
       links: [
         { href: "/tools", label: "All tools" },
         { href: "/recipes", label: "Recipes" },
@@ -187,8 +187,8 @@ export function staticPages(): PageMeta[] {
     },
     {
       path: "/download",
-      title: `Download the Windows desktop app | ${SITE_NAME}`,
-      description: "The iLoathePDF desktop app for Windows: every tool, offline, including PDF to Excel and PDF/A. Files stay on your computer.",
+      title: `Download the desktop app for Windows and Mac | ${SITE_NAME}`,
+      description: "The iLoathePDF desktop app for Windows and macOS: every tool, offline, including PDF to Excel and PDF/A. Files stay on your computer.",
       index: true,
       priority: 0.6,
       heading: "Desktop app",
@@ -212,7 +212,7 @@ export function staticPages(): PageMeta[] {
   ];
 
   for (const t of TOOLS) {
-    const desc = t.status === "desktop-only" ? `${t.description} Available in the free iLoathePDF desktop app for Windows.` : `${t.description} ${PRIVACY_LINE}`;
+    const desc = t.status === "desktop-only" ? `${t.description} Available in the free iLoathePDF desktop app for Windows and Mac.` : `${t.description} ${PRIVACY_LINE}`;
     pages.push({
       path: `/tools/${t.slug}`,
       title: toolTitle(t.name),

@@ -13,6 +13,27 @@ const FIREFOX_ZIP = `${RELEASE}/iloathepdf-extension-${version}-firefox.zip`;
 const BUTTON =
   "inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]";
 
+/**
+ * A one-click store install that isn't live yet: the extension is in review
+ * at the Chrome Web Store and Microsoft Edge Add-ons. Not a link until it is
+ * listed; swap in the store URL then.
+ */
+function StoreSoon({ store }: { store: string }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      aria-disabled="true"
+      className="inline-flex h-11 items-center gap-2.5 rounded-[11px] border border-border bg-surface px-4 text-[14px] font-semibold text-muted"
+    >
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <path d="M2.5 5.5h11l-1 8h-9zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" />
+      </svg>
+      {store}
+      <span className="rounded-full bg-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-wide text-on-accent">{t("COMING SOON")}</span>
+    </div>
+  );
+}
+
 function Check() {
   return (
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ok)" strokeWidth="1.8" className="mt-0.5 flex-none" aria-hidden="true">
@@ -66,6 +87,14 @@ export function Extension() {
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
+            <StoreSoon store={t("Chrome Web Store")} />
+            <StoreSoon store={t("Microsoft Edge Add-ons")} />
+          </div>
+          <p className="mt-3 max-w-[52ch] text-[13.5px] leading-relaxed text-muted">
+            {t("One-click install from the Chrome and Edge stores is on its way: the extension is in review now. Until then, it installs by hand in about a minute.")}
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <a href={CHROME_ZIP} className={BUTTON}>
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
                 <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
@@ -82,7 +111,7 @@ export function Extension() {
           </p>
 
           <h2 className="mt-12 text-[13px] font-semibold">{t("Install it in Chrome or Edge")}</h2>
-          <p className="mt-1.5 text-[13.5px] text-muted">{t("It isn't in the browser stores yet, so it installs by hand. It takes a minute.")}</p>
+          <p className="mt-1.5 text-[13.5px] text-muted">{t("Until it's in the stores, it installs by hand. It takes a minute.")}</p>
           <ol className="mt-4 flex flex-col gap-3">
             {steps.map((step, i) => (
               <li key={step} className="flex items-start gap-3 text-[14px] leading-relaxed">
