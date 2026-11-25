@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload form test page</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 24px auto; padding: 0 16px; }
+    table { border-collapse: collapse; width: 100%; }
+    td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    .dropzone { border: 2px dashed #999; padding: 16px; border-radius: 8px; cursor: pointer; }
+    .dropzone input { display: none; }
+    output { display: block; color: #555; font-size: 13px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <!--
+    A page for trying the extension by hand (serve this folder, then click the
+    toolbar button) and the fixture the content-script tests load in jsdom.
+    Each field reports what it received in the <output> under it.
+  -->
+  <h1>Application form</h1>
+  <form id="application" onsubmit="return false">
+    <table>
+      <tr>
+        <td>Photograph<br /><small>Size should be less than 100 kb, JPG/JPEG only</small></td>
+        <td><input type="file" id="photo" name="photo" accept="image/jpeg" /><output for="photo"></output></td>
+      </tr>
+      <tr>
+        <td>Signature<br /><small>Size: 10kb - 20kb</small></td>
+        <td><input type="file" id="signature" name="signature" accept=".jpg,.jpeg,.png" /><output for="signature"></output></td>
+      </tr>
+    </table>
+
+    <p>
+      <label for="certificate">Caste certificate (PDF, max 500 KB)</label><br />
+      <input type="file" id="certificate" accept="application/pdf" /><output for="certificate"></output>
+    </p>
+
+    <div class="field">
+      <span id="docs-help">Upload your documents. Each file up to 2 MB.</span>
+      <input type="file" id="docs" multiple aria-describedby="docs-help" /><output for="docs"></output>
+    </div>
+
+    <div class="field">
+      <label class="dropzone" for="avatar">Click to choose a profile picture</label>
+      <input type="file" id="avatar" accept="image/*" data-max-size="204800" /><output for="avatar"></output>
+    </div>
+  </form>
+
+  <script>
+    for (const input of document.querySelectorAll('input[type="file"]')) {
+      input.addEventListener("change", () => {
+        const out = document.querySelector(`output[for="${input.id}"]`);
+        out.textContent = [...input.files].map((f) => `${f.name} (${f.size} bytes, ${f.type})`).join(", ");
+      });
+    }
+  </script>
+</body>
+</html>

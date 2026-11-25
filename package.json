@@ -4,6 +4,7 @@
   "license": "MIT",
   "workspaces": [
     "apps/desktop",
+    "apps/extension",
     "apps/web",
     "packages/i18n",
     "packages/text"
