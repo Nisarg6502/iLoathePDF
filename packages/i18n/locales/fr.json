@@ -1460,5 +1460,8 @@
   "Too long to save on this device. Your text is still here, but a refresh will clear it.": "Trop long pour être enregistré sur cet appareil. Votre texte est toujours là, mais une actualisation l'effacera.",
   "This browser isn't letting the page save (a private window?). Your text is still here.": "Ce navigateur ne laisse pas la page enregistrer (fenêtre privée ?). Votre texte est toujours là.",
   "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "Enregistré uniquement dans ce navigateur, jamais envoyé. Oublié après 7 jours sans utilisation.",
-  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "Enregistré uniquement sur cet ordinateur, jamais envoyé. Oublié après 7 jours sans utilisation."
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "Enregistré uniquement sur cet ordinateur, jamais envoyé. Oublié après 7 jours sans utilisation.",
+  "verb": "verbe",
+  "to really, really hate something.": "détester vraiment, vraiment quelque chose.",
+  "We loathe PDF tools that upload your files, so we built one that doesn't.": "Nous détestons les outils PDF qui envoient vos fichiers en ligne, alors nous en avons fait un qui ne le fait pas."
 }

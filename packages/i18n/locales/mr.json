@@ -1457,5 +1457,8 @@
   "Too long to save on this device. Your text is still here, but a refresh will clear it.": "या डिव्हाइसवर सेव्ह करण्यासाठी खूप मोठा आहे. तुमचा मजकूर अजून इथेच आहे, पण रिफ्रेश केल्यावर तो पुसला जाईल.",
   "This browser isn't letting the page save (a private window?). Your text is still here.": "हा ब्राउझर पेजला सेव्ह करू देत नाही (कदाचित प्रायव्हेट विंडो?). तुमचा मजकूर अजून इथेच आहे.",
   "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "फक्त याच ब्राउझरमध्ये सेव्ह, कधीही अपलोड नाही. 7 दिवस वापर न झाल्यास आपोआप विसरला जातो.",
-  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "फक्त याच संगणकावर सेव्ह, कधीही अपलोड नाही. 7 दिवस वापर न झाल्यास आपोआप विसरला जातो."
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "फक्त याच संगणकावर सेव्ह, कधीही अपलोड नाही. 7 दिवस वापर न झाल्यास आपोआप विसरला जातो.",
+  "verb": "क्रियापद",
+  "to really, really hate something.": "एखाद्या गोष्टीचा मनापासून तिरस्कार करणे.",
+  "We loathe PDF tools that upload your files, so we built one that doesn't.": "तुमच्या फाइल्स अपलोड करणाऱ्या PDF टूल्सचा आम्हाला तिरस्कार आहे, म्हणून आम्ही असे टूल बनवले जे तसे करत नाही."
 }

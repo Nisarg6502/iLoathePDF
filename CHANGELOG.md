@@ -15,6 +15,8 @@ app under Settings → About. Format follows
   once, and it is forgotten after 7 days without being opened.
 
 ### Changed
+- The home screen (desktop app and website) explains the name in one line:
+  "loathe" means to really, really hate something.
 - The website's Privacy page now lists everything kept in the browser: the
   theme, the word counter limit, the compare view and, only if you choose
   Save text, your word counter text.

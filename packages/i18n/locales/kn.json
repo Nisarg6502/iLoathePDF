@@ -1460,5 +1460,8 @@
   "Too long to save on this device. Your text is still here, but a refresh will clear it.": "ಈ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲು ತುಂಬಾ ಉದ್ದವಾಗಿದೆ. ನಿಮ್ಮ ಪಠ್ಯ ಇನ್ನೂ ಇಲ್ಲೇ ಇದೆ, ಆದರೆ ರಿಫ್ರೆಶ್ ಮಾಡಿದರೆ ಅದು ಅಳಿಸಿಹೋಗುತ್ತದೆ.",
   "This browser isn't letting the page save (a private window?). Your text is still here.": "ಈ ಬ್ರೌಸರ್ ಪುಟಕ್ಕೆ ಉಳಿಸಲು ಬಿಡುತ್ತಿಲ್ಲ (ಖಾಸಗಿ ವಿಂಡೋ ಇರಬಹುದೇ?). ನಿಮ್ಮ ಪಠ್ಯ ಇನ್ನೂ ಇಲ್ಲೇ ಇದೆ.",
   "Saved in this browser only, never uploaded. Forgotten after 7 days unused.": "ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಸಲಾಗಿದೆ, ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಆಗುವುದಿಲ್ಲ. 7 ದಿನ ಬಳಸದಿದ್ದರೆ ತಾನಾಗಿ ಮರೆಯಲಾಗುತ್ತದೆ.",
-  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "ಈ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಸಲಾಗಿದೆ, ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಆಗುವುದಿಲ್ಲ. 7 ದಿನ ಬಳಸದಿದ್ದರೆ ತಾನಾಗಿ ಮರೆಯಲಾಗುತ್ತದೆ."
+  "Saved on this computer only, never uploaded. Forgotten after 7 days unused.": "ಈ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಸಲಾಗಿದೆ, ಎಂದಿಗೂ ಅಪ್‌ಲೋಡ್ ಆಗುವುದಿಲ್ಲ. 7 ದಿನ ಬಳಸದಿದ್ದರೆ ತಾನಾಗಿ ಮರೆಯಲಾಗುತ್ತದೆ.",
+  "verb": "ಕ್ರಿಯಾಪದ",
+  "to really, really hate something.": "ಯಾವುದನ್ನಾದರೂ ತುಂಬಾ ತುಂಬಾ ದ್ವೇಷಿಸುವುದು.",
+  "We loathe PDF tools that upload your files, so we built one that doesn't.": "ನಿಮ್ಮ ಫೈಲ್‌ಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡುವ PDF ಟೂಲ್‌ಗಳನ್ನು ನಾವು ದ್ವೇಷಿಸುತ್ತೇವೆ, ಅದಕ್ಕೇ ಹಾಗೆ ಮಾಡದ ಒಂದನ್ನು ನಾವು ಮಾಡಿದ್ದೇವೆ."
 }

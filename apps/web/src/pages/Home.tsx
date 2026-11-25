@@ -30,6 +30,12 @@ export function Home() {
               "Merge, split, compress, organize and convert — running entirely on your own machine. There is no upload step, because there is nowhere to upload to.",
             )}
           </p>
+          {/* Many visitors don't know the word in the name. */}
+          <p className="mt-4 max-w-[52ch] border-l-2 border-accent pl-3 text-[13.5px] leading-relaxed text-muted text-pretty" data-testid="name-meaning">
+            <span className="font-semibold text-text">loathe</span>{" "}
+            <span className="font-mono text-[11px] italic">{t("verb")}</span> — {t("to really, really hate something.")}{" "}
+            {t("We loathe PDF tools that upload your files, so we built one that doesn't.")}
+          </p>
           <div className="mt-8 flex flex-wrap gap-2.5">
             <Link
               to="/tools/compress"
