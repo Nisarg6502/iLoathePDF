@@ -85,6 +85,8 @@ jobs:
         run: npm run test --workspace=apps/extension
       - name: Build
         run: npm run build --workspace=apps/extension
+      - name: Smoke test in a real browser
+        run: npm run smoke --workspace=apps/extension
       - name: Package
         run: npm run zip --workspace=apps/extension
 

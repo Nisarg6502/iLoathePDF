@@ -1,0 +1,76 @@
+name: Release extension
+
+# Push a tag like `extension-v0.1.0` (matching apps/extension/package.json) to
+# build, test and publish the Chrome/Edge and Firefox packages. The tag can't
+# match the desktop app's `v*.*.*` pattern, so the two releases never mix.
+
+on:
+  push:
+    tags: ["extension-v*.*.*"]
+
+concurrency:
+  group: release-extension-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build and publish the extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+
+      - name: Tag matches the extension's version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(node -p "require('./apps/extension/package.json').version")
+          if [ "$TAG" != "extension-v$version" ]; then
+            echo "Tag $TAG does not match apps/extension/package.json version $version" >&2
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=apps/extension
+      - name: Test
+        run: npm run test --workspace=apps/extension
+      - name: Build
+        run: npm run build --workspace=apps/extension
+      - name: Smoke test in a real browser
+        run: npm run smoke --workspace=apps/extension
+      - name: Package
+        run: npm run zip --workspace=apps/extension
+
+      # --latest=false matters: the desktop app's updater reads
+      # releases/latest/download/latest.json, so the newest *desktop* release
+      # must stay "latest".
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#extension-v}"
+          cat > notes.md <<EOF
+          Browser extension $version: fit files to upload forms, and turn images on any page into a PDF. Everything runs on your computer; nothing is uploaded.
+
+          - **Chrome / Edge:** \`iloathepdf-extension-$version-chrome.zip\`. Unzip it, open \`chrome://extensions\` (or \`edge://extensions\`), turn on Developer mode and choose **Load unpacked**.
+          - **Firefox:** \`iloathepdf-extension-$version-firefox.zip\`. Open \`about:debugging#/runtime/this-firefox\` and choose **Load Temporary Add-on**.
+
+          Not the desktop app: its installer is in the latest \`v*\` release.
+          EOF
+          gh release create "$TAG" \
+            --title "iLoathePDF browser extension $version" \
+            --notes-file notes.md \
+            --latest=false \
+            apps/extension/release/*.zip

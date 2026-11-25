@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "zip": "node --experimental-strip-types scripts/zip.ts"
+    "zip": "node --experimental-strip-types scripts/zip.ts",
+    "smoke": "node --experimental-strip-types scripts/smoke.ts"
   },
   "dependencies": {
     "@iloathepdf/i18n": "*",
