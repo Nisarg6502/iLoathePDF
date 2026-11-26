@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { LayoutGroup, motion } from "motion/react";
 import { DesktopAppArt } from "@/components/DesktopAppArt";
+import { RightClickDemo } from "@/components/demo/RightClickDemo";
 import { tr, Trans, useTranslation } from "@iloathepdf/i18n";
 
 const RELEASES_URL = "https://github.com/Nisarg6502/iLoathePDF/releases";
@@ -205,6 +206,23 @@ export function Download() {
           </div>
         </div>
       </div>
+
+      <section className="mt-20 grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_600px]">
+        <div>
+          <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-accent">{t("RIGHT-CLICK MENU")}</span>
+          <h2 className="mt-3 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em]">{t("Right-click, and it's done.")}</h2>
+          <p className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-muted">
+            {os === "mac"
+              ? t("Select files in Finder, right-click and open Quick Actions. Only what fits the selection is offered: PDFs, images or ZIP files each get their own items. Jobs with nothing to choose run right there, and the result is saved next to your files.")
+              : t("Select files in File Explorer and right-click. The iLoathePDF menu offers only what fits the selection: PDFs, images or ZIP files each get their own items. Jobs with nothing to choose run right there, and the result is saved next to your files.")}
+          </p>
+          <p className="mt-3 max-w-[46ch] text-[13.5px] leading-relaxed text-muted">
+            {t("Items ending in … open the app on that tool, with your files already loaded.")}{" "}
+            {os === "mac" ? t("You can switch the items off in the app's Settings.") : t("On Windows 11, the menu is under Show more options.")}
+          </p>
+        </div>
+        <RightClickDemo os={os} />
+      </section>
     </div>
   );
 }

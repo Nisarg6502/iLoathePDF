@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { tr, Trans, useTranslation } from "@iloathepdf/i18n";
 import { version } from "../../../extension/package.json";
+import { ExtensionDemo } from "@/components/demo/ExtensionDemo";
 
 // Straight links to this version's files. The site is built from the same
 // commit as the extension, so the version matches the newest release once its
@@ -168,6 +169,17 @@ export function Extension() {
           </div>
         </div>
       </div>
+
+      <section className="mt-20 grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_600px]">
+        <div>
+          <span className="font-mono text-[10.5px] font-bold tracking-[0.15em] text-accent">{t("SEE IT WORK")}</span>
+          <h2 className="mt-3 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em]">{t("Fixes files where you are.")}</h2>
+          <p className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-muted">
+            {t("A form that wants a JPG under 100 KB gets one with a click on Fit. An image you right-click becomes a PDF in your Downloads folder, or one page of a PDF you collect from several.")}
+          </p>
+        </div>
+        <ExtensionDemo />
+      </section>
     </div>
   );
 }
