@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { msg } from "@iloathepdf/i18n/msg";
 
 import { isTauri } from "./jobs";
-import { baseName, dirName } from "./utils";
+import { baseName, dirName, separatorOf } from "./utils";
 
 const OUTPUT_DIR_KEY = "iloathepdf.outputDir";
 
@@ -82,7 +82,7 @@ export function useOutputDir() {
 export function shortenPath(path: string): string {
   const parent = baseName(dirName(path));
   const leaf = baseName(path);
-  return parent ? `${parent}\\${leaf}` : leaf;
+  return parent ? `${parent}${separatorOf(path)}${leaf}` : leaf;
 }
 
 /**

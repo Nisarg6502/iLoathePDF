@@ -21,7 +21,7 @@ import { tr, useTranslation } from "@iloathepdf/i18n";export function HowItWorks
     <div className="mx-auto max-w-[820px] px-5 sm:px-8 py-14">
       <h1 className="m-0 text-4xl font-semibold tracking-[-0.032em]">{t("How it works")}</h1>
       <p className="mt-3 text-base leading-relaxed text-muted">
-        {t("The desktop app and this website process the same kinds of files. On Windows the engine is native (Rust + Python + Ghostscript); in the browser it's pdf-lib and pdf.js, running against the file you drop. Neither one has a server behind it.")}
+        {t("The desktop app and this website process the same kinds of files. In the desktop app, for Windows and macOS, the engine is native (Rust + Python + Ghostscript); in the browser it's pdf-lib and pdf.js, running against the file you drop. Neither one has a server behind it.")}
       </p>
 
       <div className="mt-10 flex flex-col">

@@ -20,12 +20,7 @@ import { isTauri, type JobError, type OutputFile } from "@/lib/jobs";
 import { baseName, cn, formatBytes } from "@/lib/utils";
 import { tr, useTranslation } from "@iloathepdf/i18n";
 
-/**
- * `baseName()` in lib/utils only splits on "/", so Windows paths come back
- * whole. Everything the sidecar returns is a Windows path, so trim the
- * backslash segment too. (Reported upstream — utils.ts is not ours to edit.)
- */
-const fileName = (path: string) => baseName(path).split("\\").pop() ?? path;
+const fileName = (path: string) => baseName(path);
 
 export interface CompressionSummary {
   originalBytes: number;

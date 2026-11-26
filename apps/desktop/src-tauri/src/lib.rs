@@ -101,12 +101,27 @@ pub fn run() {
         ])
         .build(context)
         .expect("error while building tauri application")
-        .run(|app, event| {
+        .run(|app, event| match event {
             // Files that arrived before the event loop started (this
             // process's own) wait for it, so launches Explorer started at the
             // same moment, queued behind the loop, join them.
-            if let tauri::RunEvent::Ready = event {
-                launch::arm(app);
+            tauri::RunEvent::Ready => launch::arm(app),
+            // macOS hands files over as an event rather than on the command
+            // line: Finder's "Open With", or files dropped on the Dock icon.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Opened { urls } => {
+                let files = urls
+                    .iter()
+                    .filter_map(|url| url.to_file_path().ok())
+                    .map(|path| path.to_string_lossy().into_owned());
+                let argv: Vec<String> = std::iter::once("iLoathePDF".to_string())
+                    .chain(files)
+                    .collect();
+                if argv.len() > 1 {
+                    launch::receive(app, argv, Path::new("/"), true);
+                    launch::focus_main_window(app);
+                }
             }
+            _ => {}
         });
 }

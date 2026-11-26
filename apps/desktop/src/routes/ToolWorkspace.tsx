@@ -30,7 +30,7 @@ import { takePendingFiles } from "@/lib/handoff";
 import { useOutputDir } from "@/lib/settings";
 import { panelVariants } from "@/lib/motion";
 import type { OptionValues, Tool } from "@/lib/tools";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes, isMac } from "@/lib/utils";
 import type { SavedSignKind } from "@/lib/signatureStore";
 import { SIGN_BOX_COLORS, SIGN_HIGHLIGHT_COLORS, type SignElement } from "@/lib/signTypes";
 import type { RedactBox, RedactMode } from "@/lib/redactTypes";
@@ -391,7 +391,7 @@ export default function ToolWorkspace({ tool }: { tool: Tool }) {
                   </span>
                   <span className="mt-1 block text-[13.5px] text-muted">
                     {picking
-                      ? t("Windows can take a moment the first time.")
+                      ? (isMac() ? t("This can take a moment the first time.") : t("Windows can take a moment the first time."))
                       : t("or click anywhere in this box to browse")}
                   </span>
                 </span>
@@ -626,7 +626,7 @@ function RunFooter({
       >
         {running ? <Loader2 className="animate-spin" /> : <Play />}
         <span>{running ? t("Working…") : tool.action}</span>
-        <span className="font-mono text-[12px] font-normal opacity-70">{t("Ctrl+Enter")}</span>
+        <span className="font-mono text-[12px] font-normal opacity-70">{isMac() ? "⌘ Enter" : t("Ctrl+Enter")}</span>
       </Button>
 
       {blocker ? <p className="mt-2 text-center text-[13px] text-muted">{blocker}</p> : null}

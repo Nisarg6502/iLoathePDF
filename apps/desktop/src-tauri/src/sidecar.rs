@@ -262,7 +262,14 @@ fn resolve_command(app: &AppHandle) -> Result<(String, Vec<String>), String> {
     }
 
     let resources = app.path().resource_dir().map_err(|e| e.to_string())?;
-    let exe = resources.join("sidecar").join("iloathepdf-sidecar.exe");
+    let name = if cfg!(windows) {
+        "iloathepdf-sidecar.exe"
+    } else {
+        "iloathepdf-sidecar"
+    };
+    let exe = resources.join("sidecar").join(name);
+    #[cfg(target_os = "macos")]
+    clear_quarantine(&resources);
     if !exe.exists() {
         return Err(format!(
             "bundled document engine missing at {}",
@@ -270,4 +277,29 @@ fn resolve_command(app: &AppHandle) -> Result<(String, Vec<String>), String> {
         ));
     }
     Ok((exe.to_string_lossy().into_owned(), vec![]))
+}
+
+/// A Mac app downloaded from the website carries the download "quarantine"
+/// flag on every file inside it. Once the user has chosen to open the app,
+/// macOS lets the app run, but each helper program inside it (this engine,
+/// and Ghostscript, which the engine starts) can be checked again on its own
+/// and refused, because the app is not notarised by Apple. Clearing the flag
+/// on the app's own bundled helpers, which the user has already agreed to run,
+/// avoids that. Best effort: a failure is only logged, and the engine's own
+/// start-up error says what went wrong.
+#[cfg(target_os = "macos")]
+fn clear_quarantine(resources: &std::path::Path) {
+    for dir in ["sidecar", "vendor"] {
+        let path = resources.join(dir);
+        match Command::new("/usr/bin/xattr")
+            .args(["-r", "-d", "com.apple.quarantine"])
+            .arg(&path)
+            .output()
+        {
+            // xattr exits non-zero when some files never had the flag, which
+            // is the normal case for a copy that was not downloaded.
+            Ok(_) => {}
+            Err(e) => log::warn!("could not clear quarantine on {}: {e}", path.display()),
+        }
+    }
 }

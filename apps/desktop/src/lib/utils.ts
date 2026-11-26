@@ -20,7 +20,17 @@ export function formatBytes(bytes: number): string {
 
 /** "C:\a\b\file.pdf" -> "file.pdf" */
 export function baseName(path: string): string {
+  if (path.startsWith("/")) return path.slice(path.lastIndexOf("/") + 1);
   return path.split(/[\\/]/).pop() ?? path;
+}
+
+/**
+ * True on a Mac. The window there keeps macOS's own close/minimise/zoom
+ * buttons (see tauri.macos.conf.json), and a few messages that name Windows
+ * read differently.
+ */
+export function isMac(): boolean {
+  return typeof navigator !== "undefined" && /Macintosh|Mac OS X/.test(navigator.userAgent);
 }
 
 export function stripExt(name: string): string {
@@ -28,12 +38,33 @@ export function stripExt(name: string): string {
   return i > 0 ? name.slice(0, i) : name;
 }
 
-/** A drive path ("C:\x" or "C:/x") or a UNC path ("\\server\share"). Everything handed to the sidecar must be one. */
-export function isAbsoluteWindowsPath(path: string): boolean {
-  return /^[a-zA-Z]:[\\/]/.test(path) || path.startsWith("\\\\");
+// A backslash, built from its char code so no escape handling can mangle it.
+const BACKSLASH = String.fromCharCode(92);
+
+/** "/" for a macOS path ("/Users/me/x.pdf"), a backslash for a Windows one. */
+export function separatorOf(path: string): string {
+  return path.startsWith("/") ? "/" : BACKSLASH;
+}
+
+/**
+ * A drive path ("C:" then either slash), a UNC path (two backslashes) or a
+ * macOS path ("/Users/..."). Everything handed to the sidecar must be one.
+ */
+export function isAbsolutePath(path: string): boolean {
+  const drive = /^[a-zA-Z]:/.test(path) && (path[2] === "/" || path[2] === BACKSLASH);
+  return drive || path.startsWith(BACKSLASH + BACKSLASH) || path.startsWith("/");
+}
+
+/** `name` inside the folder `dir`, joined with the separator `dir` uses. A root that already ends in one is not doubled. */
+export function joinPath(dir: string, name: string): string {
+  const sep = separatorOf(dir);
+  return dir.endsWith(sep) ? dir + name : dir + sep + name;
 }
 
 export function dirName(path: string): string {
+  // macOS: only "/" separates (a backslash is a legal file-name character),
+  // and a file at the top of the disk has "/" as its folder.
+  if (path.startsWith("/")) return path.slice(0, path.lastIndexOf("/")) || "/";
   const parts = path.split(/[\\/]/);
   parts.pop();
   // A file in a drive root ("G:\a.jpg") has parent "G:", which is the current folder

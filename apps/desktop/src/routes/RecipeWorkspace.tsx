@@ -32,7 +32,7 @@ import { takePendingFiles } from "@/lib/handoff";
 import { useOutputDir } from "@/lib/settings";
 import { EASE_OUT, panelVariants } from "@/lib/motion";
 import { toolById, type OptionValues } from "@/lib/tools";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes, isMac } from "@/lib/utils";
 import type { Recipe } from "@/lib/recipes";
 import { tr, useTranslation } from "@iloathepdf/i18n";
 
@@ -350,7 +350,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
                   </span>
                   <span className="mt-1 block text-[13.5px] text-muted">
                     {picking
-                      ? t("Windows can take a moment the first time.")
+                      ? (isMac() ? t("This can take a moment the first time.") : t("Windows can take a moment the first time."))
                       : t("or click anywhere in this box to browse")}
                   </span>
                 </span>
@@ -807,7 +807,7 @@ function RunFooter({
       >
         {running ? <Loader2 className="animate-spin" /> : <Play />}
         <span>{running ? t("Working…") : recipe.steps.length === 1 ? t("Run") : t("Run {{count}} steps", { count: recipe.steps.length })}</span>
-        <span className="font-mono text-[12px] font-normal opacity-70">{t("Ctrl+Enter")}</span>
+        <span className="font-mono text-[12px] font-normal opacity-70">{isMac() ? "⌘ Enter" : t("Ctrl+Enter")}</span>
       </Button>
 
       {blocker ? <p className="mt-2 text-center text-[13px] text-muted">{blocker}</p> : null}

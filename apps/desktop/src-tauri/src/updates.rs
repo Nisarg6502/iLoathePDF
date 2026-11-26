@@ -98,6 +98,8 @@ pub async fn check_for_update(
     state: State<'_, AppState>,
     store: State<'_, UpdateStore>,
 ) -> Result<Option<UpdateInfo>, JobError> {
+    // Only Windows adds a hook below.
+    #[cfg_attr(not(windows), allow(unused_mut))]
     let mut builder = app.updater_builder();
 
     // Windows replaces files the engine is holding open, so stop it just before
@@ -199,10 +201,12 @@ pub async fn download_update(
     Ok(())
 }
 
-/// Runs the downloaded installer. On success this does not return: the app
-/// exits and the installer takes over (and reopens the app when it is done).
+/// Runs the downloaded installer. On Windows this does not return on success:
+/// the app exits and the installer takes over (and reopens the app when it is
+/// done). On a Mac the new app replaces this one in place, then the app
+/// restarts into it.
 #[tauri::command]
-pub async fn install_update(store: State<'_, UpdateStore>) -> Result<(), JobError> {
+pub async fn install_update(app: AppHandle, store: State<'_, UpdateStore>) -> Result<(), JobError> {
     let update = store
         .pending
         .lock()
@@ -223,7 +227,22 @@ pub async fn install_update(store: State<'_, UpdateStore>) -> Result<(), JobErro
                 e.to_string(),
             )))
         })
-        .map_err(|e| error("The update could not be started.", e))
+        .map_err(|e| error("The update could not be started.", e))?;
+
+    // The new app is in place; stop this one's engine and start the new one.
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::Manager;
+        if let Some(engine) = app.state::<AppState>().sidecar.clone() {
+            engine.shutdown();
+        }
+        app.restart()
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
