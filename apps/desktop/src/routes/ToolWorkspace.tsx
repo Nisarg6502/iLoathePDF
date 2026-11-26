@@ -626,7 +626,7 @@ function RunFooter({
       >
         {running ? <Loader2 className="animate-spin" /> : <Play />}
         <span>{running ? t("Working…") : tool.action}</span>
-        <span className="font-mono text-[12px] font-normal opacity-70">{t("Ctrl+Enter")}</span>
+        <span className="font-mono text-[12px] font-normal opacity-70">{isMac() ? "⌘ Enter" : t("Ctrl+Enter")}</span>
       </Button>
 
       {blocker ? <p className="mt-2 text-center text-[13px] text-muted">{blocker}</p> : null}

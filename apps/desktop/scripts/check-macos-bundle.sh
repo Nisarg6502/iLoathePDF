@@ -80,6 +80,10 @@ echo "app and engine running"
 
 echo "3. Screenshot..."
 osascript -e 'tell application "System Events" to set frontmost of (first process whose unix id is '"$pid"') to true' || true
+# CI screens are small (1024x768): pull the window fully on screen so the
+# whole title bar, macOS's own window buttons included, is in the picture.
+osascript -e 'tell application "System Events" to tell (first process whose unix id is '"$pid"') to set position of window 1 to {0, 25}' || true
+osascript -e 'tell application "System Events" to tell (first process whose unix id is '"$pid"') to set size of window 1 to {1000, 720}' || true
 sleep 2
 screencapture -x "$shot" || echo "screencapture failed (no screen access on this machine)"
 

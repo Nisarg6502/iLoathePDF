@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
-import { cn } from "../lib/utils";
+import { cn, isMac } from "../lib/utils";
 import {
   GROUP_LABEL,
   suggestTools,
@@ -98,7 +98,7 @@ export default function Home() {
             </span>
           </span>
           <span className="flex flex-none gap-1.5">
-            {["Ctrl", "O"].map((k) => (
+            {[isMac() ? "⌘" : "Ctrl", "O"].map((k) => (
               <kbd
                 key={k}
                 className="rounded border border-border px-1.5 py-0.5 font-mono text-[12px] font-normal text-faint"
