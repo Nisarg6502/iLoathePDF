@@ -98,6 +98,8 @@ pub async fn check_for_update(
     state: State<'_, AppState>,
     store: State<'_, UpdateStore>,
 ) -> Result<Option<UpdateInfo>, JobError> {
+    // Only Windows adds a hook below.
+    #[cfg_attr(not(windows), allow(unused_mut))]
     let mut builder = app.updater_builder();
 
     // Windows replaces files the engine is holding open, so stop it just before
@@ -227,11 +229,20 @@ pub async fn install_update(app: AppHandle, store: State<'_, UpdateStore>) -> Re
         })
         .map_err(|e| error("The update could not be started.", e))?;
 
+    // The new app is in place; stop this one's engine and start the new one.
     #[cfg(target_os = "macos")]
-    app.restart();
+    {
+        use tauri::Manager;
+        if let Some(engine) = app.state::<AppState>().sidecar.clone() {
+            engine.shutdown();
+        }
+        app.restart()
+    }
     #[cfg(not(target_os = "macos"))]
-    let _ = app;
-    Ok(())
+    {
+        let _ = app;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

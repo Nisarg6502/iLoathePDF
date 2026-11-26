@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://iloathepdf.com/"><b>Try the web app</b></a> ·
-  <a href="https://github.com/Nisarg6502/iLoathePDF/releases/latest"><b>Download for Windows</b></a> ·
+  <a href="https://iloathepdf.com/download"><b>Download for Windows or Mac</b></a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="SECURITY.md">Security</a>
 </p>
@@ -32,7 +32,7 @@ so every file you feed them gets uploaded to someone else's server. That's
 fine for a holiday photo. It's not fine for an Aadhaar card, a PAN card, a
 signed contract, or anything else you'd rather not hand to a stranger's
 backend. iLoathePDF does the same jobs with the same quality of interface,
-without the upload — as a Windows desktop app that is offline unless you opt in to an update check, and
+without the upload — as a desktop app for Windows and macOS that is offline unless you opt in to an update check, and
 as a website that processes files client-side and never sends them anywhere.
 
 | | Typical online PDF sites | iLoathePDF |
@@ -61,13 +61,22 @@ run it. The installer isn't code-signed yet, so Windows SmartScreen may say
 built by [GitHub Actions](.github/workflows/release-desktop.yml) from the tagged
 source, and the app only installs updates signed with the project's key.
 
+**Desktop (macOS 11 or later):** download the disk image for your Mac from the
+[download page](https://iloathepdf.com/download?os=mac): Apple silicon (M1 and
+later) or Intel. Open it and drag iLoathePDF into Applications. The app is free
+and not registered with Apple, so it is signed ad hoc and not notarised: the
+first time you open it macOS says it can't check it. Click **Done**, then go to
+**System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14
+and earlier, Control-click the app and choose **Open** instead). You only do
+this once.
+
 **Web:** nothing to install. Open <https://iloathepdf.com/>.
 
 ## Two ways to run it
 
 | | [Desktop app](apps/desktop) | [Web app](apps/web) |
 | --- | --- | --- |
-| **Install** | Windows installer | None — open the link |
+| **Install** | Windows installer or Mac disk image | None — open the link |
 | **Engine** | Native Rust + Python + Ghostscript | `pdf-lib` / `pdf.js`, in your browser |
 | **File size limits** | Disk-bound | ~200 MB (browser memory) |
 | **Batch / whole folders** | Yes | No |
@@ -179,7 +188,7 @@ in [`docs/archive/specs`](docs/archive/specs) and
 ```
 iLoathePDF/
 ├── apps/
-│   ├── desktop/   the Windows app — see apps/desktop/README.md
+│   ├── desktop/   the Windows and macOS app — see apps/desktop/README.md
 │   └── web/       the website — see apps/web
 ├── packages/
 │   └── i18n/      interface translations shared by both apps

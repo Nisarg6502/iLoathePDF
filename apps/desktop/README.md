@@ -1,6 +1,6 @@
 # iLoathePDF
 
-A Windows desktop app for merging, splitting, compressing and converting PDFs
+A desktop app for Windows and macOS for merging, splitting, compressing and converting PDFs
 and images — where nothing is ever uploaded.
 
 The tools that do this well are websites, so every file goes to someone else's
@@ -82,8 +82,15 @@ npm run tauri dev      # the desktop app
 npm run dev            # the UI alone in a browser, against a mocked engine
 npm test               # engine tests, unit and end-to-end over real stdio
 npm run typecheck
-npm run build:app      # freeze the engine, then build the installer
+npm run build:app      # Windows: freeze the engine, then build the installer
+npm run build:app:mac  # macOS: build Ghostscript and the engine, then the .app and .dmg
 ```
+
+The Mac build (`scripts/build-macos.sh`) compiles Ghostscript from its pinned
+source release, because Artifex publishes no macOS binary, and signs the app ad
+hoc: free, but not notarised, so a downloaded copy needs Open Anyway once.
+`scripts/check-macos-bundle.sh` proves a built `.app` works: the engine and
+Ghostscript run from inside it, and the app starts its engine.
 
 ## Licence
 
