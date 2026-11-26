@@ -8,15 +8,20 @@ import { version } from "../../../extension/package.json";
 // connections to other servers.)
 const RELEASE = `https://github.com/Nisarg6502/iLoathePDF/releases/download/extension-v${version}`;
 const CHROME_ZIP = `${RELEASE}/iloathepdf-extension-${version}-chrome.zip`;
+// Live on Microsoft Edge Add-ons. The Chrome Web Store listing is still in
+// review: when it is live, give Chrome the same kind of button as Edge.
+const EDGE_STORE = "https://microsoftedge.microsoft.com/addons/detail/igmikmgahdniamhadbhkpkhjcmdkhkpc";
 const FIREFOX_ZIP = `${RELEASE}/iloathepdf-extension-${version}-firefox.zip`;
+
+const SECONDARY_BUTTON =
+  "inline-flex h-11 items-center gap-2 rounded-[11px] border border-border bg-surface px-5 text-[14px] font-semibold text-text transition-transform duration-100 hover:border-border-hi active:scale-[0.97]";
 
 const BUTTON =
   "inline-flex h-11 items-center gap-2 rounded-[11px] bg-accent px-5 text-[14.5px] font-semibold text-on-accent shadow-[var(--shadow-card)] transition-transform duration-100 hover:bg-accent-hi active:bg-accent-deep active:scale-[0.97]";
 
 /**
- * A one-click store install that isn't live yet: the extension is in review
- * at the Chrome Web Store and Microsoft Edge Add-ons. Not a link until it is
- * listed; swap in the store URL then.
+ * A one-click store install that isn't live yet (the Chrome Web Store
+ * listing is in review). Not a link until it is listed.
  */
 function StoreSoon({ store }: { store: string }) {
   const { t } = useTranslation();
@@ -87,19 +92,24 @@ export function Extension() {
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
+            <a href={EDGE_STORE} className={BUTTON}>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                <path d="M2.5 5.5h11l-1 8h-9zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" />
+              </svg>
+              {t("Add to Microsoft Edge")}
+            </a>
             <StoreSoon store={t("Chrome Web Store")} />
-            <StoreSoon store={t("Microsoft Edge Add-ons")} />
           </div>
           <p className="mt-3 max-w-[52ch] text-[13.5px] leading-relaxed text-muted">
-            {t("One-click install from the Chrome and Edge stores is on its way: the extension is in review now. Until then, it installs by hand in about a minute.")}
+            {t("Edge: one click from Microsoft Edge Add-ons, and it keeps itself up to date. Chrome: the Chrome Web Store listing is in review, so for now it installs by hand in about a minute.")}
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <a href={CHROME_ZIP} className={BUTTON}>
+            <a href={CHROME_ZIP} className={SECONDARY_BUTTON}>
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
                 <path d="M8 2v8.5M4.5 7l3.5 3.5L11.5 7M3 13.5h10" />
               </svg>
-              {t("Get the extension for Chrome and Edge")}
+              {t("Download the zip for Chrome")}
             </a>
             <span className="font-mono text-[12px] text-muted">v{version}</span>
           </div>
@@ -110,8 +120,8 @@ export function Extension() {
             />
           </p>
 
-          <h2 className="mt-12 text-[13px] font-semibold">{t("Install it in Chrome or Edge")}</h2>
-          <p className="mt-1.5 text-[13.5px] text-muted">{t("Until it's in the stores, it installs by hand. It takes a minute.")}</p>
+          <h2 className="mt-12 text-[13px] font-semibold">{t("Install it in Chrome by hand")}</h2>
+          <p className="mt-1.5 text-[13.5px] text-muted">{t("Until it's in the Chrome Web Store, it installs by hand. It takes a minute.")}</p>
           <ol className="mt-4 flex flex-col gap-3">
             {steps.map((step, i) => (
               <li key={step} className="flex items-start gap-3 text-[14px] leading-relaxed">

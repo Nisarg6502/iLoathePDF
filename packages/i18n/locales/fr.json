@@ -1478,9 +1478,7 @@
   "CHROME · EDGE · FIREFOX": "CHROME · EDGE · FIREFOX",
   "The tools, right on the page.": "Les outils, directement sur la page.",
   "A small browser extension that fixes files where you need them: on the upload form that rejects your photo, or on the image you just right-clicked. Your files never leave your computer.": "Une petite extension de navigateur qui règle vos fichiers là où vous en avez besoin : sur le formulaire d'envoi qui refuse votre photo, ou sur l'image sur laquelle vous venez de faire un clic droit. Vos fichiers ne quittent jamais votre ordinateur.",
-  "Get the extension for Chrome and Edge": "Obtenir l'extension pour Chrome et Edge",
   "Firefox: <a>download the Firefox zip</a> and open it from about:debugging (Load Temporary Add-on). Firefox removes it when it restarts, until the extension is in the add-ons store.": "Firefox : <a>téléchargez le zip pour Firefox</a> et ouvrez-le depuis about:debugging (Charger un module temporaire). Firefox le retire à chaque redémarrage, jusqu'à ce que l'extension soit sur le site des modules.",
-  "Install it in Chrome or Edge": "L'installer dans Chrome ou Edge",
   "Want every tool, and whole folders at once? <a>Get the desktop app</a>.": "Vous voulez tous les outils, et des dossiers entiers d'un coup ? <a>Téléchargez l'application de bureau</a>.",
   "What it does": "Ce qu'elle fait",
   "What it asks your browser for": "Ce qu'elle demande à votre navigateur",
@@ -1575,7 +1573,9 @@
   "No installer for Linux yet. It works fine in the browser version: <a>open the tools</a> instead.": "Pas encore d’installateur pour Linux. Il fonctionne bien avec la version web : <a>ouvrez les outils</a>.",
   "COMING SOON": "BIENTÔT",
   "Chrome Web Store": "Chrome Web Store",
-  "Microsoft Edge Add-ons": "Microsoft Edge Add-ons",
-  "One-click install from the Chrome and Edge stores is on its way: the extension is in review now. Until then, it installs by hand in about a minute.": "L'installation en un clic depuis les boutiques de Chrome et d'Edge arrive bientôt : l'extension est en cours de vérification. En attendant, elle s'installe à la main en une minute environ.",
-  "Until it's in the stores, it installs by hand. It takes a minute.": "En attendant qu'elle soit dans les boutiques, elle s'installe à la main. Cela prend une minute."
+  "Add to Microsoft Edge": "Ajouter à Microsoft Edge",
+  "Edge: one click from Microsoft Edge Add-ons, and it keeps itself up to date. Chrome: the Chrome Web Store listing is in review, so for now it installs by hand in about a minute.": "Edge : un clic depuis Microsoft Edge Add-ons, et elle se met à jour toute seule. Chrome : la fiche du Chrome Web Store est en cours de vérification, donc pour l'instant elle s'installe à la main en une minute environ.",
+  "Download the zip for Chrome": "Télécharger le zip pour Chrome",
+  "Install it in Chrome by hand": "L'installer dans Chrome à la main",
+  "Until it's in the Chrome Web Store, it installs by hand. It takes a minute.": "En attendant qu'elle soit sur le Chrome Web Store, elle s'installe à la main. Cela prend une minute."
 }

@@ -1478,9 +1478,7 @@
   "CHROME · EDGE · FIREFOX": "CHROME · EDGE · FIREFOX",
   "The tools, right on the page.": "ಉಪಕರಣಗಳು, ನೇರವಾಗಿ ಪುಟದಲ್ಲೇ.",
   "A small browser extension that fixes files where you need them: on the upload form that rejects your photo, or on the image you just right-clicked. Your files never leave your computer.": "ಫೈಲ್‌ಗಳನ್ನು ನಿಮಗೆ ಬೇಕಾದಲ್ಲೇ ಸರಿಪಡಿಸುವ ಒಂದು ಚಿಕ್ಕ ಬ್ರೌಸರ್ ವಿಸ್ತರಣೆ: ನಿಮ್ಮ ಫೋಟೋವನ್ನು ತಿರಸ್ಕರಿಸುವ ಅಪ್‌ಲೋಡ್ ಫಾರ್ಮ್‌ನಲ್ಲಿ, ಅಥವಾ ನೀವು ಈಗಷ್ಟೇ ರೈಟ್-ಕ್ಲಿಕ್ ಮಾಡಿದ ಚಿತ್ರದ ಮೇಲೆ. ನಿಮ್ಮ ಫೈಲ್‌ಗಳು ಎಂದಿಗೂ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಬಿಟ್ಟು ಹೋಗುವುದಿಲ್ಲ.",
-  "Get the extension for Chrome and Edge": "Chrome ಮತ್ತು Edge ಗಾಗಿ ವಿಸ್ತರಣೆ ಪಡೆಯಿರಿ",
   "Firefox: <a>download the Firefox zip</a> and open it from about:debugging (Load Temporary Add-on). Firefox removes it when it restarts, until the extension is in the add-ons store.": "Firefox: <a>Firefox ನ zip ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</a> ಮತ್ತು ಅದನ್ನು about:debugging ನಿಂದ ತೆರೆಯಿರಿ (Load Temporary Add-on). ವಿಸ್ತರಣೆ ಆಡ್-ಆನ್ ಸ್ಟೋರ್‌ಗೆ ಬರುವವರೆಗೆ, Firefox ಮರುಪ್ರಾರಂಭವಾದಾಗ ಅದನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ.",
-  "Install it in Chrome or Edge": "ಇದನ್ನು Chrome ಅಥವಾ Edge ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ",
   "Want every tool, and whole folders at once? <a>Get the desktop app</a>.": "ಎಲ್ಲಾ ಉಪಕರಣಗಳು, ಮತ್ತು ಸಂಪೂರ್ಣ ಫೋಲ್ಡರ್‌ಗಳು ಒಮ್ಮೆಗೇ ಬೇಕೇ? <a>ಡೆಸ್ಕ್‌ಟಾಪ್ ಆ್ಯಪ್ ಪಡೆಯಿರಿ</a>.",
   "What it does": "ಇದು ಏನು ಮಾಡುತ್ತದೆ",
   "What it asks your browser for": "ಇದು ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಿಂದ ಏನು ಕೇಳುತ್ತದೆ",
@@ -1575,7 +1573,9 @@
   "No installer for Linux yet. It works fine in the browser version: <a>open the tools</a> instead.": "Linux ಗೆ ಇನ್ನೂ ಇನ್ಸ್ಟಾಲರ್ ಇಲ್ಲ. ಅದರಲ್ಲಿ ಬ್ರೌಸರ್ ಆವೃತ್ತಿ ಚೆನ್ನಾಗಿ ಕೆಲಸ ಮಾಡುತ್ತದೆ: ಬದಲಿಗೆ <a>ಪರಿಕರಗಳನ್ನು ತೆರೆಯಿರಿ</a>.",
   "COMING SOON": "ಶೀಘ್ರದಲ್ಲೇ",
   "Chrome Web Store": "Chrome Web Store",
-  "Microsoft Edge Add-ons": "Microsoft Edge Add-ons",
-  "One-click install from the Chrome and Edge stores is on its way: the extension is in review now. Until then, it installs by hand in about a minute.": "Chrome ಮತ್ತು Edge ಸ್ಟೋರ್‌ಗಳಿಂದ ಒಂದೇ ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ: ಎಕ್ಸ್‌ಟೆನ್ಶನ್ ಈಗ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ. ಅಲ್ಲಿಯವರೆಗೆ ಕೈಯಾರೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ, ಸುಮಾರು ಒಂದು ನಿಮಿಷ ಸಾಕು.",
-  "Until it's in the stores, it installs by hand. It takes a minute.": "ಸ್ಟೋರ್‌ಗಳಲ್ಲಿ ಬರುವವರೆಗೆ ಇದನ್ನು ಕೈಯಾರೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಬೇಕು. ಒಂದು ನಿಮಿಷ ಸಾಕು."
+  "Add to Microsoft Edge": "Microsoft Edge ಗೆ ಸೇರಿಸಿ",
+  "Edge: one click from Microsoft Edge Add-ons, and it keeps itself up to date. Chrome: the Chrome Web Store listing is in review, so for now it installs by hand in about a minute.": "Edge: Microsoft Edge Add-ons ನಿಂದ ಒಂದೇ ಕ್ಲಿಕ್, ಮತ್ತು ಅದು ತಾನಾಗಿಯೇ ಅಪ್‌ಡೇಟ್ ಆಗುತ್ತದೆ. Chrome: Chrome Web Store ಪಟ್ಟಿ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ, ಆದ್ದರಿಂದ ಸದ್ಯಕ್ಕೆ ಕೈಯಾರೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ, ಸುಮಾರು ಒಂದು ನಿಮಿಷ ಸಾಕು.",
+  "Download the zip for Chrome": "Chrome ಗಾಗಿ zip ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
+  "Install it in Chrome by hand": "Chrome ನಲ್ಲಿ ಕೈಯಾರೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ",
+  "Until it's in the Chrome Web Store, it installs by hand. It takes a minute.": "Chrome Web Store ನಲ್ಲಿ ಬರುವವರೆಗೆ ಇದನ್ನು ಕೈಯಾರೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಬೇಕು. ಒಂದು ನಿಮಿಷ ಸಾಕು."
 }

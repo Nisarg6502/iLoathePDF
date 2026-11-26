@@ -1475,9 +1475,7 @@
   "CHROME · EDGE · FIREFOX": "CHROME · EDGE · FIREFOX",
   "The tools, right on the page.": "टूल्स, थेट पेजवर.",
   "A small browser extension that fixes files where you need them: on the upload form that rejects your photo, or on the image you just right-clicked. Your files never leave your computer.": "एक छोटे ब्राउझर एक्सटेंशन जे फाइल्स जिथे गरज आहे तिथेच दुरुस्त करते: तुमचा फोटो नाकारणाऱ्या अपलोड फॉर्मवर, किंवा तुम्ही आत्ताच राइट-क्लिक केलेल्या इमेजवर. तुमच्या फाइल्स कधीच तुमच्या संगणकाबाहेर जात नाहीत.",
-  "Get the extension for Chrome and Edge": "Chrome आणि Edge साठी एक्सटेंशन मिळवा",
   "Firefox: <a>download the Firefox zip</a> and open it from about:debugging (Load Temporary Add-on). Firefox removes it when it restarts, until the extension is in the add-ons store.": "Firefox: <a>Firefox ची zip डाउनलोड करा</a> आणि about:debugging मधून उघडा (Load Temporary Add-on). एक्सटेंशन ॲड-ऑन स्टोअरमध्ये येईपर्यंत, Firefox रीस्टार्ट झाल्यावर ते काढून टाकतो.",
-  "Install it in Chrome or Edge": "ते Chrome किंवा Edge मध्ये इन्स्टॉल करा",
   "Want every tool, and whole folders at once? <a>Get the desktop app</a>.": "सगळी टूल्स, आणि संपूर्ण फोल्डर एकाच वेळी हवे आहेत? <a>डेस्कटॉप ॲप मिळवा</a>.",
   "What it does": "हे काय करते",
   "What it asks your browser for": "हे तुमच्या ब्राउझरकडे काय मागते",
@@ -1572,7 +1570,9 @@
   "No installer for Linux yet. It works fine in the browser version: <a>open the tools</a> instead.": "Linux साठी अजून इन्स्टॉलर नाही. त्यावर ब्राउझर आवृत्ती छान चालते: त्याऐवजी <a>टूल उघडा</a>.",
   "COMING SOON": "लवकरच",
   "Chrome Web Store": "Chrome Web Store",
-  "Microsoft Edge Add-ons": "Microsoft Edge Add-ons",
-  "One-click install from the Chrome and Edge stores is on its way: the extension is in review now. Until then, it installs by hand in about a minute.": "Chrome आणि Edge स्टोअरमधून एका क्लिकमध्ये इन्स्टॉल लवकरच येत आहे: एक्सटेन्शन सध्या रिव्ह्यूमध्ये आहे. तोपर्यंत ते हाताने इन्स्टॉल करा, फक्त एक मिनिट लागतो.",
-  "Until it's in the stores, it installs by hand. It takes a minute.": "ते स्टोअरमध्ये येईपर्यंत हाताने इन्स्टॉल करावे लागते. फक्त एक मिनिट लागतो."
+  "Add to Microsoft Edge": "Microsoft Edge मध्ये जोडा",
+  "Edge: one click from Microsoft Edge Add-ons, and it keeps itself up to date. Chrome: the Chrome Web Store listing is in review, so for now it installs by hand in about a minute.": "Edge: Microsoft Edge Add-ons वरून एका क्लिकमध्ये, आणि ते आपोआप अपडेट होत राहते. Chrome: Chrome Web Store लिस्टिंग सध्या रिव्ह्यूमध्ये आहे, म्हणून सध्या ते हाताने इन्स्टॉल करा, फक्त एक मिनिट लागतो.",
+  "Download the zip for Chrome": "Chrome साठी zip डाउनलोड करा",
+  "Install it in Chrome by hand": "Chrome मध्ये हाताने इन्स्टॉल करा",
+  "Until it's in the Chrome Web Store, it installs by hand. It takes a minute.": "ते Chrome Web Store मध्ये येईपर्यंत हाताने इन्स्टॉल करावे लागते. फक्त एक मिनिट लागतो."
 }
