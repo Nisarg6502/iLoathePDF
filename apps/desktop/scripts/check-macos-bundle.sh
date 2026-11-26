@@ -127,17 +127,24 @@ for name in ("a.pdf", "b.pdf"):
     c.save()
 PY
 
-# Runs one Quick Action on files, the way Finder does, through Automator.
-run_quick_action() {
+# Runs a Quick Action's own command on files, with each file a separate
+# argument, exactly as Finder hands over a selection.
+run_command() {
   local workflow="$services/$1"
   shift
-  if ! automator -i "$*" "$workflow"; then
+  local command
+  command="$(plutil -extract actions.0.action.ActionParameters.COMMAND_STRING raw "$workflow/Contents/document.wflow")"
+  /bin/sh -c "$command" sh "$@"
+}
+
+# Runs a Quick Action on one file through Automator, as Finder does. (The
+# automator tool passes its input as one string, so only one file.)
+run_quick_action() {
+  if ! automator -i "$2" "$services/$1"; then
     # Automator from a script can be refused on a headless machine; the
     # workflow's own command is what matters, so run that directly.
-    echo "automator could not run $workflow; running its command directly" >&2
-    local command
-    command="$(plutil -extract actions.0.action.ActionParameters.COMMAND_STRING raw "$workflow/Contents/document.wflow")"
-    /bin/sh -c "$command" sh "$@"
+    echo "automator could not run $1; running its command directly" >&2
+    run_command "$1" "$2"
   fi
 }
 
@@ -165,8 +172,8 @@ kill "$pid"
 wait "$pid" 2>/dev/null || true
 sleep 2
 
-echo "4b. Merge, with the app closed..."
-run_quick_action iLoathePDF-run-merge.workflow "$work/a.pdf" "$work/b.pdf"
+echo "4b. Merge two files, with the app closed..."
+run_command iLoathePDF-run-merge.workflow "$work/a.pdf" "$work/b.pdf"
 if ! wait_for "$work/merged*.pdf" 90; then
   echo "merge quick action wrote nothing next to the files:" >&2
   ls -la "$work" >&2

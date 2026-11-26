@@ -389,9 +389,13 @@ pub fn sync(services: &Path, app: &Path, actions: &[FinderAction]) -> Result<boo
     for action in actions {
         let contents = services.join(action.bundle_name()).join("Contents");
         let io = |e: std::io::Error| format!("could not write {}: {e}", action.bundle_name());
-        changed |= write_if_changed(&contents.join("Info.plist"), &info_plist(action)).map_err(io)?;
-        changed |= write_if_changed(&contents.join("document.wflow"), &document_wflow(action, app))
-            .map_err(io)?;
+        changed |=
+            write_if_changed(&contents.join("Info.plist"), &info_plist(action)).map_err(io)?;
+        changed |= write_if_changed(
+            &contents.join("document.wflow"),
+            &document_wflow(action, app),
+        )
+        .map_err(io)?;
     }
     Ok(changed)
 }
@@ -456,8 +460,8 @@ mod tests {
     }
 
     fn scratch_dir(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir()
-            .join(format!("iloathepdf-finder-{name}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("iloathepdf-finder-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir
@@ -468,16 +472,17 @@ mod tests {
         let app = Path::new("/Applications/iLoathePDF.app");
         let run = script(&action("run", "compress", "x"), app);
         assert!(run.contains("app='/Applications/iLoathePDF.app'\n"));
-        assert!(run.contains(
-            "exec /usr/bin/open -n -g -a \"$app\" --args --run compress \"$@\"\n"
-        ));
+        assert!(run.contains("exec /usr/bin/open -n -g -a \"$app\" --args --run compress \"$@\"\n"));
         let open = script(&action("action", "split", "x"), app);
         assert!(open.contains("exec /usr/bin/open -n -a \"$app\" --args --action split \"$@\"\n"));
     }
 
     #[test]
     fn odd_app_paths_stay_one_shell_word() {
-        let s = script(&action("run", "compress", "x"), Path::new("/Users/o'neil/Apps/i L.app"));
+        let s = script(
+            &action("run", "compress", "x"),
+            Path::new("/Users/o'neil/Apps/i L.app"),
+        );
         assert!(s.contains(r"app='/Users/o'\''neil/Apps/i L.app'"));
     }
 
@@ -515,8 +520,14 @@ mod tests {
             action("run", "../../evil", "x"),
             action("run", "Compress", "x"),
             action("run", "compress", "two\nlines"),
-            FinderAction { types: vec![], ..action("run", "compress", "x") },
-            FinderAction { types: vec!["a b".into()], ..action("run", "compress", "x") },
+            FinderAction {
+                types: vec![],
+                ..action("run", "compress", "x")
+            },
+            FinderAction {
+                types: vec!["a b".into()],
+                ..action("run", "compress", "x")
+            },
         ] {
             assert!(sync(&dir, app, &[action("run", "ok", "x"), bad]).is_err());
         }
@@ -530,7 +541,10 @@ mod tests {
         let mine = dir.join("Someone else's.workflow");
         std::fs::create_dir_all(&mine).unwrap();
 
-        let both = [action("run", "compress", "Compress"), action("action", "split", "Split…")];
+        let both = [
+            action("run", "compress", "Compress"),
+            action("action", "split", "Split…"),
+        ];
         assert!(sync(&dir, app, &both).unwrap());
         let info = dir.join("iLoathePDF-run-compress.workflow/Contents/Info.plist");
         assert!(std::fs::read_to_string(&info).unwrap().contains("Compress"));
@@ -542,7 +556,9 @@ mod tests {
 
         let renamed = [action("run", "compress", "Comprimir")];
         assert!(sync(&dir, app, &renamed).unwrap());
-        assert!(std::fs::read_to_string(&info).unwrap().contains("Comprimir"));
+        assert!(std::fs::read_to_string(&info)
+            .unwrap()
+            .contains("Comprimir"));
         assert!(!dir.join("iLoathePDF-action-split.workflow").exists());
 
         assert!(sync(&dir, Path::new(""), &[]).unwrap());
@@ -554,7 +570,9 @@ mod tests {
     #[test]
     fn app_bundle_is_found_only_inside_an_app() {
         assert_eq!(
-            app_bundle(Path::new("/Applications/iLoathePDF.app/Contents/MacOS/iLoathePDF")),
+            app_bundle(Path::new(
+                "/Applications/iLoathePDF.app/Contents/MacOS/iLoathePDF"
+            )),
             Some(PathBuf::from("/Applications/iLoathePDF.app"))
         );
         assert_eq!(app_bundle(Path::new("/src/target/debug/iloathepdf")), None);
