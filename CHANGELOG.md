@@ -5,6 +5,20 @@ app under Settings → About. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.13.0] - 2026-11-26
+
+### Added
+- Finder right-click menu on Mac, like the Explorer menu on Windows: the app
+  writes one Quick Action per item to ~/Library/Services when it starts
+  (there is no install step on a Mac). Compress, Merge into one PDF, Convert
+  to PDF, Combine into one PDF, Convert to JPG, Extract here and Extract to a
+  new folder run in place with only the progress card showing; the
+  "open in the app" items load the files into their tool. Each item shows
+  only for the file types it takes, and its label follows the app's
+  language. Settings > Finder right-click menu removes them all.
+- An app started on a Mac only for a quick action shows no Dock icon, and
+  quits once the job is done.
+
 ## [0.12.0] - 2026-11-26
 
 ### Added

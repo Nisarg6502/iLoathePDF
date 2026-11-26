@@ -501,6 +501,10 @@ fn settle_later<R: Runtime>(app: AppHandle<R>, generation: u64) {
 
 /// Brings the window forward for a launch forwarded from another process.
 pub fn focus_main_window<R: Runtime>(app: &AppHandle<R>) {
+    // A Finder quick action may have started the app without a Dock icon
+    // (lib.rs); a main window needs one.
+    #[cfg(target_os = "macos")]
+    let _ = app.set_activation_policy(tauri::ActivationPolicy::Regular);
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.unminimize();
         let _ = window.show();

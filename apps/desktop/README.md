@@ -90,7 +90,9 @@ The Mac build (`scripts/build-macos.sh`) compiles Ghostscript from its pinned
 source release, because Artifex publishes no macOS binary, and signs the app ad
 hoc: free, but not notarised, so a downloaded copy needs Open Anyway once.
 `scripts/check-macos-bundle.sh` proves a built `.app` works: the engine and
-Ghostscript run from inside it, and the app starts its engine.
+Ghostscript run from inside it, the app starts its engine, and the Finder
+right-click items (Quick Actions the app writes to `~/Library/Services`, see
+`src-tauri/src/finder.rs`) do their job in place with the app open and closed.
 
 ## Licence
 

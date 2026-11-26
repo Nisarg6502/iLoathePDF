@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CHANGELOG } from "@/lib/changelog";
+import { finderMenuSupported, setFinderMenuEnabled, useFinderMenu } from "@/lib/finderActions";
 import { isTauri, ping, type PingResult } from "@/lib/jobs";
 import { useOutputDir } from "@/lib/settings";
 import { isMac } from "@/lib/utils";
@@ -181,6 +182,36 @@ function UpdatesPanel() {
   );
 }
 
+function FinderMenuPanel() {
+  const { t } = useTranslation();
+  const { enabled, error } = useFinderMenu();
+  return (
+    <div className="grid gap-3">
+      <div className="flex items-start gap-3">
+        <Switch
+          id="finder-menu"
+          checked={enabled}
+          onCheckedChange={setFinderMenuEnabled}
+          aria-labelledby="finder-menu-label"
+        />
+        <div className="min-w-0">
+          <label id="finder-menu-label" htmlFor="finder-menu" className="text-[13.5px] font-semibold text-text">
+            {t("Show iLoathePDF in Finder's right-click menu")}
+          </label>
+          <p className="mt-0.5 text-[13px] text-muted">
+            {enabled
+              ? t("On. Right-click PDFs, images or ZIP files in Finder and open Quick Actions: compress, merge, convert and extract happen right there, and the results are saved next to the files.")
+              : t("Off. iLoathePDF is not in Finder's menus.")}
+          </p>
+        </div>
+      </div>
+      {error ? (
+        <p className="text-[13px] text-danger">{t("The Finder menu could not be updated: {{error}}", { error })}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function formatChecked(at: number): string {
   const seconds = Math.round((Date.now() - at) / 1000);
   if (seconds < 60) return tr("just now");
@@ -285,6 +316,15 @@ export default function Settings() {
         >
           <UpdatesPanel />
         </Section>
+
+        {finderMenuSupported() ? (
+          <Section
+            title={t("Finder right-click menu")}
+            hint={t("Quick Actions for PDFs, images and ZIP files, like the right-click menu on Windows.")}
+          >
+            <FinderMenuPanel />
+          </Section>
+        ) : null}
 
         <Section
           title={t("Where results are saved")}

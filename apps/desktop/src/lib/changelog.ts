@@ -19,6 +19,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.13.0",
+    date: "2026-11-26",
+    highlights: [
+      "Right-click quick actions on Mac: in Finder, right-click PDFs, images or ZIP files and open Quick Actions to compress, merge, convert or extract them right there, without opening the app. The results land next to your files.",
+      "The rest of the right-click menu is there too: split, protect, scan and the other tools open in the app with your files loaded.",
+      "Don't want them in Finder? Switch them off in Settings.",
+    ],
+  },
+  {
     version: "0.12.0",
     date: "2026-11-26",
     highlights: [

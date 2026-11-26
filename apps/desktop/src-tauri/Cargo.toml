@@ -1,6 +1,6 @@
 [package]
 name = "iloathepdf"
-version = "0.12.0"
+version = "0.13.0"
 description = "Offline PDF and image toolkit"
 authors = ["Nisarg6502"]
 license = "MIT"
