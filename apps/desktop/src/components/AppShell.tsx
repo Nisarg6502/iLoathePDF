@@ -12,6 +12,7 @@ import { useTranslation } from "@iloathepdf/i18n";
 import { pickedFromPaths } from "@/components/FileDropZone";
 import { setPendingFiles } from "@/lib/handoff";
 import { claimLaunch, startLaunchListener, useLaunch } from "@/lib/launch";
+import { startFinderMenuSync } from "@/lib/finderActions";
 import { TOOLS, type Tool } from "@/lib/tools";
 import { TEXT_TOOLS } from "@/lib/textTools";
 import { cn, isMac } from "@/lib/utils";
@@ -587,6 +588,8 @@ function LaunchBanner() {
   const [dismissed, setDismissed] = useState(0);
 
   useEffect(() => startLaunchListener(), []);
+  // Mac: keep the Finder right-click menu in place (finderActions.ts).
+  useEffect(() => startFinderMenuSync(), []);
 
   useEffect(() => {
     if (!launch || !claimLaunch(launch)) return;

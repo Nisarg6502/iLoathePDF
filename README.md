@@ -69,6 +69,8 @@ first time you open it macOS says it can't check it. Click **Done**, then go to
 **System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14
 and earlier, Control-click the app and choose **Open** instead). You only do
 this once.
+Once it has run, right-click PDFs, images or ZIP files in Finder and open
+**Quick Actions** for iLoathePDF's items (switch them off in Settings).
 
 **Web:** nothing to install. Open <https://iloathepdf.com/>.
 

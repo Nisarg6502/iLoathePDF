@@ -1,4 +1,5 @@
 mod commands;
+mod finder;
 mod instance_gate;
 mod launch;
 mod locale;
@@ -56,6 +57,15 @@ pub fn run() {
             // progress card. Every other start shows it straight away.
             if kind != launch::LaunchKind::Quick {
                 launch::focus_main_window(app.handle());
+            } else {
+                // Started from Finder only for a quick action: no Dock icon
+                // or menu bar for a job that shows nothing but its progress
+                // card (Windows: no taskbar button). focus_main_window
+                // restores both if the main window is opened after all.
+                #[cfg(target_os = "macos")]
+                let _ = app
+                    .handle()
+                    .set_activation_policy(tauri::ActivationPolicy::Accessory);
             }
 
             // A failure to start the engine is not fatal: the window still
@@ -94,6 +104,7 @@ pub fn run() {
             launch::take_quick_requests,
             quick::quick_window_fit,
             quick::quick_open_in_app,
+            finder::set_finder_actions,
             locale::installer_language,
             updates::check_for_update,
             updates::download_update,
